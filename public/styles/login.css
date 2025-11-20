@@ -1,0 +1,105 @@
+/* Main Style */
+
+body {
+	font-family: 'Roboto', 'Orbitron', sans-serif;
+	font-size: 16px;
+	background-color: #fff;
+	margin: 0;
+	display: flex;
+	
+	.content-wrapper {
+		flex-grow: 1;
+		height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		
+		.v-divider {
+			width: 2px;
+			height: 40%;
+			border: 4px solide red;
+			margin: 0 1rem;
+			background-color: #eceff1;
+		}
+		
+		.left-content, .right-content {
+			min-width: 400px;
+			width: 20%;
+			height: auto;
+		}
+		
+		/* Logo */
+		.left-content {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			
+			img {
+				position: relative;
+				width: 60%;
+				height: auto;
+			}
+			
+			.copyright {
+				font-family: 'Orbitron';
+				font-size: .75rem;
+				font-weight: bold;
+				
+				i {
+					font-family: 'Roboto';
+					font-style: normal;
+					font-size: .875rem;
+					color: var(--bg-primary-color);
+				}
+			}
+		}
+		
+		.right-content {
+			padding: 4rem 2rem;
+			
+			.head {
+				padding: 0;
+				margin: 1rem 0;
+				
+				img {
+					width: 32px;
+					height: auto;
+				}
+				.title {
+					font-family: 'Orbitron';
+					font-size: 1.4rem;
+				}
+				h6 {
+					color: #666; 
+					font-weight: normal;
+					font-size: .875rem;
+					padding-top: .5rem;
+					padding-bottom: .5rem;
+				}
+			}
+			
+			.input-field {
+				margin: 1rem 0;
+				
+				.group-text {
+					width: 110px;
+					color: #ccc;
+					margin-right: .75rem;
+				}
+			}
+			
+			.btn {
+				--bs-btn-color: #f44336;
+				--bs-btn-border-color: #f44336;
+				--bs-btn-hover-color: #fff;
+				--bs-btn-hover-bg: #f44336;
+				--bs-btn-hover-border-color: #f44336;
+				
+				margin: 3rem 0 0;
+				display: block;
+				width: 100%;
+			}
+		}
+	}
+}

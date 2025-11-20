@@ -1,0 +1,21 @@
+/* Variables Define */
+
+:root {
+	/* 官網主色紅 */
+	--bg-brand-primary-color: #cb1a19; /* red */
+	--bg-brand-secondary-color: #f5ac2d; /* amber */
+	--bg-brand-secondary-light-color: #ffd180;
+	
+	--bg-menu-color: #263238; /*#263238;*/
+	
+	--bg-default-color: #eceff1; /* grey */
+	--bg-primary-color: #ed5a65; /* red */
+	--bg-secondary-color: #ffc107; /* amber */
+	
+	/* Button */
+	--bg-btn-create-color: #00e676;
+	--btn-create-color: #1b5e20;
+	
+	
+	/*** Bootstrap Variables ***/
+}

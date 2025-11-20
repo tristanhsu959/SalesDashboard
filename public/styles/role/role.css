@@ -1,0 +1,70 @@
+/* common */
+.page.navbar {
+	width: 100%;
+	height: 64px;
+	/* height: auto; */
+	/* Default */
+	background-color: var(--bg-brand-secondary-light-color);
+	color: #000;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	flex-direction: row;
+		
+	.navbar-action {
+		display: flex;
+		align-items: center;
+		font-weight: 500;
+	}
+	
+	/* 共用的style */
+	.navbar-operation {
+		display: flex;
+		font-weight: 500;
+		
+		a.btn {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 2.5rem;
+			height: 2.5rem;
+			border-radius: 1.25rem;
+			transition: width 0.3s ease-in-out 0.1s;
+			overflow: hidden;
+			margin-left: 1rem;
+			
+			.title {
+				font-size: 0px;
+				transition-property: font-size;
+				transition-duration: .3s;
+				transition-delay: .1s;
+			}
+			
+			&.w2:hover {
+				width: calc(3rem * 2);
+			}
+			&.w3:hover {
+				width: calc(3rem * 2.5);
+			}
+			&:hover {
+				.title {
+					font-size: 1rem;
+					transition-property: font-size;
+					transition-duration: .3s;
+					transition-delay: .3s;
+				}
+			}
+			
+		}
+		
+		/* Page Toolbar */
+		a.btn-create {
+			background-color: var(--bg-btn-create-color);
+			color: var(--btn-create-color);
+		}
+		
+		a.btn-return {
+			background-color: #263238 ;
+			color: #fff;
+		}
+	}
+}
