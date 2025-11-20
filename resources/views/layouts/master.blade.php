@@ -15,6 +15,7 @@
 		<link href="{{ asset('styles/_variables.css') }}" rel="stylesheet" />
 		<link href="{{ asset('styles/my_component.css') }}" rel="stylesheet" />
 		<link href="{{ asset('styles/master.css') }}" rel="stylesheet" />
+		<link href="{{ asset('styles/navbar.css') }}" rel="stylesheet" />
 		@stack('styles')
 		
 		<!-- Scripts -->

@@ -10,21 +10,16 @@
     <script src="{{ asset('scripts/role/create.js') }}"></script>
 @endpush
 
+@section('navHead', '身份管理 | 新增')
+
+@section('navAction')
+<a href="{{ url('roles/list') }}" class="btn btn-return">
+	<span class="title">回列表</span>
+	<span class="material-symbols-outlined filled-icon">arrow_forward</span>
+</a>
+@endsection
+
 @section('content')
-
-<nav class="page navbar">
-	<span class="navbar-action">
-		<span class="material-symbols-outlined filled-icon">bubble_chart</span>
-		身份管理 | 新增
-	</span>
-	<span class="navbar-operation">
-		<a href="{{ url('roles/list') }}" class="btn btn-return w3">
-			<span class="title">回列表</span>
-			<span class="material-symbols-outlined filled-icon">arrow_forward</span>
-		</a>
-	</span>
-</nav>
-
 @if($status === TRUE)
 		
 <form action="{{ route('auth') }}" method="post" id="loginForm">
@@ -63,14 +58,23 @@
 					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
 				</div>
 				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">新增</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">編輯</label>
-					</div>
+					<label class="form-check-label" for="flexCheckDefault1">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
+						新增
+					</label>
+					<label class="form-check-label" for="flexCheckDefault1">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
+						新增
+					</label>
+					<label class="form-check-label" for="flexCheckDefault1">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
+						新增
+					</label>
+					<label class="form-check-label" for="flexCheckDefault1">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
+						新增
+					</label>
+					
 				</div>
 			</li>
 			<li class="list-group-item">

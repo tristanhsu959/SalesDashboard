@@ -3,9 +3,6 @@
 body {
 	background-color: white;
 }
-.navbar-operation {
-	
-}
 
 .section-wrapper {
 	display: flex;
@@ -32,36 +29,72 @@ body {
 	.role-permission {
 		flex: 2;
 		padding: 1rem;
-		background-color: #f9fbe7;
-		box-shadow: 0px 1px 4px 2px rgba(0, 0, 0, 0.3);
+		// background: linear-gradient(135deg, #1f1f23, #2d2d31, #101012);
+		// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8);
+		// background-color: #f3e5f5;
+		box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+		border-radius: .5rem;
 		
 		.list-group {
 			margin-bottom: 1rem;
 			
 			.title {
-				display: inline-block;
-				background-color: blue;
-				border-radius: 50% 50%;
+				
 			}
 			
 			.list-group-item {
-				background-color: #f9fbe7;
+				display: flex;
+				justify-content: space-between;
+				background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8);
+				// background: linear-gradient(135deg, #212121  , #757575  , #e0e0e0  );
+				// background-color: #ff80ab;
 				border-left-width: 0;
 				border-right-width: 0;
 				border-top-width: 0;
 				
+				&:last-child {
+					border-bottom-width: 0;
+				}
 				.permission-group {
 					
 					label {
-						color: var(--bg-primary-color);
+						color: #fff;
 					}
 				}
 				
 				.permission-group-items {
 					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					flex-wrap: wrap;
+					width: 50%;
 					
-					.permission-item {
-						margin-right: 1rem;
+					.form-check-label {
+						width: auto;
+						height: 2rem;
+						margin: .25rem;
+						color: #999;
+						border: 1px solid #999;
+						padding: .175rem 1.25rem;
+						border-radius: 1rem;
+						
+						&:last-child {
+							margin-right: 0;
+						}
+						
+						.form-check-input {
+							display: none;
+						}
+						
+						&:has(input:checked) {
+							border-color: #fff;
+							color: #fff;
+							background-color: #6a1b9a  ;
+							transition-property: color, border-color, background-color;
+							transition-duration: .3s;
+							transition-delay: .3s;
+							
+						}
 					}
 					
 				}
