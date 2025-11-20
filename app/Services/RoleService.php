@@ -25,4 +25,9 @@ class RoleService
 	{
 		return $result = ResponseLib::initialize([])->fail('test')->get();
 	}
+	
+	public function createRole()
+	{
+		return ResponseLib::initialize()->success()->get();
+	}
 }

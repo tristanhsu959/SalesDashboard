@@ -49,7 +49,7 @@ class RoleController extends Controller
 	 */
 	public function create(Request $request)
 	{
-		$response = [];
+		$response = $this->_service->createRole();
 		return view('role/create', $response);
 	}
 }

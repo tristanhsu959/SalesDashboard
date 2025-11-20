@@ -25,13 +25,12 @@
 	</span>
 </nav>
 
-{{--@if($status === TRUE)--}}
+@if($status === TRUE)
 		
-<section class="role-list section-wrapper container-fluid">
 <form action="{{ route('auth') }}" method="post" id="loginForm">
-	@csrf
-	
-	<div class="data-info">
+@csrf
+<section class="section-wrapper">
+	<div class="section role-data">
 		<div class="input-field field-orange">
 			<input type="text" class="form-control valid" id="name" name="name" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">名稱</label>
@@ -44,43 +43,93 @@
 			<input type="text" class="form-control valid" id="jobtitle" name="jobtitle" maxlength="10" placeholder=" " required>
 			<label for="jobtitle" class="form-label">職稱</label>
 		</div>
-		<select class="form-select col-3" id="group" name="group">
-			<option selected>權限群組</option>
-			<option value="1">Administrator</option>
-			<option value="2">User</option>
-		</select>
+		<div class="input-select">
+			<select class="form-select" id="group" name="group">
+				<option value="-1"selected>請選擇</option>
+				<option value="1">Administrator</option>
+				<option value="2">User</option>
+			</select>
+			<label for="jobtitle" class="form-label">權限群組</label>
+		</div>
+		
 	</div>
 	
-	<div class="data-info">
-		<div class="form-floating col-3">
-			<input type="text" class="form-control" id="name" name="name" maxlength="10" placeholder="名稱">
-			<label for="name">名稱</label>
-		</div>
-		<div class="form-floating col-3">
-			<input type="text" class="form-control" id="department" name="department" maxlength="20" placeholder="部門">
-			<label for="department">部門</label>
-		</div>
-		<div class="form-floating col-3">
-			<input type="text" class="form-control" id="jobtitle" name="jobtitle" maxlength="10" placeholder="職稱">
-			<label for="jobtitle">職稱</label>
-		</div>
-		<select class="form-select col-3" id="group" name="group">
-			<option selected>權限群組</option>
-			<option value="1">Administrator</option>
-			<option value="2">User</option>
-		</select>
+	<div class="section role-permission">
+		<ul class="list-group">
+			<label class="title">權限管理</label>
+			<li class="list-group-item">
+				<div class="form-check form-switch permission-group">
+					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
+				</div>
+				<div class="permission-group-items">
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">新增</label>
+					</div>
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">編輯</label>
+					</div>
+				</div>
+			</li>
+			<li class="list-group-item">
+				<div class="form-check form-switch permission-group">
+					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
+				</div>
+				<div class="permission-group-items">
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
+					</div>
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
+					</div>
+				</div>
+			</li>
+		</ul>
+		
+		<ul class="list-group">
+			<label class="title">權限管理</label>
+			<li class="list-group-item">
+				<div class="form-check form-switch permission-group">
+					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
+				</div>
+				<div class="permission-group-items">
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">新增</label>
+					</div>
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">編輯</label>
+					</div>
+				</div>
+			</li>
+			<li class="list-group-item">
+				<div class="form-check form-switch permission-group">
+					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
+				</div>
+				<div class="permission-group-items">
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
+					</div>
+					<div class="form-check permission-item">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
+					</div>
+				</div>
+			</li>
+		</ul>
 	</div>
-	<ul class="list-group data-permission">
-		<li class="list-group-item">An item</li>
-		<li class="list-group-item">A second item</li>
-		<li class="list-group-item">A third item</li>
-		<li class="list-group-item">A fourth item</li>
-		<li class="list-group-item">And a fifth one</li>
-	</ul>
-	
-</form>
 </section>
 
+</form>
+@endif
 
-{{--@endif--}}
 @endsection()
