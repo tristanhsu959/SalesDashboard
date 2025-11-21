@@ -2,18 +2,17 @@
 @extends('layouts.master')
 
 @push('styles')
-	<link href="{{ asset('styles/role/role.css') }}" rel="stylesheet">
-    <link href="{{ asset('styles/role/list.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/user/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/role/list.js') }}"></script>
+    <script src="{{ asset('scripts/user/list.js') }}"></script>
 @endpush
 
-@section('navHead', '身份管理 | 列表')
+@section('navHead', '帳號管理 | 列表')
 
 @section('navAction')
-<a href="{{ url('roles/create') }}" class="btn btn-create">
+<a href="{{ url('users/create') }}" class="btn btn-create">
 	<span class="material-symbols-outlined filled-icon">add</span>
 	<span class="title">新增</span>
 </a>
@@ -22,40 +21,59 @@
 @section('content')
 {{--@if($status === TRUE)--}}
 
-<section class="role-list section-wrapper">
+<section class="user-list section-wrapper">
 	<div class="container-fluid">
-		<div class="row hea1">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">操作</div>
+		<div class="row head">
+			<div class="col col-1">#</div>
+			<div class="col">AD帳號</div>
+			<div class="col">顯示名稱</div>
+			<div class="col">管理區域</div>
+			<div class="col">權限身份</div>
+			<div class="col col-action">操作</div>
 		</div>
 		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">操作</div>
-		</div>
-		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">
-				<!--a href="" class="btn">編輯</a>
-				<a href="" class="btn">刪除</a-->
+			<div class="col col-1">1</div>
+			<div class="col">T2025001</div>
+			<div class="col">Tomas</div>
+			<div class="col">全區</div>
+			<div class="col">管理者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">
-				<!--a href="" class="btn">編輯</a>
-				<a href="" class="btn">刪除</a-->
+			<div class="col col-1">1</div>
+			<div class="col">T2025001</div>
+			<div class="col">Tomas</div>
+			<div class="col">北區</div>
+			<div class="col">使用者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col col-1">1</div>
+			<div class="col">T2025001</div>
+			<div class="col">Tomas</div>
+			<div class="col">北區</div>
+			<div class="col">使用者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
 			</div>
 		</div>
 	</div>

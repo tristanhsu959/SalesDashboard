@@ -1,6 +1,6 @@
 {{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
-@use('App\Enums\RoleGroup');
-@use('App\Enums\Operation');
+@use('App\Enums\RoleGroup')
+@use('App\Enums\Operation')
 
 @extends('layouts.master')
 
@@ -24,7 +24,7 @@
 @section('content')
 @if($status === TRUE)
 		
-<form action="{{ route('auth') }}" method="post" id="loginForm">
+<form action="{{ route('auth') }}" method="post" id="roleForm">
 @csrf
 <section class="section-wrapper">
 	<div class="section role-data">
@@ -65,6 +65,10 @@
 			@endforeach
 		</ul>
 		@endforeach
+	</div>
+	<div class="toolbar">
+		<button type="button" class="btn btn-primary btn-major">儲存</button>
+		<button type="button" class="btn btn-outline-danger">取消</button>
 	</div>
 </section>
 @endif

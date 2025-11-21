@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 
 
 /* Login */

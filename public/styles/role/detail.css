@@ -108,5 +108,14 @@ body {
 			}
 		}
 	}
+	
+	.toolbar {
+		.btn {
+			margin-right: .5rem;
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
 }
 

@@ -2,8 +2,7 @@
 @extends('layouts.master')
 
 @push('styles')
-	<link href="{{ asset('styles/role/role.css') }}" rel="stylesheet">
-    <link href="{{ asset('styles/role/list.css') }}" rel="stylesheet">
+	<link href="{{ asset('styles/role/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')

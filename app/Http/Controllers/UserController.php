@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\RoleService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class RoleController extends Controller
+class UserController extends Controller
 {
 	private $_service;
 	
-	public function __construct(RoleService $roleService)
+	public function __construct(UserService $userService)
 	{
-		$this->_service = $roleService;
+		$this->_service = $userService;
 	}
 	
 	/* 列表
@@ -22,7 +22,7 @@ class RoleController extends Controller
 	 */
 	public function list(Request $request)
 	{
-		return view('role/list');
+		return view('user/list');
 		// $validator = Validator::make($request->all(), [
             // 'ad_account' => 'required|max:20',
 			// 'ad_password' => 'required|max:20',
@@ -49,7 +49,7 @@ class RoleController extends Controller
 	 */
 	public function create(Request $request)
 	{
-		$response = $this->_service->createRole();
-		return view('role/detail', $response);
+		$response = $this->_service->createUser();
+		return view('user/detail', $response);
 	}
 }

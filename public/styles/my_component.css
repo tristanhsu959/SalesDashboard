@@ -19,7 +19,12 @@
 
 .btn {
 	border-radius: 2px;
+	
+	&.btn-major {
+		min-width: 8rem;
+	}
 }
+
 
 /* Customize Component */
 .input-field, .input-select {
@@ -46,6 +51,9 @@
 		.form-select {
 			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9100' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 		}
+	}
+	&.field-dark {
+		--dark-color: #b0bec5;
 	}
 }
 
@@ -90,6 +98,9 @@
 	}
 	
 	&.field-dark {
+		label {
+			color: var(--dark-color);
+		}
 		input {
 			background-color: var(--bg-dark-color);
 			color: #fff;
