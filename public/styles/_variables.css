@@ -11,11 +11,13 @@
 	--bg-default-color: #fff; /* grey */
 	--bg-primary-color: #ed5a65; /* red */
 	--bg-secondary-color: #ffc107; /* amber */
+	--bg-dark-color: #37474f; /* blue grey */
 	
 	/* Button */
-	--bg-btn-create-color: #00e676;
-	--btn-create-color: #1b5e20;
-	
+	--bg-btn-create-color: #00c853;
+	--bg-btn-update-color: #673ab7;
+	--bg-btn-delete-color: #f44336;
+	--bg-btn-return-color: #263238;
 	
 	/*** Bootstrap Variables ***/
 }

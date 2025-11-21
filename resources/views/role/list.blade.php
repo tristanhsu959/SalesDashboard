@@ -24,38 +24,49 @@
 
 <section class="role-list section-wrapper">
 	<div class="container-fluid">
-		<div class="row hea1">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
+		<div class="row head">
+			<div class="col col-1">#</div>
+			<div class="col">身份</div>
 			<div class="col">權限群組</div>
-			<div class="col col-3">操作</div>
+			<div class="col col-action">操作</div>
 		</div>
 		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">操作</div>
-		</div>
-		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">
-				<!--a href="" class="btn">編輯</a>
-				<a href="" class="btn">刪除</a-->
+			<div class="col col-1">1</div>
+			<div class="col">經理</div>
+			<div class="col">使用者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col">名稱</div>
-			<div class="col">部門</div>
-			<div class="col">職稱</div>
-			<div class="col">權限群組</div>
-			<div class="col col-3">
-				<!--a href="" class="btn">編輯</a>
-				<a href="" class="btn">刪除</a-->
+			<div class="col col-1">2</div>
+			<div class="col col-1">經理</div>
+			<div class="col">使用者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col col-1">3</div>
+			<div class="col col-1">經理</div>
+			<div class="col">使用者</div>
+			<div class="col col-action">
+				<a href="" class="btn btn-edit">
+					<span class="material-symbols-outlined">edit</span>
+				</a>
+				<a href="" class="btn btn-del">
+					<span class="material-symbols-outlined">delete</span>
+				</a>
 			</div>
 		</div>
 	</div>

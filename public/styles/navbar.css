@@ -56,7 +56,6 @@
 		a.btn-create {
 			background-color: var(--bg-btn-create-color);
 			color: #fff;
-			border-color: var(--bg-btn-create-color);
 			
 			&:hover {
 				width: calc(3ch * 3.5);
@@ -64,7 +63,7 @@
 		}
 		
 		a.btn-return {
-			background-color: #263238 ;
+			background-color: var(--bg-btn-return-color);
 			color: #fff;
 			
 			&:hover {

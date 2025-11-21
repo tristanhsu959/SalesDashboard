@@ -1,10 +1,11 @@
 {{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
+@use('App\Enums\RoleGroup');
 @use('App\Enums\Operation');
+
 @extends('layouts.master')
 
 @push('styles')
-	<link href="{{ asset('styles/role/role.css') }}" rel="stylesheet">
-    <link href="{{ asset('styles/role/create.css') }}" rel="stylesheet">
+	<link href="{{ asset('styles/role/detail.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -27,19 +28,19 @@
 @csrf
 <section class="section-wrapper">
 	<div class="section role-data">
-		<div class="input-field field-orange">
+		<div class="input-field field-orange field-dark">
 			<input type="text" class="form-control valid" id="name" name="name" maxlength="10" placeholder=" " required>
-			<label for="name" class="form-label">名稱</label>
+			<label for="name" class="form-label">身份</label>
 		</div>
-		<div class="input-select">
+		<div class="input-select field-orange field-dark">
 			<select class="form-select" id="group" name="group">
-				<option value="-1"selected>請選擇</option>
-				<option value="1">Administrator</option>
-				<option value="2">User</option>
+				<option value=""selected>請選擇</option>
+				@foreach(RoleGroup::cases() as $role)
+				<option value="{{ $role->value }}">{{ $role->label() }}</option>
+				@endforeach
 			</select>
 			<label for="group" class="form-label">權限群組</label>
 		</div>
-		
 	</div>
 	
 	<div class="section role-permission">
