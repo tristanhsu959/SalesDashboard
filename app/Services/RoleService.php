@@ -28,6 +28,7 @@ class RoleService
 	
 	public function createRole()
 	{
-		return ResponseLib::initialize()->success()->get();
+		$data['permissionList'] = config('web.menu');
+		return ResponseLib::initialize($data)->success()->get();
 	}
 }

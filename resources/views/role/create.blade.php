@@ -1,4 +1,5 @@
 {{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
+@use('App\Enums\Operation');
 @extends('layouts.master')
 
 @push('styles')
@@ -30,181 +31,40 @@
 			<input type="text" class="form-control valid" id="name" name="name" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">名稱</label>
 		</div>
-		<div class="input-field field-orange">
-			<input type="text" class="form-control valid" id="department" name="department" maxlength="20" placeholder=" " required>
-			<label for="department" class="form-label">部門</label>
-		</div>
-		<div class="input-field field-orange">
-			<input type="text" class="form-control valid" id="jobtitle" name="jobtitle" maxlength="10" placeholder=" " required>
-			<label for="jobtitle" class="form-label">職稱</label>
-		</div>
 		<div class="input-select">
 			<select class="form-select" id="group" name="group">
 				<option value="-1"selected>請選擇</option>
 				<option value="1">Administrator</option>
 				<option value="2">User</option>
 			</select>
-			<label for="jobtitle" class="form-label">權限群組</label>
+			<label for="group" class="form-label">權限群組</label>
 		</div>
 		
 	</div>
 	
 	<div class="section role-permission">
+		@foreach($data['permissionList'] as $groupKey => $group)
 		<ul class="list-group">
-			<label class="title">權限管理</label>
+			<label class="title">{{ $group['groupName'] }}</label>
+			@foreach($group['items'] as $itemKey => $item)
 			<li class="list-group-item">
 				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
+					<input class="form-check-input" type="checkbox" id="item{{ $groupKey.$itemKey }}">
+					<label class="form-check-label" for="item{{ $groupKey.$itemKey }}">{{ $item['name'] }}</label>
 				</div>
 				<div class="permission-group-items">
-					<label class="form-check-label" for="flexCheckDefault1">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
-						新增
+					@foreach($item['operation'] as $opKey => $operation)
+					<label class="form-check-label" for="operation{{$groupKey.$itemKey.$opKey }}">
+						<input class="form-check-input" type="checkbox" value="" id="operation{{$groupKey.$itemKey.$opKey }}">
+						{{ $operation->label() }}
 					</label>
-					<label class="form-check-label" for="flexCheckDefault1">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
-						新增
-					</label>
-					<label class="form-check-label" for="flexCheckDefault1">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
-						新增
-					</label>
-					<label class="form-check-label" for="flexCheckDefault1">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
-						新增
-					</label>
-					
+					@endforeach
 				</div>
 			</li>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-				</div>
-			</li>
+			@endforeach
 		</ul>
-		
-		<ul class="list-group">
-			<label class="title">權限管理</label>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">新增</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">編輯</label>
-					</div>
-				</div>
-			</li>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-				</div>
-			</li>
-		</ul>
+		@endforeach
 	</div>
 </section>
-
-<ul class="list-group">
-			<label class="title">權限管理</label>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">新增</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">編輯</label>
-					</div>
-				</div>
-			</li>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-				</div>
-			</li>
-		</ul>
-		
-</form>
-<ul class="list-group">
-			<label class="title">權限管理</label>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">新增</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">編輯</label>
-					</div>
-				</div>
-			</li>
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">角色管理</label>
-				</div>
-				<div class="permission-group-items">
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-					<div class="form-check permission-item">
-						<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-						<label class="form-check-label" for="flexCheckDefault">角色管理</label>
-					</div>
-				</div>
-			</li>
-		</ul>
 @endif
-
 @endsection()

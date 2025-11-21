@@ -9,7 +9,7 @@
 
 .form-control:focus, .form-select:focus {
 	box-shadow: none;
-	border-width: 2px;
+	// border-width: 2px;
 	border-color: #ff9100;
 }
 

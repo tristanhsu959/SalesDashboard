@@ -36,7 +36,7 @@ return [
 	[
 		'groupName' => '權限管理',
 		'groupCode' => '02',
-		'groupIcon' => ['name' => 'chart_data', 'filled' => FALSE],
+		'groupIcon' => ['name' => 'admin_panel_settings', 'filled' => FALSE],
 		'items' => [
 			[
 				'actionCode'	=> '01',

@@ -21,6 +21,9 @@ class AppHelper
 		$segments = Request::segments();
 		$navStyle = '';
 		
+		if (empty($segments))
+			return $navStyle;
+		
 		switch($segments[0])
 		{
 			case 'new_releases' :

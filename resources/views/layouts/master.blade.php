@@ -31,17 +31,15 @@
 			<div class='content-wrapper'>
 				@yield('login')
 			</div>
+		@else
+			@include('layouts.master_menu')
+			<div class='content-wrapper'>
+				@include('layouts.master_actionbar')
+				@hasSection('content')
+					@yield('content')
+				@endif
+			</div>
 		@endif
-		
-		@include('layouts.master_menu')
-			
-		<div class='content-wrapper'>
-			@include('layouts.master_actionbar')
-			@hasSection('content')
-				@yield('content')
-			@endif
-		</div>
-		
 		
 		
 		@if(! empty($msg))
