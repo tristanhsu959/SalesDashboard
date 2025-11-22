@@ -29,7 +29,7 @@
 		<div class="input-field field-blue">
 			<input type="text" class="form-control valid" id="ad_account" name="ad_account" maxlength="20" placeholder=" " required>
 			<label for="ad_account" class="form-label">Account</label>
-			<span class="group-text">@8way.com.tw</span>
+			<span class="domain-text">@8way.com.tw</span>
 		</div>
 		<div class="input-field field-blue">
 			<input type="password" class="form-control" id="ad_password" name="ad_password" placeholder=" " maxlength="20" required>

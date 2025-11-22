@@ -1,6 +1,6 @@
 /* list */
 body {
-	background-color: var(--bg-dark-color);
+	background-color: var(--bg-page-dark-color);
 }
 .section-wrapper {
 	display: flex;
@@ -27,17 +27,32 @@ body {
 	}
 	
 	.role-permission {
+		position: relative;
 		flex: 2;
 		padding: 1rem;
 		border-radius: .5rem;
-		border: 1px solid #999;
-		background-color: #eceff1;
+		border: 1px solid #ff9100;
+		margin-top: 1rem;
+		// background-color: #eceff1;
+		
+		&:before {
+			content: '權限身份';
+			position: absolute;
+			top: 0;
+			padding: 0 .25rem;
+			color: #ff9100;
+			background-color: var(--bg-page-dark-color);
+			display: flex;
+			transform: translate(-0.25rem, -50%);
+		}
 		
 		.list-group {
 			margin-bottom: 1rem;
 			
 			.title {
-				
+				display: flex;
+				align-items: center;
+				color: #ea80fc;
 			}
 			
 			.list-group-item {
@@ -46,8 +61,10 @@ body {
 				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #f3e5f5);
 				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
 				// background: linear-gradient(135deg, #4a148c, #7b1fa2, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
-				background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
+				// background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
 				border-width: 0 0 1px;
+				background-color: transparent;
+				border-color: #607d8b;
 				
 				&:last-child {
 					border-bottom-width: 0;
@@ -61,7 +78,11 @@ body {
 					margin-top: .25rem;
 					
 					label {
-						color: #fff;
+						color: #00bcd4;
+					}
+					.form-check-input:checked {
+						background-color: #ff9100;
+						border-color: #ff6d00;
 					}
 				}
 				
@@ -78,8 +99,8 @@ body {
 						width: auto;
 						height: 2rem;
 						margin: .25rem;
-						color: #9575cd;
-						border: 1px solid #9575cd;
+						color: #ce93d8;
+						border: 1px solid #ce93d8;
 						padding: .175rem 1rem;
 						border-radius: 1rem;
 						
@@ -92,16 +113,17 @@ body {
 						}
 						
 						&:has(input:checked) {
-							border-color: #4527a0;
-							color: #4527a0;
-							background-color: #b388ff;
+							// border-color: #ea80fc;
+							color: #4a148c;
+							background-color: #ce93d8;
 							transition-property: color, border-color, background-color;
 							transition-duration: .3s;
 							transition-delay: .15s;
 							
 							&:before {
-								content: '\f88b';
+								content: '\e5ca';
 								font-family: 'Material Symbols Outlined';
+								// font-variation-settings: 'FILL' 1;
 							}
 						}
 					}

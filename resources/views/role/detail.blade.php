@@ -46,7 +46,10 @@
 	<div class="section role-permission">
 		@foreach($data['permissionList'] as $groupKey => $group)
 		<ul class="list-group">
-			<label class="title">{{ $group['groupName'] }}</label>
+			<label class="title">
+				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>
+				{{ $group['groupName'] }}
+			</label>
 			@foreach($group['items'] as $itemKey => $item)
 			<li class="list-group-item">
 				<div class="form-check form-switch permission-group">

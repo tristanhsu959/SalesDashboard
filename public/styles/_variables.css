@@ -12,7 +12,6 @@
 	--bg-default-color: #fff; /* grey */
 	--bg-primary-color: #ed5a65; /* red */
 	--bg-secondary-color: #ffc107; /* amber */
-	--bg-dark-color: #37474f; /* blue grey */
 	
 	/* Button */
 	--bg-btn-profile-color: #00bcd4; /* 500 */
@@ -21,5 +20,6 @@
 	--bg-btn-delete-color: #f44336; /* 500 */
 	--bg-btn-return-color: #263238; /* darken4 */
 	
-	/*** Bootstrap Variables ***/
+	--bg-page-dark-color: #37474f; /* blue grey */
+	--input-dark-color: #b0bec5; /* blue grey */
 }

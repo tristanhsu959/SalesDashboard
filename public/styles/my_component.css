@@ -1,22 +1,6 @@
 /* Component Style */
 
-/* Modify bootstrap style */
-.form-control, .form-select, .form-floating {
-	border-radius: 4px;
-	border-width: 1px;
-	border-color: #ffab40;
-}
-
-.form-control:focus, .form-select:focus {
-	box-shadow: none;
-	// border-width: 2px;
-	border-color: #ff9100;
-}
-
-.form-select {
-	line-height: 2; /*1.5*/
-}
-
+/* Button */
 .btn {
 	border-radius: 2px;
 	
@@ -45,46 +29,28 @@
 }
 
 
-/* Customize Component */
-.input-field, .input-select {
-	&.field-red {
-		--set-color: #ff1744; /* accent3 */
-		.form-select {
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cb1a19' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-		}
-	}
-	&.field-blue {
-		--set-color: #00b0ff; /* accent3 */
-		.form-select {
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232196f3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-		}
-	}
-	&.field-cyan {
-		--set-color: #00e5ff; /* accent3 */
-		.form-select {
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230d47a1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-		}
-	}
-	&.field-orange {
-		--set-color: #ff9100; /* accent3 */
-		.form-select {
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9100' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-		}
-	}
-	&.field-dark {
-		--dark-color: #b0bec5;
-	}
+/* Customize Form Fields */
+.form-control, .form-select, .form-floating {
+	border-radius: 4px;
+	// border-width: 1px;
+	// border-color: #ffab40;
+}
+
+.form-control:focus, .form-select:focus {
+	box-shadow: none;
+	// border-width: 2px;
+	// border-color: #ff9100;
 }
 
 .input-field {
 	position: relative;
 	/*margin: 1rem;*/
 	
+	/* Default setting */
 	label {
 		position: absolute;
-		color: #8d8d8d;
+		color: #8d8d8d; /* default */
 		pointer-events: none;
-		background-color: transparent;
 		top: 1px;
 		left: 15px;
 		transform: translateY(0.6rem);
@@ -95,41 +61,75 @@
 		padding: 10px 15px;
 		font-size: 1rem;
 		border-radius: 4px;
-		border: solid 1px var(--set-color);
 		letter-spacing: 1px;
 		width: 100%;
 	}
 		
 	input:focus  {
 		outline: none;
-		border: solid 1px var(--set-color);
 	}
 	
 	input:focus ~ label, input:not(:placeholder-shown) ~ label {
 		transform: translateY(-51%) translateX(-10px) scale(0.8);
 		background-color: #fff;
 		padding: 0px 5px;
-		color: var(--set-color);
+		color: #212529;
 		font-weight: bold;
 		letter-spacing: 1px;
 		border: none;
 		border-radius: 100px;
 	}
 	
-	&.field-dark {
-		label {
-			color: var(--dark-color);
-		}
+	/* Customize */
+	&.field-red {
 		input {
-			background-color: var(--bg-dark-color);
-			color: #fff;
+			border-color: #ff1744; /* accent3 */
 		}
 		input:focus ~ label, input:not(:placeholder-shown) ~ label {
-			background-color: var(--bg-dark-color);
+			color: #ff1744;
 		}
 	}
 	
-	.group-text {
+	&.field-blue {
+		input {
+			border-color: #00b0ff; 
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #00b0ff;
+		}
+	}
+	&.field-cyan {
+		input {
+			border-color: #00e5ff; 
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #00e5ff;
+		}
+	}
+	&.field-orange {
+		input {
+			border-color: #ff9100; 
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #ff9100;
+		}
+	}
+	
+	&.field-dark {
+		label {
+			color: var(--input-dark-color);
+		}
+		input {
+			background-color: var(--bg-page-dark-color);
+			color: #fff;
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			background-color: var(--bg-page-dark-color);
+		}
+	}
+	
+	/* Singin form */
+	.domain-text {
 		position: absolute;
 		top: 1px;
 		right: 15px;
@@ -140,40 +140,78 @@
 }
 
 .input-select {
-	position: relative;
-	
-	.form-select {
-		border-radius: 4px;
-		border-color: var(--set-color);
-	}
-	
-	label
-	{
-		position: absolute;
-		pointer-events: none;
-		top: 1px;
-		left: 15px;
-		transform: translateY(-51%) translateX(-12px) scale(0.8);
-		background-color: #fff;
-		color: var(--set-color);
-		padding: 0px 5px;
-		font-weight: bold;
-		border-radius: 100px;
-	}
-	
-	&.field-dark {
+    position: relative;
+    
+	/* Default */
+    .form-select {
+        border-radius: 4px;
+        line-height: 2;
+		color: #212529;
+    }
+    
+    label
+    {
+        position: absolute;
+        pointer-events: none;
+        top: 1px;
+        left: 15px;
+        transform: translateY(-51%) translateX(-12px) scale(0.8);
+        background-color: #fff;
+        color: #212529;
+        padding: 0px 5px;
+        font-weight: bold;
+        border-radius: 100px;
+    }
+    
+	&.field-red {
 		.form-select {
-			background-color: var(--bg-dark-color);
-			color: #fff;
+			border-color: #ff1744; /* accent3 */
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cb1a19' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 		}
-		
 		label {
-			background-color: var(--bg-dark-color);
+			color: #ff1744;
 		}
 	}
+	&.field-blue {
+		.form-select {
+			border-color: #00b0ff;
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232196f3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+		}
+		label {
+			color: #00b0ff;
+		}
+	}
+	&.field-cyan {
+		.form-select {
+			border-color: #00e5ff; 
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300e5ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+		}
+		label {
+			color: #00e5ff;
+		}
+	}
+	&.field-orange {
+		--set-color: #ff9100; /* accent3 */
+		.form-select {
+			border-color: #ff9100; 
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9100' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+		}
+		label {
+			color: #ff9100;
+		}
+	}
+	
+    &.field-dark {
+        .form-select {
+            background-color: var(--bg-page-dark-color);
+            color: #fff;
+        }
+        
+        label {
+            background-color: var(--bg-page-dark-color);
+        }
+    }
 }
-
-
 
 
 

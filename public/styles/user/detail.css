@@ -1,6 +1,6 @@
 /* list */
 body {
-	background-color: var(--bg-dark-color);
+	background-color: var(--bg-page-dark-color);
 }
 .section-wrapper {
 	display: flex;
@@ -42,7 +42,7 @@ body {
 			top: 0;
 			padding: 0 .25rem;
 			color: #00e5ff;
-			background-color: var(--bg-dark-color);
+			background-color: var(--bg-page-dark-color);
 			display: flex;
 			transform: translate(-0.25rem, -50%);
 		}
