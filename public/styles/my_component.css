@@ -132,10 +132,10 @@
 	.domain-text {
 		position: absolute;
 		top: 1px;
-		right: 15px;
+		right: 2rem;
 		display: inline-block;
 		transform: translateY(0.6rem);
-		color: #666;
+		color: #8d8d8d;
 	}
 }
 
@@ -211,6 +211,20 @@
             background-color: var(--bg-page-dark-color);
         }
     }
+}
+
+/* input Required */
+.field.required {
+	input:focus ~ label, input:not(:placeholder-shown) ~ label, .form-select + label {
+		display: flex;
+		align-items: center;
+		
+		&:before {
+			content: '\e1eb';
+			font-family: 'Material Symbols Outlined';
+			color: #f44336;
+		}
+	}
 }
 
 

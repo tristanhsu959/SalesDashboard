@@ -1,4 +1,6 @@
 @inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')
+@use('App\Enums\Area')
+
 @extends('layouts.master')
 
 @push('styles')
@@ -22,6 +24,28 @@
 {{--@if($status === TRUE)--}}
 
 <section class="user-list section-wrapper">
+	<div class="search-bar">
+		<div class="input-field field-blue field-dark field">
+			<input type="text" class="form-control valid" id="account" name="account" maxlength="15" placeholder=" ">
+			<label for="account" class="form-label">AD帳號</label>
+		</div>
+		<div class="input-field field-blue field-dark field">
+			<input type="text" class="form-control valid" id="displayName" name="displayName" maxlength="15" placeholder=" ">
+			<label for="displayName" class="form-label">顯示名稱</label>
+		</div>
+		<div class="input-select field-blue field-dark field">
+			<select class="form-select" id="area" name="area">
+				<option value=""selected>請選擇</option>
+				@foreach(Area::cases() as $area)
+				<option value="{{ $area->value }}">{{ $area->label() }}</option>
+				@endforeach
+			</select>
+			<label for="group" class="form-label">管理區域</label>
+		</div>
+		<button class="btn btn-search btn-info" type="button">
+			<span class="material-symbols-outlined filled-icon">search</span>
+		</button>
+	</div>
 	<div class="container-fluid">
 		<div class="row head">
 			<div class="col col-1">#</div>

@@ -36,15 +36,22 @@ body {
 		margin-top: 1rem;
 		position: relative;
 		
-		&:before {
-			content: '權限身份';
+		&.required label.title:before {
+			content: '\e1eb';
+			font-family: 'Material Symbols Outlined';
+			color: #f44336;
+		}
+		
+		label.title {
 			position: absolute;
 			top: 0;
 			padding: 0 .25rem;
 			color: #00e5ff;
 			background-color: var(--bg-page-dark-color);
 			display: flex;
+			align-items: center;
 			transform: translate(-0.25rem, -50%);
+			font-family: 'Material Symbols Outlined';
 		}
 		
 		.form-check-label {
