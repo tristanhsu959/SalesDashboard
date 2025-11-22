@@ -54,10 +54,10 @@ body {
 			align-items: center;
 			width: 160px;
 			height: 88px;
-			background-color: #455a64;
-			border: 2px solid #78909c;
+			background-color: #263238;
+			border: 2px solid #455a64;
 			border-radius: 0 0 4px 4px;
-			color: #78909c;
+			color: #455a64;
 			margin: .5rem;
 			padding: 1rem;
 			box-sizing: border-box;
