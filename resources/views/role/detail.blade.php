@@ -68,7 +68,7 @@
 	</div>
 	<div class="toolbar">
 		<button type="button" class="btn btn-primary btn-major">儲存</button>
-		<button type="button" class="btn btn-outline-danger">取消</button>
+		<button type="button" class="btn btn-red">取消</button>
 	</div>
 </section>
 @endif

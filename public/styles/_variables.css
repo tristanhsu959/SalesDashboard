@@ -6,7 +6,8 @@
 	--bg-brand-secondary-color: #f5ac2d; /* amber */
 	--bg-brand-secondary-light-color: #ffd180;
 	
-	--bg-menu-color: #263238; /*#263238;*/
+	--bg-menu-color: #263238; /*dark4 */
+	--bg-menu-hover-color: #455a64; /*dark4 */
 	
 	--bg-default-color: #fff; /* grey */
 	--bg-primary-color: #ed5a65; /* red */
@@ -14,10 +15,11 @@
 	--bg-dark-color: #37474f; /* blue grey */
 	
 	/* Button */
-	--bg-btn-create-color: #00c853;
-	--bg-btn-update-color: #673ab7;
-	--bg-btn-delete-color: #f44336;
-	--bg-btn-return-color: #263238;
+	--bg-btn-profile-color: #00bcd4; /* 500 */
+	--bg-btn-create-color: #4caf50; /* 500 */
+	--bg-btn-update-color: #9c27b0; /* 500 */
+	--bg-btn-delete-color: #f44336; /* 500 */
+	--bg-btn-return-color: #263238; /* darken4 */
 	
 	/*** Bootstrap Variables ***/
 }

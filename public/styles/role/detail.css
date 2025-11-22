@@ -44,7 +44,9 @@ body {
 				display: flex;
 				justify-content: space-between;
 				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #f3e5f5);
-				background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
+				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
+				// background: linear-gradient(135deg, #4a148c, #7b1fa2, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
+				background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
 				border-width: 0 0 1px;
 				
 				&:last-child {
@@ -76,8 +78,8 @@ body {
 						width: auto;
 						height: 2rem;
 						margin: .25rem;
-						color: #4a148c;
-						border: 1px solid #4a148c;
+						color: #9575cd;
+						border: 1px solid #9575cd;
 						padding: .175rem 1rem;
 						border-radius: 1rem;
 						
@@ -90,9 +92,9 @@ body {
 						}
 						
 						&:has(input:checked) {
-							border-color: #fff;
-							color: #fff;
-							background-color: #6a1b9a  ;
+							border-color: #4527a0;
+							color: #4527a0;
+							background-color: #b388ff;
 							transition-property: color, border-color, background-color;
 							transition-duration: .3s;
 							transition-delay: .15s;

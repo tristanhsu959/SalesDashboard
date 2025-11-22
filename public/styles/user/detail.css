@@ -26,6 +26,83 @@ body {
 		}
 	}
 	
+	.user-role {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		border: 1px solid #00e5ff;
+		border-radius: .5rem;
+		padding: 1rem;
+		margin-top: 1rem;
+		position: relative;
+		
+		&:before {
+			content: '權限身份';
+			position: absolute;
+			top: 0;
+			padding: 0 .25rem;
+			color: #00e5ff;
+			background-color: var(--bg-dark-color);
+			display: flex;
+			transform: translate(-0.25rem, -50%);
+		}
+		
+		.form-check-label {
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 160px;
+			height: 88px;
+			background-color: #455a64;
+			border: 2px solid #78909c;
+			border-radius: 0 0 4px 4px;
+			color: #78909c;
+			margin: .5rem;
+			padding: 1rem;
+			box-sizing: border-box;
+			transition: border-color, color 0.2s ease-in-out 0.1s;
+			
+			input {
+				display: none;
+			}
+			
+			&:before {
+				content: '';
+				width: 160px;
+				height: .5rem;
+				background-color: #ff4081;
+				position: absolute;
+				top: 0;
+				opacity: 0;
+				transition: opacity 0.2s ease-in-out 0.1s;
+			}
+			&:after {
+				content: '';
+				width: 0;
+				height: 0;
+				border-width: 16px 24px 0;
+				border-color: transparent;
+				border-top-color: #ff4081;
+				border-style: solid;
+				position: absolute;
+				top: .5rem;
+				opacity: 0;
+				transition: opacity 0.2s ease-in-out 0.1s;
+			}
+			
+			&:has(input:checked) {
+				border-color: #ff4081;
+				color: #ff4081; 
+				
+				&:before,  &:after{
+					opacity: 1;
+					
+				}
+			}
+		}
+	}
+	
 	.toolbar {
 		.btn {
 			margin-right: .5rem;

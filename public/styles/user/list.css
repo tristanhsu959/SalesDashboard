@@ -11,7 +11,6 @@ body {
 	.row {
 		border-width: 0;
 		border-bottom: 1px solid #607d8b;
-		// border-bottom: 1px solid #ccc;
 		
 		&.head  {
 			// background-color: #2196f3;
@@ -25,7 +24,6 @@ body {
 			
 			&:nth-child(odd) {
 				background-color: #455a64;
-				// background-color: #eceff1;
 			}
 		}
 		
