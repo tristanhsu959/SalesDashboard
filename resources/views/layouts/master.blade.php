@@ -12,10 +12,7 @@
 		<link href="https://fonts.googleapis.com/css?family=Roboto|Orbitron&display=swap" rel="stylesheet" />
 		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="{{ asset('styles/_variables.css') }}" rel="stylesheet" />
-		<link href="{{ asset('styles/my_component.css') }}" rel="stylesheet" />
 		<link href="{{ asset('styles/master.css') }}" rel="stylesheet" />
-		<link href="{{ asset('styles/actionbar.css') }}" rel="stylesheet" />
 		@stack('styles')
 		
 		<!-- Scripts -->
@@ -33,12 +30,16 @@
 			</div>
 		@else
 			@include('layouts.master_menu')
+		
 			<div class='content-wrapper'>
 				@include('layouts.master_actionbar')
 				@hasSection('content')
 					@yield('content')
 				@endif
 			</div>
+			
+			@include('layouts.master_profile')
+			
 		@endif
 		
 		
@@ -51,6 +52,10 @@
 				<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
 			</div>
 		</div>
+		@endif
+		
+		@sectionMissing('signin')
+			@include('layouts.master_dialog')
 		@endif
 	</body>
 </html>

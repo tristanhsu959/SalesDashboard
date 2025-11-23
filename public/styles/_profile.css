@@ -1,0 +1,80 @@
+/* User Profile */
+
+.offcanvas.offcanvas-start {
+	width: 280px;
+	border-width: 0;
+	
+	.offcanvas-header h5 {
+		font-family: 'Orbitron';
+	}
+	
+	.offcanvas-body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0 0 1rem;
+		
+		.section {
+			width: 100%;
+			padding: 1rem;
+		}
+		
+		.access-info {
+			position: relative;
+			display: flex;
+			background-color: #f8bbd0;
+			padding-top: 2rem;
+			padding-bottom: 2rem;
+				
+			>.material-symbols-outlined {
+				font-size: 4rem;
+				color: #ec407a;
+			}
+			
+			.info {
+				flex: 1;
+				padding: .5rem 0;
+				
+				p {
+					margin: 0;
+					color: #424242;
+					
+					&:first-child {
+						font-size: .85rem;
+						font-family: 'Orbitron';
+					}
+					&:last-child {
+						font-size: 1.2rem;
+						font-weight: 500;
+						color: #000;
+					}
+				}
+			}
+			
+			a.btn-signout {
+				position: absolute;
+				bottom: 0;
+				right: 1rem;
+				transform: translateY(50%);
+				background-color: #7e57c2;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 3.5rem;
+				height: 3.5rem;
+				border-radius: 2rem;
+				color: #fff;
+			}
+		}
+		
+		.other-info {
+			padding-top: calc(3.5rem / 2 + 1rem);
+			
+			p {
+				display: flex;
+				justify-content: space-between;
+			}
+		}
+	}
+	
+}
