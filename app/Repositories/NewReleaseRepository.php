@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Exceptions\DBException;
 
 #新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同
 class NewReleaseRepository extends Repository
@@ -14,7 +15,7 @@ class NewReleaseRepository extends Repository
 		
 	}
 	
-	/* 取主資料
+	/* 取主資料-BuyGood
 	 * @params: start date
 	 * @params: end date
 	 * @params: product ids
@@ -22,13 +23,19 @@ class NewReleaseRepository extends Repository
 	 */
 	public function getBgSaleData($startDateTime, $endDateTime, $productIds)
 	{
+		try{
 		$db = $this->connectBGPosErp('SALE01 as a');
 		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds);
 		
 		return $result;
+		}
+		catch(Exception $e)
+		{
+			throw new DBException('讀取DB發生錯誤', $e->getMessage(), __class__, __function__);
+		}
 	}
 	
-	/* 取Mapping資料 | 複合店情境
+	/* 取Mapping資料 | 複合店情境 - BaFang
 	 * @params: start date
 	 * @params: end date
 	 * @params: brand code

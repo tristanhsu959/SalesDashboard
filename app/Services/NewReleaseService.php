@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Exception;
+use Throwable;
 
 
 class NewReleaseService
@@ -49,12 +50,12 @@ class NewReleaseService
 		#設定Cache
 		$cacheKey = implode(':', [$configKey, $saleDate, $endDate]);
 		
-		if (Cache::has($cacheKey))
-		{
-			Log::channel('webLog')->info('get from cache');
-			return Cache::get($cacheKey);
-		}
-		else
+		// if (Cache::has($cacheKey))
+		// {
+			// Log::channel('webLog')->info('get from cache');
+			// return Cache::get($cacheKey);
+		// }
+		// else
 		{
 			Log::channel('webLog')->info('get from db');
 			return $this->processStatistics($configKey, $cacheKey);
@@ -117,9 +118,9 @@ class NewReleaseService
 			
 			return $result;
 		}
-		catch(Exception $e)
+		catch(throwable $e)
 		{
-			Log::channel('webLog')->error($e->getMessage());
+			//Log::channel('webLog')->error($e->getMessage());
 			return ResponseLib::initialize($statistics)->fail($e->getMessage())->get();
 		}
 	}
