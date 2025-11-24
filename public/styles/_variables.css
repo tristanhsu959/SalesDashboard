@@ -22,4 +22,11 @@
 	
 	--bg-page-dark-color: #37474f; /* blue grey */
 	--input-dark-color: #b0bec5; /* blue grey */
+	
+	/* Dark Table */
+	--table-head-bg-color: #263238;
+	--table-head-color: #cfd8dc;
+	--table-row-border-color: #607d8b;
+	--table-col-color: #859AA4;
+	--table-col-odd-color: #40525B;
 }

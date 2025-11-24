@@ -14,9 +14,13 @@ $(function(){
 });
 
 /* valid or invalid */
-function validationInput(el)
+function validationInput(els)
 {
 	//el: id/class/ or ....
+	if ($.isArray(els))
+	{
+	}
+	else
 	$(el).removeClass('is-valid is-invalid');
 	
 	if ($(el).val() == '')

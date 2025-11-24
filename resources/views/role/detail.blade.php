@@ -9,7 +9,7 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/role/create.js') }}"></script>
+    <script src="{{ asset('scripts/role/create.js') }}" defer></script>
 @endpush
 
 @section('navHead', '身份管理 | 新增')
@@ -22,17 +22,16 @@
 @endsection
 
 @section('content')
-@if($status === TRUE)
-		
-<form action="{{ route('auth') }}" method="post" id="roleForm">
+<form action="{{ url('roles/create') }}" method="post" id="roleForm">
 @csrf
+
 <section class="section-wrapper">
 	<div class="section role-data">
-		<div class="input-field field-orange field-dark">
+		<div class="input-field field-orange field-dark field required">
 			<input type="text" class="form-control valid" id="name" name="name" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
-		<div class="input-select field-orange field-dark">
+		<div class="input-select field-orange field-dark field required">
 			<select class="form-select" id="group" name="group">
 				<option value=""selected>請選擇</option>
 				@foreach(RoleGroup::cases() as $role)
@@ -59,7 +58,7 @@
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
 					<label class="form-check-label" for="operation{{$groupKey.$itemKey.$opKey }}">
-						<input class="form-check-input" type="checkbox" value="" id="operation{{$groupKey.$itemKey.$opKey }}">
+						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" id="operation{{$groupKey.$itemKey.$opKey }}" name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'group[?][?]') }}">
 						{{ $operation->label() }}
 					</label>
 					@endforeach
@@ -70,9 +69,9 @@
 		@endforeach
 	</div>
 	<div class="toolbar">
-		<button type="button" class="btn btn-primary btn-major">儲存</button>
-		<button type="button" class="btn btn-red">取消</button>
+		<button type="button" class="btn btn-primary btn-major btn-save">儲存</button>
+		<button type="button" class="btn btn-red btn-cancel">取消</button>
 	</div>
 </section>
-@endif
+
 @endsection()

@@ -107,7 +107,7 @@
 						
 						&:hover, &.active {
 							border-radius: 20px;
-							background-color: rgba(69, 90, 100, .5);/*--bg-menu-hover-color);*/
+							background-color: rgba(69, 90, 100, .375);/*--bg-menu-hover-color);*/
 							color: var(--text-hover-color);
 						}
 					}

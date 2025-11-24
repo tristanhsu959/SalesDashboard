@@ -58,10 +58,10 @@ body {
 			.list-group-item {
 				display: flex;
 				justify-content: space-between;
-				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #f3e5f5);
-				// background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
-				// background: linear-gradient(135deg, #4a148c, #7b1fa2, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
-				// background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7);
+				/* background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #f3e5f5); */
+				/* background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
+				/* background: linear-gradient(135deg, #4a148c, #7b1fa2, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
+				/* background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
 				border-width: 0 0 1px;
 				background-color: transparent;
 				border-color: #607d8b;
@@ -113,11 +113,11 @@ body {
 						}
 						
 						&:has(input:checked) {
-							// border-color: #ea80fc;
-							// color: #4a148c;
-							// background-color: #ce93d8;
+							/* border-color: #ea80fc; */
+							/* color: #4a148c; */
+							/* background-color: #ce93d8; */
 							color: #ce93d8;
-							background-color: #7b1fa2;
+							background-color: rgba(122, 31, 162, .75); /*#7b1fa2;*/
 							transition-property: color, border-color, background-color;
 							transition-duration: .3s;
 							transition-delay: .15s;
@@ -125,7 +125,7 @@ body {
 							&:before {
 								content: '\e5ca';
 								font-family: 'Material Symbols Outlined';
-								// font-variation-settings: 'FILL' 1;
+								/* font-variation-settings: 'FILL' 1; */
 							}
 						}
 					}

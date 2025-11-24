@@ -17,4 +17,9 @@ class Repository
 		#梁社漢
 		return DB::connection('BGPosErp')->table($table)->lock('WITH(NOLOCK)');
 	}
+	
+	protected function connectSaleDashboard($table)
+	{
+		return DB::connection('SaleDashboard')->table($table)->lock('WITH(NOLOCK)');
+	}
 }

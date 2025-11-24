@@ -24,13 +24,15 @@ Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getTomatoB
 /* 身份管理 */
 Route::get('roles', [RoleController::class, 'list']);
 Route::get('roles/list', [RoleController::class, 'list']);
-Route::get('roles/create', [RoleController::class, 'create']);
-Route::get('roles/update/{id?}', [RoleController::class, 'update']);
-Route::get('roles/remove/{id?}', [RoleController::class, 'remove']);
+Route::get('roles/create', [RoleController::class, 'showCreate']);
+Route::post('roles/create', [RoleController::class, 'create']);
+Route::get('roles/update/{id?}', [RoleController::class, 'showUpdate']);
+Route::post('roles/update/{id?}', [RoleController::class, 'update']);
+Route::post('roles/delete/{id?}', [RoleController::class, 'remove']);
 
 /* 帳號管理 */
 Route::get('users', [UserController::class, 'list']);
 Route::get('users/list', [UserController::class, 'list']);
 Route::get('users/create', [UserController::class, 'create']);
 Route::get('users/update/{id?}', [UserController::class, 'update']);
-Route::get('users/remove/{id?}', [UserController::class, 'remove']);
+Route::get('users/delete/{id?}', [UserController::class, 'remove']);

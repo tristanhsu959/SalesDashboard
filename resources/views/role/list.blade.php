@@ -1,4 +1,3 @@
-@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')
 @extends('layouts.master')
 
 @push('styles')
@@ -19,10 +18,16 @@
 @endsection
 
 @section('content')
-{{--@if($status === TRUE)--}}
-
+@if($status === TRUE)
 <section class="role-list section-wrapper">
-	<div class="container-fluid">
+	@if(empty($data))
+	<div class="container-fluid empty-list">
+		<div class="row">
+			<div class="col">查無符合資料</div>
+		</div>
+	</div>
+	@else
+	<div class="container-fluid list-data">
 		<div class="row head">
 			<div class="col col-1">#</div>
 			<div class="col">身份</div>
@@ -44,7 +49,7 @@
 		</div>
 		<div class="row">
 			<div class="col col-1">2</div>
-			<div class="col col-1">經理</div>
+			<div class="col">經理</div>
 			<div class="col">使用者</div>
 			<div class="col col-action">
 				<a href="" class="btn btn-edit">
@@ -57,7 +62,7 @@
 		</div>
 		<div class="row">
 			<div class="col col-1">3</div>
-			<div class="col col-1">經理</div>
+			<div class="col">經理</div>
 			<div class="col">使用者</div>
 			<div class="col col-action">
 				<a href="" class="btn btn-edit">
@@ -69,6 +74,7 @@
 			</div>
 		</div>
 	</div>
+	@endif
 </section>
-{{--@endif--}}
+@endif
 @endsection()
