@@ -1,5 +1,5 @@
 {{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
-@use('App\Enums\RoleGroup')
+
 @use('App\Enums\Operation')
 
 @extends('layouts.master')
@@ -28,22 +28,22 @@
 <section class="section-wrapper">
 	<div class="section role-data">
 		<div class="input-field field-orange field-dark field required">
-			<input type="text" class="form-control valid" id="name" name="name" maxlength="10" placeholder=" " required>
+			<input type="text" class="form-control" id="name" name="name" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
 		<div class="input-select field-orange field-dark field required">
+			<label for="group" class="form-label">權限群組</label>
 			<select class="form-select" id="group" name="group">
-				<option value=""selected>請選擇</option>
-				@foreach(RoleGroup::cases() as $role)
+				<option value="" selected>請選擇</option>
+				@foreach($data['roleGroup'] as $role)
 				<option value="{{ $role->value }}">{{ $role->label() }}</option>
 				@endforeach
 			</select>
-			<label for="group" class="form-label">權限群組</label>
 		</div>
 	</div>
 	
 	<div class="section role-permission">
-		@foreach($data['permissionList'] as $groupKey => $group)
+		@foreach($data['functionList'] as $groupKey => $group)
 		<ul class="list-group">
 			<label class="title">
 				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>
@@ -57,8 +57,8 @@
 				</div>
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
-					<label class="form-check-label" for="operation{{$groupKey.$itemKey.$opKey }}">
-						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" id="operation{{$groupKey.$itemKey.$opKey }}" name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'group[?][?]') }}">
+					<label class="form-check-label" for="settingList{{$groupKey.$itemKey.$opKey }}">
+						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" id="settingList{{$groupKey.$itemKey.$opKey }}" name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'settingList[?][?][]') }}">
 						{{ $operation->label() }}
 					</label>
 					@endforeach

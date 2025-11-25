@@ -10,18 +10,38 @@ $(function(){
 		}
 	});
 	
+	/* Remove invalid style */
+	$('.form-control').on('keypress', function(event){
+		$(this).removeClass('is-invalid');
+	});
+	$('.form-select').on('change', function(event){
+		$(this).removeClass('is-invalid');
+	});
+	
 	$('.toast').toast('show');
 });
 
 /* valid or invalid */
-function validationInput(els)
+function validateForm(fields)
 {
 	//el: id/class/ or ....
-	if ($.isArray(els))
+	if ($.isArray(fields))
 	{
+		let result = true;
+		
+		$.each(fields, function(key, el){
+			result = result & validateInput(el);
+		});
+		
+		return result;
 	}
 	else
-	$(el).removeClass('is-valid is-invalid');
+		return validateInput(els);
+}
+
+function validateInput(el)
+{
+	$(el).removeClass('is-invalid');
 	
 	if ($(el).val() == '')
 	{
@@ -29,8 +49,5 @@ function validationInput(els)
 		return false;
 	}
 	else
-	{
-		$(el).addClass('is-valid');
 		return true;
-	}
 }

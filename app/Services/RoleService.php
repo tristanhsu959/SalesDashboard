@@ -4,17 +4,19 @@ namespace App\Services;
 
 use App\Repositories\RoleRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\LoggerLib;
 use App\Traits\MenuTrait;
+use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Exception;
 
 class RoleService
 {
-	use MenuTrait;
+	use MenuTrait, RolePermissionTrait;
 	
+	private $_title = '身份管理';
 	private $_repository;
     
 	public function __construct(RoleRepository $roleRepository)
@@ -32,21 +34,26 @@ class RoleService
 		{
 			$list = $this->_repository->getList()->toArray();
 			
-			return ResponseLib::initialize($list)->success()->get();
+			return $list;
 		}
 		catch(Exception $e)
 		{
-			return ResponseLib::initialize()->fail($e->getMessage())->get();
+			LoggerLib::initialize()->sysLog($this->_title, __class__, __function__, $e->getMessage());
+			return FALSE;
 		}
 	}
 	
-	/* 取Role清單(Get ALL)
-	 * @params: 
+	/* Create Role
+	 * @params: string
+	 * @params: string
+	 * @params: hex string
 	 * @return: array
 	 */
-	public function createRole()
+	public function createRole($roleName, $roleGroup, $settingList)
 	{
-		$data['permissionList'] = config('web.menu');
+		$permissions = $this->getPermissions($settingList);
+		$this->_repository->create($roleName, $roleGroup, $permissions);
+		
 		return ResponseLib::initialize($data)->success()->get();
 	}
 }

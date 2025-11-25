@@ -16,6 +16,6 @@ class DBException extends Exception
 	
     public function log(string $message, string $devMessage, string $class, string $function)
 	{
-		Log::channel('webDBLog')->error("{$message} [{$class}::{$function}] {$devMessage}");
+		Log::channel('webSysLog')->error("{$message} [{$class}::{$function}] {$devMessage}");
 	}
 }

@@ -3,8 +3,9 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
-use Exception;
 use App\Exceptions\DBException;
+use Illuminate\Support\Carbon;
+use Exception;
 
 class RoleRepository extends Repository
 {
@@ -20,24 +21,51 @@ class RoleRepository extends Repository
 	 */
 	public function getList()
 	{
-		try
-		{
-			$db = $this->connectSaleDashboard('Role');
+		$db = $this->connectSaleDashboard('Role');
 			
-			$result = $db
-				->select('RoleId', 'RoleName', 'RoleGroup')
-				->get();
+		$result = $db
+			->select('RoleId', 'RoleName', 'RoleGroup')
+			->get();
 				
-			return $result;
-		}
-		catch(Exception $e)
-		{
-			throw new DBException('讀取DB發生錯誤', $e->getMessage(), __class__, __function__);
-			return FALSE;
-		}
+		return $result;
 	}
 	
+	/* Create Role
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function create($roleName, $roleGroup, $permissions)
+	{
+		$db = $this->connectSaleDashboard('Role');
+		$createAt = now()->locale('zh-tw')->format('Y-m-d  H:i:s');
+		dd($createAt);
+		#$id = $db->insertGetId(['RoleName' => $roleName, 'RoleGroup' => $roleGroup, 'CreateAt' => $createAt]);
+				
+		return $result;
+	}
 	
+	/* Create Role Permission
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function createPermission($roleId, $permissions)
+	{
+		$db = $this->connectSaleDashboard('Role');
+		
+		#create insert data array
+		$permissionSetting = [];
+		
+		foreach($permissions as $permission)
+		{
+			$permissionSetting[] = ['RoleName'=>$roleName, 'RoleGroup'=>$roleGroup];
+		}
+		
+		$result = $db
+			->select('RoleId', 'RoleName', 'RoleGroup')
+			->get();
+				
+		return $result;
+	}
 	
 	
 	

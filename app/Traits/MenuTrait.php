@@ -13,7 +13,7 @@ trait MenuTrait
 	 * @params: 
 	 * @return: array
 	 */
-	public function getMenu()
+	public function getAllMenu()
 	{
 		return config('web.menu');
 	}

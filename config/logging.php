@@ -61,15 +61,16 @@ return [
 			'ignore_exceptions' => false,
 			'path' => storage_path('logs/webSys.log'),
 		],
-		'webDBLog' => [
-			'driver' => 'daily',
-			'days' => 15,
-			#'channels' => ['daily'],
-			'ignore_exceptions' => false,
-			'path' => storage_path('logs/webDB.log'),
-		],
+		// 'webDBLog' => [
+			// 'driver' => 'daily',
+			// 'days' => 15,
+			// #'channels' => ['daily'],
+			// 'ignore_exceptions' => false,
+			// 'path' => storage_path('logs/webDB.log'),
+		// ],
 		
 		/* User Define End */
+		
 		
         'stack' => [
             'driver' => 'stack',
