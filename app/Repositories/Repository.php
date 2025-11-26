@@ -18,8 +18,11 @@ class Repository
 		return DB::connection('BGPosErp')->table($table)->lock('WITH(NOLOCK)');
 	}
 	
-	protected function connectSaleDashboard($table)
+	protected function connectSaleDashboard($table = NULL)
 	{
-		return DB::connection('SaleDashboard')->table($table)->lock('WITH(NOLOCK)');
+		if (empty($table))
+			return DB::connection('SaleDashboard');
+		else
+			return DB::connection('SaleDashboard')->table($table)->lock('WITH(NOLOCK)');
 	}
 }

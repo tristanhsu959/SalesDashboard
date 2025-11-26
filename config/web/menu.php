@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoleGroup;
 use App\Enums\Operation;
 
 #Menu Config
@@ -9,6 +10,7 @@ return [
 		'groupName' => '新品銷售',
 		'groupCode' => '01', #permission code
 		'groupIcon' => ['name' => 'chart_data', 'filled' => FALSE],
+		'groupType' => '',
 		'items' => [
 			[
 				'actionCode'	=> '01', #permission code
@@ -37,6 +39,7 @@ return [
 		'groupName' => '權限管理',
 		'groupCode' => '02',
 		'groupIcon' => ['name' => 'admin_panel_settings', 'filled' => FALSE],
+		'groupType' => RoleGroup::ADMIN->name,
 		'items' => [
 			[
 				'actionCode'	=> '01',

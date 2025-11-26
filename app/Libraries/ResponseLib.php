@@ -40,10 +40,10 @@ class ResponseLib
 	 * @params: array
 	 * @return: object
 	 */
-	public function success($data = [])
+	public function success($msg = NULL)
 	{
-		if (! empty($data))
-			$this->_response['data'] = $data;
+		if (! empty($msg))
+			$this->_response['msg'] = $msg;
 		
 		$this->_response['status'] = TRUE;
 		

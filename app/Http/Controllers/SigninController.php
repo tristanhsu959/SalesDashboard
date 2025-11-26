@@ -3,21 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\AuthService;
+use App\Services\SigninService;
 use App\Libraries\ResponseLib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
+class SigninController extends Controller
 {
 	private $_service;
 	
-	public function __construct(AuthService $authService)
+	public function __construct(SigninService $signinService)
 	{
-		$this->_service = $authService;
+		$this->_service = $signinService;
 	}
 	
-	public function signin()
+	public function showSignin()
 	{
 		$msg = session('msg');
 		
@@ -50,7 +50,7 @@ class AuthController extends Controller
 		
 		$response = $this->_service->authUser($account, $password);
 		
-		if ($response['status'] === FALSE)
+		if ($response === FALSE)
 			return redirect('signin')->with('msg', '登入失敗，帳號或密碼錯誤');
 		else
 			return redirect('home');

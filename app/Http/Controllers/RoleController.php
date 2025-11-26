@@ -29,8 +29,8 @@ class RoleController extends Controller
 		
 		if ($data === FALSE)
 			$response = ResponseLib::initialize()->fail('讀取身份清單發生錯誤')->get();
-		
-		$response = ResponseLib::initialize($data)->success()->get();
+		else
+			$response = ResponseLib::initialize($data)->success()->get();
 		
 		return view('role/list', $response);
 	}
@@ -75,7 +75,12 @@ class RoleController extends Controller
 		$group 			= $request->input('group');
 		$settingList	= $request->input('settingList');
 		
-		$response = $this->_service->createRole($name, $group, $settingList);
+		$result = $this->_service->createRole($name, $group, $settingList);
+		
+		if ($result === FALSE)
+			$response = ResponseLib::initialize($data)->fail('身份新增失敗')->get();
+		else
+			$response = ResponseLib::initialize($data)->success('身份新增完成')->get();
 		
 		return view('role/detail', $response);
 	}

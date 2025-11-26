@@ -2,26 +2,27 @@
 
 :root {
 	/* 官網主色紅 */
-	--bg-brand-primary-color: #cb1a19; /* red */
-	--bg-brand-secondary-color: #f5ac2d; /* amber */
-	--bg-brand-secondary-light-color: #ffd180;
+	--primary-red-color: #cb1a19; /* red */
+	--primary-orange-color: #f5ac2d; /* amber */
+	--primary-orange-light-color: #ffd180;
 	
-	--bg-menu-color: #263238; /*dark4 */
-	--bg-menu-hover-color: #455a64; /*dark4 */
+	--secondary-red-color: #ed5a65; /* red */
+	--secondary-orange-color: #ffc107; /* amber */
 	
-	--bg-default-color: #fff; /* grey */
-	--bg-primary-color: #ed5a65; /* red */
-	--bg-secondary-color: #ffc107; /* amber */
+	/* View Background */
+	--default-bg-color: #fff;
+	--dark-bg-color: #37474f;
+	
+	--divider-color: #eceff1;
+	
 	
 	/* Button */
-	--bg-btn-profile-color: #00bcd4; /* 500 */
-	--bg-btn-create-color: #4caf50; /* 500 */
-	--bg-btn-update-color: #9c27b0; /* 500 */
-	--bg-btn-delete-color: #f44336; /* 500 */
-	--bg-btn-return-color: #263238; /* darken4 */
+	--btn-profile-bg-color: #00bcd4; /* 500 */
+	--btn-create-bg-color: #4caf50; /* 500 */
+	--btn-update-bg-color: #9c27b0; /* 500 */
+	--btn-delete-bg-color: #f44336; /* 500 */
+	--btn-return-bg-color: #263238; /* darken4 */
 	
-	--bg-page-dark-color: #37474f; /* blue grey */
-	--input-dark-color: #b0bec5; /* blue grey */
 	
 	/* Dark Table */
 	--table-head-bg-color: #263238;

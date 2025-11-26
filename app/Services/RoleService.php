@@ -38,7 +38,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize()->sysLog($this->_title, __class__, __function__, $e->getMessage());
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
 			return FALSE;
 		}
 	}
@@ -51,9 +51,18 @@ class RoleService
 	 */
 	public function createRole($roleName, $roleGroup, $settingList)
 	{
-		$permissions = $this->getPermissions($settingList);
-		$this->_repository->create($roleName, $roleGroup, $permissions);
+		try
+		{
+			#create data & permission setting
+			$permissionList = $this->buildPermissions($settingList);
+			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
-		return ResponseLib::initialize($data)->success()->get();
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
 	}
 }

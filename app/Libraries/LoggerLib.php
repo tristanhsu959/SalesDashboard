@@ -7,25 +7,28 @@ use Log;
 
 class LoggerLib
 {
-	public function __construct()
+	private $_title;
+	
+	public function __construct($title)
 	{
+		$this->_title = $title;
 	}
 	
 	/* initialize
 	 * @params: array
 	 * @return: object
 	 */
-    public static function initialize()
+    public static function initialize($title)
     {
-		return new LoggerLib();
+		return new LoggerLib($title);
     }
 	
 	/* initialize
 	 * @params: array
 	 * @return: object
 	 */
-    public function sysLog($title, $class, $function, $msg)
+    public function sysLog($msg, $class = 'NA', $function = 'NA')
     {
-		Log::channel('webSysLog')->error("{$title} [{$class}::{$function}] {$msg}");
+		Log::channel('webSysLog')->error("{$this->_title} [{$class}::{$function}] {$msg}");
     }
 }

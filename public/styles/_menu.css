@@ -1,5 +1,7 @@
 /* Aside Menu */
 .aside.menu {
+	--menu-bg-color: #263238; /*dark4 */
+	
 	position: sticky;
 	top: 0;
 	left: 0;
@@ -7,7 +9,7 @@
 	/*min-height: 100vh;
 	height: 100%;*/
 	height: 100vh;
-	background-color: var(--bg-menu-color);
+	background-color: var(--menu-bg-color);
 	margin: 0;
 	padding: 0;
 	/*padding-bottom: 1000%;*/
@@ -19,10 +21,10 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		// background-color: var(--bg-brand-primary-color);
-		// background-color: var(--bg-brand-secondary-light-color);
-		// background: linear-gradient(135deg, #f5ac2d, #cb1a19, #cb1a19);
-		background: linear-gradient(125deg, var(--bg-brand-primary-color), var(--bg-brand-primary-color), var(--bg-brand-secondary-color), var(--bg-brand-secondary-color));
+		/* background-color: var(--bg-brand-primary-color); */
+		/* background-color: var(--bg-brand-secondary-light-color); */
+		/* background: linear-gradient(135deg, #f5ac2d, #cb1a19, #cb1a19); */
+		background: linear-gradient(125deg, var(--primary-red-color), var(--primary-red-color), var(--primary-orange-color), var(--primary-orange-color));
 		
 		/* copyright */
 		&:after {
@@ -30,7 +32,7 @@
 			left: 4px;
 			bottom: 0;
 			content: "\00A9 2025";
-			color: var(--bg-primary-color);
+			color: var(--secondary-red-color);
 			font-size: .75rem;
 		}
 		
@@ -42,8 +44,9 @@
 	}
 	
 	.container-fluid {
-		--text-primary-color: #00b8d4; /*accent4*/
-		--text-hover-color: #18ffff;
+		--menu-text-color: #00b8d4; 
+		--menu-hover-color: #84ffff; /*#18ffff;*/
+		
 		
 		width: 100%;
 		padding-left: 0;
@@ -61,16 +64,16 @@
 				align-items: center;
 				padding: .5rem 1rem;
 				text-decoration: none;
-				color: var(--text-primary-color);
+				color: var(--menu-text-color);
 				
 				.material-symbols-outlined {
 					margin-right: .5rem;
 				}
 				
-				&:hover, &[aria-expanded='true'] {
-					color: var(--text-hover-color);
+				&:hover /*, &[aria-expanded='true']*/ {
+					/* color: var(--text-hover-color); */
 					cursor: pointer;
-					text-shadow: 0 0 .75rem var(--text-hover-color);
+					text-shadow: 0 0 .75rem var(--menu-hover-color);
 				}
 				
 				&[aria-expanded='false']:after {
@@ -94,21 +97,21 @@
 					display: flex;
 					border-width: 0px;
 					padding: 0 1rem 0 2rem;
-					background-color: var(--bg-menu-color);
+					background-color: var(--menu-bg-color);
 					margin-bottom: .25rem;
 					
 					a {
 						flex: 1;
 						padding: 0 1rem;
 						text-decoration: none;
-						color: var(--text-primary-color);
+						color: var(--menu-text-color);
 						font-size: .875rem;
 						line-height: 40px;
 						
 						&:hover, &.active {
 							border-radius: 20px;
-							background-color: rgba(69, 90, 100, .375);/*--bg-menu-hover-color);*/
-							color: var(--text-hover-color);
+							background-color: rgba(69, 90, 100, .375);
+							color: var(--menu-hover-color);
 						}
 					}
 				}

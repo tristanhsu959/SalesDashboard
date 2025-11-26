@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SigninController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\RoleController;
@@ -9,10 +9,10 @@ use App\Http\Controllers\UserController;
 
 
 /* Login */
-Route::get('/', [AuthController::class, 'signin'])->name('signin');
-Route::get('signin', [AuthController::class, 'signin'])->name('signin');
-Route::post('auth', [AuthController::class, 'authSignin'])->name('auth');
-Route::get('signout', [AuthController::class, 'signout'])->name('signout');
+Route::get('/', [SigninController::class, 'showSignin'])->name('signin');
+Route::get('signin', [SigninController::class, 'showSignin'])->name('signin');
+Route::post('signin', [SigninController::class, 'authSignin'])->name('authSignin');
+Route::get('signout', [SigninController::class, 'signout'])->name('signout');
 
 /* Home */
 Route::get('home', [HomeController::class, 'index'])->name('home');

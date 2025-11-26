@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Libraries\ResponseLib;
-use App\Traits\AdAuthTrait;
+use App\Traits\AuthenticationTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -12,11 +12,11 @@ use Illuminate\Support\Carbon;
 use Exception;
 
 
-class AuthService
+class SigninService
 {
-	#保留新增其它登入的彈性
-	use AdAuthTrait;
-	const SESS_AUTH = 'SessAuthInfo';
+	use AuthenticationTrait, AuthorizationTrait;
+	
+	private $_title = '登入驗證';
 	
 	public function __construct()
 	{
@@ -30,22 +30,13 @@ class AuthService
 	 */
 	public function authUser($account, $password)
 	{
-		$response = $this->authenticationAD($account, $password);
+		$adInfo = $this->authAD($account, $password);
+		
+		if ($adInfo === FALSE)
+			return FALSE;
 		
 		#Save to session
-		if ($response['status'] === TRUE)
-			$this->_saveAuthInfo($response['data']);
-		
-		return $response;
-	}
-	
-	/* 儲存登入資訊
-	 * @params: array
-	 * @return: 
-	 */
-	private function _saveAuthInfo($adInfo)
-	{
-		session()->put(self::SESS_AUTH, $adInfo);
+		$this->saveAuthUser($adInfo);
 		
 		return TRUE;
 	}

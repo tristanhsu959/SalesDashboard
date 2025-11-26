@@ -115,16 +115,16 @@
 		}
 	}
 	
-	&.field-dark {
+	&.dark {
 		label {
-			color: var(--input-dark-color);
+			color: #b0bec5;
 		}
 		input {
-			background-color: var(--bg-page-dark-color);
+			background-color: var(--dark-bg-color);
 			color: #fff;
 		}
 		input:focus ~ label, input:not(:placeholder-shown) ~ label {
-			background-color: var(--bg-page-dark-color);
+			background-color: var(--dark-bg-color);
 		}
 	}
 	
@@ -205,14 +205,14 @@
 		}
 	}
 	
-    &.field-dark {
+    &.dark {
         .form-select {
-            background-color: var(--bg-page-dark-color);
+            background-color: var(--dark-bg-color);
             color: #fff;
         }
         
         label {
-            background-color: var(--bg-page-dark-color);
+            background-color: var(--dark-bg-color);
         }
     }
 	

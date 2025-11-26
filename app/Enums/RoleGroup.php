@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum RoleGroup : int
 {
-    case ADMIN	= 999;
-	case USER 	= 1;
+    case ADMIN		= 1;
+	case USER 		= 2;
 	
 	public function label() : string
     {

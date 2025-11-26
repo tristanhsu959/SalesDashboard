@@ -1,5 +1,6 @@
 {{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
 
+@use('App\Enums\RoleGroup')
 @use('App\Enums\Operation')
 
 @extends('layouts.master')
@@ -9,7 +10,7 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/role/create.js') }}" defer></script>
+    <script src="{{ asset('scripts/role/detail.js') }}" defer></script>
 @endpush
 
 @section('navHead', '身份管理 | 新增')
@@ -22,16 +23,16 @@
 @endsection
 
 @section('content')
-<form action="{{ url('roles/create') }}" method="post" id="roleForm">
+<form action="{{ url('roles/create') }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
 @csrf
 
 <section class="section-wrapper">
 	<div class="section role-data">
-		<div class="input-field field-orange field-dark field required">
+		<div class="input-field field-orange field dark required">
 			<input type="text" class="form-control" id="name" name="name" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
-		<div class="input-select field-orange field-dark field required">
+		<div class="input-select field-orange field dark required">
 			<label for="group" class="form-label">權限群組</label>
 			<select class="form-select" id="group" name="group">
 				<option value="" selected>請選擇</option>
@@ -42,9 +43,9 @@
 		</div>
 	</div>
 	
-	<div class="section role-permission">
+	<div class="section role-permission dark">
 		@foreach($data['functionList'] as $groupKey => $group)
-		<ul class="list-group">
+		<ul class="list-group {{ Str::lower($group['groupType']) }}">
 			<label class="title">
 				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>
 				{{ $group['groupName'] }}

@@ -2,14 +2,20 @@
 
 namespace App\Traits;
 
-use App\Libraries\ResponseLib;
+use App\Libraries\LoggerLib;;
 use Illuminate\Support\Str;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
 
-trait AdAuthTrait
+/* 認證 */
+trait AuthenticationTrait
 {
-	public function authenticationAD($account, $password)
+	/* AD登入驗證(由trait決定驗證方式)
+	 * @params: string
+	 * @params: string
+	 * @return: array
+	 */
+	public function authAD($account, $password)
 	{
 		#C:\openldap\sysconf\ldap.conf for local dev
 		#無法匿名連線(除LDAP外)
@@ -17,7 +23,7 @@ trait AdAuthTrait
 		$result = [];
 		
 		$connectionConfig = config('web.auth.ad.connection');
-		$connectionConfig['username'] = $account;
+		$connectionConfig['username'] = $account; //"8waytw\$account";
 		$connectionConfig['password'] = $password;
 		
 		try 
@@ -41,17 +47,15 @@ trait AdAuthTrait
 			$adInfo['name'] = Str::remove(' ', $result['name'][0]); #=>CNName
 			$adInfo['mail'] = $result['mail'][0];
 			
-			return ResponseLib::initialize()->success($adInfo)->get();
+			return $adInfo;
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 
 		{
-			$error = $e->getDetailedError();
+			$detailMsg = $e->getDetailedError()->getDiagnosticMessage();
+			$error = "{$e->getMessage()}:{$detailMsg}";
+			LoggerLib::initialize($this->_title)->sysLog($error, __class__, __function__);
 			
-			return ResponseLib::initialize()->fail($error->getErrorMessage())->get();
-			
-			#echo $error->getErrorCode().'<br/>';
-			#echo $error->getErrorMessage().'<br/>';
-			#echo $error->getDiagnosticMessage().'<br/>';
+			return FALSE;
 		}
 	}
 }

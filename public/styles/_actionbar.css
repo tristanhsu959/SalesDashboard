@@ -7,8 +7,7 @@
 	height: 64px;
 	/* height: auto; */
 	/* Default */
-	// background-color: var(--bg-brand-secondary-light-color);
-	background-color: var(--bg-brand-secondary-color);
+	background-color: var(--primary-orange-color);
 	color: #000;
 	padding-left: 1rem;
 	padding-right: 1rem;
@@ -56,11 +55,11 @@
 		
 		/* Page Toolbar */
 		a.btn-profile {
-			background-color: var(--bg-btn-profile-color);
+			background-color: var(--btn-profile-bg-color);
 			color: #fff;
 		}
 		a.btn-create {
-			background-color: var(--bg-btn-create-color);
+			background-color: var(--btn-create-bg-color);
 			color: #fff;
 			
 			&:hover {
@@ -69,7 +68,7 @@
 		}
 		
 		a.btn-return {
-			background-color: var(--bg-btn-return-color);
+			background-color: var(--btn-return-bg-color);
 			color: #fff;
 			
 			&:hover {

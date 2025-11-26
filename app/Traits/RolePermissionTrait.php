@@ -8,10 +8,10 @@ use Illuminate\Support\Str;
 trait RolePermissionTrait
 {
 	/* 建立Permission設定
-	 * @params: 
+	 * @params: array
 	 * @return: array
 	 */
-	public function getPermissions($settingList)
+	public function buildPermissions($settingList)
 	{
 		$permissions = [];
 		
@@ -19,7 +19,7 @@ trait RolePermissionTrait
 		{
 			foreach($groupList as $actionCode => $operationList)
 			{
-				$permissions[] = $this->_buildPermissions($groupCode, $actionCode, $operationList);
+				$permissions[] = $this->_createPermissionCode($groupCode, $actionCode, $operationList);
 			}
 		}
 		
@@ -27,19 +27,23 @@ trait RolePermissionTrait
 	}
 	
 	/* Create and Group by function
-	 * @params: 
+	 * @params: string
+	 * @params: string
+	 * @params: array
 	 * @return: array
 	 */
-	private function _buildPermissions($groupCode, $actionCode, $operationList)
+	private function _createPermissionCode($hexGroupCode, $hexActionCode, $hexOperationList)
 	{
 		$permission = 0;
+		$decGroupCode = hexdec($hexGroupCode) << 24;
+		$decActionCode = hexdec($hexActionCode) << 16;
 		
-		foreach($operationList as $operationCode)
+		foreach($hexOperationList as $hexOperationCode)
 		{
-			$hexString = "{$groupCode}{$actionCode}{$operationCode}";
-			$permission = $permission | hexdec($hexString);
+			$decOperationCode = hexdec($hexOperationCode);
+			$permission = $permission | $decGroupCode | $decActionCode | $decOperationCode;
 		}
 		
-		return dechex($permission);
+		return Str::padLeft(dechex($permission), 8, '0');
 	}
 }

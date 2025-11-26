@@ -31,82 +31,62 @@ class RoleRepository extends Repository
 	}
 	
 	/* Create Role
-	 * @params: 
+	 * @params: string
+	 * @params: string
+	 * @params: array
 	 * @return: boolean
 	 */
-	public function create($roleName, $roleGroup, $permissions)
+	public function insertRole($roleName, $roleGroup, $permissionList)
 	{
-		$db = $this->connectSaleDashboard('Role');
-		$createAt = now()->locale('zh-tw')->format('Y-m-d  H:i:s');
-		dd($createAt);
-		#$id = $db->insertGetId(['RoleName' => $roleName, 'RoleGroup' => $roleGroup, 'CreateAt' => $createAt]);
-				
-		return $result;
-	}
-	
-	/* Create Role Permission
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function createPermission($roleId, $permissions)
-	{
-		$db = $this->connectSaleDashboard('Role');
+		#只能用facade
+		$db = $this->connectSaleDashboard();
 		
-		#create insert data array
-		$permissionSetting = [];
-		
-		foreach($permissions as $permission)
+		#只能用手動transaction寫法
+		try 
 		{
-			$permissionSetting[] = ['RoleName'=>$roleName, 'RoleGroup'=>$roleGroup];
+			$db->beginTransaction();
+
+			$roleData['RoleName']	= $roleName;
+			$roleData['RoleGroup'] 	= $roleGroup;
+			$roleData['CreateAt'] 	= now()->format('Y-m-d H:i:s');
+			
+			$id = $db->table('Role')->insertGetId($roleData);
+			
+			$permissionData = $this->_buildPermissionData($id, $permissionList);
+			$db->table('RolePermission')->insert($permissionData);
+			
+			$db->commit();
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
 		}
 		
-		$result = $db
-			->select('RoleId', 'RoleName', 'RoleGroup')
-			->get();
-				
-		return $result;
+		return TRUE;
 	}
 	
-	
-	
-	/* 取Mapping資料 | 複合店情境 - BaFang
-	 * @params: start date
-	 * @params: end date
-	 * @params: brand code
-	 * @return: collection
+	/* Create Role Permission data
+	 * @params: 
+	 * @return: boolean
 	 */
-	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $shopIds)
+	private function _buildPermissionData($roleId, $permissionList)
 	{
-		$db = $this->connectBFPosErp('SALE01 as a');
-		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds, $shopIds);
+		//$db = $this->connectSaleDashboard('RolePermission');
 		
-		return $result;
+		#create insert data array
+		$permissions = [];
+		
+		foreach($permissionList as $permissionCode)
+		{
+			$permissions[] = ['RoleId' => $roleId, 'Permission' => $permissionCode];
+		}
+		
+		//$result = $db->table('RolePermission')->insert($permissions);
+				
+		return $permissions;
 	}
 	
-	/* Build query string | 新品:八方/梁社漢共用
-	 * @params: start date
-	 * @params: end date
-	 * @params: brand code
-	 * @return: collection
-	 */
-	private function _getSaleResult($db, $startDateTime, $endDateTime, $productIds, $shopIds = NULL)
-	{
-		$query = $db
-				->select('a.SHOP_ID', 'a.QTY', 'b.SALE_DATE', 'c.SHOP_NAME')
-				->join('SALE00 as b', function($join) {
-					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
-							->on('a.SALE_ID', '=', 'b.SALE_ID');
-				})
-				->join('SHOP00 as c', 'a.SHOP_ID', '=', 'c.SHOP_ID')
-				->whereIn('a.PROD_ID', $productIds)
-				->where('b.SALE_DATE', '>=', $startDateTime)
-				->where('b.SALE_DATE', '<=', $endDateTime)
-				->orderBy('b.SALE_DATE', 'DESC')
-				->orderBy('a.SHOP_ID');
-				
-		if (! is_null($shopIds))
-			$query->whereIn('a.SHOP_ID', $shopIds);
-		
-		return $query->get();
-	}
+	
+	
+	
 }

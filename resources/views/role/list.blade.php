@@ -20,7 +20,7 @@
 @section('content')
 @if($status === TRUE)
 <section class="role-list section-wrapper">
-	@if(empty($data))
+	@if(!empty($data))
 	<div class="container-fluid empty-list">
 		<div class="row">
 			<div class="col">查無符合資料</div>
