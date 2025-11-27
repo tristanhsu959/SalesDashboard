@@ -116,7 +116,7 @@ class RoleController extends Controller
 		
 		$data['roleData'] = $this->_service->getRoleById($id);
 		$this->_viewModel->response = ResponseLib::initialize($data)->success()->get();
-		
+		#test
 		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
 	
