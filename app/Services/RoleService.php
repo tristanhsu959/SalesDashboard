@@ -26,14 +26,13 @@ class RoleService
 	
 	/* 取Role清單(Get ALL)
 	 * @params: 
-	 * @return: array
+	 * @return: object array
 	 */
 	public function getList()
 	{
 		try
 		{
 			$list = $this->_repository->getList()->toArray();
-			
 			return $list;
 		}
 		catch(Exception $e)
@@ -58,6 +57,24 @@ class RoleService
 			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
 			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* 取Role Data
+	 * @params: int
+	 * @return: object array
+	 */
+	public function getRoleById($id)
+	{
+		try
+		{
+			$result = $this->_repository->getRoleById($id);
+			return $result;
 		}
 		catch(Exception $e)
 		{

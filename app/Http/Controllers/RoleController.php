@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\RoleService;
 use App\Libraries\ResponseLib;
+use App\ViewModels\RoleViewModel;
 use App\Enums\RoleGroup;
+use App\Enums\FormAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -13,10 +15,12 @@ use Illuminate\Support\Facades\Validator;
 class RoleController extends Controller
 {
 	private $_service;
+	private $_viewModel;
 	
-	public function __construct(RoleService $roleService)
+	public function __construct(RoleService $roleService, RoleViewModel $roleViewModel)
 	{
-		$this->_service = $roleService;
+		$this->_service		= $roleService;
+		$this->_viewModel 	= $roleViewModel;
 	}
 	
 	/* 列表
@@ -32,7 +36,10 @@ class RoleController extends Controller
 		else
 			$response = ResponseLib::initialize($data)->success()->get();
 		
-		return view('role/list', $response);
+		$this->_viewModel->response = $response;
+		$this->_viewModel->action = FormAction::List;
+	
+		return view('role/list', ['viewModel' => $this->_viewModel]);
 	}
 	
 	/* 新增Form
@@ -42,12 +49,13 @@ class RoleController extends Controller
 	public function showCreate(Request $request)
 	{
 		#initialize
-		$data['roleGroup'] 		= RoleGroup::cases(); #直接取enum
-		$data['functionList'] 	= $this->_service->getAllMenu();
+		$this->_viewModel->action 		= FormAction::CREATE;
+		$this->_viewModel->roleGroup 	= RoleGroup::cases();
+		$this->_viewModel->functionList = $this->_service->getAllMenu();
 		
-		$response = ResponseLib::initialize($data)->success()->get();
+		$this->_viewModel->response = ResponseLib::initialize()->success()->get();
 		
-		return view('role/detail', $response);
+		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
 	
 	/* 新增 POST
@@ -57,9 +65,11 @@ class RoleController extends Controller
 	public function create(Request $request)
 	{
 		#initialize
-		$data['roleGroup'] 		= RoleGroup::cases(); #直接取enum
-		$data['functionList']	 = $this->_service->getAllMenu();
+		$this->_viewModel->action 		= FormAction::CREATE;
+		$this->_viewModel->roleGroup 	= RoleGroup::cases();
+		$this->_viewModel->functionList = $this->_service->getAllMenu();
 		
+		#validate input
 		$validator = Validator::make($request->all(), [
             'name' => 'required|max:10',
 			'group' => 'required|min:1',
@@ -67,10 +77,11 @@ class RoleController extends Controller
  
         if ($validator->fails()) 
 		{
-			$response = ResponseLib::initialize($data)->fail('資料輸入不完整')->get();
-			return view('role/detail', $response);
+			$this->_viewModel->response = ResponseLib::initialize($data)->fail('資料輸入不完整')->get();
+			return view('role/detail', ['viewModel' => $this->_viewModel]);
 		}
 		
+		#fetch form data
 		$name 			= $request->input('name');
 		$group 			= $request->input('group');
 		$settingList	= $request->input('settingList');
@@ -78,30 +89,58 @@ class RoleController extends Controller
 		$result = $this->_service->createRole($name, $group, $settingList);
 		
 		if ($result === FALSE)
-			$response = ResponseLib::initialize($data)->fail('身份新增失敗')->get();
+			$this->_viewModel->response = ResponseLib::initialize()->fail('身份新增失敗')->get();
 		else
-			$response = ResponseLib::initialize($data)->success('身份新增完成')->get();
+			$this->_viewModel->response = ResponseLib::initialize()->success('身份新增完成')->get();
 		
-		return view('role/detail', $response);
+		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
 	
-	/* 編輯
+	/* 編輯Form
+	 * @params: request
+	 * @return: array
+	 */
+	public function showUpdate(Request $request, $id)
+	{
+		#initialize
+		$this->_viewModel->roleId 		= $id;
+		$this->_viewModel->action 		= FormAction::UPDATE;
+		$this->_viewModel->roleGroup 	= RoleGroup::cases();
+		$this->_viewModel->functionList = $this->_service->getAllMenu();
+		
+		if (empty($id))
+		{
+			$this->_viewModel->response = ResponseLib::initialize()->fail('身份識別ID為空值')->get();
+			return view('role/detail', ['viewModel' => $this->_viewModel]);
+		}
+		
+		$data['roleData'] = $this->_service->getRoleById($id);
+		$this->_viewModel->response = ResponseLib::initialize($data)->success()->get();
+		
+		return view('role/detail', ['viewModel' => $this->_viewModel]);
+	}
+	
+	/* 編輯Form
 	 * @params: request
 	 * @return: array
 	 */
 	public function update(Request $request, $roleId)
 	{
-		// $validator = Validator::make($request->all(), [
-            // 'ad_account' => 'required|max:20',
-			// 'ad_password' => 'required|max:20',
-        // ]);
+		$validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+        ]);
  
-        // if ($validator->fails()) 
-			// return redirect('login')->with('msg', '登入失敗，帳號或密碼輸入錯誤');
-		// $account = $request->input('ad_account');
-		// $password = $request->input('ad_password');
+        if ($validator->fails()) 
+		{
+			$this->_viewModel->response = ResponseLib::initialize($data)->fail('資料輸入不完整')->get();
+			return view('role/detail', ['viewModel' => $this->_viewModel]);
+		}
+		
+		$account = $request->input('ad_account');
+		$password = $request->input('ad_password');
 		
 		$response = $this->_service->createRole();
 		return view('role/detail', $response);
 	}
+	
 }

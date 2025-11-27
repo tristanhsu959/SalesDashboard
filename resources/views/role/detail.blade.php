@@ -13,38 +13,39 @@
     <script src="{{ asset('scripts/role/detail.js') }}" defer></script>
 @endpush
 
-@section('navHead', '身份管理 | 新增')
+@section('navHead', $viewModel->getBreadcrumb())
 
 @section('navAction')
-<a href="{{ url('roles/list') }}" class="btn btn-return">
+<a href="{{ route('role.list') }}" class="btn btn-return">
 	<span class="title">回列表</span>
 	<span class="material-symbols-outlined filled-icon">arrow_forward</span>
 </a>
 @endsection
 
 @section('content')
-<form action="{{ url('roles/create') }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
+<form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
+<input type="hidden" value="{{ $viewModel->roleId }}" name="id">
 @csrf
 
 <section class="section-wrapper">
 	<div class="section role-data">
 		<div class="input-field field-orange field dark required">
-			<input type="text" class="form-control" id="name" name="name" maxlength="10" placeholder=" " required>
+			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->getRoleName() }}" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
 		<div class="input-select field-orange field dark required">
 			<label for="group" class="form-label">權限群組</label>
 			<select class="form-select" id="group" name="group">
-				<option value="" selected>請選擇</option>
-				@foreach($data['roleGroup'] as $role)
-				<option value="{{ $role->value }}">{{ $role->label() }}</option>
+				<option value="">請選擇</option>
+				@foreach($viewModel->roleGroup as $role)
+				<option value="{{ $role->value }}" {{ $viewModel->selectRoleGroup($role->value) }} >{{ $role->label() }}</option>
 				@endforeach
 			</select>
 		</div>
 	</div>
 	
 	<div class="section role-permission dark">
-		@foreach($data['functionList'] as $groupKey => $group)
+		@foreach($viewModel->functionList as $groupKey => $group)
 		<ul class="list-group {{ Str::lower($group['groupType']) }}">
 			<label class="title">
 				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>

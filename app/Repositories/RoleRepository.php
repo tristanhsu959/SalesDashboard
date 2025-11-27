@@ -49,6 +49,7 @@ class RoleRepository extends Repository
 			$roleData['RoleName']	= $roleName;
 			$roleData['RoleGroup'] 	= $roleGroup;
 			$roleData['CreateAt'] 	= now()->format('Y-m-d H:i:s');
+			$roleData['UpdateAt'] 	= $roleData['CreateAt'];
 			
 			$id = $db->table('Role')->insertGetId($roleData);
 			
@@ -86,7 +87,26 @@ class RoleRepository extends Repository
 		return $permissions;
 	}
 	
-	
-	
-	
+	/* Get Role Data
+	 * @params: 
+	 * @return: collection
+	 */
+	public function getRoleById($id)
+	{
+		$db = $this->connectSaleDashboard();
+			
+		// $result = $db
+			// ->select('RoleId', 'RoleName', 'RoleGroup', 'UpdateAt')
+			// ->addSelect(DB::RAW("permissionString = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
+			// ->where('RoleId', '=', $id)
+			// ->get();
+		
+		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 
+					permission = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
+					->where('RoleId', '=', $id)
+					->get()->first();
+		$result->permission = explode(',', $result->permission);
+		
+		return $result;
+	}
 }

@@ -11,7 +11,7 @@ use App\Http\Controllers\UserController;
 /* Login */
 Route::get('/', [SigninController::class, 'showSignin'])->name('signin');
 Route::get('signin', [SigninController::class, 'showSignin'])->name('signin');
-Route::post('signin', [SigninController::class, 'authSignin'])->name('authSignin');
+Route::post('signin', [SigninController::class, 'authSignin']);
 Route::get('signout', [SigninController::class, 'signout'])->name('signout');
 
 /* Home */
@@ -22,13 +22,13 @@ Route::get('new_releases/pork_ribs', [NewReleaseController::class, 'getPorkRibsS
 Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getTomatoBeefStatistics']);
 
 /* 身份管理 */
-Route::get('roles', [RoleController::class, 'list']);
-Route::get('roles/list', [RoleController::class, 'list']);
-Route::get('roles/create', [RoleController::class, 'showCreate']);
-Route::post('roles/create', [RoleController::class, 'create']);
-Route::get('roles/update/{id?}', [RoleController::class, 'showUpdate']);
-Route::post('roles/update/{id?}', [RoleController::class, 'update']);
-Route::post('roles/delete/{id?}', [RoleController::class, 'remove']);
+Route::get('roles', [RoleController::class, 'list'])->name('role.list');
+Route::get('roles/list', [RoleController::class, 'list'])->name('role.list');
+Route::get('roles/create', [RoleController::class, 'showCreate'])->name('role.create');
+Route::post('roles/create', [RoleController::class, 'create'])->name('role.create.post');;
+Route::get('roles/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
+Route::post('roles/update', [RoleController::class, 'update'])->name('role.update.post');;
+Route::post('roles/delete/{id}', [RoleController::class, 'remove'])->name('role.remove.post');
 
 /* 帳號管理 */
 Route::get('users', [UserController::class, 'list']);

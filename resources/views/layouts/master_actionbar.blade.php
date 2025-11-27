@@ -1,4 +1,3 @@
-{{--@inject('viewHelper', 'App\ViewHelpers\AppHelper')--}}
 
 <nav class="page navbar">
 	<span class="navbar-head">
