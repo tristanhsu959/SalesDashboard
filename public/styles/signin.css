@@ -7,6 +7,10 @@ body {
 	margin: 0;
 	display: flex;
 	
+	&.dark {
+		background-color: var(--default-bg-color);
+	}
+	
 	.content-wrapper {
 		flex-grow: 1;
 		height: 100vh;

@@ -1,7 +1,7 @@
 /* Role list */
-body {
-	background-color: var(--dark-bg-color);
-}
+/* body { */
+	/* background-color: var(--dark-bg-color); */
+/* } */
 
 .role-list.section-wrapper {
 	/* box-shadow: 0px 1px 4px 2px rgba(0, 0, 0, 0.3); */
@@ -21,6 +21,7 @@ body {
 			
 			&:not(.head) {
 				color: var(--table-col-color);
+				/* background-color:var(--table-col-even-color); */
 				
 				&:nth-child(odd) {
 					background-color:var(--table-col-odd-color);

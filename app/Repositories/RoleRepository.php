@@ -21,12 +21,6 @@ class RoleRepository extends Repository
 	 */
 	public function getList()
 	{
-		return [
-			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>1],
-			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>2],
-			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>1],
-		];
-		
 		$db = $this->connectSaleDashboard('Role');
 			
 		$result = $db
@@ -79,8 +73,6 @@ class RoleRepository extends Repository
 	 */
 	private function _buildPermissionData($roleId, $permissionList)
 	{
-		//$db = $this->connectSaleDashboard('RolePermission');
-		
 		#create insert data array
 		$permissions = [];
 		
@@ -89,8 +81,6 @@ class RoleRepository extends Repository
 			$permissions[] = ['RoleId' => $roleId, 'Permission' => $permissionCode];
 		}
 		
-		//$result = $db->table('RolePermission')->insert($permissions);
-				
 		return $permissions;
 	}
 	
@@ -100,8 +90,6 @@ class RoleRepository extends Repository
 	 */
 	public function getRoleById($id)
 	{
-		return ['RoleId'=>1, 'RoleName'=>'test11', 'RoleGroup'=>1, 'Permission'=>['01020002', '0201000f']];
-		
 		$db = $this->connectSaleDashboard();
 			
 		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 

@@ -10,14 +10,14 @@ body {
 	display: flex; 
 	
 	&.dark {
-		background-color: var(--dark-bg-color);
+		background-color: var(--primary-dark-bg-color);
 	}
 	
 	.content-wrapper{
 		position: relative;
 		flex-grow: 1;
-		width: calc(100vw - 280px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
-		height: 100%;
+		width: calc(100vw - 240px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
+		height: 100%; /* 100vh sticky會失效 */
 		/* overflow-x: hidden; */
 		box-sizing: border-box;
 		display: flex;

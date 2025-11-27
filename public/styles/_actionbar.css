@@ -54,6 +54,10 @@
 		}
 		
 		/* Page Toolbar */
+		a.btn-home {
+			background-color: var(--btn-home-bg-color);
+			color: #fff;
+		}
 		a.btn-profile {
 			background-color: var(--btn-profile-bg-color);
 			color: #fff;

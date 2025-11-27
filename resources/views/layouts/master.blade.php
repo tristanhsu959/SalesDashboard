@@ -23,7 +23,7 @@
 		@stack('scripts')
 	</head>
 
-	<body>
+	<body class="dark">
 		@hasSection('signin')
 			<div class='content-wrapper'>
 				@yield('signin')
@@ -31,7 +31,7 @@
 		@else
 			@include('layouts.master_menu')
 		
-			<div class='content-wrapper'>
+			<div class='content-wrapper dark'>
 				@include('layouts.master_actionbar')
 				@hasSection('content')
 					@yield('content')

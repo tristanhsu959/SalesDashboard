@@ -1,7 +1,5 @@
 /* list */
-body {
-	background-color: var(--bg-page-dark-color);
-}
+
 .section-wrapper {
 	display: flex;
 	flex-direction: column;
@@ -47,7 +45,7 @@ body {
 			top: 0;
 			padding: 0 .25rem;
 			color: #00e5ff;
-			background-color: var(--bg-page-dark-color);
+			background-color: var(--primary-dark-bg-color);
 			display: flex;
 			align-items: center;
 			transform: translate(-0.25rem, -50%);
@@ -68,6 +66,7 @@ body {
 			padding: 1rem;
 			box-sizing: border-box;
 			transition: border-color, color 0.2s ease-in-out 0.1s;
+			cursor: pointer;
 			
 			input {
 				display: none;

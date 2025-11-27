@@ -1,5 +1,9 @@
 /* Component Style */
 
+:root {
+	--input-field-color: #cfd8dc;
+}
+
 /* Button */
 .btn {
 	border-radius: 2px;
@@ -117,14 +121,14 @@
 	
 	&.dark {
 		label {
-			color: #b0bec5;
+			color: var(--input-field-color);
 		}
 		input {
-			background-color: var(--dark-bg-color);
-			color: #fff;
+			background-color: var(--primary-dark-bg-color);
+			color: var(--input-field-color);
 		}
 		input:focus ~ label, input:not(:placeholder-shown) ~ label {
-			background-color: var(--dark-bg-color);
+			background-color: var(--primary-dark-bg-color);
 		}
 	}
 	
@@ -207,12 +211,12 @@
 	
     &.dark {
         .form-select {
-            background-color: var(--dark-bg-color);
-            color: #fff;
+            background-color: var(--primary-dark-bg-color);
+            color: var(--input-field-color);
         }
         
         label {
-            background-color: var(--dark-bg-color);
+            background-color: var(--primary-dark-bg-color);
         }
     }
 	

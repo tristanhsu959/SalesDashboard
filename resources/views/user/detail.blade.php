@@ -28,15 +28,15 @@
 @csrf
 <section class="section-wrapper">
 	<div class="section user-data">
-		<div class="input-field field-cyan field-dark field required">
+		<div class="input-field field-cyan dark field required">
 			<input type="text" class="form-control valid" id="account" name="account" maxlength="15" placeholder=" ">
 			<label for="account" class="form-label">AD帳號</label>
 		</div>
-		<div class="input-field field-cyan field-dark field">
+		<div class="input-field field-cyan dark field">
 			<input type="text" class="form-control valid" id="displayName" name="displayName" maxlength="15" placeholder=" ">
 			<label for="displayName" class="form-label">顯示名稱</label>
 		</div>
-		<div class="input-select field-cyan field-dark field">
+		<div class="input-select field-cyan dark field">
 			<select class="form-select" id="area" name="area">
 				<option value=""selected>請選擇</option>
 				@foreach(Area::cases() as $area)
@@ -45,7 +45,7 @@
 			</select>
 			<label for="group" class="form-label">管理區域</label>
 		</div>
-		<div class="input-select field-cyan field-dark field required">
+		<div class="input-select field-cyan dark field required">
 			<select class="form-select" id="role" name="role">
 				<option value=""selected>請選擇</option>
 				@foreach(RoleGroup::cases() as $role)

@@ -11,12 +11,14 @@
 	
 	/* View Background */
 	--default-bg-color: #fff;
-	--dark-bg-color: #37474f;
+	--primary-dark-bg-color: #263238;
+	--secondary-dark-bg-color: #37474f;
 	
 	--divider-color: #eceff1;
 	
 	
 	/* Button */
+	--btn-home-bg-color: #e91e63;
 	--btn-profile-bg-color: #00bcd4; /* 500 */
 	--btn-create-bg-color: #4caf50; /* 500 */
 	--btn-update-bg-color: #9c27b0; /* 500 */
@@ -25,9 +27,16 @@
 	
 	
 	/* Dark Table */
-	--table-head-bg-color: #263238;
-	--table-head-color: #cfd8dc;
+	--table-head-bg-color: #252525;
+	--table-head-color: #b0bec5;
 	--table-row-border-color: #607d8b;
-	--table-col-color: #859AA4;
-	--table-col-odd-color: #40525B;
+	--table-col-color: #90a4ae;
+	--table-col-odd-color: #37474f;
+	/* --table-col-even-color: #455a64; */
+	
+	/* --table-head-bg-color: #263238; */
+	/* --table-head-color: #cfd8dc; */
+	/* --table-row-border-color: #607d8b; */
+	/* --table-col-color: #859AA4; */
+	/* --table-col-odd-color: #40525B; */
 }
