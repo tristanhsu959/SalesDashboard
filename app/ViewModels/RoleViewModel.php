@@ -3,51 +3,76 @@
 namespace App\ViewModels;
 
 use App\Enums\FormAction;
+use App\Traits\RolePermissionTrait;
 
 class RoleViewModel
 {
-	private $roleId = NULL;
+	use RolePermissionTrait;
+	
+	#private $roleId = NULL;
 	private $title = '身份管理';
-	private $action; #enum
+	#private $action; #enum
 	
 	private $data = [];
-	private $status;
-	private $msg = '';
+	#private $status;
+	#private $msg = '';
 	
-	private $option; #其它參數
+	#private $option; #其它參數
+	
+	public function __construct()
+	{
+		#initialize
+		$this->data['status']	= FALSE;
+		$this->data['msg'] 		= '';
+		$this->data['action'] 	= NULL; #enum form action
+		$this->data['roleData'] = NULL;
+		$this->data['list'] 	= [];
+	}
 	
 	public function __set($name, $value)
     {
-		if ($name == 'response')
-			$this->_setResponse($value);
-		else if (property_exists($this, $name))
-			$this->$name = $value;
-		else 
-			$this->option[$name] = $value;
+		$this->data[$name] = $value;
     }
 	
 	public function __get($name)
     {
-		if (property_exists($this, $name))
-			return $this->$name;
-		else
-			return $this->option[$name];
+		return $this->data[$name];
 	}
 	
 	/* 須有isset, 否則empty()會判別錯誤 */
 	public function __isset($name)
     {
-		if (property_exists($this, $name))
-			return isset($this->$name);
-		else
-			return array_key_exists($name, $this->option);
+		return array_key_exists($name, $this->data);
 	}
 	
-	private function _setResponse($response)
+	/* Status / Msg
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function success($msg = NULL)
 	{
-		$this->data 	= $response['data'];
-		$this->status	= $response['status'];
-		$this->msg 		= $response['msg'];
+		$this->data['status'] = TRUE;
+		$this->data['msg'] = $msg ?? '';
+	}
+	
+	public function fail($msg)
+	{
+		$this->data['status'] 	= FALSE;
+		$this->data['msg'] 		= $msg;
+	}
+	
+	/* Role Data
+	 * @params: 
+	 * @return: string
+	 */
+	public function getRoleId()
+    {
+		return data_get($this->data, 'roleData.RoleId', 0);
+	}
+	
+	public function getRoleName()
+	{
+		return data_get($this->data, 'roleData.RoleName', '');
 	}
 	
 	public function getBreadcrumb()
@@ -69,13 +94,20 @@ class RoleViewModel
 	}
 	
 	/* Form Style */
-	public function getRoleName()
+	public function selectedRoleGroup($group)
 	{
-		return $this->data->RoleName ?? '';
+		$group = intval($group);
+		
+		return ($group == data_get($this->data, 'roleData.RoleGroup', 0)) ? 'selected' : '';
 	}
 	
-	public function selectRoleGroup($group)
+	public function checkedOperation($hexGroupCode, $hexActionCode, $hexOperation)
 	{
-		return ($group == $this->data->RoleGroup) ? 'selected' : '';
+		$authPermission = data_get($this->data, 'roleData.Permission', []);
+		
+		if ($this->authFunctionPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission))
+			return 'checked';
+		
+		return '';
 	}
 }

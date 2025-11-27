@@ -22,7 +22,7 @@
 
 @if($viewModel->status === TRUE)
 <section class="role-list section-wrapper">
-	@if(empty(($viewModel->data)))
+	@if(empty(($viewModel->list)))
 	<div class="container-fluid empty-list">
 		<div class="row">
 			<div class="col">查無符合資料</div>
@@ -36,16 +36,16 @@
 			<div class="col">權限群組</div>
 			<div class="col col-action">操作</div>
 		</div>
-		@foreach($viewModel->data as $idx => $role)
+		@foreach($viewModel->list as $idx => $role)
 		<div class="row">
 			<div class="col col-1">{{ $idx + 1 }}</div>
-			<div class="col">{{ $role->RoleName }}</div>
-			<div class="col">{{ RoleGroup::getLabelByValue($role->RoleGroup) }}</div>
+			<div class="col">{{ $role['RoleName'] }}</div>
+			<div class="col">{{ RoleGroup::getLabelByValue($role['RoleGroup']) }}</div>
 			<div class="col col-action">
-				<a href="{{ route('role.update', [$role->RoleId]) }}" class="btn btn-edit">
+				<a href="{{ route('role.update', [$role['RoleId']]) }}" class="btn btn-edit">
 					<span class="material-symbols-outlined">edit</span>
 				</a>
-				<a href="{{ route('role.remove.post', [$role->RoleId]) }}" class="btn btn-del">
+				<a href="{{ route('role.remove.post', [$role['RoleId']]) }}" class="btn btn-del">
 					<span class="material-symbols-outlined">delete</span>
 				</a>
 			</div>

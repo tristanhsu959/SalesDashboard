@@ -20,9 +20,7 @@ $(function(){
 			$('.role-permission ul.admin .form-check-input').prop('disabled', true);
 			$('.role-permission ul.admin').hide();
 		}
-	});
-	
-	$('#group').trigger('change');
+	}).trigger('change');
 	
 	$('.permission-group .form-check-input').change(function(){
 		let checkAll = false;
@@ -40,7 +38,7 @@ $(function(){
 			$(this).closest('.list-group-item').find('.permission-group .form-check-input').prop('checked', true);
 		else
 			$(this).closest('.list-group-item').find('.permission-group .form-check-input').prop('checked', false);
-	});
+	}).trigger('change');
 });
 
 function createRole()

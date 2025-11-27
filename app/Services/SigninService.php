@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Libraries\ResponseLib;
 use App\Traits\AuthenticationTrait;
+use App\Traits\AuthorizationTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;

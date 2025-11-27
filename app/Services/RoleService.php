@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\RoleRepository;
-use App\Libraries\ResponseLib;
 use App\Libraries\LoggerLib;
 use App\Traits\MenuTrait;
 use App\Traits\RolePermissionTrait;
@@ -32,7 +31,8 @@ class RoleService
 	{
 		try
 		{
-			$list = $this->_repository->getList()->toArray();
+			$list = $this->_repository->getList();
+			
 			return $list;
 		}
 		catch(Exception $e)
@@ -53,7 +53,7 @@ class RoleService
 		try
 		{
 			#create data & permission setting
-			$permissionList = $this->buildPermissions($settingList);
+			$permissionList = $this->buildPermissionByFunction($settingList);
 			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
 			return TRUE;

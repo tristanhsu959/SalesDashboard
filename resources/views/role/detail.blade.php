@@ -1,5 +1,3 @@
-{{--@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')--}}
-
 @use('App\Enums\RoleGroup')
 @use('App\Enums\Operation')
 
@@ -24,7 +22,7 @@
 
 @section('content')
 <form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
-<input type="hidden" value="{{ $viewModel->roleId }}" name="id">
+<input type="hidden" value="{{ $viewModel->getRoleId() }}" name="id">
 @csrf
 
 <section class="section-wrapper">
@@ -38,7 +36,9 @@
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
 				@foreach($viewModel->roleGroup as $role)
-				<option value="{{ $role->value }}" {{ $viewModel->selectRoleGroup($role->value) }} >{{ $role->label() }}</option>
+				<option value="{{ $role->value }}" {{ $viewModel->selectedRoleGroup($role->value) }}>
+				{{ $role->label() }}
+				</option>
 				@endforeach
 			</select>
 		</div>
@@ -60,7 +60,12 @@
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
 					<label class="form-check-label" for="settingList{{$groupKey.$itemKey.$opKey }}">
-						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" id="settingList{{$groupKey.$itemKey.$opKey }}" name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'settingList[?][?][]') }}">
+						<input class="form-check-input" type="checkbox" 
+							value="{{ $operation->value }}" 
+							id="settingList{{$groupKey.$itemKey.$opKey }}" 
+							name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'settingList[?][?][]') }}"
+							{{ $viewModel->checkedOperation($group['groupCode'], $item['actionCode'], $operation->value) }}
+						>
 						{{ $operation->label() }}
 					</label>
 					@endforeach

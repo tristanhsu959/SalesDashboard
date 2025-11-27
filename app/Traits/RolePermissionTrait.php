@@ -7,11 +7,11 @@ use Illuminate\Support\Str;
 
 trait RolePermissionTrait
 {
-	/* 建立Permission設定
+	/* 建立Permission設定 by list
 	 * @params: array
 	 * @return: array
 	 */
-	public function buildPermissions($settingList)
+	public function buildPermissionByFunction($settingList)
 	{
 		$permissions = [];
 		
@@ -30,7 +30,7 @@ trait RolePermissionTrait
 	 * @params: string
 	 * @params: string
 	 * @params: array
-	 * @return: array
+	 * @return: string
 	 */
 	private function _createPermissionCode($hexGroupCode, $hexActionCode, $hexOperationList)
 	{
@@ -45,5 +45,31 @@ trait RolePermissionTrait
 		}
 		
 		return Str::padLeft(dechex($permission), 8, '0');
+	}
+	
+	/* Auth Permission
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: string
+	 */
+	public function authFunctionPermission($hexGroupCode, $hexActionCode, $hexOperationCode, $hexAuthPermissions)
+	{
+		$decGroupCode = hexdec($hexGroupCode) << 24;
+		$decActionCode = hexdec($hexActionCode) << 16;
+		$decOperationCode = hexdec($hexOperationCode);
+		$decPermission = $decGroupCode | $decActionCode | $decOperationCode;
+		
+		#$authPermission格式為DB內容
+		foreach($hexAuthPermissions as $authPermission)
+		{
+			$decAuthPermission = hexdec($authPermission);
+			
+			#有一個符合即可
+			if (($decPermission & $decAuthPermission) == $decPermission)
+				return TRUE;
+		}
+		
+		return FALSE;
 	}
 }

@@ -32,11 +32,11 @@ class RoleController extends Controller
 		$data = $this->_service->getList();
 		
 		if ($data === FALSE)
-			$response = ResponseLib::initialize()->fail('讀取身份清單發生錯誤')->get();
+			$this->_viewModel->fail('讀取身份清單發生錯誤');
 		else
-			$response = ResponseLib::initialize($data)->success()->get();
+			$this->_viewModel->success();
 		
-		$this->_viewModel->response = $response;
+		$this->_viewModel->list = $data;
 		$this->_viewModel->action = FormAction::List;
 	
 		return view('role/list', ['viewModel' => $this->_viewModel]);
@@ -53,7 +53,7 @@ class RoleController extends Controller
 		$this->_viewModel->roleGroup 	= RoleGroup::cases();
 		$this->_viewModel->functionList = $this->_service->getAllMenu();
 		
-		$this->_viewModel->response = ResponseLib::initialize()->success()->get();
+		$this->_viewModel->success();
 		
 		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
@@ -77,7 +77,7 @@ class RoleController extends Controller
  
         if ($validator->fails()) 
 		{
-			$this->_viewModel->response = ResponseLib::initialize($data)->fail('資料輸入不完整')->get();
+			$this->_viewModel->fail('資料輸入不完整');
 			return view('role/detail', ['viewModel' => $this->_viewModel]);
 		}
 		
@@ -89,9 +89,9 @@ class RoleController extends Controller
 		$result = $this->_service->createRole($name, $group, $settingList);
 		
 		if ($result === FALSE)
-			$this->_viewModel->response = ResponseLib::initialize()->fail('身份新增失敗')->get();
+			$this->_viewModel->fail('身份新增失敗');
 		else
-			$this->_viewModel->response = ResponseLib::initialize()->success('身份新增完成')->get();
+			$this->_viewModel->success('身份新增完成');
 		
 		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
@@ -103,20 +103,26 @@ class RoleController extends Controller
 	public function showUpdate(Request $request, $id)
 	{
 		#initialize
-		$this->_viewModel->roleId 		= $id;
 		$this->_viewModel->action 		= FormAction::UPDATE;
 		$this->_viewModel->roleGroup 	= RoleGroup::cases();
 		$this->_viewModel->functionList = $this->_service->getAllMenu();
 		
 		if (empty($id))
 		{
-			$this->_viewModel->response = ResponseLib::initialize()->fail('身份識別ID為空值')->get();
+			$this->_viewModel->fail('身份識別ID為空值');
 			return view('role/detail', ['viewModel' => $this->_viewModel]);
 		}
 		
-		$data['roleData'] = $this->_service->getRoleById($id);
-		$this->_viewModel->response = ResponseLib::initialize($data)->success()->get();
-		#test
+		$roleData = $this->_service->getRoleById($id);
+		if ($roleData === FALSE)
+		{
+			$this->_viewModel->fail('讀取資料發生錯誤');
+			return view('role/detail', ['viewModel' => $this->_viewModel]);
+		}
+		
+		$this->_viewModel->roleData = $roleData; 
+		$this->_viewModel->success();
+		
 		return view('role/detail', ['viewModel' => $this->_viewModel]);
 	}
 	

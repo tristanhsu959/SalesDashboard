@@ -21,6 +21,12 @@ class RoleRepository extends Repository
 	 */
 	public function getList()
 	{
+		return [
+			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>1],
+			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>2],
+			['RoleId'=>1, 'RoleName'=>'test', 'RoleGroup'=>1],
+		];
+		
 		$db = $this->connectSaleDashboard('Role');
 			
 		$result = $db
@@ -38,12 +44,12 @@ class RoleRepository extends Repository
 	 */
 	public function insertRole($roleName, $roleGroup, $permissionList)
 	{
-		#只能用facade
-		$db = $this->connectSaleDashboard();
-		
 		#只能用手動transaction寫法
 		try 
 		{
+			#只能用facade
+			$db = $this->connectSaleDashboard();
+		
 			$db->beginTransaction();
 
 			$roleData['RoleName']	= $roleName;
@@ -57,13 +63,14 @@ class RoleRepository extends Repository
 			$db->table('RolePermission')->insert($permissionData);
 			
 			$db->commit();
+			return TRUE;
 		} 
 		catch (Exception $e) 
 		{
 			$db->rollBack();
+			throw $e;
+			return FALSE;
 		}
-		
-		return TRUE;
 	}
 	
 	/* Create Role Permission data
@@ -93,18 +100,15 @@ class RoleRepository extends Repository
 	 */
 	public function getRoleById($id)
 	{
+		return ['RoleId'=>1, 'RoleName'=>'test11', 'RoleGroup'=>1, 'Permission'=>['01020002', '0201000f']];
+		
 		$db = $this->connectSaleDashboard();
 			
-		// $result = $db
-			// ->select('RoleId', 'RoleName', 'RoleGroup', 'UpdateAt')
-			// ->addSelect(DB::RAW("permissionString = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
-			// ->where('RoleId', '=', $id)
-			// ->get();
-		
 		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 
 					permission = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
 					->where('RoleId', '=', $id)
 					->get()->first();
+		
 		$result->permission = explode(',', $result->permission);
 		
 		return $result;
