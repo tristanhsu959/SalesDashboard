@@ -7,7 +7,7 @@
 				<span class="material-symbols-outlined">release_alert</span>
 				<h5 class="modal-title" id="alertModalToggleLabel">ALERT</h5>
 			</div>
-			<div class="modal-body">
+			<div class="modal-body description">
 				Show alert message here.
 			</div>
 			<div class="modal-footer">
@@ -24,7 +24,7 @@
 				<span class="material-symbols-outlined">verified</span>
 				<h5 class="modal-title" id="alertModalToggleLabel">CONFIRM</h5>
 			</div>
-			<div class="modal-body">
+			<div class="modal-body description">
 				Show confirm description here.
 			</div>
 			<div class="modal-footer">

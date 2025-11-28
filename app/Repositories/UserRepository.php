@@ -7,7 +7,7 @@ use App\Exceptions\DBException;
 use Illuminate\Support\Carbon;
 use Exception;
 
-class RoleRepository extends Repository
+class UserRepository extends Repository
 {
 	
 	public function __construct()
@@ -21,10 +21,10 @@ class RoleRepository extends Repository
 	 */
 	public function getList()
 	{
-		$db = $this->connectSaleDashboard('Role');
+		$db = $this->connectSaleDashboard('User');
 			
 		$result = $db
-			->select('RoleId', 'RoleName', 'RoleGroup')
+			->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId', 'UpdateAt')
 			->get();
 				
 		return $result;

@@ -6,7 +6,7 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/role/list.js') }}"></script>
+    <script src="{{ asset('scripts/role/list.js') }}" defer></script>
 @endpush
 
 @section('navHead', $viewModel->getBreadcrumb())
@@ -21,6 +21,10 @@
 @section('content')
 
 @if($viewModel->status === TRUE)
+<form action="" method="post" id="roleListForm">
+@csrf
+</form>
+
 <section class="role-list section-wrapper">
 	@if(empty(($viewModel->list)))
 	<div class="container-fluid empty-list">
@@ -45,7 +49,7 @@
 				<a href="{{ route('role.update', [$role['RoleId']]) }}" class="btn btn-edit">
 					<span class="material-symbols-outlined">edit</span>
 				</a>
-				<a href="{{ route('role.remove.post', [$role['RoleId']]) }}" class="btn btn-del">
+				<a href="{{ route('role.delete.post', [$role['RoleId']]) }}" class="btn btn-del">
 					<span class="material-symbols-outlined">delete</span>
 				</a>
 			</div>

@@ -136,6 +136,10 @@
 		border-color: red;
 	}
 	
+	.input-hint {
+		color: #f48fb1;
+	}
+	
 	/* Singin form */
 	.domain-text {
 		position: absolute;
@@ -222,6 +226,10 @@
 	
 	.form-select.is-invalid {
 		border-color: red;
+	}
+	
+	.input-hint {
+		color: #f48fb1;
 	}
 }
 

@@ -2,31 +2,125 @@
 
 namespace App\Services;
 
-use App\Libraries\ResponseLib;
+use App\Repositories\UserRepository;
+use App\Libraries\LoggerLib;
+use App\Traits\MenuTrait;
+use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Exception;
 
 class UserService
 {
+	#use MenuTrait, RolePermissionTrait;
+	
+	private $_title = '帳號管理';
 	private $_repository;
     
-	public function __construct()
+	public function __construct(UserRepository $userRepository)
 	{
-		// $this->_repository = $partyRepository;
+		$this->_repository = $userRepository;
 	}
 	
+	/* 取帳號清單(Get ALL)
+	 * @params: 
+	 * @return: object array
+	 */
 	public function getList()
 	{
-		return $result = ResponseLib::initialize([])->fail('test')->get();
+		try
+		{
+			$list = $this->_repository->getList();
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
 	}
 	
-	public function createUser()
+	/* Create Role
+	 * @params: string
+	 * @params: string
+	 * @params: hex string
+	 * @return: array
+	 */
+	public function createRole($roleName, $roleGroup, $settingList)
 	{
-		// $data['permissionList'] = config('web.menu');
-		$data = [];
-		return ResponseLib::initialize($data)->success()->get();
+		try
+		{
+			#Create data & Build permission setting
+			$permissionList = $this->buildPermissionByFunction($settingList);
+			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
+		
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* 取Role Data
+	 * @params: int
+	 * @return: object array
+	 */
+	public function getRoleById($id)
+	{
+		try
+		{
+			$result = $this->_repository->getRoleById($id);
+			return $result;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* Update Role
+	 * @params: string
+	 * @params: string
+	 * @params: hex string
+	 * @return: array
+	 */
+	public function updateRole($roleName, $roleGroup, $settingList, $roleId)
+	{
+		try
+		{
+			#Build permission setting
+			$permissionList = $this->buildPermissionByFunction($settingList);
+			$this->_repository->updateRole($roleName, $roleGroup, $permissionList, $roleId);
+		
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* Remove Role
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function deleteRole($roleId)
+	{
+		try
+		{
+			$this->_repository->removeRole($roleId);
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
 	}
 }

@@ -51,3 +51,11 @@ function validateInput(el)
 	else
 		return true;
 }
+
+function showConfirmDialog(desc, callback)
+{
+	$('#confirm_modal .description').text(desc);
+	/* 須用on event模式 */
+	$('#confirm_modal .btn-major').on('click', callback);
+	$('#confirm_modal').modal('show');
+}

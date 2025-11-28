@@ -31,6 +31,7 @@
 		<div class="input-field field-cyan dark field required">
 			<input type="text" class="form-control valid" id="account" name="account" maxlength="15" placeholder=" ">
 			<label for="account" class="form-label">AD帳號</label>
+			<div class="input-hint">@8way.com.tw</div>
 		</div>
 		<div class="input-field field-cyan dark field">
 			<input type="text" class="form-control valid" id="displayName" name="displayName" maxlength="15" placeholder=" ">

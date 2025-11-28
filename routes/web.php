@@ -25,14 +25,16 @@ Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getTomatoB
 Route::get('roles', [RoleController::class, 'list'])->name('role.list');
 Route::get('roles/list', [RoleController::class, 'list'])->name('role.list');
 Route::get('roles/create', [RoleController::class, 'showCreate'])->name('role.create');
-Route::post('roles/create', [RoleController::class, 'create'])->name('role.create.post');;
+Route::post('roles/create', [RoleController::class, 'create'])->name('role.create.post');
 Route::get('roles/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
-Route::post('roles/update', [RoleController::class, 'update'])->name('role.update.post');;
-Route::post('roles/delete/{id}', [RoleController::class, 'remove'])->name('role.remove.post');
+Route::post('roles/update', [RoleController::class, 'update'])->name('role.update.post');
+Route::post('roles/delete/{id}', [RoleController::class, 'delete'])->name('role.delete.post');
 
 /* 帳號管理 */
-Route::get('users', [UserController::class, 'list']);
-Route::get('users/list', [UserController::class, 'list']);
-Route::get('users/create', [UserController::class, 'create']);
-Route::get('users/update/{id?}', [UserController::class, 'update']);
-Route::get('users/delete/{id?}', [UserController::class, 'remove']);
+Route::get('users', [UserController::class, 'list'])->name('user.list');
+Route::get('users/list', [UserController::class, 'list'])->name('user.list');
+Route::get('users/create', [UserController::class, 'showCreate'])->name('user.create');
+Route::post('users/create', [RoleController::class, 'create'])->name('user.create.post');
+Route::get('users/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
+Route::post('users/update', [RoleController::class, 'update'])->name('user.update.post');
+Route::get('users/delete/{id}', [UserController::class, 'delete'])->name('user.delete.post');

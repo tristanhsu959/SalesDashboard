@@ -22,7 +22,7 @@
 
 @section('content')
 <form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
-<input type="hidden" value="{{ $viewModel->getRoleId() }}" name="id">
+<input type="hidden" value="{{ $viewModel->getUpdateRoleId() }}" name="id">
 @csrf
 
 <section class="section-wrapper">

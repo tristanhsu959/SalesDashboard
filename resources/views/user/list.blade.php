@@ -1,6 +1,3 @@
-@inject('viewHelper', 'App\ViewHelpers\NewReleaseHelper')
-@use('App\Enums\Area')
-
 @extends('layouts.master')
 
 @push('styles')
@@ -8,13 +5,13 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/user/list.js') }}"></script>
+    <script src="{{ asset('scripts/user/list.js') }}" defer></script>
 @endpush
 
-@section('navHead', '帳號管理 | 列表')
+@section('navHead', $viewModel->getBreadcrumb())
 
 @section('navAction')
-<a href="{{ url('users/create') }}" class="btn btn-create">
+<a href="{{ route('user.create') }}" class="btn btn-create">
 	<span class="material-symbols-outlined filled-icon">add</span>
 	<span class="title">新增</span>
 </a>

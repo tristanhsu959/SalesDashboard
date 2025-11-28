@@ -52,7 +52,7 @@ class RoleService
 	{
 		try
 		{
-			#create data & permission setting
+			#Create data & Build permission setting
 			$permissionList = $this->buildPermissionByFunction($settingList);
 			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
@@ -75,6 +75,47 @@ class RoleService
 		{
 			$result = $this->_repository->getRoleById($id);
 			return $result;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* Update Role
+	 * @params: string
+	 * @params: string
+	 * @params: hex string
+	 * @return: array
+	 */
+	public function updateRole($roleName, $roleGroup, $settingList, $roleId)
+	{
+		try
+		{
+			#Build permission setting
+			$permissionList = $this->buildPermissionByFunction($settingList);
+			$this->_repository->updateRole($roleName, $roleGroup, $permissionList, $roleId);
+		
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* Remove Role
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function deleteRole($roleId)
+	{
+		try
+		{
+			$this->_repository->removeRole($roleId);
+			return TRUE;
 		}
 		catch(Exception $e)
 		{

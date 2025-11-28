@@ -3,22 +3,17 @@
 namespace App\ViewModels;
 
 use App\Enums\FormAction;
-use App\Enums\RoleGroup;
-use App\Traits\MenuTrait;
-use App\Traits\RolePermissionTrait;
 
-class RoleViewModel
+class UserViewModel
 {
-	use MenuTrait, RolePermissionTrait;
-	
-	private $title = '身份管理';
+	private $title = '帳號管理';
 	private $data = [];
 	
 	public function __construct()
 	{
 		#initialize
 		$this->data['action'] 	= NULL; #enum form action
-		$this->data['roleId']	= 0; #form create or update role id
+		$this->data['userId']	= 0; #form create or update role id
 		$this->data['status']	= FALSE;
 		$this->data['msg'] 		= '';
 		$this->data['roleData'] = NULL; #DB data
@@ -34,12 +29,12 @@ class RoleViewModel
 	{
 		#初始化各參數及Form Options
 		$this->data['action']	= $action;
-		$this->data['roleId']	= $roleId;
+		$this->data['userId']	= $roleId;
 		$this->data['msg'] 		= '';
 		
 		if ($action == FormAction::CREATE OR $action == FormAction::UPDATE)
 		{
-			$this->data['roleGroup'] 	= RoleGroup::cases();
+			$this->data['Area'] 	= RoleGroup::cases();
 			$this->data['functionList']	= $this->getAllMenu();
 		}
 	}

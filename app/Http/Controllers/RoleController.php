@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\RoleService;
-use App\Libraries\ResponseLib;
 use App\ViewModels\RoleViewModel;
-use App\Enums\RoleGroup;
 use App\Enums\FormAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -29,6 +27,8 @@ class RoleController extends Controller
 	 */
 	public function list(Request $request)
 	{
+		$this->_viewModel->initialize(FormAction::List);
+		
 		$data = $this->_service->getList();
 		
 		if ($data === FALSE)
@@ -37,9 +37,8 @@ class RoleController extends Controller
 			$this->_viewModel->success();
 		
 		$this->_viewModel->list = $data;
-		$this->_viewModel->action = FormAction::List;
-	
-		return view('role/list', ['viewModel' => $this->_viewModel]);
+		
+		return view('role/list')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增Form
@@ -49,13 +48,10 @@ class RoleController extends Controller
 	public function showCreate(Request $request)
 	{
 		#initialize
-		$this->_viewModel->action 		= FormAction::CREATE;
-		$this->_viewModel->roleGroup 	= RoleGroup::cases();
-		$this->_viewModel->functionList = $this->_service->getAllMenu();
-		
+		$this->_viewModel->initialize(FormAction::CREATE);
 		$this->_viewModel->success();
 		
-		return view('role/detail', ['viewModel' => $this->_viewModel]);
+		return view('role/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增 POST
@@ -64,10 +60,14 @@ class RoleController extends Controller
 	 */
 	public function create(Request $request)
 	{
+		#fetch form data
+		$name 			= $request->input('name');
+		$group 			= $request->input('group');
+		$settingList	= $request->input('settingList');
+		
 		#initialize
-		$this->_viewModel->action 		= FormAction::CREATE;
-		$this->_viewModel->roleGroup 	= RoleGroup::cases();
-		$this->_viewModel->functionList = $this->_service->getAllMenu();
+		$this->_viewModel->initialize(FormAction::CREATE);
+		$this->_viewModel->keepFormData($name, $group, $settingList);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -78,22 +78,18 @@ class RoleController extends Controller
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('role/detail', ['viewModel' => $this->_viewModel]);
+			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
-		
-		#fetch form data
-		$name 			= $request->input('name');
-		$group 			= $request->input('group');
-		$settingList	= $request->input('settingList');
 		
 		$result = $this->_service->createRole($name, $group, $settingList);
 		
 		if ($result === FALSE)
-			$this->_viewModel->fail('身份新增失敗');
+		{
+			$this->_viewModel->fail('新增身份失敗');
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
 		else
-			$this->_viewModel->success('身份新增完成');
-		
-		return view('role/detail', ['viewModel' => $this->_viewModel]);
+			return redirect()->route('role.list')->with('msg', '新增身份完成');;
 	}
 	
 	/* 編輯Form
@@ -103,50 +99,81 @@ class RoleController extends Controller
 	public function showUpdate(Request $request, $id)
 	{
 		#initialize
-		$this->_viewModel->action 		= FormAction::UPDATE;
-		$this->_viewModel->roleGroup 	= RoleGroup::cases();
-		$this->_viewModel->functionList = $this->_service->getAllMenu();
+		$this->_viewModel->initialize(FormAction::UPDATE, $id);
 		
 		if (empty($id))
-		{
-			$this->_viewModel->fail('身份識別ID為空值');
-			return view('role/detail', ['viewModel' => $this->_viewModel]);
-		}
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
 		
 		$roleData = $this->_service->getRoleById($id);
+		
 		if ($roleData === FALSE)
-		{
-			$this->_viewModel->fail('讀取資料發生錯誤');
-			return view('role/detail', ['viewModel' => $this->_viewModel]);
-		}
+			return redirect()->route('role.list')->with('msg', '讀取編輯資料發生錯誤');
 		
 		$this->_viewModel->roleData = $roleData; 
 		$this->_viewModel->success();
 		
-		return view('role/detail', ['viewModel' => $this->_viewModel]);
+		return view('role/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form
 	 * @params: request
 	 * @return: array
 	 */
-	public function update(Request $request, $roleId)
+	public function update(Request $request)
 	{
+		#fetch form data
+		$id 			= $request->input('id');
+		$name 			= $request->input('name');
+		$group 			= $request->input('group');
+		$settingList	= $request->input('settingList');
+		
+		#initialize
+		$this->_viewModel->initialize(FormAction::UPDATE, $id);
+		$this->_viewModel->keepFormData($name, $group, $settingList);
+		
+		if (empty($id))
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+		
 		$validator = Validator::make($request->all(), [
-            'id' => 'required|integer',
+            'name' => 'required|max:10',
+			'group' => 'required|min:1',
         ]);
  
         if ($validator->fails()) 
 		{
-			$this->_viewModel->response = ResponseLib::initialize($data)->fail('資料輸入不完整')->get();
-			return view('role/detail', ['viewModel' => $this->_viewModel]);
+			$this->_viewModel->fail('資料輸入不完整');
+			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$account = $request->input('ad_account');
-		$password = $request->input('ad_password');
+		$result = $this->_service->updateRole($name, $group, $settingList, $id);
 		
-		$response = $this->_service->createRole();
-		return view('role/detail', $response);
+		if ($result === FALSE)
+		{
+			$this->_viewModel->fail('編輯身份失敗');
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
+		else
+			return redirect()->route('role.list')->with('msg', '編輯身份完成');
 	}
 	
+	/* 刪除
+	 * @params: request
+	 * @return: array
+	 */
+	public function delete(Request $request, $id)
+	{
+		#initialize
+		$this->_viewModel->initialize(FormAction::DELETE, $id);
+		
+		/*跟validator整併即可*/
+		if (empty($id))
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+		
+		$result = $this->_service->deleteRole($id);
+		
+		if ($result === FALSE)
+			return redirect()->route('role.list')->with('msg', '刪除身份失敗');
+		else
+			return redirect()->route('role.list')->with('msg', '刪除身份完成');
+	}
 }
