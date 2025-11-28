@@ -24,7 +24,7 @@
 		<h6>使用AD帳號登入至系統</h6>
 	</div>
 	
-	<form action="{{ route('signin') }}" method="post" id="signinForm">
+	<form action="{{ url('signin') }}" method="post" id="signinForm">
 		@csrf
 		<div class="input-field field-blue">
 			<input type="text" class="form-control" id="ad_account" name="ad_account" maxlength="20" placeholder=" " required>

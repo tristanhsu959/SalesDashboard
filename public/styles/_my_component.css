@@ -118,6 +118,14 @@
 			color: #ff9100;
 		}
 	}
+	&.field-lime {
+		input {
+			border-color: #aeea00 ; 
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #aeea00 ;
+		}
+	}
 	
 	&.dark {
 		label {
