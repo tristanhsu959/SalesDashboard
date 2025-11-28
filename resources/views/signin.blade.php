@@ -27,13 +27,13 @@
 	<form action="{{ url('signin') }}" method="post" id="signinForm">
 		@csrf
 		<div class="input-field field-blue">
-			<input type="text" class="form-control" id="ad_account" name="ad_account" maxlength="20" placeholder=" " required>
-			<label for="ad_account" class="form-label">Account</label>
+			<input type="text" class="form-control" id="adAccount" name="adAccount" maxlength="20" placeholder=" " required>
+			<label for="adAccount" class="form-label">Account</label>
 			<span class="domain-text">@8way.com.tw</span>
 		</div>
 		<div class="input-field field-blue">
-			<input type="password" class="form-control" id="ad_password" name="ad_password" placeholder=" " maxlength="20" required>
-			<label for="ad_password" class="form-label">Password</label>
+			<input type="password" class="form-control" id="adPassword" name="adPassword" placeholder=" " maxlength="20" required>
+			<label for="adPassword" class="form-label">Password</label>
 		</div>
 		<button id="btnSignin" type="button" class="btn btn-outline-danger">Sign In</button>
 	</form>

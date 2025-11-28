@@ -19,36 +19,28 @@ class SigninController extends Controller
 	
 	public function showSignin()
 	{
-		$msg = session('msg');
-		
-		#Return defatul
-		if (empty($msg))
-			$response = ResponseLib::initialize()->success()->get();
-        else
-			$response = ResponseLib::initialize()->fail($msg)->get();
-		
-		return view('signin', $response);
+		return view('signin');
 	}
 	
 	/* 登入驗證
 	 * @params: request
 	 * @return: array
 	 */
-	public function authSignin(Request $request)
+	public function signin(Request $request)
 	{
 		$validator = Validator::make($request->all(), [
-            'ad_account' => 'required|max:20',
-			'ad_password' => 'required|max:20',
+            'adAccount' => 'required|max:20',
+			'adPassword' => 'required|max:20',
         ]);
  
         if ($validator->fails()) 
-			return redirect('signin')->with('msg', '登入失敗，帳號或密碼輸入錯誤');
+			return redirect('signin')->with('msg', '登入失敗，帳號或密碼錯誤');
 		
 		
-		$account = $request->input('ad_account');
-		$password = $request->input('ad_password');
+		$adAccount = $request->input('adAccount');
+		$adPassword = $request->input('adPassword');
 		
-		$response = $this->_service->authUser($account, $password);
+		$response = $this->_service->authSiginIn($adAccount, $adPassword);
 		
 		if ($response === FALSE)
 			return redirect('signin')->with('msg', '登入失敗，帳號或密碼錯誤');

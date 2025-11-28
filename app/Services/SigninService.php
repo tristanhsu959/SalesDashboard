@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Libraries\ResponseLib;
+use App\Repositories\SigninRepository;
+use App\Libraries\LoggerLib;
 use App\Traits\AuthenticationTrait;
 use App\Traits\AuthorizationTrait;
 use Illuminate\Support\Arr;
@@ -18,27 +19,63 @@ class SigninService
 	use AuthenticationTrait, AuthorizationTrait;
 	
 	private $_title = '登入驗證';
+	private $_repository;
 	
-	public function __construct()
+	public function __construct(SigninRepository $signinRepository)
 	{
-		
+		$this->_repository = $signinRepository;
 	}
 	
 	/* 登入驗證(由trait決定驗證方式)
 	 * @params: string
 	 * @params: string
-	 * @return: array
+	 * @return: boolean
 	 */
-	public function authUser($account, $password)
+	public function authSiginIn($adAccount, $adPassword)
 	{
-		$adInfo = $this->authAD($account, $password);
+		try
+		{
+			#1. auth by AD
+			$adInfo = $this->authenticationAD($adAccount, $adPassword);
+			
+			#記錄Log, 以便分辨錯誤點
+			if ($adInfo === FALSE)
+				throw new Exception('登入失敗，AD帳號或密碼錯誤');
+			
+			#2. auth DB account permission
+			$userInfo = $this->_authAccountRegister($adAccount);
+			
+			if ($userInfo === FALSE)
+				throw new Exception('登入失敗，帳號尚未註冊');
+			
+			#3. Save to session
+			$this->saveUserToSession($adInfo, $userInfo);
+			
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
+	/* 驗證帳號是否有在系統註冊
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	private function _authAccountRegister($adAccount)
+	{
+		$userInfo = $this->_repository->getUserByAccount($adAccount);
 		
-		if ($adInfo === FALSE)
+		if (empty($userInfo))
 			return FALSE;
 		
-		#Save to session
-		$this->saveAuthUser($adInfo);
+		#若是2維要再toArray, 允許有帳號無Permission, 故不檢查
+		$permission = $this->_repository->getUserPermission($userInfo['UserRoleId'])->toArray();
+		$userInfo['Permission'] = Arr::flatten($permission);
 		
-		return TRUE;
+		return $userInfo;
 	}
 }

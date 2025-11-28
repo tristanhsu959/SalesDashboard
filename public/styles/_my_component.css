@@ -211,13 +211,21 @@
 		}
 	}
 	&.field-orange {
-		--set-color: #ff9100; /* accent3 */
 		.form-select {
 			border-color: #ff9100; 
 			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9100' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 		}
 		label {
 			color: #ff9100;
+		}
+	}
+	&.field-lime {
+		.form-select {
+			border-color: #aeea00; 
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23aeea00' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+		}
+		label {
+			color: #aeea00;
 		}
 	}
 	

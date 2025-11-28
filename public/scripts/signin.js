@@ -2,7 +2,7 @@
 
 $(function(){
 	$('#btnSignin').click(function() {
-		if (validateForm(['#ad_account', '#ad_password']))
+		if (validateForm(['#adAccount', '#adPassword'], true))
 			$('#signinForm').submit();
 		else
 			return false;

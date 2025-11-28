@@ -12,16 +12,18 @@ trait AuthorizationTrait
 	
 	/* 儲存登入資訊
 	 * @params: array
+	 * @params: array
 	 * @return: 
 	 */
-	public function saveAuthUser($adInfo)
+	public function saveUserToSession($adInfo, $userInfo)
 	{
-		session()->put(self::SESS_AUTH_USER, $adInfo);
+		$sessionData = array_merge($adInfo, $userInfo);
+		session()->put(self::SESS_AUTH_USER, $sessionData);
 		
 		return TRUE;
 	}
 	
-	public function getAuthUser()
+	public function getSigninUserInfo()
 	{
 		return session()->get(self::SESS_AUTH_USER);
 	}

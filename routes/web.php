@@ -11,7 +11,7 @@ use App\Http\Controllers\UserController;
 /* Login */
 Route::get('/', [SigninController::class, 'showSignin'])->name('signin');
 Route::get('signin', [SigninController::class, 'showSignin'])->name('signin');
-Route::post('signin', [SigninController::class, 'authSignin']);
+Route::post('signin', [SigninController::class, 'signin']);
 Route::get('signout', [SigninController::class, 'signout'])->name('signout');
 
 /* Home */
