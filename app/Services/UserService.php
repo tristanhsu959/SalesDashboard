@@ -42,6 +42,27 @@ class UserService
 		}
 	}
 	
+	/* 取帳號清單 By Query
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: array
+	 */
+	public function searchList($searchAd, $searchName, $searchArea)
+	{
+		try
+		{
+			$list = $this->_repository->getList($searchAd, $searchName, $searchArea);
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return FALSE;
+		}
+	}
+	
 	/* 取帳號清單(Get ALL)
 	 * @params: 
 	 * @return: array
@@ -84,29 +105,15 @@ class UserService
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/* 取Role Data
+	/* 取User Data
 	 * @params: int
 	 * @return: object array
 	 */
-	public function getRoleById($id)
+	public function getUserById($id)
 	{
 		try
 		{
-			$result = $this->_repository->getRoleById($id);
+			$result = $this->_repository->getUserById($id);
 			return $result;
 		}
 		catch(Exception $e)
@@ -116,19 +123,19 @@ class UserService
 		}
 	}
 	
-	/* Update Role
+	/* Update User
 	 * @params: string
 	 * @params: string
-	 * @params: hex string
-	 * @return: array
+	 * @params: int
+	 * @params: int
+	 * @params: int
+	 * @return: boolean
 	 */
-	public function updateRole($roleName, $roleGroup, $settingList, $roleId)
+	public function updateUser($adAccount, $displayName, $areaId, $roleId, $userId)
 	{
 		try
 		{
-			#Build permission setting
-			$permissionList = $this->buildPermissionByFunction($settingList);
-			$this->_repository->updateRole($roleName, $roleGroup, $permissionList, $roleId);
+			$this->_repository->updateUser($adAccount, $displayName, $areaId, $roleId, $userId);
 		
 			return TRUE;
 		}
@@ -139,15 +146,15 @@ class UserService
 		}
 	}
 	
-	/* Remove Role
+	/* Remove User
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function deleteRole($roleId)
+	public function deleteUser($userId)
 	{
 		try
 		{
-			$this->_repository->removeRole($roleId);
+			$this->_repository->removeUser($userId);
 			return TRUE;
 		}
 		catch(Exception $e)

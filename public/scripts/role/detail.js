@@ -6,7 +6,7 @@ $(function(){
 	});
 	
 	$('.btn-save').click(function(){
-		createRole();
+		submitForm();
 	});
 	
 	$('#group').change(function(){
@@ -41,7 +41,7 @@ $(function(){
 	}).trigger('change');
 });
 
-function createRole()
+function submitForm()
 {
 	//沒有設定權限也可以Submit
 	if (validateForm(['#name', '#group']))

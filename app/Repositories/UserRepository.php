@@ -35,15 +35,27 @@ class UserRepository extends Repository
 	 * @params: 
 	 * @return: array
 	 */
-	public function getList()
+	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
 	{
 		$db = $this->connectSaleDashboard('User');
 			
-		$result = $db
-			->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
-			->get()
-			->toArray();
-				
+		$db->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId');
+		
+		#query conditions
+		if (! is_null($searchAd))
+			$db->where('UserAd', 'like', "%{$searchAd}%");
+		if (! is_null($searchName))
+			$db->where('UserDisplayName', 'like', "%{$searchName}%");
+		if (! is_null($searchArea))
+			$db->where('UserAreaId', '=', $searchArea);
+		
+		$result = $db->get()->toArray();
+		
+		// $result = $db
+			// ->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
+			// ->get()
+			// ->toArray();
+			
 		return $result;
 	}
 	
@@ -86,91 +98,52 @@ class UserRepository extends Repository
 		return $permissions;
 	}
 	
-	/* Get Role Data
+	/* Get User Data
 	 * @params: 
 	 * @return: array
 	 */
-	public function getRoleById($id)
+	public function getUserById($id)
 	{
-		$db = $this->connectSaleDashboard();
+		$db = $this->connectSaleDashboard('User');
 			
-		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 
-					permission = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
-					->where('RoleId', '=', $id)
+		$result = $db->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
+					->where('UserId', '=', $id)
 					->get()->first();
-		
-		$result['Permission'] = explode(',', $result['permission']);
 		
 		return $result;
 	}
 	
-	/* Update Role
+	/* Update User
 	 * @params: string
 	 * @params: string
-	 * @params: array
+	 * @params: int
+	 * @params: int
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateRole($roleName, $roleGroup, $permissionList, $roleId)
+	public function updateUser($adAccount, $displayName, $areaId, $roleId, $userId)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard();
+		$db = $this->connectSaleDashboard('User');
 		
-			$db->beginTransaction();
-
-			$roleData['RoleName']	= $roleName;
-			$roleData['RoleGroup'] 	= $roleGroup;
-			$roleData['UpdateAt'] 	= now()->format('Y-m-d H:i:s');
+		$data['UserAd']			= $adAccount;
+		$data['UserDisplayName']= $displayName;
+		$data['UserAreaId']		= $areaId;
+		$data['UserRoleId'] 	= $roleId;
+		$data['UpdateAt'] 		= now()->format('Y-m-d H:i:s');
 			
-			$db->table('Role')->where('RoleId', '=', $roleId)->update($roleData);
-			
-			$permissionData = $this->_buildPermissionData($roleId, $permissionList);
-			#Remove all setting by role id
-			$db->table('RolePermission')->where('RoleId', '=', $roleId)->delete();
-			$db->table('RolePermission')->insert($permissionData);
-			
-			$db->commit();
-			
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		$db->where('UserId', '=', $userId)->update($data);
+		return TRUE;
 	}
 	
-	/* Remove Role
+	/* Remove User
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function RemoveRole($roleId)
+	public function RemoveUser($userId)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard();
-		
-			$db->beginTransaction();
+		$db = $this->connectSaleDashboard('User');
+		$db->where('UserId', '=', $userId)->delete();
 
-			#Remove all setting by role id
-			$db->table('Role')->where('RoleId', '=', $roleId)->delete();
-			$db->table('RolePermission')->where('RoleId', '=', $roleId)->delete();
-			
-			$db->commit();
-			
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		return FALSE;
 	}
 }

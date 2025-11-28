@@ -23,4 +23,21 @@ enum Area : int
 			self::KAOHSIUNG => '大高雄區',
         };
     }
+	
+	public static function getLabelByValue($value) : string
+	{
+		#型別要一樣
+		$value = intval($value);
+		
+		return match($value)
+		{
+			self::TAIPEI->value		=> self::TAIPEI->label(),
+			self::YILAN->value 		=> self::YILAN->label(),
+			self::TCM->value		=> self::TCM->label(),
+			self::CCT->value 		=> self::CCT->label(),
+			self::YCN->value		=> self::YCN->label(),
+			self::KAOHSIUNG->value	=> self::KAOHSIUNG->label(),
+			default => 'UNKNOW',
+		};
+	}
 }

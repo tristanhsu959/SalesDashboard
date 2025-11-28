@@ -22,6 +22,31 @@ class UserController extends Controller
 		$this->_viewModel 	= $userViewModel;
 	}
 	
+	/* Search
+	 * @params: request
+	 * @return: array
+	 */
+	public function search(Request $request)
+	{
+		$this->_viewModel->initialize(FormAction::List);
+		
+		#query params
+		$searchAd	= $request->input('searchAd');
+		$searchName	= $request->input('searchName');
+		$searchArea	= $request->input('searchArea');
+		
+		$data = $this->_service->searchList($searchAd, $searchName, $searchArea);
+		
+		if ($data === FALSE)
+			$this->_viewModel->fail('查詢發生錯誤');
+		else
+			$this->_viewModel->success();
+		
+		$this->_viewModel->list = $data;
+		
+		return view('user/list')->with('viewModel', $this->_viewModel);
+	}
+	
 	/* 列表
 	 * @params: request
 	 * @return: array
@@ -104,17 +129,17 @@ class UserController extends Controller
 		$this->_viewModel->initialize(FormAction::UPDATE, $id);
 		
 		if (empty($id))
-			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
-		$roleData = $this->_service->getRoleById($id);
+		$userData = $this->_service->getUserById($id);
 		
-		if ($roleData === FALSE)
-			return redirect()->route('role.list')->with('msg', '讀取編輯資料發生錯誤');
+		if ($userData === FALSE)
+			return redirect()->route('user.list')->with('msg', '讀取編輯資料發生錯誤');
 		
-		$this->_viewModel->roleData = $roleData; 
+		$this->_viewModel->userData = $userData; 
 		$this->_viewModel->success();
 		
-		return view('role/detail')->with('viewModel', $this->_viewModel);
+		return view('user/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form
@@ -124,38 +149,39 @@ class UserController extends Controller
 	public function update(Request $request)
 	{
 		#fetch form data
-		$id 			= $request->input('id');
-		$name 			= $request->input('name');
-		$group 			= $request->input('group');
-		$settingList	= $request->input('settingList');
+		$id 		= $request->input('id');
+		$adAccount	= $request->input('adAccount');
+		$displayName= $request->input('displayName');
+		$area		= $request->input('area');
+		$role		= $request->input('role');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE, $id);
-		$this->_viewModel->keepFormData($name, $group, $settingList);
+		$this->_viewModel->keepFormData($adAccount, $displayName, $area, $role);
 		
 		if (empty($id))
-			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:10',
-			'group' => 'required|min:1',
+            'adAccount' => 'required|max:20',
+			'role' => 'required|integer',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('role/detail')->with('viewModel', $this->_viewModel);
+			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->updateRole($name, $group, $settingList, $id);
+		$result = $this->_service->updateUser($adAccount, $displayName, $area, $role, $id);
 		
 		if ($result === FALSE)
 		{
-			$this->_viewModel->fail('編輯身份失敗');
-			return view('role/detail')->with('viewModel', $this->_viewModel);
+			$this->_viewModel->fail('編輯帳號失敗');
+			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('role.list')->with('msg', '編輯身份完成');
+			return redirect()->route('user.list')->with('msg', '編輯帳號完成');
 	}
 	
 	/* 刪除
@@ -169,13 +195,13 @@ class UserController extends Controller
 		
 		/*跟validator整併即可*/
 		if (empty($id))
-			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
-		$result = $this->_service->deleteRole($id);
+		$result = $this->_service->deleteUser($id);
 		
 		if ($result === FALSE)
-			return redirect()->route('role.list')->with('msg', '刪除身份失敗');
+			return redirect()->route('user.list')->with('msg', '刪除帳號失敗');
 		else
-			return redirect()->route('role.list')->with('msg', '刪除身份完成');
+			return redirect()->route('user.list')->with('msg', '刪除帳號完成');
 	}
 }

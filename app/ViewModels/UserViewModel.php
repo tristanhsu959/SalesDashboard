@@ -131,9 +131,19 @@ class UserViewModel
 	{
 		return data_get($this->data, 'userData.UserRoleId', 0);
 	}
-	
 	/* User Data End */
 	
+	/* List Data
+	 * @params: 
+	 * @return: string
+	 */
+	public function getRoleById($roleId)
+	{
+		$collect = collect($this->data['roleList']);
+		$collect = $collect->keyBy('RoleId')->toArray();
+		
+		return data_get($collect, "{$roleId}.RoleName", '');
+	}
 	
 	public function getBreadcrumb()
     {
