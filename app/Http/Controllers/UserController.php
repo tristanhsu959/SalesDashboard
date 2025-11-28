@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\UserService;
 use App\ViewModels\UserViewModel;
 use App\Enums\FormAction;
+use App\Enums\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -51,7 +52,7 @@ class UserController extends Controller
 		$this->_viewModel->initialize(FormAction::CREATE);
 		$this->_viewModel->success();
 		
-		return view('role/detail')->with('viewModel', $this->_viewModel);
+		return view('user/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增 POST
@@ -61,35 +62,36 @@ class UserController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
-		$name 			= $request->input('name');
-		$group 			= $request->input('group');
-		$settingList	= $request->input('settingList');
+		$adAccount	= $request->input('adAccount');
+		$displayName= $request->input('displayName');
+		$area		= $request->input('area');
+		$role		= $request->input('role');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($name, $group, $settingList);
+		$this->_viewModel->keepFormData($adAccount, $displayName, $area, $role);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:10',
-			'group' => 'required|min:1',
+            'adAccount' => 'required|max:20',
+			'role' => 'required|integer',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('role/detail')->with('viewModel', $this->_viewModel);
+			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->createRole($name, $group, $settingList);
+		$result = $this->_service->createUser($adAccount, $displayName, $area, $role);
 		
 		if ($result === FALSE)
 		{
-			$this->_viewModel->fail('新增身份失敗');
-			return view('role/detail')->with('viewModel', $this->_viewModel);
+			$this->_viewModel->fail('新增帳號失敗');
+			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('role.list')->with('msg', '新增身份完成');;
+			return redirect()->route('user.list')->with('msg', '新增帳號完成');;
 	}
 	
 	/* 編輯Form

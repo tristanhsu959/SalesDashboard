@@ -25,7 +25,8 @@ class RoleRepository extends Repository
 			
 		$result = $db
 			->select('RoleId', 'RoleName', 'RoleGroup')
-			->get();
+			->get()
+			->toArray();
 				
 		return $result;
 	}

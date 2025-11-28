@@ -2,52 +2,26 @@
 
 namespace App\ViewModels;
 
+use App\Services\UserService;
 use App\Enums\FormAction;
+use App\Enums\Area;
 
 class UserViewModel
 {
+	private $_service;
 	private $title = '帳號管理';
 	private $data = [];
 	
-	public function __construct()
+	public function __construct(UserService $userService)
 	{
+		$this->_service = $userService;
 		#initialize
 		$this->data['action'] 	= NULL; #enum form action
 		$this->data['userId']	= 0; #form create or update role id
 		$this->data['status']	= FALSE;
 		$this->data['msg'] 		= '';
-		$this->data['roleData'] = NULL; #DB data
+		$this->data['userData'] = NULL; #DB data
 		$this->data['list'] 	= []; #DB data
-	}
-	
-	/* initialize
-	 * @params: enum
-	 * @params: int
-	 * @return: boolean
-	 */
-	public function initialize($action , $roleId = 0)
-	{
-		#初始化各參數及Form Options
-		$this->data['action']	= $action;
-		$this->data['userId']	= $roleId;
-		$this->data['msg'] 		= '';
-		
-		if ($action == FormAction::CREATE OR $action == FormAction::UPDATE)
-		{
-			$this->data['Area'] 	= RoleGroup::cases();
-			$this->data['functionList']	= $this->getAllMenu();
-		}
-	}
-	
-	/* Keep user form data
-	 * @params: 
-	 * @return: string
-	 */
-	public function keepFormData($name, $group, $settingList)
-    {
-		data_set($this->data, 'roleData.RoleName', $name);
-		data_set($this->data, 'roleData.RoleGroup', $group);
-		data_set($this->data, 'roleData.Permission', $this->buildPermissionByFunction($settingList));
 	}
 	
 	public function __set($name, $value)
@@ -64,6 +38,44 @@ class UserViewModel
 	public function __isset($name)
     {
 		return array_key_exists($name, $this->data);
+	}
+	
+	/* initialize
+	 * @params: enum
+	 * @params: int
+	 * @return: void
+	 */
+	public function initialize($action , $userId = 0)
+	{
+		#初始化各參數及Form Options
+		$this->data['action']	= $action;
+		$this->data['userId']	= $userId;
+		$this->data['msg'] 		= '';
+		
+		$this->_setOptions();
+	}
+	
+	/* Form所屬的參數選項
+	 * @params: enum
+	 * @params: array
+	 * @return: void
+	 */
+	private function _setOptions()
+	{
+		$this->data['area'] 	= Area::cases();
+		$this->data['roleList']	= $this->_service->getRoleOptions();
+	}
+	
+	/* Keep user form data
+	 * @params: 
+	 * @return: string
+	 */
+	public function keepFormData($adAccount, $displayName, $area, $role)
+    {
+		data_set($this->data, 'userData.UserAd', $adAccount);
+		data_set($this->data, 'userData.UserDisplayName', $displayName);
+		data_set($this->data, 'userData.UserAreaId', $area);
+		data_set($this->data, 'userData.UserRoleId', $role);
 	}
 	
 	/* Status / Msg
@@ -86,24 +98,42 @@ class UserViewModel
 	 * @params: 
 	 * @return: string
 	 */
-	public function getUpdateRoleId()
+	public function getUpdateUserId()
     {
-		return data_get($this->data, 'roleId', 0);
+		return data_get($this->data, 'userId', 0);
 	}
 	
-	/* Role Data
+	/* User Data
 	 * @params: 
 	 * @return: string
 	 */
-	public function getRoleId()
+	public function getUserId()
     {
-		return data_get($this->data, 'roleData.RoleId', 0);
+		return data_get($this->data, 'userData.UserId', 0);
 	}
 	
-	public function getRoleName()
+	public function getUserAd()
 	{
-		return data_get($this->data, 'roleData.RoleName', '');
+		return data_get($this->data, 'userData.UserAd', '');
 	}
+	
+	public function getUserDisplayName()
+	{
+		return data_get($this->data, 'userData.UserDisplayName', '');
+	}
+	
+	public function getUserAreaId()
+	{
+		return data_get($this->data, 'userData.UserAreaId', 0);
+	}
+	
+	public function getUserRoleId()
+	{
+		return data_get($this->data, 'userData.UserRoleId', 0);
+	}
+	
+	/* User Data End */
+	
 	
 	public function getBreadcrumb()
     {
@@ -118,24 +148,27 @@ class UserViewModel
     {
 		return match($this->action)
 		{
-			FormAction::CREATE => route('role.create.post'),
-			FormAction::UPDATE => route('role.update.post'),
+			FormAction::CREATE => route('user.create.post'),
+			FormAction::UPDATE => route('user.update.post'),
 		};
 	}
 	
 	/* Form Style */
-	public function selectedRoleGroup($group)
+	public function selectedArea($areaId)
 	{
-		$group = intval($group);
+		$userAreaId = $this->getUserAreaId();
 		
-		return ($group == data_get($this->data, 'roleData.RoleGroup', 0)) ? 'selected' : '';
+		if ($areaId == $userAreaId)
+			return 'selected';
+		
+		return '';
 	}
 	
-	public function checkedOperation($hexGroupCode, $hexActionCode, $hexOperation)
+	public function checkedRole($roleId)
 	{
-		$authPermission = data_get($this->data, 'roleData.Permission', []);
+		$userRoleId = $this->getUserRoleId();
 		
-		if ($this->authFunctionPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission))
+		if ($roleId == $userRoleId)
 			return 'checked';
 		
 		return '';

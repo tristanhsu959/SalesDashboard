@@ -34,7 +34,7 @@ Route::post('roles/delete/{id}', [RoleController::class, 'delete'])->name('role.
 Route::get('users', [UserController::class, 'list'])->name('user.list');
 Route::get('users/list', [UserController::class, 'list'])->name('user.list');
 Route::get('users/create', [UserController::class, 'showCreate'])->name('user.create');
-Route::post('users/create', [RoleController::class, 'create'])->name('user.create.post');
+Route::post('users/create', [UserController::class, 'create'])->name('user.create.post');
 Route::get('users/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
-Route::post('users/update', [RoleController::class, 'update'])->name('user.update.post');
+Route::post('users/update', [UserController::class, 'update'])->name('user.update.post');
 Route::get('users/delete/{id}', [UserController::class, 'delete'])->name('user.delete.post');

@@ -80,5 +80,6 @@
 		<button type="button" class="btn btn-red btn-cancel">取消</button>
 	</div>
 </section>
+</form>
 
 @endsection()

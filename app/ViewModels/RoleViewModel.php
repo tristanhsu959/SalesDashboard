@@ -25,36 +25,6 @@ class RoleViewModel
 		$this->data['list'] 	= []; #DB data
 	}
 	
-	/* initialize
-	 * @params: enum
-	 * @params: int
-	 * @return: boolean
-	 */
-	public function initialize($action , $roleId = 0)
-	{
-		#初始化各參數及Form Options
-		$this->data['action']	= $action;
-		$this->data['roleId']	= $roleId;
-		$this->data['msg'] 		= '';
-		
-		if ($action == FormAction::CREATE OR $action == FormAction::UPDATE)
-		{
-			$this->data['roleGroup'] 	= RoleGroup::cases();
-			$this->data['functionList']	= $this->getAllMenu();
-		}
-	}
-	
-	/* Keep user form data
-	 * @params: 
-	 * @return: string
-	 */
-	public function keepFormData($name, $group, $settingList)
-    {
-		data_set($this->data, 'roleData.RoleName', $name);
-		data_set($this->data, 'roleData.RoleGroup', $group);
-		data_set($this->data, 'roleData.Permission', $this->buildPermissionByFunction($settingList));
-	}
-	
 	public function __set($name, $value)
     {
 		$this->data[$name] = $value;
@@ -69,6 +39,43 @@ class RoleViewModel
 	public function __isset($name)
     {
 		return array_key_exists($name, $this->data);
+	}
+	
+	/* initialize
+	 * @params: enum
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function initialize($action , $roleId = 0)
+	{
+		#初始化各參數及Form Options
+		$this->data['action']	= $action;
+		$this->data['roleId']	= $roleId;
+		$this->data['msg'] 		= '';
+		
+		$this->_setOptions();
+	}
+	
+	/* Form所屬的參數選項
+	 * @params: enum
+	 * @params: array
+	 * @return: void
+	 */
+	private function _setOptions()
+	{
+		$this->data['roleGroup'] 	= RoleGroup::cases();
+		$this->data['functionList']	= $this->getAllMenu();
+	}
+	
+	/* Keep user form data
+	 * @params: 
+	 * @return: string
+	 */
+	public function keepFormData($name, $group, $settingList)
+    {
+		data_set($this->data, 'roleData.RoleName', $name);
+		data_set($this->data, 'roleData.RoleGroup', $group);
+		data_set($this->data, 'roleData.Permission', $this->buildPermissionByFunction($settingList));
 	}
 	
 	/* Status / Msg

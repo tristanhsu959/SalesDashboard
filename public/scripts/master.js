@@ -22,7 +22,7 @@ $(function(){
 });
 
 /* valid or invalid */
-function validateForm(fields)
+function validateForm(fields, invalidStyle)
 {
 	//el: id/class/ or ....
 	if ($.isArray(fields))
@@ -30,26 +30,37 @@ function validateForm(fields)
 		let result = true;
 		
 		$.each(fields, function(key, el){
-			result = result & validateInput(el);
+			result = result & validateInput(el, invalidStyle);
 		});
 		
-		return result;
+		return Boolean(result);
 	}
 	else
-		return validateInput(els);
+		return validateInput(fields, invalidStyle);
 }
 
-function validateInput(el)
+function validateInput(el, invalidStyle)
 {
-	$(el).removeClass('is-invalid');
+	invalidStyle = invalidStyle || false;
 	
-	if ($(el).val() == '')
+	if (invalidStyle)
+		$(el).removeClass('is-invalid');
+	
+	if ($(el).val() == '' || typeof $(el).val() == 'undefined')
 	{
-		$(el).addClass('is-invalid');
+		if (invalidStyle)
+			$(el).addClass('is-invalid');
 		return false;
 	}
 	else
 		return true;
+}
+
+/* Dialog */
+function showAlertDialog(desc)
+{
+	$('#alert_modal .description').text(desc);
+	$('#alert_modal').modal('show');
 }
 
 function showConfirmDialog(desc, callback)

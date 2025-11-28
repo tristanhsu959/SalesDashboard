@@ -19,52 +19,54 @@ class UserRepository extends Repository
 	 * @params: 
 	 * @return: array
 	 */
+	public function getRoleList()
+	{
+		$db = $this->connectSaleDashboard('Role');
+			
+		$result = $db
+			->select('RoleId', 'RoleName')
+			->get()
+			->toArray();
+				
+		return $result;
+	}
+	
+	/* Get User Data from DB
+	 * @params: 
+	 * @return: array
+	 */
 	public function getList()
 	{
 		$db = $this->connectSaleDashboard('User');
 			
 		$result = $db
-			->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId', 'UpdateAt')
-			->get();
+			->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
+			->get()
+			->toArray();
 				
 		return $result;
 	}
 	
-	/* Create Role
+	/* Create Account
 	 * @params: string
 	 * @params: string
-	 * @params: array
+	 * @params: int
+	 * @params: int
 	 * @return: boolean
 	 */
-	public function insertRole($roleName, $roleGroup, $permissionList)
+	public function insertUser($adAccount, $displayName, $areaId, $roleId)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard();
+		$db = $this->connectSaleDashboard('User');
 		
-			$db->beginTransaction();
-
-			$roleData['RoleName']	= $roleName;
-			$roleData['RoleGroup'] 	= $roleGroup;
-			$roleData['CreateAt'] 	= now()->format('Y-m-d H:i:s');
-			$roleData['UpdateAt'] 	= $roleData['CreateAt'];
+		$data['UserAd']			= $adAccount;
+		$data['UserDisplayName']= $displayName;
+		$data['UserAreaId']		= $areaId;
+		$data['UserRoleId'] 	= $roleId;
+		$data['CreateAt'] 		= now()->format('Y-m-d H:i:s');
+		$data['UpdateAt'] 		= $data['CreateAt'];
 			
-			$id = $db->table('Role')->insertGetId($roleData);
-			
-			$permissionData = $this->_buildPermissionData($id, $permissionList);
-			$db->table('RolePermission')->insert($permissionData);
-			
-			$db->commit();
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		$db->insert($data);
+		return TRUE;
 	}
 	
 	/* Create Role Permission data

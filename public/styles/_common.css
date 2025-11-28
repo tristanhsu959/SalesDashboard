@@ -36,6 +36,18 @@ body {
 	.list-group {
 		border-radius: 2px;
 	}
+	
+	.section-wrapper .empty-list {
+		.row {
+			border-bottom-width: 0;
+			background-color: rgba(229, 115, 115, .4); /*#e57373; */
+			
+			.col {
+				padding: .5rem;
+				color: #fff;
+			}
+		}
+	}
 }
 
 .filled-icon {

@@ -23,9 +23,28 @@ class UserService
 		$this->_repository = $userRepository;
 	}
 	
+	/* 取可設定的Role清單
+	 * @params: 
+	 * @return: array
+	 */
+	public function getRoleOptions()
+	{
+		try
+		{
+			$list = $this->_repository->getRoleList();
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			return [];
+		}
+	}
+	
 	/* 取帳號清單(Get ALL)
 	 * @params: 
-	 * @return: object array
+	 * @return: array
 	 */
 	public function getList()
 	{
@@ -42,19 +61,19 @@ class UserService
 		}
 	}
 	
-	/* Create Role
+	/* Create Account
 	 * @params: string
 	 * @params: string
-	 * @params: hex string
-	 * @return: array
+	 * @params: int
+	 * @params: int
+	 * @return: boolean
 	 */
-	public function createRole($roleName, $roleGroup, $settingList)
+	public function createUser($adAccount, $displayName, $areaId, $roleId)
 	{
 		try
 		{
-			#Create data & Build permission setting
-			$permissionList = $this->buildPermissionByFunction($settingList);
-			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
+			#Create data
+			$this->_repository->insertUser($adAccount, $displayName, $areaId, $roleId);
 		
 			return TRUE;
 		}
@@ -64,6 +83,20 @@ class UserService
 			return FALSE;
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/* 取Role Data
 	 * @params: int
