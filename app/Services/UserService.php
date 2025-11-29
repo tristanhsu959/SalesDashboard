@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\UserRepository;
 use App\Libraries\LoggerLib;
-use App\Traits\MenuTrait;
 use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -13,8 +12,6 @@ use Exception;
 
 class UserService
 {
-	#use MenuTrait, RolePermissionTrait;
-	
 	private $_title = '帳號管理';
 	private $_repository;
     

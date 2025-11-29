@@ -1,4 +1,4 @@
-@inject('service', 'App\Services\HomeService')
+@inject('service', 'App\Services\AppService')
 @inject('viewHelper', 'App\ViewHelpers\MenuHelper')
 
 <div class="aside menu">

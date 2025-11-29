@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\RoleRepository;
 use App\Libraries\LoggerLib;
-use App\Traits\MenuTrait;
 use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -13,7 +12,7 @@ use Exception;
 
 class RoleService
 {
-	use MenuTrait, RolePermissionTrait;
+	use RolePermissionTrait;
 	
 	private $_title = '身份管理';
 	private $_repository;

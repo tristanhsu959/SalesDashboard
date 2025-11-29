@@ -15,8 +15,21 @@ trait AuthenticationTrait
 	 * @params: string
 	 * @return: array
 	 */
-	public function authAD($account, $password)
+	public function authenticationAD($account, $password)
 	{
+		#fake data
+		return [
+			"company" => "八方雲集國際股份有限公司",
+			"department" => "資訊處",
+			"title" => "經理",
+			"displayname" => "Tristan Hsu 許方毓",
+			"employeeid" => "T2025098",
+			"name" => "許方毓",
+			"mail" => "tristan.hsu@8way.com.tw",
+		];
+
+ 
+ 
 		#C:\openldap\sysconf\ldap.conf for local dev
 		#無法匿名連線(除LDAP外)
 		
@@ -51,10 +64,7 @@ trait AuthenticationTrait
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 
 		{
-			$detailMsg = $e->getDetailedError()->getDiagnosticMessage();
-			$error = "{$e->getMessage()}:{$detailMsg}";
-			LoggerLib::initialize($this->_title)->sysLog($error, __class__, __function__);
-			
+			LoggerLib::initialize('AD驗證')->sysLog($e->getMessage(), __class__, __function__);
 			return FALSE;
 		}
 	}

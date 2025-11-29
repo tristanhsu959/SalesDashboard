@@ -4,12 +4,12 @@ namespace App\ViewModels;
 
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
-use App\Traits\MenuTrait;
+use App\Traits\AuthorizationTrait;
 use App\Traits\RolePermissionTrait;
 
 class RoleViewModel
 {
-	use MenuTrait, RolePermissionTrait;
+	use AuthorizationTrait, RolePermissionTrait;
 	
 	private $title = '身份管理';
 	private $data = [];
@@ -64,7 +64,7 @@ class RoleViewModel
 	private function _setOptions()
 	{
 		$this->data['roleGroup'] 	= RoleGroup::cases();
-		$this->data['functionList']	= $this->getAllMenu();
+		$this->data['functionList']	= $this->getMenu();
 	}
 	
 	/* Keep user form data
@@ -147,7 +147,7 @@ class RoleViewModel
 	{
 		$authPermission = data_get($this->data, 'roleData.Permission', []);
 		
-		if ($this->authFunctionPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission))
+		if ($this->hasOperationPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission))
 			return 'checked';
 		
 		return '';

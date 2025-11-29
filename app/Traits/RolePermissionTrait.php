@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 trait RolePermissionTrait
 {
-	/* 建立Permission設定 by list
+	/* 建立Permission設定For DB
 	 * @params: array
 	 * @return: array
 	 */
@@ -47,26 +47,62 @@ trait RolePermissionTrait
 		return Str::padLeft(dechex($permission), 8, '0');
 	}
 	
-	/* Auth Permission
+	/* Auth Group Permission
 	 * @params: string
 	 * @params: string
-	 * @params: string
-	 * @return: string
+	 * @return: boolean
 	 */
-	public function authFunctionPermission($hexGroupCode, $hexActionCode, $hexOperationCode, $hexAuthPermissions)
+	public function hasGroupPermission($hexGroup, $hexUserPermissions)
 	{
-		$decGroupCode = hexdec($hexGroupCode) << 24;
-		$decActionCode = hexdec($hexActionCode) << 16;
-		$decOperationCode = hexdec($hexOperationCode);
-		$decPermission = $decGroupCode | $decActionCode | $decOperationCode;
+		$hexAction = '00';
+		$hexOperation = '0000';
+		
+		return $this->_authPermission($hexGroup, $hexAction, $hexOperation, $hexUserPermissions);
+	}
+	
+	/* Auth Function Permission
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasActionPermission($hexGroup, $hexAction, $hexUserPermissions)
+	{
+		$hexOperation = '0000';
+		
+		return $this->_authPermission($hexGroup, $hexAction, $hexOperation, $hexUserPermissions);
+	}
+	
+	/* Auth CRUD Permission
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasOperationPermission($hexGroup, $hexAction, $hexOperation, $hexUserPermissions)
+	{
+		return $this->_authPermission($hexGroup, $hexAction, $hexOperation, $hexUserPermissions);
+	}
+	
+	/* Auth Permission - Group/Action/Operation共用邏輯
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	private function _authPermission($hexGroupe, $hexAction, $hexOperation, $hexUserPermissions)
+	{
+		$decGroup = hexdec($hexGroupe) << 24;
+		$decAction = hexdec($hexAction) << 16;
+		$decOperation = hexdec($hexOperation);
+		$decMask = $decGroup | $decAction | $decOperation;
 		
 		#$authPermission格式為DB內容
-		foreach($hexAuthPermissions as $authPermission)
+		foreach($hexUserPermissions as $permission)
 		{
-			$decAuthPermission = hexdec($authPermission);
+			$decPermission = hexdec($permission);
 			
 			#有一個符合即可
-			if (($decPermission & $decAuthPermission) == $decPermission)
+			if (($decMask & $decPermission) == $decMask)
 				return TRUE;
 		}
 		
