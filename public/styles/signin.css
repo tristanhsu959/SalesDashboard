@@ -9,6 +9,7 @@ body {
 	
 	&.dark {
 		background-color: var(--default-bg-color);
+		background: var(--default-bg-color);
 	}
 	
 	.content-wrapper {

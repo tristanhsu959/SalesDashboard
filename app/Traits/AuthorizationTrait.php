@@ -25,6 +25,9 @@ trait AuthorizationTrait
 	
 	public function getSigninUserInfo()
 	{
+		if (session()->missing(self::SESS_AUTH_USER))
+			return FALSE;
+		
 		return session()->get(self::SESS_AUTH_USER);
 	}
 	

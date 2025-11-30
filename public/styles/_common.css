@@ -11,6 +11,7 @@ body {
 	
 	&.dark {
 		background-color: var(--primary-dark-bg-color);
+		background: linear-gradient(150deg, var(--primary-dark-bg-color), var(--primary-dark-bg-color), var(--primary-dark-bg-color), #37474f);
 	}
 	
 	.content-wrapper{
@@ -99,3 +100,13 @@ body {
 	}
 }
 
+/* Color Common */
+.purple-accent-1 {
+	color: #ea80fc;
+}
+.red {
+	color: #f44336;
+}
+.cyan-accent-4 {
+	color: #00b8d4;
+}

@@ -9,7 +9,7 @@ return [
 	[
 		'groupName' => '新品銷售',
 		'groupCode' => '01', #permission code
-		'groupIcon' => ['name' => 'chart_data', 'filled' => FALSE],
+		'groupIcon' => ['name' => 'chart_data', 'style' => 'purple-accent-1'], #filled-icon 
 		'groupType' => '',
 		'items' => [
 			[
@@ -38,7 +38,7 @@ return [
 	[
 		'groupName' => '權限管理',
 		'groupCode' => '02',
-		'groupIcon' => ['name' => 'admin_panel_settings', 'filled' => FALSE],
+		'groupIcon' => ['name' => 'admin_panel_settings', 'style' => 'filled-icon1 red'],
 		'groupType' => RoleGroup::ADMIN->name,
 		'items' => [
 			[

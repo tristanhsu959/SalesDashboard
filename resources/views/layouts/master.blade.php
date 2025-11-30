@@ -1,3 +1,6 @@
+@inject('service', 'App\Services\AppService')
+@inject('viewHelper', 'App\ViewHelpers\MenuHelper')
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>

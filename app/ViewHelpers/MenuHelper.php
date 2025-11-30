@@ -26,17 +26,17 @@ class MenuHelper
 		return '';
 	}
 	
-    /* View Style */
-	public function getIconStyle($filled = FALSE)
+    /* View Style 
+	public function getIconStyle($style = FALSE)
 	{
 		return $filled ? 'filled-icon' : '';
-	}
+	}*/
 	
 	/* 已不用 */
-	public function getActionActiveStyle($groupCode, $actionCode, $currentAction)
+	/*public function getActionActiveStyle($groupCode, $actionCode, $currentAction)
 	{
 		$code = $groupCode . $actionCode;
 		
 		return (hexdec($code) == hexdec($currentAction)) ? 'active' : '';
-	}
+	}*/
 }
