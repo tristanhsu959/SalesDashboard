@@ -17,7 +17,7 @@ body {
 	.content-wrapper{
 		position: relative;
 		flex-grow: 1;
-		width: calc(100vw - 240px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
+		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
 		height: 100%; /* 100vh sticky會失效 */
 		/* overflow-x: hidden; */
 		box-sizing: border-box;

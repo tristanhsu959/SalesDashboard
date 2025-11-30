@@ -20,7 +20,7 @@ class AuthPermission
 		$signinUser = $this->getSigninUserInfo();
 		
 		if (empty($signinUser))
-			return redirect()->route('signin')->with('msg', '違反存取 [使用者尚未登入]');
+			return redirect()->route('signin')->with('msg', '認證已過期，請重新登入]');
 		
 		if (empty($signinUser['Permission']))
 			return redirect()->route('signin')->with('msg', '使用者尚無系統授權');

@@ -1,5 +1,5 @@
 <?php
-
+#目前未用到
 namespace App\Services;
 
 use App\Traits\AuthorizationTrait;
@@ -8,7 +8,7 @@ use Illuminate\Support\Arr;
 
 class AppService
 {
-	use AuthorizationTrait, RolePermissionTrait;
+	#use AuthorizationTrait, RolePermissionTrait;
 	
 	public function __construct()
 	{
@@ -19,17 +19,19 @@ class AppService
 	 * @params: 
 	 * @return: array
 	 */
-	public function getMenu()
-	{
-		return $this->getMenuFromConfig();
-	}
+	// public function getMenu()
+	// {
+		// return $this->getMenuFromConfig();
+	// }
 	
 	/* 取有授權的Menu (登入驗後)
 	 * @params: 
 	 * @return: array
 	 */
-	public function getAuthorizeMenu()
-	{
-		return $this->getMenuByPermission();
-	}
+	// public function getAuthorizeMenu()
+	// {
+		// return $this->getMenuByPermission();
+	// }
+	
+	
 }

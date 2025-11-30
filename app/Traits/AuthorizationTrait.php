@@ -51,7 +51,7 @@ trait AuthorizationTrait
 		$userPermission = $signinUser['Permission'];
 		
 		#2.取功能選單-ALL
-		$menuConfig = $this->getMenu();
+		$menuConfig = $this->getMenuFromConfig();
 		
 		#3.驗證有權限的選單, 只要驗證到功能即可
 		$authMenu = [];

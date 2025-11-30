@@ -6,8 +6,10 @@ $(function(){
 		if ($(this).hasClass('active'))
 		{
 			$(this).closest('.collapse').collapse('show');
-			$(this).closest('.menu-group').find('a.list-title').attr('aria-expanded', 'true');
+			$(this).closest('.menu-group').find('a.list-title').attr('aria-expanded', 'true').addClass('active');
 		}
+		else
+			$(this).closest('.menu-group').find('a.list-title').removeClass('active');
 	});
 	
 	/* Remove invalid style */

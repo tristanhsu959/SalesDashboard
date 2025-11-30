@@ -64,7 +64,7 @@ class RoleViewModel
 	private function _setOptions()
 	{
 		$this->data['roleGroup'] 	= RoleGroup::cases();
-		$this->data['functionList']	= $this->getMenu();
+		$this->data['functionList']	= $this->getMenuFromConfig();
 	}
 	
 	/* Keep user form data

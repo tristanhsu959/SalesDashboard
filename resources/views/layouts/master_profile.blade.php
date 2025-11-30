@@ -1,3 +1,4 @@
+@use(App\Enums\Area)
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="popup-profile" aria-labelledby="popup-profile">
 	<div class="offcanvas-header">
@@ -7,24 +8,23 @@
 	<div class="offcanvas-body">
 		<div class="section info-head">
 			<span class="material-symbols-outlined filled-icon">assignment_ind</span>
-			<div class="info">
-				<p>T2025001</p>
-				<p>Oskar 辛德勒</p>
-			</div>
-			<a href="{{ route('signout') }}" class="btn btn-signout" type="button">
-				<span class="material-symbols-outlined filled-icon">logout</span>
-			</a>
+			<p>{{ $signinInfo['employeeid'] }}</p>
+			<p class="name">{{ $signinInfo['displayname'] }}</p>
+			<p class="mail">{{ $signinInfo['mail'] }}</p>
 		</div>
 		<div class="section info-body">
 			<p>
-				<span>資訊處</span>
-				<span>經理</span>
+				<span>{{ $signinInfo['department'] }}</span>
+				<span>{{ $signinInfo['title'] }}</span>
 			</p>
 			<p>
 				<span>管理區域</span>
-				<span>北區</span>
+				<span>{{ Area::getLabelByValue($signinInfo['UserAreaId']) }}</span>
 			</p>
-			<p>oskar.schindler@8way.com.tw</p>
+			<p>{{ $signinInfo['company'] }}</p>
 		</div>
+		<a href="{{ route('signout') }}" class="btn btn-signout" type="button">
+			<span class="material-symbols-outlined filled-icon">logout</span>
+		</a>
 	</div>
 </div>

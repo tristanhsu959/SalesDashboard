@@ -5,7 +5,7 @@
 	position: sticky;
 	top: 0;
 	left: 0;
-	width: 240px;
+	width: 256px;
 	/*min-height: 100vh;
 	height: 100%;*/
 	height: 100vh;
@@ -47,7 +47,6 @@
 		--menu-text-color: #00b8d4; 
 		--menu-hover-color: #84ffff; /*#18ffff;*/
 		
-		
 		width: 100%;
 		padding-left: 0;
 		padding-right: 0;
@@ -70,7 +69,7 @@
 					margin-right: .5rem;
 				}
 				
-				&:hover /*, &[aria-expanded='true']*/ {
+				&:hover, &.active /*, &[aria-expanded='true']*/ {
 					color: var(--menu-hover-color);
 					cursor: pointer;
 					text-shadow: 0 0 1rem var(--menu-hover-color);
