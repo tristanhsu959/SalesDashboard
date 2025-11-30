@@ -27,8 +27,11 @@ class LoggerLib
 	 * @params: array
 	 * @return: object
 	 */
-    public function sysLog($msg, $class = 'NA', $function = 'NA')
+    public function sysLog($msg, $class = 'NA', $function = 'NA', $error = TRUE)
     {
-		Log::channel('webSysLog')->error("{$this->_title} [{$class}::{$function}] {$msg}");
+		if ($error)
+			Log::channel('webSysLog')->error("{$this->_title} [{$class}::{$function}] {$msg}");
+		else
+			Log::channel('webSysLog')->info("{$this->_title} [{$class}::{$function}] {$msg}");
     }
 }

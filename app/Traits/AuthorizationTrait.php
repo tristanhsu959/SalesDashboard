@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 trait AuthorizationTrait
 {
 	const SESS_AUTH_USER = 'SessAuthUserInfo';
+	const SESS_AUTH_MENU = 'SessAuthMenu';
 	
 	/* 儲存登入資訊
 	 * @params: array
@@ -31,6 +32,12 @@ trait AuthorizationTrait
 		return session()->get(self::SESS_AUTH_USER);
 	}
 	
+	public function removeSigninUserInfo()
+	{
+		session()->forget(self::SESS_AUTH_USER);
+		return TRUE;
+	}
+	
 	/* 取All Menu List (權限設定用)
 	 * @params: 
 	 * @return: array
@@ -46,6 +53,9 @@ trait AuthorizationTrait
 	 */
 	public function getMenuByPermission()
 	{
+		if (session()->has(self::SESS_AUTH_MENU))
+			return session()->get(self::SESS_AUTH_MENU);
+		
 		#1.取登入User Permission
 		$signinUser = $this->getSigninUserInfo();
 		$userPermission = $signinUser['Permission'];
@@ -72,6 +82,8 @@ trait AuthorizationTrait
 				$authMenu[$key]['items'] = $authItems;
 			}
 		}
+		
+		session()->put(self::SESS_AUTH_MENU, $authMenu);
 		
 		return $authMenu;
 	}

@@ -48,4 +48,15 @@ class SigninController extends Controller
 			return redirect('home');
 	}
 	
+	/* 登出
+	 * @params: request
+	 * @return: array
+	 */
+	public function signout(Request $request)
+	{
+		$this->_service->signout();
+		
+		return redirect('signin');
+	}
+	
 }

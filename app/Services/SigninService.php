@@ -78,4 +78,16 @@ class SigninService
 		
 		return $userInfo;
 	}
+	
+	/* 登出
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function signout()
+	{
+		$this->removeSigninUserInfo();
+		LoggerLib::initialize('系統登出')->sysLog('使用者登出系統', __class__, __function__, FALSE);
+			
+		return TRUE;
+	}
 }
