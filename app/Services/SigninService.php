@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\SigninRepository;
-use App\Libraries\LoggerLib;
+#use App\Libraries\LoggerLib;
 use App\Traits\AuthenticationTrait;
 use App\Traits\AuthorizationTrait;
 use Illuminate\Support\Arr;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Exception;
-
+use Log;
 
 class SigninService
 {
@@ -55,7 +55,7 @@ class SigninService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -86,7 +86,7 @@ class SigninService
 	public function signout()
 	{
 		$this->removeSigninUserInfo();
-		LoggerLib::initialize('系統登出')->sysLog('使用者登出系統', __class__, __function__, FALSE);
+		Log::channel('webSysLog')->info('使用者登出系統', [ __class__, __function__]);
 			
 		return TRUE;
 	}

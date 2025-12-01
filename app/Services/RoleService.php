@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Repositories\RoleRepository;
-use App\Libraries\LoggerLib;
+#use App\Libraries\LoggerLib;
 use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Exception;
+use Log;
 
 class RoleService
 {
@@ -36,7 +37,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -59,7 +60,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -77,7 +78,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -100,7 +101,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -118,7 +119,7 @@ class RoleService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}

@@ -34,12 +34,15 @@ class AppServiceProvider extends ServiceProvider
 		
 		#View share not work, because session is not available
 		View::composer('*', function ($view) {
-			$signinInfo = $this->getSigninUserInfo();
-			$appMenu = new MenuViewModel($this->getMenuByPermission());
 			
-			if ($signinInfo) 
-				$view->with('signinInfo', $signinInfo)->with('appMenu', $appMenu);
+			if (in_array($view->getName(), ['signin']) == FALSE)
+			{				
+				$signinInfo = $this->getSigninUserInfo();
+				$appMenu = new MenuViewModel($this->getMenuByPermission());
+				
+				if ($signinInfo) 
+					$view->with('signinInfo', $signinInfo)->with('appMenu', $appMenu);
+			}
 		});
-
     }
 }

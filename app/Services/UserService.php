@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use App\Libraries\LoggerLib;
+#use App\Libraries\LoggerLib;
 use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Exception;
+use Log;
 
 class UserService
 {
@@ -34,7 +35,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return [];
 		}
 	}
@@ -55,7 +56,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -74,7 +75,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -97,7 +98,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -115,7 +116,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -138,7 +139,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
@@ -156,7 +157,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			LoggerLib::initialize($this->_title)->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}

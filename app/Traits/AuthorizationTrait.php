@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Libraries\LoggerLib;
 use Illuminate\Support\Str;
 
 /* 授權 */
@@ -53,18 +52,23 @@ trait AuthorizationTrait
 	 */
 	public function getMenuByPermission()
 	{
+		$authMenu = [];
+		
 		if (session()->has(self::SESS_AUTH_MENU))
 			return session()->get(self::SESS_AUTH_MENU);
 		
 		#1.取登入User Permission
 		$signinUser = $this->getSigninUserInfo();
+		
+		if ($signinUser == FALSE)
+			return $authMenu;
+		
 		$userPermission = $signinUser['Permission'];
 		
 		#2.取功能選單-ALL
 		$menuConfig = $this->getMenuFromConfig();
 		
 		#3.驗證有權限的選單, 只要驗證到功能即可
-		$authMenu = [];
 		
 		foreach($menuConfig as $key => $group)
 		{

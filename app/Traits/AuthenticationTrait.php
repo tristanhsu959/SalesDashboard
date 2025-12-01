@@ -2,10 +2,11 @@
 
 namespace App\Traits;
 
-use App\Libraries\LoggerLib;;
+#use App\Libraries\LoggerLib;;
 use Illuminate\Support\Str;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
+use Log;
 
 /* 認證 */
 trait AuthenticationTrait
@@ -64,7 +65,7 @@ trait AuthenticationTrait
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 
 		{
-			LoggerLib::initialize('AD驗證')->sysLog($e->getMessage(), __class__, __function__);
+			Log::channel('webSysLog')->error('AD驗證失敗:' . $e->getMessage(), [ __class__, __function__]);
 			return FALSE;
 		}
 	}
