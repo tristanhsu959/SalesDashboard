@@ -40,6 +40,22 @@ class UserViewModel
 		return array_key_exists($name, $this->data);
 	}
 	
+	/* Status / Msg
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function success($msg = NULL)
+	{
+		$this->data['status'] = TRUE;
+		$this->data['msg'] = $msg ?? '';
+	}
+	
+	public function fail($msg)
+	{
+		$this->data['status'] 	= FALSE;
+		$this->data['msg'] 		= $msg;
+	}
+	
 	/* initialize
 	 * @params: enum
 	 * @params: int
@@ -53,6 +69,19 @@ class UserViewModel
 		$this->data['msg'] 		= '';
 		
 		$this->_setOptions();
+	}
+	
+	/* Form submit action
+	 * @params: 
+	 * @return: 
+	 */
+	public function getFormAction() : string
+    {
+		return match($this->action)
+		{
+			FormAction::CREATE => route('user.create.post'),
+			FormAction::UPDATE => route('user.update.post'),
+		};
 	}
 	
 	/* Form所屬的參數選項
@@ -76,22 +105,6 @@ class UserViewModel
 		data_set($this->data, 'userData.UserDisplayName', $displayName);
 		data_set($this->data, 'userData.UserAreaId', $area);
 		data_set($this->data, 'userData.UserRoleId', $role);
-	}
-	
-	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function success($msg = NULL)
-	{
-		$this->data['status'] = TRUE;
-		$this->data['msg'] = $msg ?? '';
-	}
-	
-	public function fail($msg)
-	{
-		$this->data['status'] 	= FALSE;
-		$this->data['msg'] 		= $msg;
 	}
 	
 	/* Create or Update Role Id 
@@ -145,25 +158,13 @@ class UserViewModel
 		return data_get($collect, "{$roleId}.RoleName", '');
 	}
 	
+	
+	/* Form Style */
 	public function getBreadcrumb()
     {
 		return $this->title . ' | ' . $this->action->label();
 	}
 	
-	/* Form submit action
-	 * @params: 
-	 * @return: 
-	 */
-	public function getFormAction() : string
-    {
-		return match($this->action)
-		{
-			FormAction::CREATE => route('user.create.post'),
-			FormAction::UPDATE => route('user.update.post'),
-		};
-	}
-	
-	/* Form Style */
 	public function selectedArea($areaId)
 	{
 		$userAreaId = $this->getUserAreaId();

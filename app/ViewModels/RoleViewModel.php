@@ -41,6 +41,22 @@ class RoleViewModel
 		return array_key_exists($name, $this->data);
 	}
 	
+	/* Status / Msg
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function success($msg = NULL)
+	{
+		$this->data['status'] = TRUE;
+		$this->data['msg'] = $msg ?? '';
+	}
+	
+	public function fail($msg)
+	{
+		$this->data['status'] 	= FALSE;
+		$this->data['msg'] 		= $msg;
+	}
+	
 	/* initialize
 	 * @params: enum
 	 * @params: int
@@ -54,6 +70,19 @@ class RoleViewModel
 		$this->data['msg'] 		= '';
 		
 		$this->_setOptions();
+	}
+	
+	/* Form submit action
+	 * @params: 
+	 * @return: 
+	 */
+	public function getFormAction() : string
+    {
+		return match($this->action)
+		{
+			FormAction::CREATE => route('role.create.post'),
+			FormAction::UPDATE => route('role.update.post'),
+		};
 	}
 	
 	/* Form所屬的參數選項
@@ -78,21 +107,6 @@ class RoleViewModel
 		data_set($this->data, 'roleData.Permission', $this->buildPermissionByFunction($settingList));
 	}
 	
-	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function success($msg = NULL)
-	{
-		$this->data['status'] = TRUE;
-		$this->data['msg'] = $msg ?? '';
-	}
-	
-	public function fail($msg)
-	{
-		$this->data['status'] 	= FALSE;
-		$this->data['msg'] 		= $msg;
-	}
 	
 	/* Create or Update Role Id 
 	 * @params: 
@@ -117,25 +131,13 @@ class RoleViewModel
 		return data_get($this->data, 'roleData.RoleName', '');
 	}
 	
+		
+	/* Form Style */
 	public function getBreadcrumb()
     {
 		return $this->title . ' | ' . $this->action->label();
 	}
 	
-	/* Form submit action
-	 * @params: 
-	 * @return: 
-	 */
-	public function getFormAction() : string
-    {
-		return match($this->action)
-		{
-			FormAction::CREATE => route('role.create.post'),
-			FormAction::UPDATE => route('role.update.post'),
-		};
-	}
-	
-	/* Form Style */
 	public function selectedRoleGroup($group)
 	{
 		$group = intval($group);

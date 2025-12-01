@@ -1,29 +1,29 @@
 /* New Release Style */
-.page.navbar {
-	&.pork-ribs {
-		background-color: var(--bg-secondary-color);
+/* .page.navbar { */
+	/* &.pork-ribs { */
+		/* background-color: var(--bg-secondary-color); */
 		
-		.navbar-head, .navbar-action {
-			color: #000;
-		}
-	}
-	&.tomato-beef {
-		background-color: #ff5722;
+		/* .navbar-head, .navbar-action { */
+			/* color: #000; */
+		/* } */
+	/* } */
+	/* &.tomato-beef { */
+		/* background-color: #ff5722; */
 		
-		.navbar-head, .navbar-action {
-			color: #fff;
-		}
-	}
+		/* .navbar-head, .navbar-action { */
+			/* color: #fff; */
+		/* } */
+	/* } */
 	
-	.navbar-action {
-		div:first-child {
-			font-weight: 500;
-		}
-		div:last-child {
-			font-size: .95rem;
-		}
-	}
-}
+	/* .navbar-action { */
+		/* div:first-child { */
+			/* font-weight: 500; */
+		/* } */
+		/* div:last-child { */
+			/* font-size: .95rem; */
+		/* } */
+	/* } */
+/* } */
 
 .scrollbar{
     &::-webkit-scrollbar{
@@ -48,6 +48,12 @@
 	}
 }
 
+.content-wrapper .nav {
+	position: sticky;
+	top: 0;
+	z-index: 22;
+	height: 64px;
+}
 .caption {
 	width: auto;
 	background-color: transparent;

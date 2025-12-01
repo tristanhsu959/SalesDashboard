@@ -12,13 +12,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Exception;
-use Throwable;
 
 
 class NewReleaseService
 {
-	use MenuTrait;
-	
 	private $_repository;
     
 	public function __construct(NewReleaseRepository $newReleaseRepository)
@@ -50,14 +47,14 @@ class NewReleaseService
 		#設定Cache
 		$cacheKey = implode(':', [$configKey, $saleDate, $endDate]);
 		
-		// if (Cache::has($cacheKey))
-		// {
-			// Log::channel('webLog')->info('get from cache');
-			// return Cache::get($cacheKey);
-		// }
-		// else
+		if (Cache::has($cacheKey))
 		{
-			Log::channel('webLog')->info('get from db');
+			Log::channel('webSysLog')->info('新品銷售：Get from cache', [ __class__, __function__]);
+			return Cache::get($cacheKey);
+		}
+		else
+		{
+			Log::channel('webSysLog')->info('新品銷售：Get from DB', [ __class__, __function__]);
 			return $this->processStatistics($configKey, $cacheKey);
 		}
 	}
@@ -69,20 +66,20 @@ class NewReleaseService
 	 */
 	public function processStatistics($configKey, $cacheKey)
 	{
+		#initialize
+		$statistics = [
+			'productName' => '',
+			'saleDate' => '',
+			'startDate' => '',
+			'endDate' => '',
+			'shop' => [],
+			'area' => [],
+			'top' => [],
+			'last' => []
+		];
+			
 		try 
 		{
-			#initialize
-			$statistics = [
-				'productName' => '',
-				'saleDate' => '',
-				'startDate' => '',
-				'endDate' => '',
-				'shop' => [],
-				'area' => [],
-				'top' => [],
-				'last' => []
-			];
-			
 			#1.取新品參數 & Initialize 
 			list($productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams($configKey);
 			$statistics['productName'] = $productName;
@@ -112,16 +109,15 @@ class NewReleaseService
 			#6.當日銷售前10名 | 當日銷售後10名
 			list($statistics['top'], $statistics['last']) = $this->_parsingByRanking($baseData, $statistics['endDate']);
 			
-			$result = ResponseLib::initialize($statistics)->success()->get();
 			#save to Cache
-			Cache::put($cacheKey, $result, now()->addMinutes(10));
+			Cache::put($cacheKey, $statistics, now()->addMinutes(10));
 			
-			return $result;
+			return $statistics;
 		}
-		catch(throwable $e)
+		catch(Exception $e)
 		{
-			//Log::channel('webLog')->error($e->getMessage());
-			return ResponseLib::initialize($statistics)->fail($e->getMessage())->get();
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			return $statistics;
 		}
 	}
 	
@@ -132,26 +128,33 @@ class NewReleaseService
 	 */
 	private function _getParams($configKey)
 	{
-		$config = config("web.newrelease.products.{$configKey}");
-		
-		$productName	= data_get($config, 'name');
-		$saleDate		= data_get($config, 'saleDate'); #開賣日
-		
-		#預防未來可能有查詢條件的狀況
-		$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
-		$endDateTime   	= Carbon::now()->setTime(23, 59, 59, 0)->toDateTimeString();
+		try
+		{
+			$config = config("web.newrelease.products.{$configKey}");
 			
-		//$startDateTime	= '2025/11/06 00:00:00'; #testing
-		//$endDateTime   	= '2025/11/06 23:59:59'; #testing 
+			$productName	= data_get($config, 'name');
+			$saleDate		= data_get($config, 'saleDate'); #開賣日
 			
-		$brandCode		= data_get($config, 'brand');
-		$productIds 	= data_get($config, 'ids.main');
-		$bfProductIds 	= [];
-		
-		if ($brandCode === 'BG') #梁社漢複合店取值用
-			$bfProductIds = data_get($config, 'ids.mapping');
-		
-		return [$productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds];
+			#預防未來可能有查詢條件的狀況
+			$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
+			$endDateTime   	= Carbon::now()->setTime(23, 59, 59, 0)->toDateTimeString();
+				
+			$startDateTime	= '2025/11/06 00:00:00'; #testing
+			$endDateTime   	= '2025/11/06 23:59:59'; #testing 
+				
+			$brandCode		= data_get($config, 'brand');
+			$productIds 	= data_get($config, 'ids.main');
+			$bfProductIds 	= [];
+			
+			if ($brandCode === 'BG') #梁社漢複合店取值用
+				$bfProductIds = data_get($config, 'ids.mapping');
+			
+			return [$productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds];
+		}
+		catch(Exception $e)
+		{
+			throw new Exception('讀取參數失敗:' . $e->getMessage());
+		}
 	}
 	
 	/* Get main data & mapping data
@@ -163,24 +166,32 @@ class NewReleaseService
 	 */
 	private function _getData($startDateTime, $endDateTime, $productIds, $bfProductIds)
 	{
-		#Get main data first
-		$mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
-		
-		if (! empty($bfProductIds)) #梁社漢新品時會有值
+		try
 		{
-			$shopIdMapping 	= config('web.newrelease.multiBrandShopidMapping');
-			$bfShopIds 		= array_keys($shopIdMapping);
+			#Get main data first
+			$mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
 			
-			$bfData	= $this->_repository->getBfSaleData($startDateTime, $endDateTime, $bfProductIds, $bfShopIds);
-			$bfData = $bfData->map(function($item, $key) use ($shopIdMapping) {
-				$item->SHOP_ID = $shopIdMapping[$item->SHOP_ID];
-				return $item;
-			});
+			if (! empty($bfProductIds)) #梁社漢新品時會有值
+			{
+				$shopIdMapping 	= config('web.newrelease.multiBrandShopidMapping');
+				$bfShopIds 		= array_keys($shopIdMapping);
+				
+				$bfData	= $this->_repository->getBfSaleData($startDateTime, $endDateTime, $bfProductIds, $bfShopIds);
+				
+				$bfData = $bfData->map(function($item, $key) use ($shopIdMapping) {
+					$item['SHOP_ID'] = $shopIdMapping[$item['SHOP_ID']];
+					return $item;
+				});
+				
+				$mainData = $mainData->merge($bfData);
+			}
 			
-			$mainData = $mainData->merge($bfData);
+			return $mainData;
 		}
-		
-		return $mainData;
+		catch(Exception $e)
+		{
+			throw new Exception('讀取DB資料失敗:' . $e->getMessage());
+		}
 	}
 	
 	/* 先分組成可共用的基底資料
@@ -197,9 +208,9 @@ class NewReleaseService
 				$temp['shopName'] 	= $item->pluck('SHOP_NAME')->get(0);
 				$temp['area'] 		= ShopLib::getAreaByShopId($temp['shopId']);
 				
-				$temp['dayQty'] 	= $item->mapToGroups(function($item, $key){ #group by date
-					$dateKey = Str::before($item->SALE_DATE, ' ');
-					return [$dateKey => $item->QTY];
+				$temp['dayQty'] = $item->mapToGroups(function($item, $key){ #group by date
+					$dateKey = Str::before($item['SALE_DATE'], ' ');
+					return [$dateKey => $item['QTY']];
 				})->map(function($item, $key){
 					return $item->sum();
 				})->toArray();
@@ -322,8 +333,8 @@ class NewReleaseService
 			return $item;
 		});
 		
-		$top = $result->sortByDesc('todayQty')->groupBy('todayQty')->take(10)->values();
-		$last = $result->sortBy('todayQty')->groupBy('todayQty')->take(10)->values();
+		$top = $result->sortByDesc('todayQty')->groupBy('todayQty')->take(10)->values()->toArray();
+		$last = $result->sortBy('todayQty')->groupBy('todayQty')->take(10)->values()->toArray();
 		
 		return [$top, $last];
 	}
