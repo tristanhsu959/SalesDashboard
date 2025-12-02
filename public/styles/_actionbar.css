@@ -80,12 +80,14 @@
 		}
 		
 		a.btn-return {
-			background-color: var(--btn-return-bg-color);
-			color: #fff;
+			color: #000;
 			margin-right: .5rem;
+			border: 1px solid #000;
 			
 			&:hover {
 				width: calc(4ch * 3.5);
+				background-color: var(--btn-return-bg-color);
+				color: #fff;
 			}
 		}
 	}

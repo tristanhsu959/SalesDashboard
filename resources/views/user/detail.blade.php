@@ -12,8 +12,8 @@
 
 @section('navBack')
 <a href="{{ route('user.list') }}" class="btn btn-return">
-	<span class="title">回列表</span>
 	<span class="material-symbols-outlined filled-icon">arrow_back</span>
+	<span class="title">回列表</span>
 </a>
 @endsection
 

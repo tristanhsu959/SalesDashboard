@@ -27,8 +27,8 @@
 	
 	
 	/* Dark Table */
-	--table-head-bg-color: #252525;
-	--table-head-color: #b0bec5;
+	--table-head-bg-color: #01579b; /*#252525;*/
+	--table-head-color: #e1f5fe;
 	--table-row-border-color: #607d8b;
 	--table-col-color: #90a4ae;
 	--table-col-odd-color: #37474f;

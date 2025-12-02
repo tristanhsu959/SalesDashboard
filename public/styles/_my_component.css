@@ -2,6 +2,7 @@
 
 :root {
 	--input-field-color: #cfd8dc;
+	--input-field-label-color: #cfd8dc;
 }
 
 /* Button */
@@ -129,7 +130,7 @@
 	
 	&.dark {
 		label {
-			color: var(--input-field-color);
+			color: var(--input-field-label-color);
 		}
 		input {
 			background-color: var(--primary-dark-bg-color);
@@ -232,7 +233,7 @@
     &.dark {
         .form-select {
             background-color: var(--primary-dark-bg-color);
-            color: var(--input-field-color);
+            color: var(--input-field-label-color);
         }
         
         label {
@@ -251,7 +252,7 @@
 
 /* input Required */
 .field.required {
-	input:focus ~ label, input:not(:placeholder-shown) ~ label, .form-select + label {
+	input ~ label, input:not(:placeholder-shown) ~ label, .form-select + label {
 		display: flex;
 		align-items: center;
 		

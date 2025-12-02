@@ -15,8 +15,8 @@
 
 @section('navBack')
 <a href="{{ route('role.list') }}" class="btn btn-return">
-	<span class="title">回列表</span>
 	<span class="material-symbols-outlined filled-icon">arrow_back</span>
+	<span class="title">回列表</span>
 </a>
 @endsection
 
@@ -32,7 +32,6 @@
 			<label for="name" class="form-label">身份</label>
 		</div>
 		<div class="input-select field-orange field dark required">
-			<label for="group" class="form-label">權限群組</label>
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
 				@foreach($viewModel->roleGroup as $role)
@@ -41,6 +40,7 @@
 				</option>
 				@endforeach
 			</select>
+			<label for="group" class="form-label">權限群組</label>
 		</div>
 	</div>
 	

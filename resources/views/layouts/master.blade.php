@@ -11,6 +11,7 @@
 		<!-- Styles & Font -->
 		<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
 		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
 		<link href="{{ asset('styles/master.css') }}" rel="stylesheet" />

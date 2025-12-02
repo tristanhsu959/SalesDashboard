@@ -47,5 +47,5 @@ function submitForm()
 	if (validateForm(['#name', '#group']))
 		$('#roleForm').submit();
 	else
-		return false;
+		showAlertDialog('身份及權限群組為必填');
 }
