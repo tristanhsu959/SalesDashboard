@@ -28,7 +28,7 @@
 	}
 	
 	/* 共用的style */
-	.navbar-action {
+	.navbar-action, .navbar-head {
 		display: flex;
 		font-weight: 500;
 		
@@ -59,7 +59,6 @@
 					transition-delay: .5s;
 				}
 			}
-			
 		}
 		
 		/* Page Toolbar */
@@ -83,6 +82,7 @@
 		a.btn-return {
 			background-color: var(--btn-return-bg-color);
 			color: #fff;
+			margin-right: .5rem;
 			
 			&:hover {
 				width: calc(4ch * 3.5);

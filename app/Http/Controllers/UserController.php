@@ -54,6 +54,7 @@ class UserController extends Controller
 		$searchAd	= $request->input('searchAd');
 		$searchName	= $request->input('searchName');
 		$searchArea	= $request->input('searchArea');
+		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchArea);
 		
 		$data = $this->_service->searchList($searchAd, $searchName, $searchArea);
 		

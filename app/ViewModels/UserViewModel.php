@@ -23,6 +23,7 @@ class UserViewModel
 		$this->_data['msg'] 		= '';
 		$this->_data['userData'] 	= NULL; #DB data
 		$this->_data['list'] 		= []; #DB data
+		$this->_data['search']		= [];
 		$this->_data['operations'] 	= [];
 	}
 	
@@ -33,7 +34,7 @@ class UserViewModel
 	
 	public function __get($name)
     {
-		return $this->_data[$name];
+		return data_get($this->_data, $name, '');
 	}
 	
 	/* 須有isset, 否則empty()會判別錯誤 */
@@ -97,6 +98,32 @@ class UserViewModel
 	{
 		$this->_data['area'] 	= Area::cases();
 		$this->_data['roleList']= $this->_service->getRoleOptions();
+	}
+	
+	/* Keep user search data
+	 * @params: 
+	 * @return: string
+	 */
+	public function keepSearchData($adAccount, $displayName, $area)
+    {
+		data_set($this->_data, 'search.UserAd', $adAccount);
+		data_set($this->_data, 'search.UserDisplayName', $displayName);
+		data_set($this->_data, 'search.UserAreaId', $area);
+	}
+	
+	public function getSearchAd()
+	{
+		return data_get($this->_data, 'search.UserAd', '');
+	}
+	
+	public function getSearchName()
+	{
+		return data_get($this->_data, 'search.UserDisplayName', '');
+	}
+	
+	public function getSearchArea()
+	{
+		return data_get($this->_data, 'search.UserAreaId', 0);
 	}
 	
 	/* Keep user form data
@@ -185,6 +212,14 @@ class UserViewModel
 		
 		if ($roleId == $userRoleId)
 			return 'checked';
+		
+		return '';
+	}
+	
+	public function selectedSearchArea($areaId)
+	{
+		if ($areaId == $this->getSearchArea())
+			return 'selected';
 		
 		return '';
 	}

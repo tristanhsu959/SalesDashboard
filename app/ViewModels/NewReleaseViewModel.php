@@ -9,31 +9,30 @@ use Carbon\CarbonPeriod;
 
 class NewReleaseViewModel
 {
-	private $title = '新品銷售';
-	private $data = [];
+	private $_data = [];
 	
 	public function __construct()
 	{
 		#initialize
-		$this->data['action'] 	= NULL; #enum form action
-		$this->data['status']	= FALSE;
-		$this->data['msg'] 		= '';
+		$this->_data['action'] 	= NULL; #enum form action
+		$this->_data['status']	= FALSE;
+		$this->_data['msg'] 	= '';
 	}
 	
 	public function __set($name, $value)
     {
-		$this->data[$name] = $value;
+		$this->_data[$name] = $value;
     }
 	
 	public function __get($name)
     {
-		return $this->data[$name];
+		return data_get($this->_data, $name, '');
 	}
 	
 	/* 須有isset, 否則empty()會判別錯誤 */
 	public function __isset($name)
     {
-		return array_key_exists($name, $this->data);
+		return array_key_exists($name, $this->_data);
 	}
 	
 	/* Status / Msg
@@ -42,14 +41,14 @@ class NewReleaseViewModel
 	 */
 	public function success($msg = NULL)
 	{
-		$this->data['status'] = TRUE;
-		$this->data['msg'] = $msg ?? '';
+		$this->_data['status'] 	= TRUE;
+		$this->_data['msg'] 	= $msg ?? '';
 	}
 	
 	public function fail($msg)
 	{
-		$this->data['status'] 	= FALSE;
-		$this->data['msg'] 		= $msg;
+		$this->_data['status'] 	= FALSE;
+		$this->_data['msg'] 	= $msg;
 	}
 	
 	/* initialize
@@ -60,8 +59,8 @@ class NewReleaseViewModel
 	public function initialize($action , $userId = 0)
 	{
 		#初始化各參數及Form Options
-		$this->data['action']	= $action;
-		$this->data['msg'] 		= '';
+		$this->_data['action']	= $action;
+		$this->_data['msg'] 	= '';
 	}
 	
 	/* 門市 */
@@ -83,8 +82,8 @@ class NewReleaseViewModel
 	public function getDateRange($orderAsc = FALSE)
     {
 		$order = $orderAsc ? 'ASC' : 'DESC';
-		$st = Carbon::create($this->data['statistics']['startDate']);
-		$end = Carbon::create($this->data['statistics']['endDate']);
+		$st = Carbon::create($this->_data['statistics']['startDate']);
+		$end = Carbon::create($this->_data['statistics']['endDate']);
 		$period = CarbonPeriod::create($st, $end);
 
 		$dateList = [];
@@ -103,6 +102,6 @@ class NewReleaseViewModel
 	/* Form Style */
 	public function getBreadcrumb()
     {
-		return $this->data['statistics']['productName'];
+		return $this->_data['statistics']['productName'];
 	}
 }

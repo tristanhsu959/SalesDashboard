@@ -37,7 +37,7 @@ class RoleViewModel
 	
 	public function __get($name)
     {
-		return $this->_data[$name];
+		return data_get($this->_data, $name, '');
 	}
 	
 	/* 須有isset, 否則empty()會判別錯誤 */

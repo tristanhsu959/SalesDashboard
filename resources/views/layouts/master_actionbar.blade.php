@@ -1,6 +1,7 @@
 
 <nav class="page navbar">
 	<span class="navbar-head">
+		@yield('navBack')
 		<span class="material-symbols-outlined filled-icon">bubble_chart</span>
 		@yield('navHead')
 	</span>

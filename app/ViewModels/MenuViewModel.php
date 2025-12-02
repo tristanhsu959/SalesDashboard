@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Request;
 class MenuViewModel
 {
 	private $_service;
-	private $title = 'APP';
 	private $_menu = [];
 	
 	public function __construct(Array $menu)
