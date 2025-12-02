@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\RoleRepository;
+use App\Traits\AuthorizationTrait;
 use App\Traits\RolePermissionTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -12,10 +13,10 @@ use Log;
 
 class RoleService
 {
-	use RolePermissionTrait;
+	use AuthorizationTrait, RolePermissionTrait;
 	
-	private $_title = '身份管理';
-	private $_repository;
+	private $_groupKey	= 'authManager';
+	private $_actionKey = 'roles';
     
 	public function __construct(RoleRepository $roleRepository)
 	{
@@ -122,4 +123,13 @@ class RoleService
 			return FALSE;
 		}
 	}
+	
+	/* CRUD Permission Check for Page
+	 * @params: int
+	 * @return: boolean
+	 */
+	 public function getOperationPermission()
+	 {
+		 return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+	 }
 }

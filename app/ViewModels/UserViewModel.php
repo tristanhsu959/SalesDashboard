@@ -17,13 +17,13 @@ class UserViewModel
 	{
 		$this->_service = $userService;
 		#initialize
-		$this->_data['action'] 	= NULL; #enum form action
-		$this->_data['userId']	= 0; #form create or update role id
-		$this->_data['status']	= FALSE;
+		$this->_data['action'] 		= NULL; #enum form action
+		$this->_data['userId']		= 0; #form create or update role id
+		$this->_data['status']		= FALSE;
 		$this->_data['msg'] 		= '';
-		$this->_data['userData'] = NULL; #DB data
-		$this->_data['list'] 	= []; #DB data
-		$this->_data['operations'] = [];
+		$this->_data['userData'] 	= NULL; #DB data
+		$this->_data['list'] 		= []; #DB data
+		$this->_data['operations'] 	= [];
 	}
 	
 	public function __set($name, $value)
@@ -188,28 +188,25 @@ class UserViewModel
 		
 		return '';
 	}
-		
+	
+	#Page operation permission
 	public function canQuery()
 	{
-		if (! in_array(Operation::READ->name, $this->_data['operations']))
-			return 'disabled';
+		return in_array(Operation::READ->name, $this->_data['operations']);
 	}
 	
 	public function canCreate()
 	{
-		if (! in_array(Operation::CREATE->name, $this->_data['operations']))
-			return 'disabled';
+		return in_array(Operation::CREATE->name, $this->_data['operations']);
 	}
 	
 	public function canUpdate()
 	{
-		if (! in_array(Operation::UPDATE->name, $this->_data['operations']))
-			return 'disabled';
+		return in_array(Operation::UPDATE->name, $this->_data['operations']);
 	}
 	
 	public function canDelete()
 	{
-		if (! in_array(Operation::DELETE->name, $this->_data['operations']))
-			return 'disabled';
+		return in_array(Operation::DELETE->name, $this->_data['operations']);
 	}
 }
