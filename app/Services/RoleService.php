@@ -17,6 +17,7 @@ class RoleService
 	
 	private $_groupKey	= 'authManager';
 	private $_actionKey = 'roles';
+	private $_repository;
     
 	public function __construct(RoleRepository $roleRepository)
 	{
@@ -130,6 +131,14 @@ class RoleService
 	 */
 	 public function getOperationPermission()
 	 {
-		 return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+		try
+		{
+			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			return [];
+		}
 	 }
 }

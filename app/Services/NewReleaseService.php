@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\NewReleaseRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
+use App\Traits\AuthorizationTrait;
 use App\Traits\MenuTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -16,6 +17,10 @@ use Exception;
 
 class NewReleaseService
 {
+	use AuthorizationTrait;
+	
+	private $_groupKey	= 'newRelease';
+	private $_actionKey = '';
 	private $_repository;
     
 	public function __construct(NewReleaseRepository $newReleaseRepository)
@@ -29,23 +34,25 @@ class NewReleaseService
 	 */
 	public function convertConfigKey($segment)
 	{
-		return Str::camel($segment);
+		#action key = config key
+		$this->_actionKey = Str::camel($segment);
+		return $this->_actionKey;
 	}
 	
 	/* 取新品銷售統計-入口
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($configKey)
+	public function getStatistics()
 	{
 		#取新品設定
-		$config = config("web.newrelease.products.{$configKey}");
+		$config = config("web.newrelease.products.{$this->_actionKey}");
 		
 		$saleDate	= (new Carbon($config['saleDate']))->format('Y-m-d');
 		$endDate   	= Carbon::now()->format('Y-m-d');
 		
 		#設定Cache
-		$cacheKey = implode(':', [$configKey, $saleDate, $endDate]);
+		$cacheKey = implode(':', [$this->_actionKey, $saleDate, $endDate]);
 		
 		if (Cache::has($cacheKey))
 		{
@@ -55,7 +62,7 @@ class NewReleaseService
 		else
 		{
 			Log::channel('webSysLog')->info('新品銷售：Get from DB', [ __class__, __function__]);
-			return $this->processStatistics($configKey, $cacheKey);
+			return $this->processStatistics($this->_actionKey, $cacheKey);
 		}
 	}
 	
@@ -64,7 +71,7 @@ class NewReleaseService
 	 * @params: string
 	 * @return: array
 	 */
-	public function processStatistics($configKey, $cacheKey)
+	public function processStatistics($cacheKey)
 	{
 		#initialize
 		$statistics = [
@@ -81,7 +88,7 @@ class NewReleaseService
 		try 
 		{
 			#1.取新品參數 & Initialize 
-			list($productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams($configKey);
+			list($productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams();
 			$statistics['productName'] = $productName;
 			$statistics['saleDate'] = (new Carbon($saleDate))->format('Y-m-d');
 			$statistics['startDate'] = (new Carbon($startDateTime))->format('Y-m-d');
@@ -126,11 +133,11 @@ class NewReleaseService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _getParams($configKey)
+	private function _getParams()
 	{
 		try
 		{
-			$config = config("web.newrelease.products.{$configKey}");
+			$config = config("web.newrelease.products.{$this->_actionKey}");
 			
 			$productName	= data_get($config, 'name');
 			$saleDate		= data_get($config, 'saleDate'); #開賣日
@@ -342,4 +349,21 @@ class NewReleaseService
 		
 		return [$top, $last];
 	}
+	
+	/* CRUD Permission Check for Page
+	 * @params: int
+	 * @return: boolean
+	 */
+	 public function getOperationPermission()
+	 {
+		try
+		{
+			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			return [];
+		}
+	 }
 }

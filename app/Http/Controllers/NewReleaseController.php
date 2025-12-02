@@ -29,9 +29,9 @@ class NewReleaseController extends Controller
 		
 		#取新品config用
 		$segment = $request->segment(2);
-		$configKey = $this->_service->convertConfigKey($segment);
+		$this->_service->convertConfigKey($segment);
 		
-		$statistics = $this->_service->getStatistics($configKey);
+		$statistics = $this->_service->getStatistics();
 		$this->_viewModel->segment = $segment;
 		
 		if ($statistics === FALSE)
@@ -52,9 +52,9 @@ class NewReleaseController extends Controller
 		
 		#取新品config用		
 		$segment = $request->segment(2);
-		$configKey = $this->_service->convertConfigKey($segment);
+		$this->_service->convertConfigKey($segment);
 		
-		$statistics = $this->_service->getStatistics($configKey);
+		$statistics = $this->_service->getStatistics();
 		$this->_viewModel->segment = $segment;
 		
 		if ($statistics === FALSE)
