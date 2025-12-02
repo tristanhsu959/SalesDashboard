@@ -34,20 +34,24 @@ class SigninService
 	{
 		try
 		{
-			#1. auth by AD
+			#1. Clear old auth session
+			$this->removeSigninUserInfo();
+			$this->removeAuthMenu();
+		
+			#2. auth by AD
 			$adInfo = $this->authenticationAD($adAccount, $adPassword);
 			
 			#記錄Log, 以便分辨錯誤點
 			if ($adInfo === FALSE)
 				throw new Exception('登入失敗，AD帳號或密碼錯誤');
 			
-			#2. auth DB account permission
+			#3. auth DB account permission
 			$userInfo = $this->_authAccountRegister($adAccount);
 			
 			if ($userInfo === FALSE)
 				throw new Exception('登入失敗，帳號尚未註冊');
 			
-			#3. Save to session
+			#4. Save to session
 			$this->saveUserToSession($adInfo, $userInfo);
 			
 			return TRUE;
@@ -85,6 +89,7 @@ class SigninService
 	public function signout()
 	{
 		$this->removeSigninUserInfo();
+		$this->removeAuthMenu();
 		Log::channel('webSysLog')->info('使用者登出系統', [ __class__, __function__]);
 			
 		return TRUE;

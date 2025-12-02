@@ -2,14 +2,9 @@
 #目前未用到
 namespace App\Services;
 
-use App\Traits\AuthorizationTrait;
-use App\Traits\RolePermissionTrait;
-use Illuminate\Support\Arr;
 
 class AppService
 {
-	#use AuthorizationTrait, RolePermissionTrait;
-	
 	public function __construct()
 	{
 		// $this->_repository = $partyRepository;

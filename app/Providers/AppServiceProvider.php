@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use PDO;
 use App\Traits\AuthorizationTrait;
-use App\Traits\RolePermissionTrait;
 use App\ViewModels\MenuViewModel;
 
 class AppServiceProvider extends ServiceProvider
 {
-	use AuthorizationTrait, RolePermissionTrait;
+	use AuthorizationTrait;
     /**
      * Register any application services.
      */

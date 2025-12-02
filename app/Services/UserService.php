@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-#use App\Libraries\LoggerLib;
-use App\Traits\RolePermissionTrait;
+use App\Traits\AuthorizationTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -13,6 +12,11 @@ use Log;
 
 class UserService
 {
+	use AuthorizationTrait;
+	
+	private $_groupKey	= 'authManager';
+	private $_actionKey = 'users';
+	
 	private $_title = '帳號管理';
 	private $_repository;
     
@@ -21,7 +25,7 @@ class UserService
 		$this->_repository = $userRepository;
 	}
 	
-	/* 取可設定的Role清單
+	/* 取可設定的Role選項清單
 	 * @params: 
 	 * @return: array
 	 */
@@ -40,7 +44,7 @@ class UserService
 		}
 	}
 	
-	/* 取帳號清單 By Query
+	/* 取帳號清單 By Query Conditions
 	 * @params: string
 	 * @params: string
 	 * @params: int
@@ -161,4 +165,13 @@ class UserService
 			return FALSE;
 		}
 	}
+	
+	/* CRUD Permission Check for Page
+	 * @params: int
+	 * @return: boolean
+	 */
+	 public function getOperationPermission()
+	 {
+		 return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+	 }
 }

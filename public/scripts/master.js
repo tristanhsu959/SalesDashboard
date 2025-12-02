@@ -2,14 +2,16 @@
 
 $(function(){
 	/* Menu */
-	$('.menu ul.list-group li a').each(function($item, $key){
-		if ($(this).hasClass('active'))
-		{
-			$(this).closest('.collapse').collapse('show');
-			$(this).closest('.menu-group').find('a.list-title').attr('aria-expanded', 'true').addClass('active');
-		}
-		else
-			$(this).closest('.menu-group').find('a.list-title').removeClass('active');
+	$('.menu .menu-group').each(function($item, $key){
+		$(this).find('a.list-title').removeClass('active');
+		
+		$(this).find('.list-group li a').each(function($item, $key){
+			if ($(this).hasClass('active'))
+			{
+				$(this).closest('.collapse').collapse('show');
+				$(this).closest('.menu-group').find('a.list-title').addClass('active');
+			}
+		});
 	});
 	
 	/* Remove invalid style */

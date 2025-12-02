@@ -22,6 +22,26 @@ class UserController extends Controller
 		$this->_viewModel 	= $userViewModel;
 	}
 	
+	/* 列表
+	 * @params: request
+	 * @return: array
+	 */
+	public function list(Request $request)
+	{
+		$this->_viewModel->initialize(FormAction::List);
+		
+		$data = $this->_service->getList();
+		
+		if ($data === FALSE)
+			$this->_viewModel->fail('讀取帳號清單發生錯誤');
+		else
+			$this->_viewModel->success();
+		
+		$this->_viewModel->list = $data;
+		
+		return view('user/list')->with('viewModel', $this->_viewModel);
+	}
+	
 	/* Search
 	 * @params: request
 	 * @return: array
@@ -39,26 +59,6 @@ class UserController extends Controller
 		
 		if ($data === FALSE)
 			$this->_viewModel->fail('查詢發生錯誤');
-		else
-			$this->_viewModel->success();
-		
-		$this->_viewModel->list = $data;
-		
-		return view('user/list')->with('viewModel', $this->_viewModel);
-	}
-	
-	/* 列表
-	 * @params: request
-	 * @return: array
-	 */
-	public function list(Request $request)
-	{
-		$this->_viewModel->initialize(FormAction::List);
-		
-		$data = $this->_service->getList();
-		
-		if ($data === FALSE)
-			$this->_viewModel->fail('讀取帳號清單發生錯誤');
 		else
 			$this->_viewModel->success();
 		

@@ -3,16 +3,16 @@
 use App\Enums\RoleGroup;
 use App\Enums\Operation;
 
-#Menu Config
+#Menu Config (key與route要相同)
 return [
 	
-	[
+	'newRelease' => [
 		'groupName' => '新品銷售',
 		'groupCode' => '01', #permission code
 		'groupIcon' => ['name' => 'chart_data', 'style' => 'purple-accent-1'], #filled-icon 
 		'groupType' => '',
 		'items' => [
-			[
+			'porkRibs' => [
 				'actionCode'	=> '01', #permission code
 				'segmentCode'	=> 'pork_ribs', #判別用
 				'name' 			=> '橙汁排骨',
@@ -22,7 +22,7 @@ return [
 				],
 				
 			],
-			[
+			'tomatoBeef' => [
 				'actionCode'	=> '02',
 				'segmentCode'	=> 'tomato_beef',
 				'name' 			=> '番茄牛三寶麵',
@@ -35,13 +35,13 @@ return [
 		],
 	],
 	
-	[
+	'authManager' => [
 		'groupName' => '權限管理',
 		'groupCode' => '02',
 		'groupIcon' => ['name' => 'admin_panel_settings', 'style' => 'filled-icon1 red'],
 		'groupType' => RoleGroup::ADMIN->name,
 		'items' => [
-			[
+			'users' => [
 				'actionCode'	=> '01',
 				'segmentCode'	=> 'users',
 				'name' 			=> '帳號管理',
@@ -50,7 +50,7 @@ return [
 					Operation::READ, Operation::CREATE, Operation::UPDATE, Operation::DELETE, 
 				],
 			],
-			[
+			'roles' => [
 				'actionCode'	=> '02',
 				'segmentCode'	=> 'roles',
 				'name' 			=> '身份管理',

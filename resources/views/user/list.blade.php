@@ -12,7 +12,7 @@
 @section('navHead', $viewModel->getBreadcrumb())
 
 @section('navAction')
-<a href="{{ route('user.create') }}" class="btn btn-create">
+<a href="{{ route('user.create') }}" class="btn btn-create" {{ $viewModel->canCreate() }}>
 	<span class="material-symbols-outlined filled-icon">add</span>
 	<span class="title">新增</span>
 </a>
@@ -24,6 +24,7 @@
 @csrf
 </form>
 
+@if ($viewModel->canQuery())
 <form action="{{ route('user.search') }}" method="post" id="searchForm">
 @csrf
 <section class="searchbar section-wrapper">
@@ -49,6 +50,7 @@
 	</button>
 </section>
 </form>
+@endif
 
 <section class="user-list section-wrapper">
 	@if(empty(($viewModel->list)))
@@ -75,12 +77,16 @@
 			<div class="col">{{ Area::getLabelByValue($user['UserAreaId']) }}</div>
 			<div class="col">{{ $viewModel->getRoleById($user['UserRoleId']) }}</div>
 			<div class="col col-action">
+				@if($viewModel->canUpdate())
 				<a href="{{ route('user.update', [$user['UserId']]) }}" class="btn btn-edit">
 					<span class="material-symbols-outlined">edit</span>
 				</a>
+				@endif
+				@if($viewModel->canDelete())
 				<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-del">
 					<span class="material-symbols-outlined">delete</span>
 				</a>
+				@endif
 			</div>
 		</div>
 		@endforeach
