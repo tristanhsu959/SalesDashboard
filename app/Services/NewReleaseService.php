@@ -110,7 +110,7 @@ class NewReleaseService
 			list($statistics['top'], $statistics['last']) = $this->_parsingByRanking($baseData, $statistics['endDate']);
 			
 			#save to Cache
-			Cache::put($cacheKey, $statistics, now()->addMinutes(10));
+			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
 			
 			return $statistics;
 		}
@@ -139,8 +139,8 @@ class NewReleaseService
 			$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
 			$endDateTime   	= Carbon::now()->setTime(23, 59, 59, 0)->toDateTimeString();
 				
-			$startDateTime	= '2025/11/06 00:00:00'; #testing
-			$endDateTime   	= '2025/11/06 23:59:59'; #testing 
+			$startDateTime	= '2025/10/06 00:00:00'; #testing
+			$endDateTime   	= '2025/10/16 23:59:59'; #testing 
 				
 			$brandCode		= data_get($config, 'brand');
 			$productIds 	= data_get($config, 'ids.main');
@@ -178,12 +178,16 @@ class NewReleaseService
 				
 				$bfData	= $this->_repository->getBfSaleData($startDateTime, $endDateTime, $bfProductIds, $bfShopIds);
 				
-				$bfData = $bfData->map(function($item, $key) use ($shopIdMapping) {
-					$item['SHOP_ID'] = $shopIdMapping[$item['SHOP_ID']];
-					return $item;
-				});
-				
-				$mainData = $mainData->merge($bfData);
+				#避免未抓到資料的狀況
+				if (empty($bfData))
+				{
+					$bfData = $bfData->map(function($item, $key) use ($shopIdMapping) {
+						$item['SHOP_ID'] = $shopIdMapping[$item['SHOP_ID']];
+						return $item;
+					});
+					
+					$mainData = $mainData->merge($bfData);
+				}
 			}
 			
 			return $mainData;

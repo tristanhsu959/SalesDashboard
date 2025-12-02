@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
-use App\Exceptions\DBException;
 use Illuminate\Support\Carbon;
 use Exception;
 
