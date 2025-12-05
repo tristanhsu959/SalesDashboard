@@ -19,7 +19,7 @@ trait AuthenticationTrait
 	public function authenticationAD($account, $password)
 	{
 		#fake data
-		return [
+		/*return [
 			"company" => "八方雲集國際股份有限公司",
 			"department" => "資訊處",
 			"title" => "經理",
@@ -28,8 +28,7 @@ trait AuthenticationTrait
 			"name" => "許方毓",
 			"mail" => "tristan.hsu@8way.com.tw",
 		];
-
- 
+		*/
  
 		#C:\openldap\sysconf\ldap.conf for local dev
 		#無法匿名連線(除LDAP外)
