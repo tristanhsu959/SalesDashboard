@@ -12,7 +12,7 @@ return [
 			#'port'         	=> 389, #636 ldaps
 			#'protocol'     	=> 'ldap://',
 				
-			'use_ssl'       	=> TRUE, #ssl or tls只能二選一
+			'use_ssl'       	=> FALSE, #ssl or tls只能二選一
 			'use_tls'       	=> FALSE, 
 			'use_sasl'      	=> TRUE, #測試帳號LDAP要設為FALSE / 正常狀況要設為TRUE
 			'version'       	=> 3,
