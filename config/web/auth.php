@@ -31,4 +31,8 @@ return [
 		],
 	],
 	
+	'supervisor' => [
+		'T2025098' => 'tristan.hsu',
+	],
+	
 ];
