@@ -194,4 +194,15 @@ trait AuthorizationTrait
 		
 		return $canPermission;
 	 }
+	 
+	 /* Config in auth.config
+	 * @params: 
+	 * @return: boolean
+	 */
+	 public function isSupervisor($userAd)
+	 {
+		$config = config('web.auth.supervisor');
+		
+		return in_array($userAd, $config);
+	 }
 }

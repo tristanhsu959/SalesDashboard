@@ -31,6 +31,9 @@
 			background-color: #d32f2f;
 		}
 	}
+	&.disabled {
+		background-color: #9e9e9e !important; 
+	}
 }
 
 

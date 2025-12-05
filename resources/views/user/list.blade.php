@@ -84,7 +84,7 @@
 					</a>
 					@endif
 					@if($viewModel->canDelete())
-					<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-del">
+					<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-del {{ $viewModel->disabledSupervisor($user['UserAd']) }}">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif

@@ -62,7 +62,7 @@ class NewReleaseService
 		else
 		{
 			Log::channel('webSysLog')->info('新品銷售：Get from DB', [ __class__, __function__]);
-			return $this->processStatistics($this->_actionKey, $cacheKey);
+			return $this->processStatistics($cacheKey);
 		}
 	}
 	
@@ -84,6 +84,8 @@ class NewReleaseService
 			'top' => [],
 			'last' => []
 		];
+			
+		Cache::add($cacheKey, $statistics, now()->addMinutes(30));
 			
 		try 
 		{
@@ -118,7 +120,7 @@ class NewReleaseService
 			
 			#save to Cache
 			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
-			
+			dd(Cache::get($cacheKey), $cacheKey);
 			return $statistics;
 		}
 		catch(Exception $e)
@@ -146,8 +148,8 @@ class NewReleaseService
 			$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
 			$endDateTime   	= Carbon::now()->setTime(23, 59, 59, 0)->toDateTimeString();
 				
-			$startDateTime	= '2025/10/06 00:00:00'; #testing
-			$endDateTime   	= '2025/10/16 23:59:59'; #testing 
+			#$startDateTime	= '2025/12/04 00:00:00'; #testing
+			#$endDateTime   	= '2025/12/05 23:59:59'; #testing 
 				
 			$brandCode		= data_get($config, 'brand');
 			$productIds 	= data_get($config, 'ids.main');

@@ -220,7 +220,8 @@ body .content-wrapper {
 				/* ranking list */
 				ul li.list-group-item {
 					height: 84px;
-					box-sizing: border-box;
+					/* box-sizing: border-box; */
+					box-sizing: content-box;
 					position: relatvie;
 					display: flex;
 					justify-content: space-between;

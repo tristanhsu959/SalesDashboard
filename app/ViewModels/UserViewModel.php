@@ -225,6 +225,7 @@ class UserViewModel
 	}
 	
 	#Page operation permission
+	#判別登入使用者權限
 	public function canQuery()
 	{
 		return in_array(Operation::READ->name, $this->_data['operations']);
@@ -240,8 +241,21 @@ class UserViewModel
 		return in_array(Operation::UPDATE->name, $this->_data['operations']);
 	}
 	
+	/* Delete permission
+	 * @params: int : 欲刪除的user id
+	 * @return: boolean
+	 */
 	public function canDelete()
 	{
 		return in_array(Operation::DELETE->name, $this->_data['operations']);
+	}
+	
+	/* Delete permission
+	 * @params: int : 欲刪除的user id
+	 * @return: boolean
+	 */
+	public function disabledSupervisor($deleteUserAd)
+	{
+		return $this->_service->isSupervisor($deleteUserAd) ? 'disabled' : '';
 	}
 }

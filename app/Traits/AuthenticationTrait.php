@@ -42,7 +42,6 @@ trait AuthenticationTrait
 		try 
 		{
 			$connection = new Connection($connectionConfig);
-		
 			$connection->connect();
 			
 			/*
@@ -65,6 +64,9 @@ trait AuthenticationTrait
 		catch (\LdapRecord\Auth\BindException $e) 
 		{
 			Log::channel('webSysLog')->error('AD驗證失敗:' . $e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error('ErrorCode:' . $e->getDetailedError()->getErrorCode());
+			Log::channel('webSysLog')->error('DetailError:' . $e->getDetailedError()->getErrorMessage());
+			Log::channel('webSysLog')->error('DiagnosticMessage:' .  $e->getDetailedError()->getDiagnosticMessage());
 			return FALSE;
 		}
 	}
