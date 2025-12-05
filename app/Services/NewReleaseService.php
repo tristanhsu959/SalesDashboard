@@ -120,7 +120,7 @@ class NewReleaseService
 			
 			#save to Cache
 			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
-			dd(Cache::get($cacheKey), $cacheKey);
+			
 			return $statistics;
 		}
 		catch(Exception $e)
