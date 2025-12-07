@@ -10,11 +10,17 @@
 	--secondary-orange-color: #ffc107; /* amber */
 	
 	/* View Background */
-	--default-bg-color: #fff;
-	--primary-dark-bg-color: #263238;
-	--secondary-dark-bg-color: #37474f;
+	--primary-default-bg-color: #fff;
+	--secondary-default-bg-color: #ccc;
 	
+	--primary-dark-bg-color: #000;
+	--secondary-dark-bg-color: #263238;
+	
+	// --primary-dark-bg-color: #263238;
+	// --secondary-dark-bg-color: #37474f;
+		
 	--divider-color: #eceff1;
+	
 	
 	
 	/* Button */
