@@ -1,11 +1,11 @@
 @extends('layouts.master')
 
 @push('styles')
-    <link href="{{ asset('styles/signin.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/signin/signin.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/signin.js') }}" defer></script>
+    <script src="{{ asset('scripts/signin/signin.js') }}" defer></script>
 @endpush
 
 @section('signin')
