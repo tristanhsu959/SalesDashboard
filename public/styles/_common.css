@@ -3,41 +3,49 @@
 
 body {
 	--scrollbar-width: calc(100vw - 100%);
+	--theme-bg-color: var(--primary-default-bg-color);
+	--theme-secondary-bg-color: var(--secondary-default-bg-color);
+	
+	/* Light Table */
+	--table-head-bg-color: #01579b; /*#252525;*/
+	--table-head-color: #e1f5fe;
+	--table-row-border-color: #607d8b;
+	--table-col-color: #90a4ae;
+	--table-col-odd-color: #37474f;
+	
+	&.dark {
+		--theme-bg-color: var(--primary-dark-bg-color);
+		--theme-secondary-bg-color: var(--secondary-dark-bg-color);
+		
+		/* Dark Table */
+		--table-head-bg-color: #01579b; /*#252525;*/
+		--table-head-color: #e1f5fe;
+		--table-row-border-color: #607d8b;
+		--table-col-color: #90a4ae;
+		--table-col-odd-color: #37474f;
+		--table-col-even-color: #263238;
+	}
 	
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
 	margin: 0;
 	display: flex; 
+	background-color: var(--theme-bg-color);
+	background: linear-gradient(150deg, var(--theme-bg-color), var(--theme-bg-color), var(--theme-bg-color), var(--theme-secondary-bg-color));
 	
-	&.dark {
-		background-color: var(--primary-dark-bg-color);
-		background: linear-gradient(150deg, var(--primary-dark-bg-color), var(--primary-dark-bg-color), var(--primary-dark-bg-color), #37474f);
-	}
 	
 	.content-wrapper{
 		position: relative;
 		flex-grow: 1;
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
 		height: 100%; /* 100vh sticky會失效 */
-		/* overflow-x: hidden; */
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		background-color: transparent;
 	}
 	
-	/* .content-wrapper { */
-		/* position: relative; */
-		/* top: 0; */
-		/* left: 280px; */
-		/* width: calc(100vw - 280px); */
-		/* height: 100vh; */
-	/* } */
-	
-	.list-group {
-		border-radius: 2px;
-	}
-	
+	/* list no data */
 	.section-wrapper .empty-list {
 		.row {
 			border-bottom-width: 0;
@@ -49,12 +57,20 @@ body {
 			}
 		}
 	}
+	
+	/* Other styles */
+	.list-group {
+		border-radius: 2px;
+	}
+	
+	
 }
 
 .filled-icon {
   font-variation-settings: 'FILL' 1;
 }
 
+/* row divider */
 .divider {
 	display: flex;
 	

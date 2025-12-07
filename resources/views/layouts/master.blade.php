@@ -33,7 +33,7 @@
 		@else
 			@include('layouts.master_menu')
 		
-			<div class='content-wrapper dark'>
+			<div class='content-wrapper'>
 				@include('layouts.master_actionbar')
 				@hasSection('content')
 					@yield('content')

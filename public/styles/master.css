@@ -2,7 +2,8 @@
 
 @import "_variables.css";
 @import "_common.css";
-@import "_my_component.css";
+@import "_component.css";
+@import "_form.css";
 @import "_actionbar.css";
 @import "_menu.css";
 @import "_profile.css";

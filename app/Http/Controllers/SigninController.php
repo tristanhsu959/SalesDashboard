@@ -34,7 +34,7 @@ class SigninController extends Controller
         ]);
  
         if ($validator->fails()) 
-			return redirect('signin')->with('msg', '登入失敗，帳號或密碼錯誤');
+			return redirect('signin')->with('msg', '登入失敗，輸入資料不完整');
 		
 		
 		$adAccount = $request->input('adAccount');
@@ -42,8 +42,8 @@ class SigninController extends Controller
 		
 		$response = $this->_service->authSiginIn($adAccount, $adPassword);
 		
-		if ($response === FALSE)
-			return redirect('signin')->with('msg', '登入失敗，帳號或密碼錯誤');
+		if ($response->status === FALSE)
+			return redirect('signin')->with('msg', $response->msg);
 		else
 			return redirect('home');
 	}
