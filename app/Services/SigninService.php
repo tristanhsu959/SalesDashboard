@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\SigninRepository;
-#use App\Libraries\LoggerLib;
+use App\Libraries\ResponseLib;
 use App\Traits\AuthenticationTrait;
 use App\Traits\AuthorizationTrait;
 use Illuminate\Support\Arr;
@@ -43,7 +43,7 @@ class SigninService
 			
 			#記錄Log, 以便分辨錯誤點
 			if ($adInfo === FALSE)
-				throw new Exception('登入失敗，AD帳號或密碼錯誤');
+				throw new Exception('AD驗證失敗');
 			
 			#3. auth DB account permission
 			$userInfo = $this->_authAccountRegister($adAccount);
@@ -54,12 +54,12 @@ class SigninService
 			#4. Save to session
 			$this->saveUserToSession($adInfo, $userInfo);
 			
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
 	
