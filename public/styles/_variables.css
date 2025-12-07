@@ -31,18 +31,4 @@
 	--btn-delete-bg-color: #f44336; /* 500 */
 	--btn-return-bg-color: #263238; /* darken4 */
 	
-	
-	/* Dark Table */
-	--table-head-bg-color: #01579b; /*#252525;*/
-	--table-head-color: #e1f5fe;
-	--table-row-border-color: #607d8b;
-	--table-col-color: #90a4ae;
-	--table-col-odd-color: #37474f;
-	/* --table-col-even-color: #455a64; */
-	
-	/* --table-head-bg-color: #263238; */
-	/* --table-head-color: #cfd8dc; */
-	/* --table-row-border-color: #607d8b; */
-	/* --table-col-color: #859AA4; */
-	/* --table-col-odd-color: #40525B; */
 }

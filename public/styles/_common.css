@@ -6,9 +6,24 @@ body {
 	--theme-bg-color: var(--primary-default-bg-color);
 	--theme-secondary-bg-color: var(--secondary-default-bg-color);
 	
+	/* Light Table */
+	--table-head-bg-color: #01579b; /*#252525;*/
+	--table-head-color: #e1f5fe;
+	--table-row-border-color: #607d8b;
+	--table-col-color: #90a4ae;
+	--table-col-odd-color: #37474f;
+	
 	&.dark {
 		--theme-bg-color: var(--primary-dark-bg-color);
 		--theme-secondary-bg-color: var(--secondary-dark-bg-color);
+		
+		/* Dark Table */
+		--table-head-bg-color: #01579b; /*#252525;*/
+		--table-head-color: #e1f5fe;
+		--table-row-border-color: #607d8b;
+		--table-col-color: #90a4ae;
+		--table-col-odd-color: #37474f;
+		--table-col-even-color: #263238;
 	}
 	
 	font-family: 'Roboto', 'Orbitron', sans-serif;
@@ -18,11 +33,6 @@ body {
 	background-color: var(--theme-bg-color);
 	background: linear-gradient(150deg, var(--theme-bg-color), var(--theme-bg-color), var(--theme-bg-color), var(--theme-secondary-bg-color));
 	
-	
-	// &.dark {
-		// background-color: var(--primary-dark-bg-color);
-		// background: linear-gradient(150deg, var(--primary-dark-bg-color), var(--primary-dark-bg-color), var(--primary-dark-bg-color), #37474f);
-	// }
 	
 	.content-wrapper{
 		position: relative;

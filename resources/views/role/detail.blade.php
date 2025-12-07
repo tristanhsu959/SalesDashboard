@@ -27,11 +27,11 @@
 
 <section class="section-wrapper">
 	<div class="section role-data">
-		<div class="input-field field-orange field dark required">
+		<div class="input-field field-orange field required">
 			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->getRoleName() }}" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
-		<div class="input-select field-orange field dark required">
+		<div class="input-select field-orange field required">
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
 				@foreach($viewModel->roleGroup as $role)
@@ -44,7 +44,7 @@
 		</div>
 	</div>
 	
-	<div class="section role-permission dark">
+	<div class="section role-permission field-group">
 		@foreach($viewModel->functionList as $groupKey => $group)
 		<ul class="list-group {{ Str::lower($group['groupType']) }}">
 			<label class="title">
