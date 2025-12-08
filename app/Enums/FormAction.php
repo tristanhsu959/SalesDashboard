@@ -4,16 +4,18 @@ namespace App\Enums;
 
 enum FormAction : int
 {
-	case HOME 	= 1;
-    case List 	= 2;
-	case CREATE	= 3;
-	case UPDATE = 4;
-	case DELETE = 5;
+	case SIGNIN	= 1;
+	case HOME 	= 2;
+    case List 	= 3;
+	case CREATE	= 4;
+	case UPDATE = 5;
+	case DELETE = 6;
 	
 	public function label() : string
     {
         return match ($this) 
 		{
+			self::SIGNIN	=> '登入',
 			self::HOME		=> '首頁',
 			self::List 		=> '列表',
 			self::CREATE	=> '新增',

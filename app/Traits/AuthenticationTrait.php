@@ -25,9 +25,10 @@ trait AuthenticationTrait
 		
 		$result = [];
 		
+		$domain = config('web.auth.domain');
 		$connectionConfig = config('web.auth.ad.connection');
 		#必須是Distinquished Name:cn= , base dn
-		$connectionConfig['username'] = "{$account}@8way.com.tw"; //"cn={$account},{$connectionConfig['base_dn']}"; 
+		$connectionConfig['username'] = "{$account}@{$domain}"; //"cn={$account},{$connectionConfig['base_dn']}"; 
 		$connectionConfig['password'] = $password;
 		
 		try 
@@ -50,7 +51,6 @@ trait AuthenticationTrait
 			$adInfo['name'] 		= Str::remove(' ', data_get($result, 'name.0', '')); #=>CNName
 			$adInfo['mail'] 		= data_get($result, 'mail.0', '');
 			
-			dd($adInfo);
 			return $adInfo;
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\UserRepository;
 use App\Traits\AuthorizationTrait;
+use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -25,22 +26,22 @@ class UserService
 		$this->_repository = $userRepository;
 	}
 	
-	/* 取可設定的Role選項清單
+	/* 取帳號清單(Get ALL)
 	 * @params: 
 	 * @return: array
 	 */
-	public function getRoleOptions()
+	public function getList()
 	{
 		try
 		{
-			$list = $this->_repository->getRoleList();
+			$list = $this->_repository->getList();
 			
-			return $list;
+			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return [];
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -56,31 +57,12 @@ class UserService
 		{
 			$list = $this->_repository->getList($searchAd, $searchName, $searchArea);
 			
-			return $list;
+			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
-		}
-	}
-	
-	/* 取帳號清單(Get ALL)
-	 * @params: 
-	 * @return: array
-	 */
-	public function getList()
-	{
-		try
-		{
-			$list = $this->_repository->getList();
-			
-			return $list;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -98,16 +80,16 @@ class UserService
 			#Create data
 			$this->_repository->insertUser($adAccount, $displayName, $areaId, $roleId);
 		
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
-	/* 取User Data
+	/* Update:取User Data
 	 * @params: int
 	 * @return: object array
 	 */
@@ -116,12 +98,12 @@ class UserService
 		try
 		{
 			$result = $this->_repository->getUserById($id);
-			return $result;
+			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -138,13 +120,12 @@ class UserService
 		try
 		{
 			$this->_repository->updateUser($adAccount, $displayName, $areaId, $roleId, $userId);
-		
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -157,12 +138,31 @@ class UserService
 		try
 		{
 			$this->_repository->removeUser($userId);
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
+		}
+	}
+	
+	/* 取可設定的Role選項清單
+	 * @params: 
+	 * @return: array
+	 */
+	public function getRoleOptions()
+	{
+		try
+		{
+			$list = $this->_repository->getRoleList();
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			return [];
 		}
 	}
 	

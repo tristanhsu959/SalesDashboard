@@ -24,10 +24,10 @@
 		<h6>使用AD帳號登入至系統</h6>
 	</div>
 	
-	<form action="{{ url('signin') }}" method="post" id="signinForm">
+	<form action="{{ route('signin.post') }}" method="post" id="signinForm">
 		@csrf
 		<div class="input-field field-blue">
-			<input type="text" class="form-control" id="adAccount" name="adAccount" maxlength="20" placeholder=" " required>
+			<input type="text" class="form-control" id="adAccount" name="adAccount" value="{{ $viewModel->adAccount }}" maxlength="20" placeholder=" " required>
 			<label for="adAccount" class="form-label">Account</label>
 			<span class="domain-text">@8way.com.tw</span>
 		</div>

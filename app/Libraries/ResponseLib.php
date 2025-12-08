@@ -49,7 +49,9 @@ class ResponseLib
 	 */
 	public function fail($msg = NULL)
 	{
-		$this->_response['msg'] = $msg;
+		if (! empty($msg))
+			$this->_response['msg'] = $msg;
+		
 		$this->_response['status'] = FALSE;
 		
 		return $this;

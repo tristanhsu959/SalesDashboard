@@ -18,9 +18,11 @@ class UserViewModel
 		$this->_service = $userService;
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
-		$this->_data['userId']		= 0; #form create or update role id
 		$this->_data['status']		= FALSE;
 		$this->_data['msg'] 		= '';
+		
+		#Form Data
+		$this->_data['userId']		= 0; #form create or update role id
 		$this->_data['userData'] 	= NULL; #DB data
 		$this->_data['list'] 		= []; #DB data
 		$this->_data['search']		= [];
@@ -43,22 +45,6 @@ class UserViewModel
 		return array_key_exists($name, $this->_data);
 	}
 	
-	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function success($msg = NULL)
-	{
-		$this->_data['status'] = TRUE;
-		$this->_data['msg'] = $msg ?? '';
-	}
-	
-	public function fail($msg)
-	{
-		$this->_data['status'] 	= FALSE;
-		$this->_data['msg'] 		= $msg;
-	}          
-	
 	/* initialize
 	 * @params: enum
 	 * @params: int
@@ -73,8 +59,23 @@ class UserViewModel
 		
 		$this->_setOptions();
 		$this->_data['operations'] = $this->_service->getOperationPermission();
-		#dd($this->_data['operations']);
 	}
+	
+	/* Status / Msg
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function success($msg = NULL)
+	{
+		$this->_data['status'] 	= TRUE;
+		$this->_data['msg'] 	= $msg ?? '';
+	}
+	
+	public function fail($msg)
+	{
+		$this->_data['status'] 	= FALSE;
+		$this->_data['msg'] 	= $msg;
+	}          
 	
 	/* Form submit action
 	 * @params: 
@@ -190,40 +191,6 @@ class UserViewModel
 	}
 	
 	
-	/* Form Style */
-	public function getBreadcrumb()
-    {
-		return $this->_title . ' | ' . $this->action->label();
-	}
-	
-	public function selectedArea($areaId)
-	{
-		$userAreaId = $this->getUserAreaId();
-		
-		if ($areaId == $userAreaId)
-			return 'selected';
-		
-		return '';
-	}
-	
-	public function checkedRole($roleId)
-	{
-		$userRoleId = $this->getUserRoleId();
-		
-		if ($roleId == $userRoleId)
-			return 'checked';
-		
-		return '';
-	}
-	
-	public function selectedSearchArea($areaId)
-	{
-		if ($areaId == $this->getSearchArea())
-			return 'selected';
-		
-		return '';
-	}
-	
 	#Page operation permission
 	#判別登入使用者權限
 	public function canQuery()
@@ -250,7 +217,34 @@ class UserViewModel
 		return in_array(Operation::DELETE->name, $this->_data['operations']);
 	}
 	
-	/* Delete permission
+	/* Form Style */
+	public function getBreadcrumb()
+    {
+		return $this->_title . ' | ' . $this->action->label();
+	}
+	
+	/* Search form */
+	public function selectedSearchArea($areaId)
+	{
+		return ($areaId == $this->getSearchArea());
+	}
+	
+	/* User form */
+	public function selectedArea($areaId)
+	{
+		$userAreaId = $this->getUserAreaId();
+		
+		return ($areaId == $userAreaId);
+	}
+	
+	public function checkedRole($roleId)
+	{
+		$userRoleId = $this->getUserRoleId();
+		
+		return ($roleId == $userRoleId);
+	}
+	
+	/* supervisor permission
 	 * @params: int : 欲刪除的user id
 	 * @return: boolean
 	 */

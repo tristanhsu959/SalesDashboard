@@ -11,7 +11,7 @@ use App\Http\Middleware\AuthPermission;
 /* Login */
 Route::get('/', [SigninController::class, 'showSignin'])->name('signin');
 Route::get('signin', [SigninController::class, 'showSignin'])->name('signin');
-Route::post('signin', [SigninController::class, 'signin']);
+Route::post('signin', [SigninController::class, 'signin'])->name('signin.post');
 Route::get('signout', [SigninController::class, 'signout'])->name('signout');
 
 Route::middleware([AuthPermission::class])->group(function(){

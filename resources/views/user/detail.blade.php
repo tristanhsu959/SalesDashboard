@@ -38,7 +38,7 @@
 			<select class="form-select" id="area" name="area">
 				<option value=""selected>請選擇</option>
 				@foreach($viewModel->area as $area)
-				<option value="{{ $area->value }}" {{ $viewModel->selectedArea($area->value) }} >{{ $area->label() }}</option>
+				<option value="{{ $area->value }}" @selected($viewModel->selectedArea($area->value)) >{{ $area->label() }}</option>
 				@endforeach
 			</select>
 			<label for="group" class="form-label">管理區域</label>
@@ -48,7 +48,7 @@
 		<label class="title">所屬身份</label>
 		@foreach($viewModel->roleList as $idx => $role)
 		<label class="form-check-label" for="role{{$idx}}">
-			<input class="form-check-input" type="radio" name="role" id="role{{$idx}}" value="{{ $role['RoleId'] }}" {{ $viewModel->checkedRole($role['RoleId']) }} >
+			<input class="form-check-input" type="radio" name="role" id="role{{$idx}}" value="{{ $role['RoleId'] }}" @checked($viewModel->checkedRole($role['RoleId'])) >
 			{{ $role['RoleName'] }}
 		</label>
 		@endforeach

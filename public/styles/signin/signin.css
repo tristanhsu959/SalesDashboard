@@ -3,14 +3,10 @@
 body {
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
-	background-color: var(--default-bg-color);
 	margin: 0;
 	display: flex;
-	
-	&.dark {
-		background-color: var(--default-bg-color);
-		background: var(--default-bg-color);
-	}
+	background-color:  var(--primary-default-bg-color);
+	background:  var(--primary-default-bg-color);
 	
 	.content-wrapper {
 		flex-grow: 1;
@@ -88,6 +84,13 @@ body {
 			.input-field {
 				margin: 1rem 0;
 				
+				label {
+					background-color: var(--primary-default-bg-color);
+				}
+				input {
+					color: #212529;
+					background-color: var(--primary-default-bg-color);
+				}
 				.group-text {
 					width: 110px;
 					color: #ccc;

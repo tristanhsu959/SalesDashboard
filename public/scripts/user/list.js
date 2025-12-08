@@ -14,11 +14,11 @@ $(function(){
 	
 	$('.btn-search').click(function(e){
 		e.preventDefault();
-		
-		if (validateForm('#searchAd') || validateForm('#searchName') || validateForm('#searchArea'))
+		$('#searchForm').submit();
+		/*if (validateForm('#searchAd') || validateForm('#searchName') || validateForm('#searchArea'))
 			$('#searchForm').submit();
 		else
-			showAlertDialog('至少須輸入一個條件');
+			showAlertDialog('至少須輸入一個條件');*/
 	});
 	
 });

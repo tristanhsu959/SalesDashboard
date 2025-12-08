@@ -100,7 +100,7 @@
 						
 						&:hover, &.active {
 							border-radius: 20px;
-							background-color: rgba(69, 90, 100, .25);
+							background-color: rgba(69, 90, 100, .5);
 							color: var(--menu-hover-color);
 						}
 					}

@@ -1,8 +1,8 @@
 /* Form Component Style */
 
 body {
-	// --input-field-color: #cfd8dc;
-	// --input-field-label-color: #cfd8dc;
+	/* --input-field-color: #cfd8dc; */
+	/* --input-field-label-color: #cfd8dc; */
 	
 	--input-field-color: #212529;
 	--input-field-bg-color: var(--primary-default-bg-color);
@@ -15,8 +15,8 @@ body {
 		--input-field-label-color: #9e9e9e;
 		--input-field-label-bg-color: var(--primary-dark-bg-color);
 	
-		// --input-field-color: ;
-		// --input-field-label-color: #8d8d8d;
+		/* --input-field-color: ; */
+		/* --input-field-label-color: #8d8d8d; */
 	}
 }
 

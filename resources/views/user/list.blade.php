@@ -42,7 +42,7 @@
 			<select class="form-select" id="searchArea" name="searchArea">
 				<option value="">請選擇</option>
 				@foreach($viewModel->area as $area)
-				<option value="{{ $area->value }}" {{ $viewModel->selectedSearchArea($area->value) }}>{{ $area->label() }}</option>
+				<option value="{{ $area->value }}" @selected($viewModel->selectedSearchArea($area->value)) >{{ $area->label() }}</option>
 				@endforeach
 			</select>
 			<label for="group" class="form-label">管理區域</label>

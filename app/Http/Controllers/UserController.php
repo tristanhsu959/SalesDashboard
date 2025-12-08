@@ -30,14 +30,15 @@ class UserController extends Controller
 	{
 		$this->_viewModel->initialize(FormAction::List);
 		
-		$data = $this->_service->getList();
+		$response = $this->_service->getList();
 		
-		if ($data === FALSE)
-			$this->_viewModel->fail('讀取帳號清單發生錯誤');
+		if ($response->status === FALSE)
+			$this->_viewModel->fail('讀取帳號清單時發生錯誤');
 		else
+		{
 			$this->_viewModel->success();
-		
-		$this->_viewModel->list = $data;
+			$this->_viewModel->list = $response->data;
+		}
 		
 		return view('user/list')->with('viewModel', $this->_viewModel);
 	}
@@ -54,16 +55,18 @@ class UserController extends Controller
 		$searchAd	= $request->input('searchAd');
 		$searchName	= $request->input('searchName');
 		$searchArea	= $request->input('searchArea');
+		
 		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchArea);
 		
-		$data = $this->_service->searchList($searchAd, $searchName, $searchArea);
+		$response = $this->_service->searchList($searchAd, $searchName, $searchArea);
 		
-		if ($data === FALSE)
-			$this->_viewModel->fail('查詢發生錯誤');
+		if ($response->status === FALSE)
+			$this->_viewModel->fail('查詢時發生錯誤');
 		else
+		{
 			$this->_viewModel->success();
-		
-		$this->_viewModel->list = $data;
+			$this->_viewModel->list = $response->data;
+		}
 		
 		return view('user/list')->with('viewModel', $this->_viewModel);
 	}
@@ -109,15 +112,15 @@ class UserController extends Controller
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->createUser($adAccount, $displayName, $area, $role);
+		$response = $this->_service->createUser($adAccount, $displayName, $area, $role);
 		
-		if ($result === FALSE)
+		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail('新增帳號失敗');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('user.list')->with('msg', '新增帳號完成');;
+			return redirect()->route('user.list')->with('msg', '新增帳號完成');
 	}
 	
 	/* 編輯Form
@@ -132,12 +135,12 @@ class UserController extends Controller
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
-		$userData = $this->_service->getUserById($id);
+		$response = $this->_service->getUserById($id);
 		
-		if ($userData === FALSE)
+		if ($response->status === FALSE)
 			return redirect()->route('user.list')->with('msg', '讀取編輯資料發生錯誤');
 		
-		$this->_viewModel->userData = $userData; 
+		$this->_viewModel->userData = $response->data; 
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);
@@ -174,9 +177,9 @@ class UserController extends Controller
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->updateUser($adAccount, $displayName, $area, $role, $id);
+		$response = $this->_service->updateUser($adAccount, $displayName, $area, $role, $id);
 		
-		if ($result === FALSE)
+		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail('編輯帳號失敗');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
