@@ -29,14 +29,15 @@ class RoleController extends Controller
 	{
 		$this->_viewModel->initialize(FormAction::List);
 		
-		$data = $this->_service->getList();
+		$response = $this->_service->getList();
 		
-		if ($data === FALSE)
+		if ($response->status === FALSE)
 			$this->_viewModel->fail('讀取身份清單發生錯誤');
 		else
+		{
 			$this->_viewModel->success();
-		
-		$this->_viewModel->list = $data;
+			$this->_viewModel->list = $response->data;
+		}
 		
 		return view('role/list')->with('viewModel', $this->_viewModel);
 	}
@@ -81,9 +82,9 @@ class RoleController extends Controller
 			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->createRole($name, $group, $settingList);
+		$response = $this->_service->createRole($name, $group, $settingList);
 		
-		if ($result === FALSE)
+		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail('新增身份失敗');
 			return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -104,12 +105,12 @@ class RoleController extends Controller
 		if (empty($id))
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
 		
-		$roleData = $this->_service->getRoleById($id);
+		$response = $this->_service->getRoleById($id);
 		
-		if ($roleData === FALSE)
+		if ($response->status === FALSE)
 			return redirect()->route('role.list')->with('msg', '讀取編輯資料發生錯誤');
 		
-		$this->_viewModel->roleData = $roleData; 
+		$this->_viewModel->roleData = $response->data;
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -145,9 +146,9 @@ class RoleController extends Controller
 			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$result = $this->_service->updateRole($name, $group, $settingList, $id);
+		$response = $this->_service->updateRole($name, $group, $settingList, $id);
 		
-		if ($result === FALSE)
+		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail('編輯身份失敗');
 			return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -169,9 +170,9 @@ class RoleController extends Controller
 		if (empty($id))
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
 		
-		$result = $this->_service->deleteRole($id);
+		$response = $this->_service->deleteRole($id);
 		
-		if ($result === FALSE)
+		if ($response->status === FALSE)
 			return redirect()->route('role.list')->with('msg', '刪除身份失敗');
 		else
 			return redirect()->route('role.list')->with('msg', '刪除身份完成');

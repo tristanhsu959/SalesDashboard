@@ -35,7 +35,7 @@
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
 				@foreach($viewModel->roleGroup as $role)
-				<option value="{{ $role->value }}" {{ $viewModel->selectedRoleGroup($role->value) }}>
+				<option value="{{ $role->value }}" @selected($viewModel->selectedRoleGroup($role->value)) >
 				{{ $role->label() }}
 				</option>
 				@endforeach
@@ -64,7 +64,7 @@
 							value="{{ $operation->value }}" 
 							id="settingList{{$groupKey.$itemKey.$opKey }}" 
 							name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'settingList[?][?][]') }}"
-							{{ $viewModel->checkedOperation($group['groupCode'], $item['actionCode'], $operation->value) }}
+							@checked($viewModel->checkedOperation($group['groupCode'], $item['actionCode'], $operation->value))
 						>
 						{{ $operation->label() }}
 					</label>

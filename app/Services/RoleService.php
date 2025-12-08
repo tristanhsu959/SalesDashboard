@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\RoleRepository;
 use App\Traits\AuthorizationTrait;
 use App\Traits\RolePermissionTrait;
+use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -34,12 +35,12 @@ class RoleService
 		{
 			$list = $this->_repository->getList();
 			
-			return $list;
+			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -57,12 +58,12 @@ class RoleService
 			$permissionList = $this->buildPermissionByFunction($settingList);
 			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -75,12 +76,12 @@ class RoleService
 		try
 		{
 			$result = $this->_repository->getRoleById($id);
-			return $result;
+			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -98,12 +99,12 @@ class RoleService
 			$permissionList = $this->buildPermissionByFunction($settingList);
 			$this->_repository->updateRole($roleName, $roleGroup, $permissionList, $roleId);
 		
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	
@@ -116,12 +117,12 @@ class RoleService
 		try
 		{
 			$this->_repository->removeRole($roleId);
-			return TRUE;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return FALSE;
+			return ResponseLib::initialize()->fail();
 		}
 	}
 	

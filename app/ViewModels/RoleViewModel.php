@@ -22,12 +22,14 @@ class RoleViewModel
 		$this->_service = $roleService;
 		#initialize
 		$this->_data['action'] 	= NULL; #enum form action
-		$this->_data['roleId']	= 0; #form create or update role id
 		$this->_data['status']	= FALSE;
-		$this->_data['msg'] 		= '';
-		$this->_data['roleData'] = NULL; #DB _data
-		$this->_data['list'] 	= []; #DB data
-		$this->_data['operations'] = [];
+		$this->_data['msg'] 	= '';
+		
+		#form data
+		$this->_data['roleId']		= 0; #form create or update role id
+		$this->_data['roleData']	= NULL; #DB _data
+		$this->_data['list'] 		= []; #DB data
+		$this->_data['operations'] 	= [];
 	}
 	
 	public function __set($name, $value)
@@ -137,30 +139,6 @@ class RoleViewModel
 		return data_get($this->_data, 'roleData.RoleName', '');
 	}
 	
-		
-	/* Form Style */
-	public function getBreadcrumb()
-    {
-		return $this->_title . ' | ' . $this->action->label();
-	}
-	
-	public function selectedRoleGroup($group)
-	{
-		$group = intval($group);
-		
-		return ($group == data_get($this->_data, 'roleData.RoleGroup', 0)) ? 'selected' : '';
-	}
-	
-	public function checkedOperation($hexGroupCode, $hexActionCode, $hexOperation)
-	{
-		$authPermission = data_get($this->_data, 'roleData.Permission', []);
-		
-		if ($this->hasOperationPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission))
-			return 'checked';
-		
-		return '';
-	}
-	
 	#Page operation permission
 	public function canQuery()
 	{
@@ -180,5 +158,26 @@ class RoleViewModel
 	public function canDelete()
 	{
 		return in_array(Operation::DELETE->name, $this->_data['operations']);
+	}
+	
+	
+	/* Form Style */
+	public function getBreadcrumb()
+    {
+		return $this->_title . ' | ' . $this->action->label();
+	}
+	
+	public function selectedRoleGroup($group)
+	{
+		$group = intval($group);
+		
+		return ($group == data_get($this->_data, 'roleData.RoleGroup', 0));
+	}
+	
+	public function checkedOperation($hexGroupCode, $hexActionCode, $hexOperation)
+	{
+		$authPermission = data_get($this->_data, 'roleData.Permission', []);
+		
+		return ($this->hasOperationPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission));
 	}
 }
