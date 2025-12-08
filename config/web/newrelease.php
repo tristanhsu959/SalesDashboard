@@ -9,7 +9,8 @@ return [
 	'products' => [
 		
 		'porkRibs' => [
-			'saleDate' => '2025/09/08',
+			'saleDate' => '2025-09-08', #發售日
+			'saleEndDate' => NULL, #停售日
 			'name' => '橙汁排骨',
 			'ids' => [
 				'main' => ['UC06000126', 'UC06000127', 'UC00000042', 'UC00000043'], #梁社漢
@@ -20,6 +21,7 @@ return [
 		
 		'tomatoBeef' => [
 			'saleDate' => '2025/10/13',
+			'saleEndDate' => '', #停售日
 			'name' => '番茄牛三寶',
 			'ids' => [
 				'main' => ['UC07100017', 'UC07100018', 'UC03000024', 'UC03000025', 'UC06100105', 'UC06100106'], #梁社漢

@@ -57,7 +57,8 @@ class NewReleaseService
 		if (Cache::has($cacheKey))
 		{
 			Log::channel('webSysLog')->info('新品銷售：Get from cache', [ __class__, __function__]);
-			return Cache::get($cacheKey);
+			$cacheStatistics = Cache::get($cacheKey);
+			return ResponseLib::initialize($cacheStatistics)->success();
 		}
 		else
 		{
@@ -75,22 +76,24 @@ class NewReleaseService
 	{
 		#initialize
 		$statistics = [
-			'productName' => '',
-			'saleDate' => '',
-			'startDate' => '',
-			'endDate' => '',
-			'shop' => [],
-			'area' => [],
-			'top' => [],
-			'last' => []
+			'productName' 	=> '',
+			'saleDate' 		=> '',
+			'saleEndDate' 	=> '',
+			'startDate' 	=> '',
+			'endDate' 		=> '',
+			'shop' 	=> [],
+			'area' 	=> [],
+			'top' 	=> [],
+			'last' 	=> [],
 		];
 			
-		Cache::add($cacheKey, $statistics, now()->addMinutes(30));
+		//Cache::add($cacheKey, $statistics, now()->addMinutes(30));
 			
 		try 
 		{
 			#1.取新品參數 & Initialize 
-			list($productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams();
+			list($productName, $saleDate, $saleEndDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams();
+			
 			$statistics['productName'] = $productName;
 			$statistics['saleDate'] = (new Carbon($saleDate))->format('Y-m-d');
 			$statistics['startDate'] = (new Carbon($startDateTime))->format('Y-m-d');
@@ -121,12 +124,12 @@ class NewReleaseService
 			#save to Cache
 			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
 			
-			return $statistics;
+			return ResponseLib::initialize($statistics)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return $statistics;
+			return ResponseLib::initialize($statistics)->fail();
 		}
 	}
 	
@@ -143,13 +146,27 @@ class NewReleaseService
 			
 			$productName	= data_get($config, 'name');
 			$saleDate		= data_get($config, 'saleDate'); #開賣日
+			$saleEndDate	= data_get($config, 'saleEndDate', ''); #停售日
 			
 			#預防未來可能有查詢條件的狀況
-			$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
-			$endDateTime   	= Carbon::now()->setTime(23, 59, 59, 0)->toDateTimeString();
-				
+			#$startDateTime 	= sprintf('%s %s', $saleDate, '00:00:00');
+			$startDateTime 	= (new Carbon($saleDate))->format('Y-m-d 00:00:00');
+			
+			#取結束日
+			$today = Carbon::now()->setTime(23, 59, 59, 0);
+			
+			if (empty($saleEndDate))
+				$endDateTime = $today;
+			else
+			{
+				$endDay = (new Carbon($saleEndDate))->setTime(23, 59, 59, 0);
+				$endDateTime = $endDay->greaterThan($today) ? $today : $endDay;
+				$endDateTime = $endDateTime->format('Y-m-d 23:59:59');
+			}
+			
+			#testing
 			#$startDateTime	= '2025/12/04 00:00:00'; #testing
-			#$endDateTime   	= '2025/12/05 23:59:59'; #testing 
+			#$endDateTime   = '2025/12/05 23:59:59'; #testing 
 				
 			$brandCode		= data_get($config, 'brand');
 			$productIds 	= data_get($config, 'ids.main');
@@ -158,7 +175,7 @@ class NewReleaseService
 			if ($brandCode === 'BG') #梁社漢複合店取值用
 				$bfProductIds = data_get($config, 'ids.mapping');
 			
-			return [$productName, $saleDate, $startDateTime, $endDateTime, $productIds, $bfProductIds];
+			return [$productName, $saleDate, $saleEndDate, $startDateTime, $endDateTime, $productIds, $bfProductIds];
 		}
 		catch(Exception $e)
 		{

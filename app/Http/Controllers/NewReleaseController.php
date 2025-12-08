@@ -29,18 +29,19 @@ class NewReleaseController extends Controller
 		
 		#取新品config用
 		$segment = $request->segment(2);
-		$this->_service->convertConfigKey($segment);
-		
-		$statistics = $this->_service->getStatistics();
 		$this->_viewModel->segment = $segment;
 		
-		if ($statistics === FALSE)
+		$this->_service->convertConfigKey($segment);
+		
+		$response = $this->_service->getStatistics();
+		
+		if ($response->status === FALSE)
 			$this->_viewModel->fail('讀取資料發生錯誤');
 		else
 			$this->_viewModel->success();
 		
-		$this->_viewModel->statistics = $statistics;
-	
+		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
+		
 		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
 	}
 	
@@ -52,17 +53,18 @@ class NewReleaseController extends Controller
 		
 		#取新品config用		
 		$segment = $request->segment(2);
-		$this->_service->convertConfigKey($segment);
-		
-		$statistics = $this->_service->getStatistics();
 		$this->_viewModel->segment = $segment;
 		
-		if ($statistics === FALSE)
+		$this->_service->convertConfigKey($segment);
+		
+		$response = $this->_service->getStatistics();
+		
+		if ($response->status === FALSE)
 			$this->_viewModel->fail('讀取資料發生錯誤');
 		else
 			$this->_viewModel->success();
 		
-		$this->_viewModel->statistics = $statistics;
+		$this->_viewModel->statistics = $response->data;
 		
 		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
 	}

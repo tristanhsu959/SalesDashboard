@@ -14,9 +14,10 @@ class NewReleaseViewModel
 	public function __construct()
 	{
 		#initialize
-		$this->_data['action'] 	= NULL; #enum form action
-		$this->_data['status']	= FALSE;
-		$this->_data['msg'] 	= '';
+		$this->_data['action'] 		= NULL; #enum form action
+		$this->_data['status']		= FALSE;
+		$this->_data['msg'] 		= '';
+		$this->_data['statistics']	= [];
 	}
 	
 	public function __set($name, $value)
