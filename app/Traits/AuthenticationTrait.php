@@ -4,6 +4,7 @@ namespace App\Traits;
 
 #use App\Libraries\LoggerLib;;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
 use Log;
@@ -26,7 +27,7 @@ trait AuthenticationTrait
 		
 		$connectionConfig = config('web.auth.ad.connection');
 		#必須是Distinquished Name:cn= , base dn
-		$connectionConfig['username'] = "cn={$account},{$connectionConfig['base_dn']}"; 
+		$connectionConfig['username'] = "{$account}@8way.com.tw"; //"cn={$account},{$connectionConfig['base_dn']}"; 
 		$connectionConfig['password'] = $password;
 		
 		try 
@@ -41,14 +42,15 @@ trait AuthenticationTrait
 			$result = $connection->query()->where('samaccountname', '=', $account)->first();
 			
 			#只取需要的資訊
-			$adInfo['company'] 		= $result['company'][0];
-			$adInfo['department'] 	= $result['department'][0];
-			$adInfo['title'] 		= $result['title'][0];
-			$adInfo['displayname'] 	= $result['displayname'][0]; #=>FirstName LastName CNName
-			$adInfo['employeeid'] 	= $result['employeeid'][0]; #=>CNName
-			$adInfo['name'] 		= Str::remove(' ', $result['name'][0]); #=>CNName
-			$adInfo['mail'] 		= $result['mail'][0];
+			$adInfo['company'] 		= data_get($result, 'company.0', '');
+			$adInfo['department'] 	= data_get($result, 'department.0', '');
+			$adInfo['title'] 		= data_get($result, 'title.0', '');
+			$adInfo['displayname'] 	= data_get($result, 'displayname.0', ''); #=>FirstName LastName CNName
+			$adInfo['employeeid'] 	= data_get($result, 'employeeid.0', ''); #=>CNName
+			$adInfo['name'] 		= Str::remove(' ', data_get($result, 'name.0', '')); #=>CNName
+			$adInfo['mail'] 		= data_get($result, 'mail.0', '');
 			
+			dd($adInfo);
 			return $adInfo;
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 
