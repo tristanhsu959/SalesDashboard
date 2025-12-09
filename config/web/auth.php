@@ -19,7 +19,7 @@ return [
 		'follow_referrals'	=> FALSE,
 		
 		'options' => [
-			#LDAP_OPT_X_TLS_CACERTFILE => config_path('web/cert/dc01.pem'),
+			LDAP_OPT_X_TLS_CACERTFILE => config_path('web/cert/8way.pem'),
 			LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_ALLOW
 		],
 		
