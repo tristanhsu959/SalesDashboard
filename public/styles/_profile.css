@@ -35,10 +35,10 @@
 			
 			p {
 				margin: 0;
-				color: #444;
+				color: #000;
 				font-size: 1.1rem;
 				font-family: 'Poiret One';
-				font-weight: bold;
+				font-weight: 400;
 				
 				&.name {
 					font-family: 'Orbitron';
@@ -47,7 +47,7 @@
 					color: #000;
 				}
 				&.mail {
-					// font-size: 1.1rem;
+					/* font-size: 1.1rem; */
 				}
 			}
 		}
