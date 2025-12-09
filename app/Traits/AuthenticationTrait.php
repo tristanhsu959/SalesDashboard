@@ -26,7 +26,7 @@ trait AuthenticationTrait
 		$result = [];
 		
 		$domain = config('web.auth.domain');
-		$connectionConfig = config('web.auth.ad.connection');
+		$connectionConfig = config('web.auth.ad');
 		#必須是Distinquished Name:cn= , base dn
 		$connectionConfig['username'] = "{$account}@{$domain}"; //"cn={$account},{$connectionConfig['base_dn']}"; 
 		$connectionConfig['password'] = $password;
