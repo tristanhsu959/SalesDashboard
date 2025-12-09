@@ -14,6 +14,10 @@ $(function(){
 		});
 	});
 	
+	$('.menu .menu-group .list-group-item a').click(function(){
+		$('#loading').addClass('active');
+	});
+	
 	/* Remove invalid style */
 	$('.form-control').on('keypress', function(event){
 		$(this).removeClass('is-invalid');

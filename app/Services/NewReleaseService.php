@@ -7,6 +7,7 @@ use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthorizationTrait;
 use App\Traits\MenuTrait;
+use App\Enums\Area;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -47,6 +48,7 @@ class NewReleaseService
 	{
 		#取新品設定
 		$config = config("web.newrelease.products.{$this->_actionKey}");
+		$cacheEnable = config('web.newrelease.cacheEnable');
 		
 		$saleDate	= (new Carbon($config['saleDate']))->format('Y-m-d');
 		$endDate   	= Carbon::now()->format('Y-m-d');
@@ -54,7 +56,7 @@ class NewReleaseService
 		#設定Cache
 		$cacheKey = implode(':', [$this->_actionKey, $saleDate, $endDate]);
 		
-		if (Cache::has($cacheKey))
+		if ($cacheEnable && Cache::has($cacheKey))
 		{
 			Log::channel('webSysLog')->info('新品銷售：Get from cache', [ __class__, __function__]);
 			$cacheStatistics = Cache::get($cacheKey);
@@ -109,6 +111,15 @@ class NewReleaseService
 			
 			#3.Parsing to base data
 			$baseData = $this->_buildBaseData($data);
+			
+			
+			/*　Area Filter Testing Method 1
+			$baseData = Arr::reject($baseData, function ($value, $key) {
+				return ($value['area'] == Area::CCT->label() OR $value['area'] == Area::YCN->label() OR $value['area'] == Area::KAOHSIUNG->label());
+			});
+			
+			dd($baseData);
+			/*　Area Filter Testing Method 1 End */
 			
 			
 			/* Statistics Start */

@@ -15,4 +15,8 @@
 		@yield('navAction')
 	</span>
 </nav>
+<div id="loading" class="loading-wrapper">
+	<div class="loading-bar"></div>
+</div>
+				
 

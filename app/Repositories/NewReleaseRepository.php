@@ -31,6 +31,7 @@ class NewReleaseRepository extends Repository
 	 * @params: start date
 	 * @params: end date
 	 * @params: brand code
+	  * @params: bafang shop id
 	 * @return: collection
 	 */
 	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $shopIds)

@@ -126,3 +126,37 @@ body {
 .cyan-accent-4 {
 	color: #00b8d4;
 }
+
+/* Loading bar */
+.loading-wrapper {
+	width: 100%;
+	height: 5px; /* Height of the loading bar */
+	background-color: #000; /* Background color of the container */
+	overflow: hidden; /* Ensures the bar stays within its container */
+	position: fixed;
+	top: 64px;
+	display: none;
+	
+	&.active {
+		display: block;
+	}
+}
+
+.loading-bar {
+  width: 30%; /* Initial width of the moving bar segment */
+  height: 100%;
+  background-color: #84ffff; /* Color of the loading bar */
+  position: absolute;
+  top: 0;
+  left: -30%; /* Start off-screen to the left */
+  animation: infinite-loading 2s linear infinite; /* Animation properties */
+}
+
+@keyframes infinite-loading {
+  0% {
+    left: -30%; /* Starts off-screen left */
+  }
+  100% {
+    left: 100%; /* Moves across to off-screen right */
+  }
+}
