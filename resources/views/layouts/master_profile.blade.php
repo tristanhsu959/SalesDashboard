@@ -19,7 +19,7 @@
 			</p>
 			<p>
 				<span>管理區域</span>
-				<span>{{ Area::getLabelByValue($signinInfo['UserAreaId']) }}</span>
+				<span>{{-- Area::getLabelByValue($signinInfo['UserAreaId']) --}}</span>
 			</p>
 			<p>{{ $signinInfo['company'] }}</p>
 		</div>

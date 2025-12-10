@@ -33,7 +33,7 @@ class UserController extends Controller
 		$response = $this->_service->getList();
 		
 		if ($response->status === FALSE)
-			$this->_viewModel->fail('讀取帳號清單時發生錯誤');
+			$this->_viewModel->fail($response->msg);
 		else
 		{
 			$this->_viewModel->success();
@@ -61,7 +61,7 @@ class UserController extends Controller
 		$response = $this->_service->searchList($searchAd, $searchName, $searchArea);
 		
 		if ($response->status === FALSE)
-			$this->_viewModel->fail('查詢時發生錯誤');
+			$this->_viewModel->fail($response->msg);
 		else
 		{
 			$this->_viewModel->success();
@@ -116,7 +116,7 @@ class UserController extends Controller
 		
 		if ($response->status === FALSE)
 		{
-			$this->_viewModel->fail('新增帳號失敗');
+			$this->_viewModel->fail($response->msg);
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
@@ -138,7 +138,7 @@ class UserController extends Controller
 		$response = $this->_service->getUserById($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('user.list')->with('msg', '讀取編輯資料發生錯誤');
+			return redirect()->route('user.list')->with('msg', $response->msg);
 		
 		$this->_viewModel->userData = $response->data; 
 		$this->_viewModel->success();
@@ -181,7 +181,7 @@ class UserController extends Controller
 		
 		if ($response->status === FALSE)
 		{
-			$this->_viewModel->fail('編輯帳號失敗');
+			$this->_viewModel->fail($response->msg);
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
@@ -201,10 +201,10 @@ class UserController extends Controller
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
-		$result = $this->_service->deleteUser($id);
+		$response = $this->_service->deleteUser($id);
 		
-		if ($result === FALSE)
-			return redirect()->route('user.list')->with('msg', '刪除帳號失敗');
+		if ($response->status === FALSE)
+			return redirect()->route('user.list')->with('msg', $response->msg);
 		else
 			return redirect()->route('user.list')->with('msg', '刪除帳號完成');
 	}

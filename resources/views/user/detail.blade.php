@@ -34,15 +34,6 @@
 			<input type="text" class="form-control" id="displayName" name="displayName" value="{{  $viewModel->getUserDisplayName() }}" maxlength="15" placeholder=" ">
 			<label for="displayName" class="form-label">顯示名稱</label>
 		</div>
-		<div class="input-select field-cyan dark field">
-			<select class="form-select" id="area" name="area">
-				<option value=""selected>請選擇</option>
-				@foreach($viewModel->area as $area)
-				<option value="{{ $area->value }}" @selected($viewModel->selectedArea($area->value)) >{{ $area->label() }}</option>
-				@endforeach
-			</select>
-			<label for="group" class="form-label">管理區域</label>
-		</div>
 	</div>
 	<div class="section user-role required">
 		<label class="title">所屬身份</label>
@@ -50,6 +41,15 @@
 		<label class="form-check-label" for="role{{$idx}}">
 			<input class="form-check-input" type="radio" name="role" id="role{{$idx}}" value="{{ $role['RoleId'] }}" @checked($viewModel->checkedRole($role['RoleId'])) >
 			{{ $role['RoleName'] }}
+		</label>
+		@endforeach
+	</div>
+	<div class="section user-area required">
+		<label class="title">管理區域</label>
+		@foreach($viewModel->area as $idx => $area)
+		<label class="form-check-label" for="area{{$idx}}">
+			<input class="form-check-input" type="checkbox" name="area[]" id="area{{$idx}}" value="{{ $area->value }}"  @checked($viewModel->checkedArea($area->value))>
+			{{ $area->label() }}
 		</label>
 		@endforeach
 	</div>

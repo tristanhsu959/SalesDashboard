@@ -66,7 +66,7 @@
 				<div class="col col-1">#</div>
 				<div class="col">AD帳號</div>
 				<div class="col">顯示名稱</div>
-				<div class="col">管理區域</div>
+				<div class="col col-4">管理區域</div>
 				<div class="col">權限身份</div>
 				<div class="col col-action">操作</div>
 			</div>
@@ -75,7 +75,11 @@
 				<div class="col col-1">{{ $idx + 1 }}</div>
 				<div class="col">{{ $user['UserAd'] }}</div>
 				<div class="col">{{ $user['UserDisplayName'] }}</div>
-				<div class="col">{{ Area::getLabelByValue($user['UserAreaId']) }}</div>
+				<div class="col col-4 col-area">
+					@foreach($user['UserAreaId'] as $area)
+					<div class="badge bg-info">{{ Area::getLabelByValue($area) }}</div>
+					@endforeach
+				</div>
 				<div class="col">{{ $viewModel->getRoleById($user['UserRoleId']) }}</div>
 				<div class="col col-action">
 					@if($viewModel->canUpdate())

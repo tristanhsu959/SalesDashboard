@@ -97,7 +97,7 @@ class UserViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['area'] 	= Area::cases();
+		$this->_data['area'] 	= Area::cases(); #enum
 		$this->_data['roleList']= $this->_service->getRoleOptions();
 	}
 	
@@ -135,8 +135,8 @@ class UserViewModel
     {
 		data_set($this->_data, 'userData.UserAd', $adAccount);
 		data_set($this->_data, 'userData.UserDisplayName', $displayName);
-		data_set($this->_data, 'userData.UserAreaId', $area);
 		data_set($this->_data, 'userData.UserRoleId', $role);
+		data_set($this->_data, 'userData.UserAreaId', $area);
 	}
 	
 	/* Create or Update Role Id 
@@ -167,14 +167,14 @@ class UserViewModel
 		return data_get($this->_data, 'userData.UserDisplayName', '');
 	}
 	
-	public function getUserAreaId()
-	{
-		return data_get($this->_data, 'userData.UserAreaId', 0);
-	}
-	
 	public function getUserRoleId()
 	{
 		return data_get($this->_data, 'userData.UserRoleId', 0);
+	}
+	
+	public function getUserAreaId()
+	{
+		return data_get($this->_data, 'userData.UserAreaId', []);
 	}
 	/* User Data End */
 	
@@ -230,11 +230,11 @@ class UserViewModel
 	}
 	
 	/* User form */
-	public function selectedArea($areaId)
+	public function checkedArea($areaId)
 	{
-		$userAreaId = $this->getUserAreaId();
+		$userAreaIds = $this->getUserAreaId();
 		
-		return ($areaId == $userAreaId);
+		return in_array($areaId, $userAreaIds);
 	}
 	
 	public function checkedRole($roleId)

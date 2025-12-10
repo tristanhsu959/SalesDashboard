@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Arr;
 use Exception;
 
 class UserRepository extends Repository
@@ -46,15 +47,15 @@ class UserRepository extends Repository
 		if (! is_null($searchName))
 			$db->where('UserDisplayName', 'like', "%{$searchName}%");
 		if (! is_null($searchArea))
-			$db->where('UserAreaId', '=', $searchArea);
+			$db->whereJsonContains('UserAreaId', $searchArea);
 		
 		$result = $db->get()->toArray();
 		
-		// $result = $db
-			// ->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
-			// ->get()
-			// ->toArray();
-			
+		$result = Arr::map($result, function ($item, string $key) {
+			$item['UserAreaId'] = empty($item['UserAreaId']) ? [] : json_decode($item['UserAreaId'], TRUE);
+			return $item;
+		});
+		
 		return $result;
 	}
 	
@@ -65,13 +66,13 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function insertUser($adAccount, $displayName, $areaId, $roleId)
+	public function insertUser($adAccount, $displayName, $areaIds, $roleId)
 	{
 		$db = $this->connectSaleDashboard('User');
 		
 		$data['UserAd']			= $adAccount;
 		$data['UserDisplayName']= $displayName;
-		$data['UserAreaId']		= $areaId;
+		$data['UserAreaId']		= json_encode($areaIds);
 		$data['UserRoleId'] 	= $roleId;
 		$data['CreateAt'] 		= now()->format('Y-m-d H:i:s');
 		$data['UpdateAt'] 		= $data['CreateAt'];
@@ -109,6 +110,8 @@ class UserRepository extends Repository
 					->where('UserId', '=', $id)
 					->get()->first();
 		
+		$result['UserAreaId'] = empty($result['UserAreaId']) ? [] : json_decode($result['UserAreaId']);
+		
 		return $result;
 	}
 	
@@ -120,13 +123,13 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateUser($adAccount, $displayName, $areaId, $roleId, $userId)
+	public function updateUser($adAccount, $displayName, $areaIds, $roleId, $userId)
 	{
 		$db = $this->connectSaleDashboard('User');
 		
 		$data['UserAd']			= $adAccount;
 		$data['UserDisplayName']= $displayName;
-		$data['UserAreaId']		= $areaId;
+		$data['UserAreaId']		= json_encode($areaIds);
 		$data['UserRoleId'] 	= $roleId;
 		$data['UpdateAt'] 		= now()->format('Y-m-d H:i:s');
 			

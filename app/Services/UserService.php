@@ -41,7 +41,7 @@ class UserService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
 		}
 	}
 	
@@ -62,30 +62,30 @@ class UserService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('查詢時發生錯誤');
 		}
 	}
 	
 	/* Create Account
 	 * @params: string
 	 * @params: string
-	 * @params: int
+	 * @params: array
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function createUser($adAccount, $displayName, $areaId, $roleId)
+	public function createUser($adAccount, $displayName, $areaIds, $roleId)
 	{
 		try
 		{
 			#Create data
-			$this->_repository->insertUser($adAccount, $displayName, $areaId, $roleId);
+			$this->_repository->insertUser($adAccount, $displayName, $areaIds, $roleId);
 		
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('新增帳號失敗');
 		}
 	}
 	
@@ -97,35 +97,35 @@ class UserService
 	{
 		try
 		{
-			$result = $this->_repository->getUserById($id);
+			$result = $this->_repository->getUserById($id); 
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('讀取帳號資料發生錯誤');
 		}
 	}
 	
 	/* Update User
 	 * @params: string
 	 * @params: string
-	 * @params: int
+	 * @params: array
 	 * @params: int
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateUser($adAccount, $displayName, $areaId, $roleId, $userId)
+	public function updateUser($adAccount, $displayName, $areaIds, $roleId, $userId)
 	{
 		try
 		{
-			$this->_repository->updateUser($adAccount, $displayName, $areaId, $roleId, $userId);
+			$this->_repository->updateUser($adAccount, $displayName, $areaIds, $roleId, $userId);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('編輯帳號失敗');
 		}
 	}
 	
@@ -143,7 +143,7 @@ class UserService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('刪除帳號失敗');
 		}
 	}
 	

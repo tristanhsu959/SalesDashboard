@@ -76,7 +76,7 @@ class SigninService
 			#若是2維要再toArray, 允許有帳號無Permission, 故不檢查
 			$permission = $this->_repository->getUserPermission($userInfo['UserRoleId'])->toArray();
 			$userInfo['Permission'] = Arr::flatten($permission);
-			$userInfo['UserAreaId'] = empty($userInfo['UserAreaId']) ? [] : json_encode($userInfo['UserAreaId']);
+			$userInfo['UserAreaId'] = empty($userInfo['UserAreaId']) ? [] : json_decode($userInfo['UserAreaId'], TRUE);
 			
 			return $userInfo;
 		}
