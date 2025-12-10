@@ -29,19 +29,22 @@ body {
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
 	margin: 0;
-	display: flex; 
+	padding: 0;
 	background-color: var(--theme-bg-color);
 	background: linear-gradient(150deg, var(--theme-bg-color), var(--theme-bg-color), var(--theme-bg-color), var(--theme-secondary-bg-color));
 	
+	main {
+		width: 100vw;
+		display: flex; 
+		justify-content: cetner;
+	}
 	
 	.content-wrapper{
 		position: relative;
-		flex-grow: 1;
+		/* flex-grow: 1; */
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
 		height: 100%; /* 100vh sticky會失效 */
 		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
 		background-color: transparent;
 	}
 	
@@ -57,20 +60,14 @@ body {
 			}
 		}
 	}
-	
-	/* Other styles */
-	.list-group {
-		border-radius: 2px;
-	}
-	
-	
 }
 
+/* Google Icon */
 .filled-icon {
   font-variation-settings: 'FILL' 1;
 }
 
-/* row divider */
+/* Common row divider */
 .divider {
 	display: flex;
 	
@@ -84,7 +81,7 @@ body {
 	}
 }
 
-/* Message */
+/* Toast Message */
 .error-msg {
 	display: flex;
 	align-items: center;
@@ -131,6 +128,7 @@ body {
 .loading-wrapper {
 	width: 100%;
 	height: 5px; /* Height of the loading bar */
+	border-radius: 1rem;
 	background-color: #000; /* Background color of the container */
 	overflow: hidden; /* Ensures the bar stays within its container */
 	position: fixed;
@@ -143,20 +141,21 @@ body {
 }
 
 .loading-bar {
-  width: 30%; /* Initial width of the moving bar segment */
-  height: 100%;
-  background-color: #84ffff; /* Color of the loading bar */
-  position: absolute;
-  top: 0;
-  left: -30%; /* Start off-screen to the left */
-  animation: infinite-loading 2s linear infinite; /* Animation properties */
+	width: 30%; /* Initial width of the moving bar segment */
+	height: 100%;
+	border-radius: 1rem;
+	background-color: #84ffff; /* Color of the loading bar */
+	position: absolute;
+	top: 0;
+	left: -30%; /* Start off-screen to the left */
+	animation: infinite-loading 2s linear infinite; /* Animation properties */
 }
 
 @keyframes infinite-loading {
-  0% {
-    left: -30%; /* Starts off-screen left */
-  }
-  100% {
-    left: 100%; /* Moves across to off-screen right */
-  }
+	0% {
+		left: -30%; /* Starts off-screen left */
+	}
+	100% {
+		left: 100%; /* Moves across to off-screen right */
+	}
 }

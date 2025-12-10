@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
 use Log;
+use Exception;
 
 /* 認證 */
 trait AuthenticationTrait
@@ -59,7 +60,7 @@ trait AuthenticationTrait
 			Log::channel('webSysLog')->error('ErrorCode:' . $e->getDetailedError()->getErrorCode());
 			Log::channel('webSysLog')->error('DetailError:' . $e->getDetailedError()->getErrorMessage());
 			Log::channel('webSysLog')->error('DiagnosticMessage:' .  $e->getDetailedError()->getDiagnosticMessage());
-			return FALSE;
+			throw new Exception('AD驗證失敗，帳號或密碼錯誤');
 		}
 	}
 	
@@ -68,7 +69,7 @@ trait AuthenticationTrait
 	 * @params: string
 	 * @return: array
 	 */
-	public function OldauthenticationAD($account, $password)
+	/*public function OldauthenticationAD($account, $password)
 	{
 		#fake data
 		/*return [
@@ -80,7 +81,7 @@ trait AuthenticationTrait
 			"name" => "許方毓",
 			"mail" => "tristan.hsu@8way.com.tw",
 		];
-		*/
+		*
  
 		#C:\openldap\sysconf\ldap.conf for local dev
 		#無法匿名連線(除LDAP外)
@@ -99,7 +100,7 @@ trait AuthenticationTrait
 			/*
 			"CN=林 XX,OU=T16000 資訊處,OU=8way_a00 八方雲集國際股份有限公司,OU=八方雲集國際股份有限公司,DC=8way,DC=com,DC=tw"
 			cn=中文名, title, ou, displayname=英+中, memof, company, department, employeeid, samaccountname, mail, mobile
-			*/
+			*
 			$result = $connection->query()->where('samaccountname', '=', $account)->first();
 			
 			#只取需要的資訊
@@ -121,5 +122,5 @@ trait AuthenticationTrait
 			Log::channel('webSysLog')->error('DiagnosticMessage:' .  $e->getDetailedError()->getDiagnosticMessage());
 			return FALSE;
 		}
-	}
+	}*/
 }

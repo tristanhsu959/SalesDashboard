@@ -15,7 +15,7 @@
 	<span class="copyright">Bafang<i>&copy;</i>2025</span>
 </div>
 
-<div class="v-divider"></div>
+<div class="divider"></div>
 
 <div class="right-content">
 	<div class="head">

@@ -26,6 +26,7 @@
 	</head>
 
 	<body class="dark">
+		<main>
 		@hasSection('signin')
 			<div class='content-wrapper'>
 				@yield('signin')
@@ -41,8 +42,8 @@
 			</div>
 			
 			@include('layouts.master_profile')
-			
 		@endif
+		</main>
 		
 		@if(! empty($viewModel->msg) || ! empty(session('msg')))
 		<div class="toast msg align-items-center" role="alert" aria-live="assertive" aria-atomic="true">

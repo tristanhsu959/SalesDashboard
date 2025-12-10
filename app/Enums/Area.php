@@ -4,19 +4,17 @@ namespace App\Enums;
 
 enum Area : int
 {
-    case ALL		= 1;
-	case TAIPEI		= 2;
-	case YILAN 		= 3;
-	case TCM 		= 4; #Taoyuan, Hsinchu, and Miaoli 
-	case CCT 		= 5; #Taichung, Changhua, Nantou
-	case YCN  		= 6; #Yunlin, Chiayi, Tainan
-	case KAOHSIUNG  = 7; 
+    case TAIPEI		= 1;
+	case YILAN 		= 2;
+	case TCM 		= 3; #Taoyuan, Hsinchu, and Miaoli 
+	case CCT 		= 4; #Taichung, Changhua, Nantou
+	case YCN  		= 5; #Yunlin, Chiayi, Tainan
+	case KAOHSIUNG  = 6; 
 	
 	public function label() : string
     {
         return match ($this) 
 		{
-			self::ALL		=> '全區',
 			self::TAIPEI	=> '大台北區',
 			self::YILAN 	=> '宜蘭區',
 			self::TCM		=> '桃竹苗區',
@@ -33,7 +31,6 @@ enum Area : int
 		
 		return match($value)
 		{
-			self::ALL->value		=> self::ALL->label(),
 			self::TAIPEI->value		=> self::TAIPEI->label(),
 			self::YILAN->value 		=> self::YILAN->label(),
 			self::TCM->value		=> self::TCM->label(),

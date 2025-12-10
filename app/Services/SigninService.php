@@ -41,15 +41,11 @@ class SigninService
 			#2. auth by AD
 			$adInfo = $this->authenticationAD($adAccount, $adPassword);
 			
-			#記錄Log, 以便分辨錯誤點
-			if ($adInfo === FALSE)
-				throw new Exception('AD驗證失敗');
-			
 			#3. auth DB account permission
 			$userInfo = $this->_authAccountRegister($adAccount);
 			
 			if ($userInfo === FALSE)
-				throw new Exception('登入失敗，帳號尚未註冊');
+				throw new Exception('登入失敗，帳號尚未在系統註冊');
 			
 			#4. Save to session
 			$this->saveUserToSession($adInfo, $userInfo);
@@ -70,16 +66,24 @@ class SigninService
 	 */
 	private function _authAccountRegister($adAccount)
 	{
-		$userInfo = $this->_repository->getUserByAccount($adAccount);
-		
-		if (empty($userInfo))
-			return FALSE;
-		
-		#若是2維要再toArray, 允許有帳號無Permission, 故不檢查
-		$permission = $this->_repository->getUserPermission($userInfo['UserRoleId'])->toArray();
-		$userInfo['Permission'] = Arr::flatten($permission);
-		
-		return $userInfo;
+		try
+		{
+			$userInfo = $this->_repository->getUserByAccount($adAccount);
+			
+			if (empty($userInfo))
+				return FALSE;
+			
+			#若是2維要再toArray, 允許有帳號無Permission, 故不檢查
+			$permission = $this->_repository->getUserPermission($userInfo['UserRoleId'])->toArray();
+			$userInfo['Permission'] = Arr::flatten($permission);
+			$userInfo['UserAreaId'] = empty($userInfo['UserAreaId']) ? [] : json_encode($userInfo['UserAreaId']);
+			
+			return $userInfo;
+		}
+		catch(Exception $e)
+		{
+			throw new Exception('驗證帳號註冊狀態，發生錯誤');
+		}
 	}
 	
 	/* 登出

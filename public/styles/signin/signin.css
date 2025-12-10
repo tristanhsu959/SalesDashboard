@@ -1,9 +1,6 @@
 /* Main Style */
 
 body {
-	font-family: 'Roboto', 'Orbitron', sans-serif;
-	font-size: 16px;
-	margin: 0;
 	display: flex;
 	background-color:  var(--primary-default-bg-color);
 	background:  var(--primary-default-bg-color);
@@ -16,22 +13,17 @@ body {
 		justify-content: center;
 		align-items: center;
 		
-		.v-divider {
-			width: 2px;
-			height: 40%;
-			border: 4px solide red;
-			margin: 0 1rem;
-			background-color: var(--divider-color);
-		}
-		
-		.left-content, .right-content {
-			min-width: 400px;
-			width: 20%;
-			height: auto;
+		.divider {
+			width: 0;
+			height: 30%;
+			border-left: 1px solid #ccc;
+			margin-left: 2rem;
+			margin-right: 2rem;
 		}
 		
 		/* Logo */
 		.left-content {
+			width: 320px;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -39,7 +31,7 @@ body {
 			
 			img {
 				position: relative;
-				width: 60%;
+				width: 100%;
 				height: auto;
 			}
 			
@@ -58,6 +50,7 @@ body {
 		}
 		
 		.right-content {
+			width: 400px;
 			padding: 4rem 2rem;
 			
 			.head {
@@ -73,7 +66,7 @@ body {
 					font-size: 1.4rem;
 				}
 				h6 {
-					color: #666; 
+					color: #444; 
 					font-weight: normal;
 					font-size: .875rem;
 					padding-top: .5rem;
