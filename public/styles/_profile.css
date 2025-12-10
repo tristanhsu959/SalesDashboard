@@ -59,6 +59,19 @@
 				display: flex;
 				justify-content: space-between;
 			}
+			
+			.user-area {
+				span {
+					width: 30%;
+					background-color: #f3e5f5;
+					color: #9575cd;
+					font-size: .85rem;
+					font-weight: 400;
+					border-radius: 1rem;
+					border: 1px solid #9575cd;
+					margin: .125rem 0;
+				}
+			}
 		}
 		
 		a.btn-signout {

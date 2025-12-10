@@ -19,7 +19,15 @@
 			</p>
 			<p>
 				<span>管理區域</span>
-				<span>{{-- Area::getLabelByValue($signinInfo['UserAreaId']) --}}</span>
+				<div class="user-area">
+				@empty($signinInfo['UserAreaId'])
+					<span class="badge bg-danger">未設定</span>
+				@endempty
+				
+				@foreach($signinInfo['UserAreaId'] as $area)
+					<span class="badge">{{ Area::getLabelByValue($area) }}</span>
+				@endforeach
+				</div>
 			</p>
 			<p>{{ $signinInfo['company'] }}</p>
 		</div>
