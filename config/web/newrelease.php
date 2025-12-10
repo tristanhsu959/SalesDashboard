@@ -2,7 +2,7 @@
 
 #新品
 return [
-	'cacheEnable' => TRUE,
+	'cacheEnable' => true,
 	#New product items | BF=>八方 ｜BG=>梁社漢
 	#梁社漢須多處理複合店, 要多取八方DB
 	#不需含套餐，因已會拆成單品項

@@ -36,7 +36,7 @@ class NewReleaseController extends Controller
 		$response = $this->_service->getStatistics();
 		
 		if ($response->status === FALSE)
-			$this->_viewModel->fail('讀取資料發生錯誤');
+			$this->_viewModel->fail($response->msg);
 		else
 			$this->_viewModel->success();
 		
@@ -60,7 +60,7 @@ class NewReleaseController extends Controller
 		$response = $this->_service->getStatistics();
 		
 		if ($response->status === FALSE)
-			$this->_viewModel->fail('讀取資料發生錯誤');
+			$this->_viewModel->fail($response->msg);
 		else
 			$this->_viewModel->success();
 		
