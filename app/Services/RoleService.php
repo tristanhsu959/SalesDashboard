@@ -40,7 +40,7 @@ class RoleService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
 		}
 	}
 	
@@ -63,7 +63,7 @@ class RoleService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('新增身份失敗');
 		}
 	}
 	
@@ -81,7 +81,7 @@ class RoleService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('讀取身份設定資料發生錯誤');
 		}
 	}
 	
@@ -104,7 +104,7 @@ class RoleService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('編輯身份失敗');
 		}
 	}
 	
@@ -122,7 +122,7 @@ class RoleService
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return ResponseLib::initialize()->fail();
+			return ResponseLib::initialize()->fail('刪除身份失敗');
 		}
 	}
 	
