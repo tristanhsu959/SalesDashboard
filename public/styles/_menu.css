@@ -1,6 +1,6 @@
 /* Aside Menu */
 .aside.menu {
-	--menu-bg-color: #000; 
+	--menu-bg-color: var(--secondary-default-bg-color); 
 	
 	position: sticky;
 	top: 0;
@@ -18,32 +18,32 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background: linear-gradient(125deg, var(--primary-red-color), var(--primary-red-color), var(--primary-orange-color), var(--primary-orange-color));
+		background: linear-gradient(125deg, var(--primary-red-color) 25%,  var(--primary-orange-color) 65%);
+		opacity: .6;
 		
 		img {
 			width: auto;
 			height: 48px;
-			/* mix-blend-mode: soft-light;/* soft-light  luminosity ; */
 		}
 	}
 	
 	.container-fluid {
-		--menu-text-color: #00b8d4; 
-		--menu-hover-color: #84ffff; /*#18ffff;*/
+		/*#00bcd4*/
+		--menu-color: rgba(0, 188, 212, .6); 
+		--menu-group-color: rgba(0, 188, 212, .87);  
+		--menu-hover-color: #80deea; /*200*/
 		
 		width: 100%;
 		height: calc(100vh - 64px);
 		padding-left: 0;
 		padding-right: 0;
-		border-right: 1px solid #263238;
 		overflow-y: auto;
 		scrollbar-width: thin;
-		scrollbar-color: var(--menu-text-color) #263238; 
+		scrollbar-color: var(--menu-group-color) var(--secondary-default-bg-color); 
 		/* Two valid colors. The first applies to the thumb of the scrollbar, the second to the track. */
 		
 	
 		.menu-group {
-			
 			&:first-child {
 				margin-top: 1rem;
 			}
@@ -54,16 +54,16 @@
 				align-items: center;
 				padding: .5rem 1rem;
 				text-decoration: none;
-				color: var(--menu-text-color);
+				color: var(--menu-group-color);
 				
 				.material-symbols-outlined {
 					margin-right: .5rem;
 				}
 				
-				&:hover, &.active /*, &[aria-expanded='true']*/ {
+				&:hover /*, &.active, &[aria-expanded='true']*/ {
 					color: var(--menu-hover-color);
 					cursor: pointer;
-					text-shadow: 0 0 1rem var(--menu-hover-color);
+					/* text-shadow: 0 0 1rem var(--menu-hover-color); */
 				}
 				
 				&[aria-expanded='false']:after {
@@ -94,13 +94,13 @@
 						flex: 1;
 						padding: 0 1rem;
 						text-decoration: none;
-						color: var(--menu-text-color);
+						color: var(--menu-color);
 						font-size: .875rem;
 						line-height: 40px;
 						
 						&:hover, &.active {
 							border-radius: 20px;
-							background-color: rgba(69, 90, 100, .5);
+							background-color: #37474f;
 							color: var(--menu-hover-color);
 						}
 					}

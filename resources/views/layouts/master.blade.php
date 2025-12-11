@@ -25,7 +25,7 @@
 		@stack('scripts')
 	</head>
 
-	<body class="dark">
+	<body>
 		<main>
 		@hasSection('signin')
 			<div class='content-wrapper'>

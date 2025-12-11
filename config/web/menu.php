@@ -9,7 +9,7 @@ return [
 	'newRelease' => [
 		'groupName' => '新品銷售',
 		'groupCode' => '01', #permission code
-		'groupIcon' => ['name' => 'chart_data', 'style' => 'purple-accent-1'], #filled-icon 
+		'groupIcon' => ['name' => 'chart_data', 'style' => 'purple'], #filled-icon 
 		'groupType' => '',
 		'items' => [
 			'porkRibs' => [
@@ -38,7 +38,7 @@ return [
 	'authManager' => [
 		'groupName' => '權限管理',
 		'groupCode' => '02',
-		'groupIcon' => ['name' => 'admin_panel_settings', 'style' => 'filled-icon1 red'],
+		'groupIcon' => ['name' => 'admin_panel_settings', 'style' => 'red'],
 		'groupType' => RoleGroup::ADMIN->name,
 		'items' => [
 			'users' => [

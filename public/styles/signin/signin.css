@@ -1,9 +1,11 @@
 /* Main Style */
 
 body {
+	--primary-default-bg-color: #fafafa;
+	
 	display: flex;
-	background-color:  var(--primary-default-bg-color);
-	background:  var(--primary-default-bg-color);
+	background-color: var(--primary-default-bg-color);
+	background: var(--primary-default-bg-color);
 	
 	.content-wrapper {
 		flex-grow: 1;
@@ -16,7 +18,7 @@ body {
 		.divider {
 			width: 0;
 			height: 30%;
-			border-left: 1px solid #ccc;
+			border-left: 1px solid rgba(0 0 0 / 12%);
 			margin-left: 2rem;
 			margin-right: 2rem;
 		}

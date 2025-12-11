@@ -7,31 +7,26 @@ body {
 	--theme-secondary-bg-color: var(--secondary-default-bg-color);
 	
 	/* Light Table */
+	/* --table-head-bg-color: #01579b; */
+	/* --table-head-color: #e1f5fe; */
+	/* --table-row-border-color: #607d8b; */
+	/* --table-col-color: #90a4ae; */
+	/* --table-col-odd-color: #37474f; */
+	
+	/* Dark Table */
 	--table-head-bg-color: #01579b; /*#252525;*/
 	--table-head-color: #e1f5fe;
 	--table-row-border-color: #607d8b;
 	--table-col-color: #90a4ae;
 	--table-col-odd-color: #37474f;
-	
-	&.dark {
-		--theme-bg-color: var(--primary-dark-bg-color);
-		--theme-secondary-bg-color: var(--secondary-dark-bg-color);
+	--table-col-even-color: #263238;
 		
-		/* Dark Table */
-		--table-head-bg-color: #01579b; /*#252525;*/
-		--table-head-color: #e1f5fe;
-		--table-row-border-color: #607d8b;
-		--table-col-color: #90a4ae;
-		--table-col-odd-color: #37474f;
-		--table-col-even-color: #263238;
-	}
-	
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
 	margin: 0;
 	padding: 0;
 	background-color: var(--theme-bg-color);
-	background: linear-gradient(150deg, var(--theme-bg-color), var(--theme-bg-color), var(--theme-bg-color), var(--theme-secondary-bg-color));
+	background: linear-gradient(150deg, #212121 10%, var(--theme-bg-color));
 	
 	main {
 		width: 100vw;
@@ -75,7 +70,7 @@ body {
 		content: '';
 		flex: 1;
 		height: 1px;
-		background-color: black;
+		background-color: rgba(255, 255, 255, .12);
 		margin-top: .5rem;
 		margin-bottom: .5rem;
 	}
@@ -114,11 +109,11 @@ body {
 }
 
 /* Color Common */
-.purple-accent-1 {
-	color: #ea80fc;
+.purple {
+	color: #ce93d8;
 }
 .red {
-	color: #f44336;
+	color: #ef9a9a;
 }
 .cyan-accent-4 {
 	color: #00b8d4;

@@ -95,7 +95,8 @@ body {
 		}
 	}
 	
-	&.field-blue {
+	/* light bg - signin */
+	&.field-blue-light {
 		input {
 			border-color: #00b0ff; 
 		}

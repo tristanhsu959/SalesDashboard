@@ -2,11 +2,22 @@
 
 /* Button */
 .btn {
+	/* Button */
+	--btn-home-bg-color: #e91e63;
+	--btn-profile-bg-color: #00bcd4; /* 500 */
+	--btn-create-bg-color: #4caf50; /* 500 */
+	--btn-update-bg-color: #9c27b0; /* 500 */
+	--btn-delete-bg-color: #f44336; /* 500 */
+	--btn-return-bg-color: #263238; /* darken4 */
+	
 	border-radius: 2px;
 	
+	/* For dialog */
 	&.btn-major {
 		min-width: 8rem;
 	}
+	
+	/* Theme */
 	&.disabled {
 		background-color: #9e9e9e !important; 
 	}
