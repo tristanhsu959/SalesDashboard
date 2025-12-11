@@ -42,9 +42,10 @@
 				
 				&.col-area .badge {
 					margin-right: .25rem;
-					border-radius: 4px;
-					background-color: rgba(3, 169, 244, .87);
-					color: rgba(0, 0, 0, .6);
+					border-radius: 2px;
+					background-color: rgba(248, 187, 208, .87);
+					color: rgba(0, 0, 0, .87);
+					font-weight: 400;
 				}
 				&.col-action {
 					display: flex;
