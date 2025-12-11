@@ -25,12 +25,12 @@
 
 <section class="section-wrapper">
 	<div class="section user-data">
-		<div class="input-field field-cyan dark field required">
+		<div class="input-field field-cyan field required">
 			<input type="text" class="form-control" id="adAccount" name="adAccount" value="{{  $viewModel->getUserAd() }}" maxlength="15" placeholder=" ">
 			<label for="adAccount" class="form-label">AD帳號</label>
 			<div class="input-hint">@8way.com.tw</div>
 		</div>
-		<div class="input-field field-cyan dark field">
+		<div class="input-field field-cyan field">
 			<input type="text" class="form-control" id="displayName" name="displayName" value="{{  $viewModel->getUserDisplayName() }}" maxlength="15" placeholder=" ">
 			<label for="displayName" class="form-label">顯示名稱</label>
 		</div>
@@ -54,7 +54,7 @@
 		@endforeach
 	</div>
 	<div class="toolbar">
-		<button type="button" class="btn btn-primary btn-major btn-save">儲存</button>
+		<button type="button" class="btn btn-major btn-save">儲存</button>
 		<button type="button" class="btn btn-red btn-cancel">取消</button>
 	</div>
 </section>

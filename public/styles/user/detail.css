@@ -28,7 +28,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: flex-start;
-		border: 1px solid #00e5ff;
+		border: 1px solid rgba(0, 229, 255, .6);
 		border-radius: .5rem;
 		padding: 1rem;
 		margin-top: 1rem;
@@ -44,8 +44,8 @@
 			position: absolute;
 			top: 0;
 			padding: 0 .25rem;
-			color: #00e5ff;
-			background-color: var(--primary-dark-bg-color);
+			color: rgba(0, 229, 255, .87);
+			background-color: var(--primary-default-bg-color);
 			display: flex;
 			align-items: center;
 			transform: translate(-0.25rem, -50%);
@@ -58,10 +58,10 @@
 			align-items: center;
 			width: 160px;
 			height: 88px;
-			background-color: rgba(38, 50, 56, .85);
-			border: 2px solid #455a64;
+			background-color: rgba(38, 50, 56, .87);
+			border: 1px solid #546e7a;
 			border-radius: 0 0 4px 4px;
-			color: #607d8b;
+			color: #546e7a;
 			margin: .5rem;
 			padding: 1rem;
 			box-sizing: border-box;
@@ -76,7 +76,7 @@
 				content: '';
 				width: 160px;
 				height: .5rem;
-				background-color: #ff4081;
+				background-color: rgba(255, 64, 129, .87);
 				position: absolute;
 				top: 0;
 				opacity: 0;
@@ -88,7 +88,7 @@
 				height: 0;
 				border-width: 16px 24px 0;
 				border-color: transparent;
-				border-top-color: #ff4081;
+				border-top-color: rgba(255, 64, 129, .87);
 				border-style: solid;
 				position: absolute;
 				top: .5rem;
@@ -97,13 +97,12 @@
 			}
 			
 			&:has(input:checked) {
-				border-color: #ff4081;
-				color: #ff4081;
-				background-color: #282828;
+				border-color: rgba(255, 64, 129, .87);
+				color: rgba(255, 64, 129, .87);
+				/* background-color: #282828; */
 				
 				&:before,  &:after{
 					opacity: 1;
-					
 				}
 			}
 		}
@@ -113,7 +112,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: flex-start;
-		border: 1px solid #00e5ff;
+		border: 1px solid rgba(0, 229, 255, .6);
 		border-radius: .5rem;
 		padding: 1rem;
 		margin-top: 1rem;
@@ -129,8 +128,8 @@
 			position: absolute;
 			top: 0;
 			padding: 0 .25rem;
-			color: #00e5ff;
-			background-color: var(--primary-dark-bg-color);
+			color: rgba(0, 229, 255, .87);
+			background-color: var(--primary-default-bg-color);
 			display: flex;
 			align-items: center;
 			transform: translate(-0.25rem, -50%);
@@ -142,10 +141,10 @@
 			justify-content: center;
 			align-items: center;
 			width: 160px;
-			background-color: rgba(38, 50, 56, .85);
-			border: 1px solid #455a64;
+			background-color: rgba(38, 50, 56, .87);
+			border: 1px solid #546e7a;
 			border-radius: 8px;
-			color: #607d8b;
+			color: #546e7a;
 			margin: .5rem;
 			padding: 1rem;
 			box-sizing: border-box;
@@ -164,8 +163,8 @@
 			}
 			
 			&:has(input:checked) {
-				border-color: #76ff03;
-				color: #76ff03;
+				border-color: rgba(118, 255, 3, .6);
+				color: rgba(118, 255, 3, .6);
 				
 				&:before {
 					content: '\e2e6';

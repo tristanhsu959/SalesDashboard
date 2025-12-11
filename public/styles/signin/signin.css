@@ -80,29 +80,38 @@ body {
 				margin: 1rem 0;
 				
 				label {
+					color: rgba(0, 0, 0, .38);
 					background-color: var(--primary-default-bg-color);
 				}
+				
 				input {
-					color: #212529;
+					color: rgba(0, 0, 0, .87);
+					border-color: #00b0ff; 
 					background-color: var(--primary-default-bg-color);
+					
+					&:focus ~ label, input:not(:placeholder-shown) ~ label {
+						color: #00b0ff;
+					}
 				}
 				.group-text {
 					width: 110px;
-					color: #ccc;
+					color: rgba(0, 0, 0, .38);
 					margin-right: .75rem;
 				}
 			}
 			
-			.btn {
-				--bs-btn-color: #f44336;
-				--bs-btn-border-color: #f44336;
-				--bs-btn-hover-color: #fff;
-				--bs-btn-hover-bg: #f44336;
-				--bs-btn-hover-border-color: #f44336;
-				
+			.btn.btn-outline-danger {
 				margin: 3rem 0 0;
 				display: block;
 				width: 100%;
+				border-radius: 2px;
+				border: 1px solid #f44336;
+				color: #f44336;
+				
+				&:hover {
+					background-color: #f44336;
+					color: rgba(255, 255, 255, .87);
+				}
 			}
 		}
 	}

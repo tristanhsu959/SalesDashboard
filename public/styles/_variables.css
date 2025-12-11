@@ -13,6 +13,11 @@
 	--primary-default-bg-color: #121212;
 	--secondary-default-bg-color: #383838; /* or 1e1e1e*/
 	
-	/* --primary-dark-bg-color: #000; */
-	/* --secondary-dark-bg-color: #263238; */
+	/* Defatul Table */
+	--table-head-bg-color: rgba(33, 150, 243, .87); 
+	--table-head-color: #bbdefb; /* light-4*/
+	--table-row-border-color: rgba(255, 255, 255, .12);
+	--table-col-color: rgba(176, 190, 197, .87);
+	--table-col-odd-color: rgba(55, 71, 79, .87);
+	--table-col-even-color: rgba(38, 50, 56, .87);
 }

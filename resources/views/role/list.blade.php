@@ -55,7 +55,7 @@
 					</a>
 					@endif
 					@if($viewModel->canDelete())
-					<a href="{{ route('role.delete.post', [$role['RoleId']]) }}" class="btn btn-del">
+					<a href="{{ route('role.delete.post', [$role['RoleId']]) }}" class="btn btn-delete">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif

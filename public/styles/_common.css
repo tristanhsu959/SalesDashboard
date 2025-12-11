@@ -6,27 +6,12 @@ body {
 	--theme-bg-color: var(--primary-default-bg-color);
 	--theme-secondary-bg-color: var(--secondary-default-bg-color);
 	
-	/* Light Table */
-	/* --table-head-bg-color: #01579b; */
-	/* --table-head-color: #e1f5fe; */
-	/* --table-row-border-color: #607d8b; */
-	/* --table-col-color: #90a4ae; */
-	/* --table-col-odd-color: #37474f; */
-	
-	/* Dark Table */
-	--table-head-bg-color: #01579b; /*#252525;*/
-	--table-head-color: #e1f5fe;
-	--table-row-border-color: #607d8b;
-	--table-col-color: #90a4ae;
-	--table-col-odd-color: #37474f;
-	--table-col-even-color: #263238;
-		
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
 	margin: 0;
 	padding: 0;
 	background-color: var(--theme-bg-color);
-	background: linear-gradient(150deg, #212121 10%, var(--theme-bg-color));
+	background: linear-gradient(90deg, var(--theme-bg-color) 10%, var(--theme-secondary-bg-color));
 	
 	main {
 		width: 100vw;
@@ -44,14 +29,18 @@ body {
 	}
 	
 	/* list no data */
-	.section-wrapper .empty-list {
-		.row {
-			border-bottom-width: 0;
-			background-color: rgba(229, 115, 115, .4); /*#e57373; */
-			
-			.col {
-				padding: .5rem;
-				color: #fff;
+	.section-wrapper {
+		margin-top: 1rem;
+		
+		.empty-list {
+			.row {
+				border-bottom-width: 0;
+				background-color: rgba(229, 115, 115, .4); /*#e57373; */
+				
+				.col {
+					padding: .5rem;
+					color: #fff;
+				}
 			}
 		}
 	}
@@ -100,11 +89,22 @@ body {
 	.modal-header {
 		color: #f44336;
 	}
+	.modal-footer {
+		border-width: 1px;
+	}
 }
 
 #confirm_modal {
 	.modal-header {
 		color: #03a9f4;
+	}
+	.modal-footer .btn.btn-outline-secondary {
+		border: 1px solid rgba(0, 0, 0, .6);
+		color: rgba(0, 0, 0, .6);
+		
+		&:hover {
+			color: rgba(255, 255, 255, .87);
+		}
 	}
 }
 
@@ -139,7 +139,7 @@ body {
 	width: 30%; /* Initial width of the moving bar segment */
 	height: 100%;
 	border-radius: 1rem;
-	background-color: #84ffff; /* Color of the loading bar */
+	background-color: rgba(128, 222, 234, .87); /* #80deea Color of the loading bar */
 	position: absolute;
 	top: 0;
 	left: -30%; /* Start off-screen to the left */

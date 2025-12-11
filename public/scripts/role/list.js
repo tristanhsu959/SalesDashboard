@@ -1,7 +1,7 @@
 /* JS */
 
 $(function(){
-	$('.btn-del').click(function(e){
+	$('.btn-delete').click(function(e){
 		e.preventDefault();
 		let action = $(this).attr('href');
 		

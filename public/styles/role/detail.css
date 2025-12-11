@@ -1,14 +1,4 @@
 /* list */
-body {
-	--field-group-color: #ff9100;
-	--field-group-primary-bg-color: var(--primary-default-bg-color);
-	--field-group-secondary-bg-color: var(--primary-default-bg-color);
-	
-	&.dark {
-		--field-group-primary-bg-color: var(--primary-dark-bg-color);
-		--field-group-secondary-bg-color: #263238;
-	}
-}
 
 .section-wrapper {
 	display: flex;
@@ -39,44 +29,42 @@ body {
 		flex: 2;
 		padding: 1rem;
 		border-radius: .5rem;
-		border: 1px solid #ff9100;
+		border: 1px solid rgba(255, 145, 0, .6); 
 		margin-top: 1rem;
-		background-color: rgba(38, 50, 56, .8);
+		background-color: rgba(38, 50, 56, .6);
 			
 		&:before {
 			content: '權限設定';
 			position: absolute;
 			top: 0;
 			padding: 0 .25rem;
-			color: var(--field-group-color);
-			background: linear-gradient(to bottom, var(--field-group-primary-bg-color) 50%, transparent 50% 100%); 
+			color: rgba(255, 145, 0, .6); 
+			background: linear-gradient(to bottom, var(--primary-default-bg-color) 50%, transparent 50% 100%); 
 			display: flex;
 			transform: translate(-0.25rem, -50%);
 		}
 		
 		.list-group {
 			margin-bottom: 1rem;
+			border-radius: 0;
+			border-bottom: 1px solid rgba(255, 255, 255, .12);
+			
+			&:last-child {
+				border-bottom-width: 0;
+			}
+				
 			/* 功能群組 */
 			.title {
 				display: flex;
 				align-items: center;
-				color: #ea80fc;
+				color: rgba(234, 128, 252, .87);
 			}
 			
 			.list-group-item {
 				display: flex;
 				justify-content: space-between;
-				/* background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #f3e5f5); */
-				/* background: linear-gradient(135deg, #4a148c, #8e24aa, #ba68c8, #ce93d8, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
-				/* background: linear-gradient(135deg, #4a148c, #7b1fa2, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
-				/* background: linear-gradient(135deg, #4a148c, #ab47bc, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7, #e1bee7); */
-				border-width: 0 0 1px;
 				background-color: transparent;
-				border-color: #546e7a;
-				
-				&:last-child {
-					border-bottom-width: 0;
-				}
+				border-width: 0;
 				
 				.form-check-label, .form-check-input {
 					cursor: pointer;
@@ -86,6 +74,7 @@ body {
 				.permission-group {
 					margin-top: .25rem;
 					
+					/* Switch */
 					label {
 						color: #00bcd4;
 					}
@@ -103,6 +92,7 @@ body {
 
 				}
 				
+				/* Checkbox */
 				.permission-group-items {
 					display: flex;
 					justify-content: flex-end;
@@ -116,9 +106,8 @@ body {
 						width: auto;
 						height: 2rem;
 						margin: .25rem;
-						// color: #e1bee7;
-						color: #616161;
-						border: 1px solid #616161;
+						color: rgba(255, 255, 255, .38);
+						border: 1px solid rgba(255, 255, 255, .38);
 						background-color: #212121;
 						padding: .175rem 1rem;
 						border-radius: 1rem;
@@ -134,9 +123,7 @@ body {
 						&:has(input:checked) {
 							border-color: #e1bee7;
 							color: #e1bee7;
-							/* background-color: #ce93d8; */
-							// color: #ce93d8;
-							background-color: rgba(122, 31, 162, .85); /* #7b1fa2;*/
+							background-color: rgba(234, 128, 252, .6);
 							transition-property: color, border-color, background-color;
 							transition-duration: .3s;
 							transition-delay: .15s;

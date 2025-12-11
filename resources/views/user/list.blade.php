@@ -30,15 +30,15 @@
 	<form action="{{ route('user.search') }}" method="post" id="searchForm">
 	@csrf
 	<section class="searchbar section-wrapper">
-		<div class="input-field field-lime dark field">
+		<div class="input-field field-lime field">
 			<input type="text" class="form-control valid" id="searchAd" name="searchAd" value="{{ $viewModel->getSearchAd() }}" maxlength="20" placeholder=" ">
 			<label for="searchAd" class="form-label">AD帳號</label>
 		</div>
-		<div class="input-field field-lime dark field">
+		<div class="input-field field-lime field">
 			<input type="text" class="form-control valid" id="searchName" name="searchName" value="{{ $viewModel->getSearchName() }}" maxlength="20" placeholder=" ">
 			<label for="searchName" class="form-label">顯示名稱</label>
 		</div>
-		<div class="input-select field-lime dark field">
+		<div class="input-select field-lime field">
 			<select class="form-select" id="searchArea" name="searchArea">
 				<option value="">請選擇</option>
 				@foreach($viewModel->area as $area)
@@ -47,7 +47,7 @@
 			</select>
 			<label for="group" class="form-label">管理區域</label>
 		</div>
-		<button class="btn btn-search btn-info" type="button">
+		<button class="btn btn-search" type="button">
 			<span class="material-symbols-outlined filled-icon">search</span>
 		</button>
 	</section>
@@ -77,7 +77,7 @@
 				<div class="col">{{ $user['UserDisplayName'] }}</div>
 				<div class="col col-4 col-area">
 					@foreach($user['UserAreaId'] as $area)
-					<div class="badge bg-info">{{ Area::getLabelByValue($area) }}</div>
+					<div class="badge">{{ Area::getLabelByValue($area) }}</div>
 					@endforeach
 				</div>
 				<div class="col">{{ $viewModel->getRoleById($user['UserRoleId']) }}</div>
@@ -88,7 +88,7 @@
 					</a>
 					@endif
 					@if($viewModel->canDelete())
-					<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-del {{ $viewModel->disabledSupervisor($user['UserAd']) }}">
+					<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($user['UserAd']) }}">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif
