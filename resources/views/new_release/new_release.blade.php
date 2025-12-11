@@ -56,11 +56,11 @@
 			@foreach($viewModel->statistics['area'] as $name => $area)
 			<div class="row">
 				<div class="col">{{ $name == 'total' ? '全區合計' : $name }}</div>
-				<div class="col">{{ $area['shopCount'] }}</div>
-				<div class="col">{{ $area['totalQty'] }}</div>
-				<div class="col">{{ $area['avgDayQty'] }}</div>
-				<div class="col">{{ $area['avgShopQty'] }}</div>
-				<div class="col">{{ $area['avgDayShopQty'] }}</div>
+				<div class="col">{{ data_get($area, 'shopCount', 0) }}</div>
+				<div class="col">{{ data_get($area, 'totalQty', 0) }}</div>
+				<div class="col">{{ data_get($area, 'avgDayQty', 0) }}</div>
+				<div class="col">{{ data_get($area, 'avgShopQty', 0) }}</div>
+				<div class="col">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
 			</div>
 			@endforeach
 		</section>

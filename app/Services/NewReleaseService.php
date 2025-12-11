@@ -162,7 +162,7 @@ class NewReleaseService
 				
 			#8.當日銷售前10名 | 當日銷售後10名
 			list($statistics['top'], $statistics['last']) = $this->_parsingByRanking($baseData, $statistics['endDate']);
-				
+			
 			return ResponseLib::initialize($statistics)->success();
 		}
 		catch(Exception $e)
@@ -427,12 +427,12 @@ class NewReleaseService
 		})->toArray();
 		
 		#重排區域的順序以保持顯示一致(系統跑會依抓到資料的順序)
-		$result['大台北區'] 	= data_get($data, Area::TAIPEI->value);
-		$result['宜蘭區'] 	= data_get($data, Area::YILAN->value);
-		$result['桃竹苗區'] 	= data_get($data, Area::TCM->value);
-		$result['中彰投區'] 	= data_get($data, Area::CCT->value);
-		$result['雲嘉南區'] 	= data_get($data, Area::YCN->value);
-		$result['大高雄區'] 	= data_get($data, Area::KAOHSIUNG->value);
+		$result['大台北區'] 	= data_get($data, Area::TAIPEI->value, []);
+		$result['宜蘭區'] 	= data_get($data, Area::YILAN->value, []);
+		$result['桃竹苗區'] 	= data_get($data, Area::TCM->value, []);
+		$result['中彰投區'] 	= data_get($data, Area::CCT->value, []);
+		$result['雲嘉南區'] 	= data_get($data, Area::YCN->value, []);
+		$result['大高雄區'] 	= data_get($data, Area::KAOHSIUNG->value, []);
 		
 		/* 已改為Area Id
 		$result['大台北區'] 	= data_get($data, '大台北區');
