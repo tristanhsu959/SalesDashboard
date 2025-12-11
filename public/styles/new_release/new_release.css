@@ -1,7 +1,7 @@
 /* New Release Style */
 
 body .content-wrapper {
-	--tab-color: #0288d1;
+	--tab-color: rgba(2, 136, 209, .87);
 	
 	height: 100vh;
 	
@@ -11,7 +11,7 @@ body .content-wrapper {
 		bottom: 1rem;
 		transform: translateX(-50%);
 		justify-content: center;
-		background-color: rgba(255, 255, 255, .75);
+		background-color: rgba(255, 255, 255, .87);
 		z-index: 20;
 		display: flex;
 		border-radius: 2rem;
@@ -25,7 +25,7 @@ body .content-wrapper {
 			
 			&.active {
 				background-color: var(--tab-color);
-				color: #fff;
+				color: rgba(255, 255, 255, .87);
 			}
 		}
 	}
@@ -35,30 +35,32 @@ body .content-wrapper {
 .tab-content {
 	background-color: transparent;
 	padding: 0;
-	margin: 2rem 1rem;
+	margin: 1rem;
 	
 	.tab-pane {
 		padding: .5rem;
 		border-radius: .5rem;
-		background-color: #fff;
-		box-shadow: 1px 1px 4px 2px rgba(255, 255, 255, 0.75);
+		background-color: rgba(255, 255, 255, .87);
+		/* box-shadow: 1px 1px 4px 2px rgba(255, 255, 255, 0.75); */
 	}
 	
 	/* 區域彙總 */
 	.statistics-area.section-wrapper {
 		padding: 0;
+		margin: 0;
+		border: 1px solid rgba(0, 0, 0, .12);
 		
 		.row {
 			margin: 0;
 			
 			&:first-child .col {
-				background-color: #01579b;
-				color: #fff;
+				background-color: rgba(1, 87, 155, .87);
+				color: rgba(255, 255, 255, .87);
 				font-weight: bold;
 			}
 			
 			&:last-child .col {
-				border-top: 1px dashed #444;
+				border-top: 1px dashed #424242;
 				color: #f44336;
 			}
 			
@@ -77,15 +79,18 @@ body .content-wrapper {
 		overflow: auto;
 		scrollbar-width: thin;
 		scrollbar-color: #33691e #f1f8e9; /*thumb - track*/
+		margin: 0;
 		
 		table {
 			--bs-table-striped-bg : #f1f8e9;
+			
 			table-layout: fixed;
 			min-width: 100%;
 			width: auto;
 			overflow: unset;
 			padding: 0;
 			margin: 0;
+			border: 1px solid rgba(0, 0, 0, .12);
 			
 			thead {
 				tr {
@@ -94,8 +99,9 @@ body .content-wrapper {
 						top: 0;
 						z-index: 5;
 						word-break: keep-all;
-						background-color: #9ccc65;
+						background-color: rgba(139, 195, 74, .6);
 						min-width: 80px;
+						color: rgba(0, 0, 0, .87);
 						
 						&.col-date span {
 							display: inline-flex;
@@ -107,7 +113,7 @@ body .content-wrapper {
 								font-size: .9rem;
 								/* background-color: #33691e; */
 								/* border-radius: 4px; */
-								color: #444;
+								color: rgba(0, 0, 0, .6);
 							}
 						}
 						
@@ -177,11 +183,12 @@ body .content-wrapper {
 		overflow: auto;
 		scrollbar-width: thin;
 		scrollbar-color: #f4511e #fff; /*thumb - track*/
+		margin: 0;
 		
 		/*共用Style*/
 		.card {
 			flex: 1;
-			box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+			/* box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3); */
 			
 			&:first-child {
 				margin-right: .75rem;
