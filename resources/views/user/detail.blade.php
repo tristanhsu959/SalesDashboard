@@ -55,7 +55,7 @@
 	</div>
 	<div class="toolbar">
 		<button type="button" class="btn btn-major btn-save">儲存</button>
-		<button type="button" class="btn btn-red btn-cancel">取消</button>
+		<button type="button" class="btn btn-red btn-reset">取消</button>
 	</div>
 </section>
 </form>

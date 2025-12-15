@@ -67,7 +67,7 @@ body {
 	input:focus ~ label, input:not(:placeholder-shown) ~ label {
 		transform: translateY(-51%) translateX(-10px) scale(0.8);
 		padding: 0px 5px;
-		font-weight: bold;
+		/* font-weight: bold; */
 		letter-spacing: 1px;
 		border: none;
 		color: var(--input-field-label-color);
@@ -92,6 +92,14 @@ body {
 			color: #ce93d8;
 		}
 	}
+	&.field-cyan {
+		input {
+			border-color: #00bcd4;
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #00bcd4;
+		}
+	}
 	/* Input define */
 	
 	
@@ -105,14 +113,7 @@ body {
 			color: #00b0ff;
 		}
 	}
-	&.field-cyan {/*#00e5ff;*/
-		input {
-			border-color: rgba(0, 229, 255, .6);
-		}
-		input:focus ~ label, input:not(:placeholder-shown) ~ label {
-			color: rgba(0, 229, 255, .6); 
-		}
-	}
+	
 	&.field-orange {
 		input {
 			border-color: rgba(255, 145, 0, .6);
@@ -184,6 +185,15 @@ body {
 			color: #ce93d8;
 		}
 	}
+	&.field-light-blue {
+		.form-select {
+			border-color: #00b0ff;
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300b0ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+		}
+		label {
+			color: #00b0ff;
+		}
+	}
 	/* Input define */
 	
 	
@@ -231,7 +241,7 @@ body {
 	}
 	
 	.input-hint {
-		color: #f48fb1;
+		color: hsla(340,82%,76%, .6);
 	}
 }
 

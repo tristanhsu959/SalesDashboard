@@ -1,14 +1,14 @@
 /* Role list */
 
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
 .role-list.section-wrapper {
 	padding: .75rem;
 	margin-left: 1rem;
 	margin-right: 1rem;
 	border-radius: .5rem;
 	background: var(--theme-surface-l1);
-	
-	.list-data {
-		border: 1px solid hsl(from var(--theme-surface-l1) h s 12%);
-	}
 }
 

@@ -30,15 +30,15 @@
 	<form action="{{ route('user.search') }}" method="post" id="searchForm">
 	@csrf
 	<section class="searchbar section-wrapper">
-		<div class="input-field field-lime field">
+		<div class="input-field field-light-blue field">
 			<input type="text" class="form-control valid" id="searchAd" name="searchAd" value="{{ $viewModel->getSearchAd() }}" maxlength="20" placeholder=" ">
 			<label for="searchAd" class="form-label">AD帳號</label>
 		</div>
-		<div class="input-field field-lime field">
+		<div class="input-field field-light-blue field">
 			<input type="text" class="form-control valid" id="searchName" name="searchName" value="{{ $viewModel->getSearchName() }}" maxlength="20" placeholder=" ">
 			<label for="searchName" class="form-label">顯示名稱</label>
 		</div>
-		<div class="input-select field-lime field">
+		<div class="input-select field-light-blue field">
 			<select class="form-select" id="searchArea" name="searchArea">
 				<option value="">請選擇</option>
 				@foreach($viewModel->area as $area)
@@ -61,7 +61,7 @@
 			</div>
 		</div>
 		@else
-		<div class="container-fluid list-data">
+		<div class="container-fluid list-data grid grid-cyan">
 			<div class="row head">
 				<div class="col col-1">#</div>
 				<div class="col">AD帳號</div>

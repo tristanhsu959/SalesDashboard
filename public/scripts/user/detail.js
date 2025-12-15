@@ -1,7 +1,7 @@
 /* Role Create JS */
 
 $(function(){
-	$('.btn-cancel').click(function(){
+	$('.btn-reset').click(function(){
 		$('#userForm')[0].reset();
 	});
 	

@@ -1,9 +1,19 @@
 /* Role list */
 
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
 .searchbar.section-wrapper {
 	margin: 1rem 1rem 0;
 	display: flex;
 	align-items: center;
+	padding: .75rem;
+	padding-top: 1rem; /* for input field */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
 	
 	.field {
 		margin-right: 1rem;
@@ -11,29 +21,15 @@
 }
 
 .user-list.section-wrapper {
-	padding: 0 1rem 1rem;
+	padding: .75rem;
+	margin-top: 1rem; /* for input field */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
 	
 	.list-data
 		.row {
-			border-width: 0;
-			border-bottom: 1px solid var(--table-row-border-color);
-			
-			&.head  {
-				background-color: var(--table-head-bg-color);
-				color: var(--table-head-color);
-				font-weight: 500;
-			}
-			
-			&:not(.head) {
-				/* color: #90a4ae; */
-				color: var(--table-col-color);
-				background-color:var(--table-col-even-color);
-				
-				&:nth-child(odd) {
-					background-color: var(--table-col-odd-color);
-				}
-			}
-			
 			.col {
 				display: flex;
 				align-items: center;
@@ -47,25 +43,7 @@
 					color: rgba(0, 0, 0, .87);
 					font-weight: 400;
 				}
-				&.col-action {
-					display: flex;
-					justify-content: flex-end;
-					
-					.btn {
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						width: 28px;
-						height: 28px;
-						padding: 0;
-						border-radius: 50% 50%;
-						margin-left: .5rem;
-						
-						.material-symbols-outlined {
-							font-size: 1.25rem;
-						}
-					}
-				}
+				
 			}
 		}
 	}
