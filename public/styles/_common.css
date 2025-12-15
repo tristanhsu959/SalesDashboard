@@ -1,156 +1,78 @@
-/* Common Style */
-/* Body Message Dialog ... */
-
 body {
-	--scrollbar-width: calc(100vw - 100%);
-	--theme-bg-color: var(--primary-default-bg-color);
-	--theme-secondary-bg-color: var(--secondary-default-bg-color);
-	
-	font-family: 'Roboto', 'Orbitron', sans-serif;
-	font-size: 16px;
-	margin: 0;
-	padding: 0;
-	background-color: var(--theme-bg-color);
-	background: linear-gradient(90deg, var(--theme-bg-color) 10%, var(--theme-secondary-bg-color));
-	
-	main {
-		width: 100vw;
-		display: flex; 
-		justify-content: cetner;
+	/* Depth box-shadow */
+	.dp-1 {
+		box-shadow:  0px 1px 3px 0px rgba(0, 0, 0, 0.2),
+		0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+		0px 2px 1px -1px rgba(0, 0, 0, 0.12); 
 	}
-	
-	.content-wrapper{
-		position: relative;
-		/* flex-grow: 1; */
-		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
-		height: 100%; /* 100vh sticky會失效 */
-		box-sizing: border-box;
-		background-color: transparent;
+	.dp-2 {
+		box-shadow:  0px 1px 5px 0px rgba(0, 0, 0, 0.2),
+		0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+		0px 3px 1px -2px rgba(0, 0, 0, 0.12); 
 	}
-	
-	/* list no data */
-	.section-wrapper {
-		margin-top: 1rem;
-		
-		.empty-list {
-			.row {
-				border-bottom-width: 0;
-				background-color: rgba(229, 115, 115, .4); /*#e57373; */
-				
-				.col {
-					padding: .5rem;
-					color: #fff;
-				}
-			}
-		}
+	.dp-3 {
+		box-shadow:0px 1px 8px 0px rgba(0, 0, 0, 0.2),
+		0px 3px 4px 0px rgba(0, 0, 0, 0.14),
+		0px 3px 3px -2px rgba(0, 0, 0, 0.12); 
 	}
-}
-
-/* Google Icon */
-.filled-icon {
-  font-variation-settings: 'FILL' 1;
-}
-
-/* Common row divider */
-.divider {
-	display: flex;
-	
-	&:before, &:after {
-		content: '';
-		flex: 1;
-		height: 1px;
-		background-color: rgba(255, 255, 255, .12);
-		margin-top: .5rem;
-		margin-bottom: .5rem;
+	.dp-4 {
+		box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+		0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+		0px 1px 10px 0px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-5 {
+		box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+		0px 5px 8px 0px rgba(0, 0, 0, 0.14),
+		0px 1px 14px 0px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-6 {
+		box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+		0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+		0px 1px 18px 0px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-7 {
+		box-shadow: 0px 4px 5px -2px rgba(0, 0, 0, 0.2),
+		0px 7px 10px 1px rgba(0, 0, 0, 0.14),
+		0px 2px 16px 1px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-8 {
+		box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+		0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+		0px 3px 14px 2px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-16 {
+		box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2),
+		0px 16px 24px 2px rgba(0, 0, 0, 0.14),
+		0px 6px 30px 5px rgba(0, 0, 0, 0.12); 
+	}
+	.dp-24 {
+		box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+		0px 24px 38px 3px rgba(0, 0, 0, 0.14),
+		0px 9px 46px 8px rgba(0, 0, 0, 0.12); 
 	}
 }
 
-/* Toast Message */
-.error-msg {
-	display: flex;
-	align-items: center;
-	border-radius: 2px;
-	
-	.material-symbols-outlined {
-		margin-right: .5rem; 
-	}
-}
+/* Theme Base Color Define */
+/*
+primary 500 200 700
+secondary A200 A100 A400
+Error cf6679 dark E00020 light
 
-.toast.msg {
-	position: absolute;
-	right: 2rem;
-	bottom: 2rem;
-	background-color: #e53935;
-	color: #fff;
-}
 
-/* Dialog */
-#alert_modal {
-	.modal-header {
-		color: #f44336;
-	}
-	.modal-footer {
-		border-width: 1px;
-	}
-}
+Surface 8dp		12%
+Nav	模式底板/模式側板	16dp	8%
+Appbar 	4dp		9%
+card	1-8dp	5~12%
+FAB		6dp		11%
+Button	2-8dp	7~12%
+Dialog	24dp 	16%
 
-#confirm_modal {
-	.modal-header {
-		color: #03a9f4;
-	}
-	.modal-footer .btn.btn-outline-secondary {
-		border: 1px solid rgba(0, 0, 0, .6);
-		color: rgba(0, 0, 0, .6);
-		
-		&:hover {
-			color: rgba(255, 255, 255, .87);
-		}
-	}
-}
+Hover	4%
+Focus	12% color 100%
 
-/* Color Common */
-.purple {
-	color: #ce93d8;
-}
-.red {
-	color: #ef9a9a;
-}
-.cyan-accent-4 {
-	color: #00b8d4;
-}
-
-/* Loading bar */
-.loading-wrapper {
-	width: 100%;
-	height: 5px; /* Height of the loading bar */
-	border-radius: 1rem;
-	background-color: #000; /* Background color of the container */
-	overflow: hidden; /* Ensures the bar stays within its container */
-	position: fixed;
-	top: 64px;
-	display: none;
-	
-	&.active {
-		display: block;
-	}
-}
-
-.loading-bar {
-	width: 30%; /* Initial width of the moving bar segment */
-	height: 100%;
-	border-radius: 1rem;
-	background-color: rgba(128, 222, 234, .87); /* #80deea Color of the loading bar */
-	position: absolute;
-	top: 0;
-	left: -30%; /* Start off-screen to the left */
-	animation: infinite-loading 2s linear infinite; /* Animation properties */
-}
-
-@keyframes infinite-loading {
-	0% {
-		left: -30%; /* Starts off-screen left */
-	}
-	100% {
-		left: 100%; /* Moves across to off-screen right */
-	}
-}
+color alpha	#000 dark/light
+primary		87% / 100%
+secondary 	54% / 70%
+hint		26% / 30% or disabled
+divider 	12% / 12%
+*/

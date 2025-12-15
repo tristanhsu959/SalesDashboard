@@ -1,6 +1,38 @@
 /* Variables Define */
 
 :root {
+	
+	/* 官網主色紅 */
+	--brand-red-bg: #cb1a19; 
+	--brand-orange-bg: #f5ac2d; 
+	
+	--theme-bg: #fafafa;
+	--theme-dark-bg: #2f3135;
+	--theme-surface-bg: #eeeeee;
+	/* --theme-on-bg: #212121; */ /*#212121*/
+	--theme-primary-color: rgba(0 0 0 / 1);
+	--theme-secondary-color: rgba(0 0 0 / .7);
+	--theme-disabled-color: rgba(0 0 0 / .3); /* disabled or hint */
+	--theme-divider-color: rgba(0 0 0 / .12);
+	
+	/* --theme-bg: #121212; */ /*hsl(0 0% 7%);*/
+	/* --theme-on-bg: #fafafa; */ /* #fafafa */
+	
+	/* TBD */
+	--theme-primary: #cb1a19;
+	--theme-on-primary: #ffffff;
+	--theme-secondary: #f5ac2d;
+	--theme-on-secondary: #212121;
+	
+	/* For different primary bg */
+	--theme-primary-alpha: 100%;
+	--theme-secondary-alpha: 70%;
+	--theme-disabled-alpha: 30%;
+	--theme-hint-alpha: 30%;
+	--theme-divider-alpha: 12%;
+	
+	/* Theme Color Define */
+	
 	/* 官網主色紅 */
 	--primary-red-color: #cb1a19; /* red */
 	--primary-orange-color: #f5ac2d; /* amber */
