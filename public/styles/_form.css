@@ -29,7 +29,7 @@ body {
 	border-radius: 4px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, .form-select:focus, form-check-input:focus {
 	box-shadow: none;
 }
 
@@ -136,7 +136,7 @@ body {
 	}
 	
 	.input-hint {
-		color: #f48fb1;
+		color: var(--theme-placeholder-color);
 	}
 	
 	/* Singin form */
@@ -146,7 +146,7 @@ body {
 		right: 2rem;
 		display: inline-block;
 		transform: translateY(0.6rem);
-		color: #8d8d8d;
+		color: var(--theme-placeholder-color);
 	}
 }
 

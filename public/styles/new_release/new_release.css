@@ -17,7 +17,7 @@ body .content-wrapper {
 		display: flex;
 		border-radius: 2rem;
 		padding: .5rem;
-		border: 2px solid var(--tab-color);
+		border: 4px solid var(--tab-color);
 		
 		.nav-link {
 			background-color: transparent;

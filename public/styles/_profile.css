@@ -27,12 +27,11 @@
 			/* background-color: rgba(0, 188, 212, .6); */
 			padding-top: 3rem;
 			padding-bottom: 3rem;
-			/* background-color: var(--brand-red-bg); */
-			background: linear-gradient(to right top, #cb1a19, #d94a14, #e46d14, #ee8d1c, #f5ac2d);
+			background-color: var(--brand-red-bg);
 			
 			>.material-symbols-outlined {
 				font-size: 4rem;
-				color: var(--brand-red-bg);
+				color: var(--brand-secondary-red-bg);
 			}
 			
 			p {

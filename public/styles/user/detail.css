@@ -35,6 +35,7 @@ body {
 		}
 	}
 	
+	/* 身份 */
 	.user-role {
 		display: flex;
 		flex-wrap: wrap;
@@ -87,7 +88,7 @@ body {
 				content: '';
 				width: 160px;
 				height: .5rem;
-				background-color: #f06292;
+				background-color: #ff4081;
 				position: absolute;
 				top: 0;
 				opacity: 0;
@@ -99,7 +100,7 @@ body {
 				height: 0;
 				border-width: 16px 24px 0;
 				border-color: transparent;
-				border-top-color: #f06292;
+				border-top-color: #ff4081;
 				border-style: solid;
 				position: absolute;
 				top: .5rem;
@@ -108,8 +109,8 @@ body {
 			}
 			
 			&:has(input:checked) {
-				border-color: #f06292;
-				color: #f06292;
+				border-color: #ff4081;
+				color: #ff4081;
 				background-color: hsla(200, 19%, 18%, 1);
 				
 				&:before,  &:after{
@@ -119,6 +120,7 @@ body {
 		}
 	}
 	
+	/* 區域 */
 	.user-area {
 		display: flex;
 		flex-wrap: wrap;
@@ -174,8 +176,8 @@ body {
 			}
 			
 			&:has(input:checked) {
-				border-color: #aed581;
-				color: #aed581;
+				border-color: #76ff03;
+				color: #76ff03;
 				background-color: hsla(200, 19%, 18%, 1);
 				
 				&:before {

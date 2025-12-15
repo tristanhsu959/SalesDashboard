@@ -42,7 +42,7 @@ body {
 		border: 1px solid #ce93d8; 
 		margin-top: 1rem;
 		background-color: rgba(38, 50, 56, .38);
-			
+		
 		&:before {
 			content: '權限設定';
 			position: absolute;
@@ -118,9 +118,9 @@ body {
 						width: auto;
 						height: 2rem;
 						margin: .25rem;
-						color: rgba(255, 255, 255, .38);
-						border: 1px solid rgba(255, 255, 255, .38);
-						background-color: #212121;
+						color: rgba(236, 239, 241, .20);
+						border: 1px solid rgba(236, 239, 241, .20);
+						background-color: rgba(38, 50, 56, 1); /* #212121; */
 						padding: .175rem 1rem;
 						border-radius: 1rem;
 						
@@ -135,7 +135,7 @@ body {
 						&:has(input:checked) {
 							border-color: #e1bee7;
 							color: #e1bee7;
-							background-color: rgba(234, 128, 252, .6);
+							background-color: #ab47bc; //rgba(234, 128, 252, .6);
 							transition-property: color, border-color, background-color;
 							transition-duration: .3s;
 							transition-delay: .15s;

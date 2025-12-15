@@ -6,13 +6,13 @@
 		@yield('navHead')
 	</span>
 	<span class="navbar-action">
+		@yield('navAction')
 		<a class="btn btn-home" href="{{ route('home') }}" role="button">
 			<span class="material-symbols-outlined">home</span>
 		</a>
 		<a class="btn btn-profile" data-bs-toggle="offcanvas" href="#popup-profile" role="button" aria-controls="popup-profile">
 			<span class="material-symbols-outlined">person</span>
 		</a>
-		@yield('navAction')
 	</span>
 </nav>
 <div id="loading" class="loading-wrapper">
