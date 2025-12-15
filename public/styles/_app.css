@@ -3,39 +3,41 @@
 
 body {
 	--scrollbar-width: calc(100vw - 100%);
-	--theme-bg-color: var(--primary-default-bg-color);
-	--theme-secondary-bg-color: var(--secondary-default-bg-color);
 	
 	font-family: 'Roboto', 'Orbitron', sans-serif;
 	font-size: 16px;
 	margin: 0;
 	padding: 0;
-	background-color: var(--theme-bg-color);
-	background: linear-gradient(90deg, var(--theme-bg-color) 10%, var(--theme-secondary-bg-color));
+	background-color: var(--theme-bg);
+	background: linear-gradient(to right bottom, #121212, #1e1e1e, #292929, #353535, #424242);
 	
+	/* menu + content-wrapper */
 	main {
-		width: 100vw;
+		height: 100vh;
 		display: flex; 
 		justify-content: cetner;
 	}
 	
+	/* actionbar + section-wrapper */
 	.content-wrapper{
 		position: relative;
-		/* flex-grow: 1; */
+		flex-grow: 1;
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
 		height: 100%; /* 100vh sticky會失效 */
 		box-sizing: border-box;
 		background-color: transparent;
+		
 	}
 	
-	/* list no data */
+	list no data
 	.section-wrapper {
 		margin-top: 1rem;
+		background-color: 
 		
 		.empty-list {
 			.row {
 				border-bottom-width: 0;
-				background-color: rgba(229, 115, 115, .4); /*#e57373; */
+				background-color: rgba(229, 115, 115, .4); #e57373;
 				
 				.col {
 					padding: .5rem;
@@ -90,26 +92,17 @@ body {
 	}
 }
 
-/* Color Common */
-.purple {
-	color: #ce93d8;
-}
-.red {
-	color: #ef9a9a;
-}
-.cyan-accent-4 {
-	color: #00b8d4;
-}
 
 /* Loading bar */
 .loading-wrapper {
 	width: 100%;
-	height: 5px; /* Height of the loading bar */
+	height: 5px;
 	border-radius: 1rem;
-	background-color: #000; /* Background color of the container */
-	overflow: hidden; /* Ensures the bar stays within its container */
+	background-color: var(--theme-bg);
+	overflow: hidden;
+	
 	position: fixed;
-	top: 64px;
+	top: calc(64px - 5px);
 	display: none;
 	
 	&.active {
@@ -118,14 +111,14 @@ body {
 }
 
 .loading-bar {
-	width: 30%; /* Initial width of the moving bar segment */
+	width: 30%; 
 	height: 100%;
 	border-radius: 1rem;
-	background-color: rgba(128, 222, 234, .87); /* #80deea Color of the loading bar */
+	background-color: rgba(128, 222, 234, .87);
 	position: absolute;
 	top: 0;
-	left: -30%; /* Start off-screen to the left */
-	animation: infinite-loading 2s linear infinite; /* Animation properties */
+	left: -30%;
+	animation: infinite-loading 2s linear infinite;
 }
 
 @keyframes infinite-loading {

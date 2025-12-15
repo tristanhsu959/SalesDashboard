@@ -7,13 +7,13 @@
 	--brand-orange-bg: #f5ac2d; 
 	
 	--theme-bg: #121212; /* #2f3135; */
-	--theme-surface-bg: #383838;
+	/* --theme-surface-bg: #383838; */
 	
-	--theme-primary-color: rgba(0 0 0 / 1);
-	--theme-secondary-color: rgba(0 0 0 / .7);
-	--theme-placeholder-color: rgba(0 0 0 / .4);
-	--theme-disabled-color: rgba(0 0 0 / .3); /* disabled or hint */
-	--theme-divider-color: rgba(0 0 0 / .12);
+	--theme-primary-color: rgba(255 255 255 / .87);
+	--theme-secondary-color: rgba(255 255 255 / .6);
+	--theme-placeholder-color: rgba(255 255 255 / .48);
+	--theme-disabled-color: rgba(255 255 255 / .38); /* disabled or hint */
+	--theme-divider-color: rgba(255 255 255 / .12);
 	
 	/* --theme-bg: #121212; */ /*hsl(0 0% 7%);*/
 	/* --theme-on-bg: #fafafa; */ /* #fafafa */

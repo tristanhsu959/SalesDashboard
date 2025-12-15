@@ -1,6 +1,6 @@
 /* Navbar */
 .page.navbar {
-	--nav-bg-color: var(--primay-default-bg-color);
+	--nav-bg-color: var(--theme-bg);
 	
 	position: sticky;
 	top: 0;
@@ -9,17 +9,21 @@
 	height: 64px;
 	
 	/* Default */
-	background-color: var(--nav-bg-color);
-	color: rgba(255, 255, 255, .6);
+	color: var(--theme-primary-color);
 	padding-left: 1rem;
 	padding-right: 1rem;
-		
+	/* background-color: var(--nav-bg-color); */
+	
 	.navbar-head {
 		display: flex;
 		align-items: center;
 		font-weight: 500;
-		color: rgba(255, 152, 0, .87);
+		color: var(--theme-primary-color);
 		
+		.material-symbols-outlined {
+			color: rgba(255, 152, 0, .87);
+			margin-right: .5rem;
+		}
 		/* New release info */
 		.new-release-info {
 			display: flex;

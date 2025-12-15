@@ -1,45 +1,52 @@
 /* Aside Menu */
 .aside.menu {
-	--menu-bg-color: var(--secondary-default-bg-color); 
+	--menu-bg: #424242;
 	
 	position: sticky;
 	top: 0;
 	left: 0;
 	width: 256px;
 	height: 100vh;
-	background-color: var(--menu-bg-color);
+	background-color: var(--menu-bg);
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 	
 	.logo {
-		height: 64px;
-		position: relative;
 		display: flex;
 		justify-content: center;
-		align-items: center;
-		background: linear-gradient(125deg, var(--primary-red-color) 25%,  var(--primary-orange-color) 65%);
-		opacity: .6;
+		padding: 2rem 1rem; 
 		
-		img {
-			width: auto;
-			height: 48px;
+		.logo-wrapper {
+			width: 64px;
+			height: 64px;
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-radius: 4rem;
+			background: linear-gradient(to right bottom, #cb1a19, #cb1a19, #d94a14, #e46d14);
+			
+			img {
+				width: auto;
+				height: 48px;
+			}
 		}
 	}
-	
+		
 	.container-fluid {
 		/*#00bcd4*/
-		--menu-color: rgba(0, 188, 212, .6); 
-		--menu-group-color: rgba(0, 188, 212, .87);  
+		--menu-color: rgba(0, 188, 212, .87); 
+		--menu-group-color: rgba(0, 188, 212, 1);  
 		--menu-hover-color: #80deea; /*200*/
 		
 		width: 100%;
-		height: calc(100vh - 64px);
+		/* height: calc(100vh - 64px); 若設定要考慮logo padding */
 		padding-left: 0;
 		padding-right: 0;
 		overflow-y: auto;
 		scrollbar-width: thin;
-		scrollbar-color: var(--menu-group-color) var(--secondary-default-bg-color); 
+		scrollbar-color: var(--menu-group-color) var(--menu-bg); 
 		/* Two valid colors. The first applies to the thumb of the scrollbar, the second to the track. */
 		
 	
@@ -63,7 +70,6 @@
 				&:hover /*, &.active, &[aria-expanded='true']*/ {
 					color: var(--menu-hover-color);
 					cursor: pointer;
-					/* text-shadow: 0 0 1rem var(--menu-hover-color); */
 				}
 				
 				&[aria-expanded='false']:after {
@@ -87,7 +93,7 @@
 					display: flex;
 					border-width: 0px;
 					padding: 0 1rem 0 2rem;
-					background-color: var(--menu-bg-color);
+					background-color: transparent;
 					margin-bottom: .25rem;
 					
 					a {
@@ -100,7 +106,7 @@
 						
 						&:hover, &.active {
 							border-radius: 20px;
-							background-color: #37474f;
+							background-color: #455a64;
 							color: var(--menu-hover-color);
 						}
 					}

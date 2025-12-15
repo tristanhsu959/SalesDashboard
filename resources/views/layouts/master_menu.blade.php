@@ -1,7 +1,9 @@
 
-<div class="aside menu">
+<div class="aside menu dp-8">
 	<div class="logo">
-		<img src="{{ asset('images/logo.png') }}" />
+		<div class="logo-wrapper">
+			<img src="{{ asset('images/logo.png') }}" />
+		</div>
 	</div>
 	<div class="container-fluid">
 		@foreach($appMenu->getMenu() as $key => $group)
