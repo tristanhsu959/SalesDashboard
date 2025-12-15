@@ -10,7 +10,8 @@ body {
 	justify-content: space-between;
 	
 	padding: .75rem;
-	padding-top: 1rem; /* for input field */
+	/* padding-top: 1rem; */ /* for input field */
+	/* margin top setting in _app */
 	margin-left: 1rem;
 	margin-right: 1rem;
 	border-radius: .5rem;
