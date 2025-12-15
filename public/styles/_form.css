@@ -74,7 +74,7 @@ body {
 		background-color: var(--input-field-label-bg-color);
 	}
 	
-	/* Customize */
+	/* Input define */
 	&.field-light-blue {
 		input {
 			border-color: #00b0ff; /* accent3 */
@@ -84,17 +84,19 @@ body {
 		}
 	}
 	
-	
-	
-	
-	&.field-red {
+	&.field-purple {
 		input {
-			border-color: #ff1744; /* accent3 */
+			border-color: #ce93d8; /* accent3 */
 		}
 		input:focus ~ label, input:not(:placeholder-shown) ~ label {
-			color: #ff1744;
+			color: #ce93d8;
 		}
 	}
+	/* Input define */
+	
+	
+	
+	
 	&.field-blue {
 		input {
 			border-color: #00b0ff; 
@@ -170,17 +172,23 @@ body {
         // border-radius: 100px;
 		color: var(--input-field-label-color);
 		background-color: var(--input-field-label-bg-color);
-   }
+	}
     
-	&.field-red {
+	/* Select define */
+	&.field-purple {
 		.form-select {
-			border-color: #ff1744; /* accent3 */
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cb1a19' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+			border-color: #ce93d8; /* accent3 */
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ce93d8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 		}
 		label {
-			color: #ff1744;
+			color: #ce93d8;
 		}
 	}
+	/* Input define */
+	
+	
+	
+	
 	&.field-blue {
 		.form-select {
 			border-color: #00b0ff;

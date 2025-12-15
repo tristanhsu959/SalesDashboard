@@ -36,7 +36,7 @@
 			</div>
 		</div>
 		@else
-		<div class="container-fluid list-data">
+		<div class="container-fluid list-data grid grid-purple">
 			<div class="row head">
 				<div class="col col-1">#</div>
 				<div class="col">身份</div>

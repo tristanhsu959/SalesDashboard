@@ -25,13 +25,13 @@
 <input type="hidden" value="{{ $viewModel->getUpdateRoleId() }}" name="id">
 @csrf
 
-<section class="section-wrapper">
+<section class="section-wrapper dp-2">
 	<div class="section role-data">
-		<div class="input-field field-orange field required">
+		<div class="input-field field-purple field required">
 			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->getRoleName() }}" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
-		<div class="input-select field-orange field required">
+		<div class="input-select field-purple field required">
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
 				@foreach($viewModel->roleGroup as $role)
@@ -47,6 +47,7 @@
 	<div class="section role-permission field-group">
 		@foreach($viewModel->functionList as $groupKey => $group)
 		<ul class="list-group {{ Str::lower($group['groupType']) }}">
+			<div class="divider"></div>
 			<label class="title">
 				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>
 				{{ $group['groupName'] }}
@@ -77,7 +78,7 @@
 	</div>
 	<div class="toolbar">
 		<button type="button" class="btn btn-primary btn-major btn-save">儲存</button>
-		<button type="button" class="btn btn-red btn-cancel">取消</button>
+		<button type="button" class="btn btn-red btn-reset">重設</button>
 	</div>
 </section>
 </form>

@@ -11,7 +11,7 @@
 				Show alert message here.
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-primary" data-bs-dismiss="modal">確認</button>
+				<button class="btn btn-ok" data-bs-dismiss="modal">確認</button>
 			</div>
 		</div>
 	</div>
@@ -28,8 +28,8 @@
 				Show confirm description here.
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-primary btn-major" data-bs-dismiss="modal">確認</button>
-				<button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+				<button class="btn btn-ok btn-major" data-bs-dismiss="modal">確認</button>
+				<button class="btn btn-cancel" data-bs-dismiss="modal">取消</button>
 			</div>
 		</div>
 	</div>

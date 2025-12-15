@@ -7,7 +7,9 @@
 	--brand-orange-bg: #f5ac2d; 
 	
 	--theme-bg: #121212; /* #2f3135; */
-	/* --theme-surface-bg: #383838; */
+	--theme-surface-l1: #424242;
+	--theme-surface-l2: #616161;
+	--theme-surface-l3: #757575;
 	
 	--theme-primary-color: rgba(255 255 255 / .87);
 	--theme-secondary-color: rgba(255 255 255 / .6);

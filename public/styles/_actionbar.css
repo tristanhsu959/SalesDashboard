@@ -20,7 +20,7 @@
 		font-weight: 500;
 		color: var(--theme-primary-color);
 		
-		.material-symbols-outlined {
+		&> .material-symbols-outlined {
 			color: rgba(255, 152, 0, .87);
 			margin-right: .5rem;
 		}
@@ -36,8 +36,8 @@
 	
 	/* 共用的style */
 	.navbar-action, .navbar-head {
-		--btn-color: rgba(255, 255, 255, .6);
-		--btn-hover-color: rgba(255, 255, 255, .87);
+		--btn-color: rgba(255, 255, 255, .7);
+		--btn-hover-color: rgba(255, 255, 255, 1);
 		
 		display: flex;
 		font-weight: 500;
@@ -80,21 +80,21 @@
 		
 		/* Page Toolbar */
 		a.btn-home {
-			background-color: rgba(233, 30, 99, .6);
+			background-color: hsl(340, 82%, 52%);
 			&:hover {
-				background-color: rgba(233, 30, 99, .87);
+				background-color: hsl(340, 82%, 56%);
 			}
 		}
 		a.btn-profile {
-			background-color: rgba(0, 188, 212, .6);
+			background-color: hsl(187, 100%, 42%);
 			&:hover {
-				background-color: rgba(0, 188, 212, .87);
+				background-color: hsl(187, 100%, 46%);
 			}
 		}
 		a.btn-create {
-			background-color: rgba(139, 195, 74, .6);
+			background-color: hsl(88, 50%, 53%);
 			&:hover {
-				background-color: rgba(139, 195, 74, .87);
+				background-color: hsl(88, 50%, 57%);
 				width: calc(3ch * 3.5);
 			}
 		}
@@ -105,6 +105,7 @@
 			&:hover {
 				width: calc(4ch * 3.5);
 				background-color: #bcaaa4;
+				color: rgba(0 0 0 / .87);
 			}
 		}
 	}

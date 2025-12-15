@@ -29,15 +29,15 @@ body {
 		
 	}
 	
-	list no data
+	/* list no data */
 	.section-wrapper {
-		margin-top: 1rem;
-		background-color: 
+		/* margin-top: 1rem; */
+		/* background-color:  */
 		
 		.empty-list {
 			.row {
 				border-bottom-width: 0;
-				background-color: rgba(229, 115, 115, .4); #e57373;
+				background-color: rgba(229, 115, 115, .4); /* #e57373; */
 				
 				.col {
 					padding: .5rem;

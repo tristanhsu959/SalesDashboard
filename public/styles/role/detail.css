@@ -1,10 +1,19 @@
 /* list */
 
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
 .section-wrapper {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	margin: 2rem 1rem 1rem;
+	padding: .75rem;
+	padding-top: 1rem; /* for input field */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
 	
 	.section {
 		height: 100%;
@@ -29,35 +38,37 @@
 		flex: 2;
 		padding: 1rem;
 		border-radius: .5rem;
-		border: 1px solid rgba(255, 145, 0, .6); 
+		border: 1px solid #ce93d8; 
 		margin-top: 1rem;
-		background-color: rgba(38, 50, 56, .6);
+		background-color: rgba(38, 50, 56, .38);
 			
 		&:before {
 			content: '權限設定';
 			position: absolute;
 			top: 0;
 			padding: 0 .25rem;
-			color: rgba(255, 145, 0, .6); 
-			background: linear-gradient(to bottom, var(--primary-default-bg-color) 50%, transparent 50% 100%); 
+			color: #ce93d8; 
+			background: linear-gradient(to bottom, var(--theme-surface-bg) 50%, transparent 50% 100%); 
 			display: flex;
 			transform: translate(-0.25rem, -50%);
 		}
 		
 		.list-group {
-			margin-bottom: 1rem;
 			border-radius: 0;
-			border-bottom: 1px solid rgba(255, 255, 255, .12);
 			
-			&:last-child {
-				border-bottom-width: 0;
+			&:first-child {
+				margin-top: .5rem;
+				
+				.divider {
+					display: none;
+				}
 			}
 				
 			/* 功能群組 */
 			.title {
 				display: flex;
 				align-items: center;
-				color: rgba(234, 128, 252, .87);
+				color: #ff9100;
 			}
 			
 			.list-group-item {
@@ -76,14 +87,14 @@
 					
 					/* Switch */
 					label {
-						color: #00bcd4;
+						color: #bcaaa4;
 					}
 					.form-check-input {
 						background-color: #cfd8dc;
 						&:checked {
-							background-color: #ff9100;
-							border-color: #ff6d00;
-							background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23e65100'/%3e%3c/svg%3e");
+							background-color: #ffd180;
+							border-color: #ffab40;
+							background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ff9100'/%3e%3c/svg%3e");
 						}
 					}
 					input:checked {

@@ -1,56 +1,14 @@
 /* Role list */
 
 .role-list.section-wrapper {
-	padding: 0 1rem 1rem;
+	padding: .75rem;
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-l1);
 	
 	.list-data {
-		.row {
-			border-width: 0;
-			border-bottom: 1px solid var(--table-row-border-color);
-			/* border-bottom: 1px solid #ccc; */
-			
-			&.head  {
-				background-color: rgba(103, 58, 183, .87);
-				color: #d1c4e9;
-				font-weight: 500;
-			}
-			
-			&:not(.head) {
-				color: var(--table-col-color);
-				background-color:var(--table-col-even-color);
-				
-				&:nth-child(odd) {
-					background-color:var(--table-col-odd-color);
-				}
-			}
-			
-			.col {
-				display: flex;
-				align-items: center;
-				border-width: 0;
-				padding: .5rem;
-				
-				&.col-action {
-					display: flex;
-					justify-content: flex-end;
-					
-					.btn {
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						width: 28px;
-						height: 28px;
-						padding: 0;
-						border-radius: 50% 50%;
-						margin-left: .5rem;
-						
-						.material-symbols-outlined {
-							font-size: 1.25rem;
-						}
-					}
-				}
-			}
-		}
+		border: 1px solid hsl(from var(--theme-surface-l1) h s 12%);
 	}
 }
 
