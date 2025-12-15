@@ -6,12 +6,12 @@
 	--brand-red-bg: #cb1a19; 
 	--brand-orange-bg: #f5ac2d; 
 	
-	--theme-bg: #fafafa;
-	--theme-dark-bg: #2f3135;
-	--theme-surface-bg: #eeeeee;
-	/* --theme-on-bg: #212121; */ /*#212121*/
+	--theme-bg: #121212; /* #2f3135; */
+	--theme-surface-bg: #383838;
+	
 	--theme-primary-color: rgba(0 0 0 / 1);
 	--theme-secondary-color: rgba(0 0 0 / .7);
+	--theme-placeholder-color: rgba(0 0 0 / .4);
 	--theme-disabled-color: rgba(0 0 0 / .3); /* disabled or hint */
 	--theme-divider-color: rgba(0 0 0 / .12);
 	
@@ -32,24 +32,4 @@
 	--theme-divider-alpha: 12%;
 	
 	/* Theme Color Define */
-	
-	/* 官網主色紅 */
-	--primary-red-color: #cb1a19; /* red */
-	--primary-orange-color: #f5ac2d; /* amber */
-	--primary-orange-light-color: #ffd180;
-	
-	--secondary-red-color: #ed5a65; /* red */
-	--secondary-orange-color: #ffc107; /* amber */
-	
-	/* View Background */
-	--primary-default-bg-color: #121212;
-	--secondary-default-bg-color: #383838; /* or 1e1e1e*/
-	
-	/* Defatul Table */
-	--table-head-bg-color: rgba(33, 150, 243, .87); 
-	--table-head-color: #bbdefb; /* light-4*/
-	--table-row-border-color: rgba(255, 255, 255, .12);
-	--table-col-color: rgba(176, 190, 197, .87);
-	--table-col-odd-color: rgba(55, 71, 79, .87);
-	--table-col-even-color: rgba(38, 50, 56, .87);
 }

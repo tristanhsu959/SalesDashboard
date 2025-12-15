@@ -4,10 +4,10 @@ body {
 	/* --input-field-color: #cfd8dc; */
 	/* --input-field-label-color: #cfd8dc; */
 	
-	--input-field-color: rgba(255, 255, 255, .87);
-	--input-field-bg-color: var(--primary-default-bg-color);
-	--input-field-label-color: rgba(255, 255, 255, .6);
-	--input-field-label-bg-color: var(--primary-default-bg-color);
+	--input-field-color: var(--theme-primary-color);
+	--input-field-bg-color: var(--theme-surface-bg);
+	--input-field-label-color: var(--theme-placeholder-color);
+	--input-field-label-bg-color: var(--theme-surface-bg);
 }
 
 /* input Required */
@@ -75,6 +75,18 @@ body {
 	}
 	
 	/* Customize */
+	&.field-light-blue {
+		input {
+			border-color: #00b0ff; /* accent3 */
+		}
+		input:focus ~ label, input:not(:placeholder-shown) ~ label {
+			color: #00b0ff;
+		}
+	}
+	
+	
+	
+	
 	&.field-red {
 		input {
 			border-color: #ff1744; /* accent3 */
