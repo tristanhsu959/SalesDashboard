@@ -1,7 +1,7 @@
 /* New Release Style */
 
 body .content-wrapper {
-	--theme-surface-bg : var(--theme-surface-l1);
+	--theme-surface-bg : var(--theme-surface-l1); /* default */
 	--tab-color: rgba(2, 136, 209, .87);
 	
 	height: 100vh;
@@ -36,42 +36,48 @@ body .content-wrapper {
 .tab-content {
 	background-color: transparent;
 	padding: 0;
-	margin: 1rem;
+	margin: 0 1rem 64px;
 	
 	.tab-pane {
-		/* padding: .5rem; */
 		border-radius: .5rem;
 		padding: .75rem;
-		padding-top: 1rem; /* for input field */
 		border-radius: .5rem;
 		background-color: var(--theme-surface-bg);
 		/* background-color: rgba(255, 255, 255, .87); */
 		/* box-shadow: 1px 1px 4px 2px rgba(255, 255, 255, 0.75); */
+		
+		&#area {
+			background-color: #01579B;
+		}
+		&#shop {
+			background-color: #aed581;
+		}
 	}
 	
 	/* 區域彙總 */
 	.statistics-area.section-wrapper {
 		padding: 0;
 		margin: 0;
-		border: 1px solid rgba(0, 0, 0, .12);
+		/* border: 1px solid rgba(0, 0, 0, .12); */
+		/* background-color: rgba(1, 87, 155, .87); */
 		
 		.row {
 			margin: 0;
 			
 			&:first-child .col {
-				background-color: rgba(1, 87, 155, .87);
+				background-color: rgba(1, 87, 155, 1);
 				color: rgba(255, 255, 255, .87);
 				font-weight: bold;
 			}
 			
 			&:last-child .col {
-				border-top: 1px dashed #424242;
+				border-top: 1px dashed rgba(0, 0, 0, .12);
 				color: #f44336;
 			}
 			
 			.col {
 				padding: .5rem;
-				background-color: #e3f2fd;
+				background-color: #e1f5fe;
 			}
 		}
 	}
@@ -80,7 +86,7 @@ body .content-wrapper {
 	.statistics-shop.section-wrapper {
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 64px - 5rem);
+		max-height: calc(100vh - 64px - 5.5rem);
 		overflow: auto;
 		scrollbar-width: thin;
 		scrollbar-color: #33691e #f1f8e9; /*thumb - track*/
@@ -95,7 +101,7 @@ body .content-wrapper {
 			overflow: unset;
 			padding: 0;
 			margin: 0;
-			border: 1px solid var(--theme-divider-color);
+			/* border: 1px solid var(--theme-divider-color); */
 			
 			thead {
 				tr {
@@ -115,7 +121,7 @@ body .content-wrapper {
 							padding: 0 .5rem;
 							
 							&:first-child {
-								font-size: .9rem;
+								/* font-size: .9rem; */
 								/* background-color: #33691e; */
 								/* border-radius: 4px; */
 								color: rgba(0, 0, 0, .6);
@@ -150,8 +156,8 @@ body .content-wrapper {
 						position: sticky;
 						font-weight: normal;
 						z-index: 5;
-						color: #2e7d32; /*#1b3823;*/
-						border-bottom-width: 0;
+						color: #1b5e20; /*#1b3823;*/
+						/* border-bottom-width: 0; */
 						
 						&:nth-child(1) {
 							left: 0;

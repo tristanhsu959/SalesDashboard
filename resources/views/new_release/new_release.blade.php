@@ -1,4 +1,5 @@
 @extends('layouts.master')
+@use('App\Enums\Area')
 
 @push('styles')
     <link href="{{ asset('styles/new_release/new_release.css') }}" rel="stylesheet">
@@ -88,7 +89,7 @@
 				<tbody>
 					@foreach($viewModel->statistics['shop'] as $shop)
 					<tr>
-						<th>{{ $shop['area'] }}</th>
+						<th>{{ Area::getLabelByValue($shop['area']) }}</th>
 						<th>{{ $shop['shopId'] }}</th>
 						<th>{{ $shop['shopName'] }}</th>
 						
