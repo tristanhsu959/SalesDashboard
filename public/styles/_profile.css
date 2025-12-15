@@ -24,18 +24,20 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			background-color: rgba(0, 188, 212, .6);
+			/* background-color: rgba(0, 188, 212, .6); */
 			padding-top: 3rem;
 			padding-bottom: 3rem;
-				
+			/* background-color: var(--brand-red-bg); */
+			background: linear-gradient(to right top, #cb1a19, #d94a14, #e46d14, #ee8d1c, #f5ac2d);
+			
 			>.material-symbols-outlined {
 				font-size: 4rem;
-				color: rgba(216, 27, 96, .87);
+				color: var(--brand-red-bg);
 			}
 			
 			p {
 				margin: 0;
-				color: rgba(0, 0, 0, .87);
+				color: rgba(255, 255, 255, .87);
 				font-size: 1.1rem;
 				font-family: 'Poiret One';
 				font-weight: 400;
@@ -60,12 +62,12 @@
 			.user-area {
 				span {
 					width: 30%;
-					background-color: rgba(129, 212, 250, .6);
-					color: rgba(1, 87, 155, .87);
+					background-color: var(--brand-orange-bg);
+					color: #212121;
 					font-size: .85rem;
 					font-weight: 400;
 					border-radius: 1rem;
-					border: 1px solid rgba(1, 87, 155, .87);
+					border: 2px solid var(--brand-red-bg);
 					margin: .125rem 0;
 				}
 			}
@@ -74,9 +76,9 @@
 		a.btn-signout {
 			position: absolute;
 			bottom: 1rem;
-			left: 140px;
+			left: 50%;
 			transform: translateX(-50%);
-			background-color: #01579b ;
+			background-color: hsl(8, 100%, 56%);
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -85,6 +87,10 @@
 			border-radius: 2rem;
 			color: #fff;
 			margin: auto;
+			
+			&:hover {
+				background-color: hsl(8, 100%, 60%);
+			}
 		}
 	}
 	

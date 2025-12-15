@@ -1,6 +1,6 @@
 /* Aside Menu */
 .aside.menu {
-	--menu-bg: #424242;
+	--menu-bg: #2f3135;
 	
 	position: sticky;
 	top: 0;
@@ -16,7 +16,8 @@
 		display: flex;
 		justify-content: center;
 		padding: 2rem 1rem; 
-		
+		border-bottom: 2px solid rgba(0 0 0 / .20);
+			
 		.logo-wrapper {
 			width: 64px;
 			height: 64px;

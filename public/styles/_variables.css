@@ -3,7 +3,8 @@
 :root {
 	
 	/* 官網主色紅 */
-	--brand-red-bg: #cb1a19; 
+	/* --brand-red-bg: #cb1a19; */
+	--brand-red-bg: #ff3b1e;
 	--brand-orange-bg: #f5ac2d; 
 	
 	--theme-bg: #121212; /* #2f3135; */
