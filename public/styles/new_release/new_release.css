@@ -1,6 +1,7 @@
 /* New Release Style */
 
 body .content-wrapper {
+	--theme-surface-bg : var(--theme-surface-l1);
 	--tab-color: rgba(2, 136, 209, .87);
 	
 	height: 100vh;
@@ -40,7 +41,8 @@ body .content-wrapper {
 	.tab-pane {
 		padding: .5rem;
 		border-radius: .5rem;
-		background-color: rgba(255, 255, 255, .87);
+		background-color: var(--theme-surface-bg);
+		/* background-color: rgba(255, 255, 255, .87); */
 		/* box-shadow: 1px 1px 4px 2px rgba(255, 255, 255, 0.75); */
 	}
 	
@@ -90,7 +92,7 @@ body .content-wrapper {
 			overflow: unset;
 			padding: 0;
 			margin: 0;
-			border: 1px solid rgba(0, 0, 0, .12);
+			border: 1px solid var(--theme-divider-color);
 			
 			thead {
 				tr {
@@ -99,7 +101,7 @@ body .content-wrapper {
 						top: 0;
 						z-index: 5;
 						word-break: keep-all;
-						background-color: rgba(139, 195, 74, .6);
+						background-color: #aed581;
 						min-width: 80px;
 						color: rgba(0, 0, 0, .87);
 						
@@ -146,6 +148,7 @@ body .content-wrapper {
 						font-weight: normal;
 						z-index: 5;
 						color: #2e7d32; /*#1b3823;*/
+						border-bottom-width: 0;
 						
 						&:nth-child(1) {
 							left: 0;

@@ -39,7 +39,7 @@ body {
 				&.col-area .badge {
 					margin-right: .25rem;
 					border-radius: 2px;
-					background-color: rgba(248, 187, 208, .87);
+					background-color: #ffe082;
 					color: rgba(0, 0, 0, .87);
 					font-weight: 400;
 				}
