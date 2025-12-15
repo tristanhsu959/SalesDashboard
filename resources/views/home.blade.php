@@ -8,6 +8,16 @@
     <script src=""></script>
 @endpush
 
-@section('navHead', '首頁')
+@section('navHome')
+<div class="navbar-home">
+	<span class="sales">sales</span><span class="dashboard">Dashboard</span>
+</div>
+@endsection
+
 @section('navAction', '')
-@section('content', '')
+
+@section('content')
+	<section class="searchbar section-wrapper">
+		
+	</section>
+@endsection

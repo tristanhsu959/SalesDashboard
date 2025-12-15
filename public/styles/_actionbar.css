@@ -13,7 +13,22 @@
 	padding-left: 1rem;
 	padding-right: 1rem;
 	/* background-color: var(--nav-bg-color); */
-	
+	.navbar-home {
+		display: flex;
+		font-size: 1.5rem;
+		font-family: 'Orbitron';
+		
+		.sales {
+			/* text-shadow: 1px 1px #ff3b1e, -1px -1px #ff3b1e, 1px -1px #ff3b1e, -1px 1px #ff3b1e;
+			 */
+			color: #ff3b1e;
+			font-weight: bold;
+		}
+		.dashboard {
+			text-shadow: 1px 1px #ff3b1e, -1px -1px #ff3b1e, 1px -1px #ff3b1e, -1px 1px #ff3b1e;
+			color: #121212;
+		}
+	}
 	.navbar-head {
 		display: flex;
 		align-items: center;

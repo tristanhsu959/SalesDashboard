@@ -1,10 +1,14 @@
 
 <nav class="page navbar">
+	@hasSection('navHome')
+	<span>@yield('navHome')</span>
+	@else
 	<span class="navbar-head">
 		@yield('navBack')
 		<span class="material-symbols-outlined filled-icon">bubble_chart</span>
 		@yield('navHead')
 	</span>
+	@endif
 	<span class="navbar-action">
 		@yield('navAction')
 		<a class="btn btn-home" href="{{ route('home') }}" role="button">
