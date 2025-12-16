@@ -21,6 +21,30 @@ class NewReleaseController extends Controller
 		$this->_viewModel 	= $newReleaseViewModel;
 	}
 	
+	/* All Entry
+	 */
+	public function getStatistics(Request $request)
+	{
+		$this->_viewModel->initialize(FormAction::List);
+		
+		#取新品config用
+		$segment = $request->segment(2);
+		$this->_viewModel->segment = $segment;
+		
+		$this->_service->convertConfigKey($segment);
+		
+		$response = $this->_service->getStatistics();
+		
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+			$this->_viewModel->success();
+		
+		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
+		
+		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
+	}
+	
     /* 橙汁排骨
 	 */
 	public function getPorkRibsStatistics(Request $request)

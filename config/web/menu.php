@@ -30,8 +30,26 @@ return [
 				'operation'		=> [
 					Operation::READ
 				],
+			],
+			'braisedPork' => [
+				'actionCode'	=> '04',
+				'segmentCode'	=> 'braised_pork',
+				'name' 			=> '主廚秘製滷肉飯',
+				'url' 			=> 'new_releases/braised_pork',
+				'operation'		=> [
+					Operation::READ
+				],
+			],
+			'eggTofu' => [
+				'actionCode'	=> '08',
+				'segmentCode'	=> 'egg_tofu',
+				'name' 			=> '老皮嫩肉',
+				'url' 			=> 'new_releases/egg_tofu',
+				'operation'		=> [
+					Operation::READ
+				],
 			]
-			#chickenfillet
+			
 		],
 	],
 	

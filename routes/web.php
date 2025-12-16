@@ -18,8 +18,10 @@ Route::middleware([AuthPermission::class])->group(function(){
 	/* Home */
 	Route::get('home', [HomeController::class, 'index'])->name('home');
 	/* 新品 */
-	Route::get('new_releases/pork_ribs', [NewReleaseController::class, 'getPorkRibsStatistics']);
-	Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getTomatoBeefStatistics']);
+	Route::get('new_releases/pork_ribs', [NewReleaseController::class, 'getStatistics']);
+	Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getStatistics']);
+	Route::get('new_releases/braised_pork', [NewReleaseController::class, 'getStatistics']);
+	Route::get('new_releases/egg_tofu', [NewReleaseController::class, 'getStatistics']);
 
 	/* 身份管理 */
 	Route::get('roles', [RoleController::class, 'list'])->name('role.list');
