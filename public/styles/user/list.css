@@ -18,6 +18,9 @@ body {
 	.field {
 		margin-right: 1rem;
 	}
+	.btn {
+		margin-right: .5rem;
+	}
 }
 
 .user-list.section-wrapper {

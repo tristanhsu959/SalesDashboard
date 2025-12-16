@@ -50,6 +50,9 @@
 		<button class="btn btn-search" type="button">
 			<span class="material-symbols-outlined filled-icon">search</span>
 		</button>
+		<button class="btn btn-search-reset" type="button">
+		<span class="material-symbols-outlined filled-icon">ink_eraser</span>
+	</button>
 	</section>
 	</form>
 

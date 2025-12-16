@@ -6,19 +6,47 @@
 @endpush
 
 @push('scripts')
-    <!--script src="{{ asset('scripts/new_release/new_release.js') }}" defer></script-->
+    <script src="{{ asset('scripts/new_release/new_release.js') }}" defer></script>
 @endpush
 
 @section('navHead')
 {{ $viewModel->getBreadcrumb() }}
 <div class="new-release-info">
 	<div>發售日</div>
-	<div>{{ $viewModel->statistics['saleDate'] }}</div>
+	<div>{{ $viewModel->getSaleDate() }}</div>
 </div>
 @endsection
 
 
 @section('content')
+<!-- Search by Date -->
+<form action="{{ route('new_releases.search') }}" method="post" id="searchForm">
+@csrf
+<input type="hidden" value="{{ $viewModel->configKey }}" name="configKey">
+
+<section class="searchbar section-wrapper dp-2">
+	<div class="input-field field-light-blue field">
+		<input type="date" class="form-control valid" 
+			id="searchStDate" name="searchStDate" value="{{ $viewModel->getSearchStDate() }}" 
+			maxlength="10" placeholder=" " min="{{ $viewModel->getSaleDate() }}">
+		<label for="searchStDate" class="form-label">開始日期</label>
+	</div>
+	<div class="input-field field-light-blue field">
+		<input type="date" class="form-control valid" 
+			id="searchEndDate" name="searchEndDate" value="{{ $viewModel->getSearchEndDate() }}" 
+			maxlength="10" placeholder=" " max="{{ $viewModel->getSaleEndDate() }}">
+		<label for="searchEndDate" class="form-label">結束日期</label>
+	</div>
+	
+	<button class="btn btn-search" type="button">
+		<span class="material-symbols-outlined filled-icon">search</span>
+	</button>
+	<button class="btn btn-search-reset" type="button">
+		<span class="material-symbols-outlined filled-icon">ink_eraser</span>
+	</button>
+</section>
+</form>
+	
 @if($viewModel->status === TRUE)
 <ul class="nav nav-tab" id="nav-tab" role="tablist">
 	<li class="nav-item" role="presentation">

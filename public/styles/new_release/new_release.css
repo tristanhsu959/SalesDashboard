@@ -1,10 +1,28 @@
 /* New Release Style */
-
-body .content-wrapper {
+body {
 	--theme-surface-bg : var(--theme-surface-l1); /* default */
 	--tab-color: rgba(2, 136, 209, .87);
+}
+
+.content-wrapper {
 	
 	height: 100vh;
+	
+	.searchbar {
+		display: flex;
+		align-items: center;
+		padding: .75rem;
+		margin: 0 1rem 1rem;
+		border-radius: .5rem;
+		background: var(--theme-surface-bg);
+		
+		.field {
+			margin-right: 1rem;
+		}
+		.btn {
+			margin-right: .5rem;
+		}
+	}
 	
 	.nav-tab {
 		position: absolute;

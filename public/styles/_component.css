@@ -29,11 +29,24 @@
 		align-items: center;
 		width: 40px;
 		height: 40px;
-		border-radius: 2rem;
+		/* border-radius: 2rem; */
 		background-color: hsl(199, 92%, 74%);
 		
 		&:hover {
 			background-color: hsl(199, 92%, 78%);
+		}
+	}
+	&.btn-search-reset {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		/* border-radius: 2rem; */
+		background-color: hsl(8, 100%, 56%);
+		
+		&:hover {
+			background-color: hsl(8, 100%, 60%);
 		}
 	}
 	/* List button */
@@ -103,8 +116,8 @@
 .grid {
 	--table-head-color: rgba(255 255 255 / 1); 
 	--table-row-border-color: var(--theme-divider-color);
-	--table-row-even-bg: transparent; /* 100 */
-	--table-row-odd-bg: hsl(from var(--theme-surface-bg) h s 30%); 
+	--table-row-even-bg: hsla(200, 19%, 18%, .3);
+	--table-row-odd-bg: hsla(200, 19%, 18%, .56); 
 	--table-row-color: rgba(255 255 255 / .7);
 	
 	.row {

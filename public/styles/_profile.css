@@ -27,7 +27,7 @@
 			/* background-color: rgba(0, 188, 212, .6); */
 			padding-top: 3rem;
 			padding-bottom: 3rem;
-			background-color: var(--brand-red-bg);
+			background-color: hsla(from var(--brand-red-bg) h s 46% / .75);
 			
 			>.material-symbols-outlined {
 				font-size: 4rem;

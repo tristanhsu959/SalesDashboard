@@ -21,7 +21,48 @@ class NewReleaseController extends Controller
 		$this->_viewModel 	= $newReleaseViewModel;
 	}
 	
-	/* All Entry
+	public function index(Request $request)
+	{
+		#取新品config用, 要存到Form
+		$segment = $request->segment(2);
+		$configKey = $this->_service->convertConfigKey($segment);
+		
+		$this->_viewModel->initialize(FormAction::List, $configKey);
+		
+		if (empty($configKey))
+			$this->_viewModel->fail('無法識別產品ID');
+		
+		#Status is NULL
+		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* Search
+	 * @params: request
+	 * @return: array
+	 */
+	public function search(Request $request)
+	{
+		#query params
+		$configKey		= $request->input('configKey');
+		$searchStDate	= $request->input('searchStDate');
+		$searchEndDate	= $request->input('searchEndDate');
+		
+		$this->_viewModel->initialize(FormAction::List, $configKey);
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
+		
+		$response = $this->_service->getStatistics($configKey);
+		
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+			$this->_viewModel->success();
+		
+		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
+		
+		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* All Entry - 改為Search
 	 */
 	public function getStatistics(Request $request)
 	{
@@ -47,7 +88,7 @@ class NewReleaseController extends Controller
 	
     /* 橙汁排骨
 	 */
-	public function getPorkRibsStatistics(Request $request)
+	/*public function getPorkRibsStatistics(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::List);
 		
@@ -67,11 +108,11 @@ class NewReleaseController extends Controller
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
 		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
-	}
+	}*/
 	
 	/* 牛三寶
 	 */
-	public function getTomatoBeefStatistics(Request $request)
+	/*public function getTomatoBeefStatistics(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::List);
 		
@@ -91,5 +132,5 @@ class NewReleaseController extends Controller
 		$this->_viewModel->statistics = $response->data;
 		
 		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
-	}
+	}*/
 }

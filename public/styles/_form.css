@@ -150,6 +150,11 @@ body {
 	}
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%); 
+  cursor: pointer;
+}
+
 .input-select {
     position: relative;
     

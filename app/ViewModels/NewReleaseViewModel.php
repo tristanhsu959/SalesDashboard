@@ -15,9 +15,11 @@ class NewReleaseViewModel
 	{
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
-		$this->_data['status']		= FALSE;
+		$this->_data['status']		= NULL;
 		$this->_data['msg'] 		= '';
 		$this->_data['statistics']	= [];
+		$this->_data['configKey']	= '';
+		$this->_data['config']		= [];
 	}
 	
 	public function __set($name, $value)
@@ -57,11 +59,59 @@ class NewReleaseViewModel
 	 * @params: int
 	 * @return: void
 	 */
-	public function initialize($action , $userId = 0)
+	public function initialize($action , $configKey = '')
 	{
 		#初始化各參數及Form Options
-		$this->_data['action']	= $action;
-		$this->_data['msg'] 	= '';
+		$this->_data['action']		= $action;
+		$this->_data['msg'] 		= '';
+		$this->_data['configKey'] 	= $configKey;
+		
+		if (! empty($configKey))
+			$this->_data['config'] 	= config("web.newrelease.products.{$configKey}");
+		
+		$this->_setOptions();
+	}
+	
+	/* Search Form參數選項
+	 * @params: 
+	 * @return: void
+	 */
+	private function _setOptions()
+	{
+		$configKey = $this->_data['configKey'];
+		
+		if (empty($configKey))
+		{
+			data_set($this->_data, 'search.stMin', '');
+			data_set($this->_data, 'search.endMax', '');
+		}
+		else
+		{
+			$config = config("web.newrelease.products.{$configKey}");
+			
+			data_set($this->_data, 'search.stMin', $config['saleDate']);
+			data_set($this->_data, 'search.endMax', $config['saleEndDate']);
+		}
+	}
+	
+	/* Keep user search data
+	 * @params: 
+	 * @return: string
+	 */
+	public function keepSearchData($searchStDate, $searchEndDate)
+    {
+		data_set($this->_data, 'search.stDate', $searchStDate);
+		data_set($this->_data, 'search.endDate', $searchEndDate);
+	}
+	
+	public function getSearchStDate()
+	{
+		return data_get($this->_data, 'search.stDate', '');
+	}
+	
+	public function getSearchEndDate()
+	{
+		return data_get($this->_data, 'search.endDate', '');
 	}
 	
 	/* 門市 */
@@ -103,6 +153,16 @@ class NewReleaseViewModel
 	/* Form Style */
 	public function getBreadcrumb()
     {
-		return $this->_data['statistics']['productName'];
+		return data_get($this->_data, 'config.name', 'UNKNOW');
+	}
+	
+	public function getSaleDate()
+    {
+		return data_get($this->_data, 'config.saleDate', '');
+	}
+	
+	public function getSaleEndDate()
+    {
+		return data_get($this->_data, 'config.saleEndDate', '');
 	}
 }

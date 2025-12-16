@@ -17,12 +17,14 @@ Route::get('signout', [SigninController::class, 'signout'])->name('signout');
 Route::middleware([AuthPermission::class])->group(function(){
 	/* Home */
 	Route::get('home', [HomeController::class, 'index'])->name('home');
+	
 	/* 新品 */
-	Route::get('new_releases/pork_ribs', [NewReleaseController::class, 'getStatistics']);
-	Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'getStatistics']);
-	Route::get('new_releases/braised_pork', [NewReleaseController::class, 'getStatistics']);
-	Route::get('new_releases/egg_tofu', [NewReleaseController::class, 'getStatistics']);
-
+	Route::get('new_releases/pork_ribs', [NewReleaseController::class, 'index']);
+	Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'index']);
+	Route::get('new_releases/braised_pork', [NewReleaseController::class, 'index']);
+	Route::get('new_releases/egg_tofu', [NewReleaseController::class, 'index']);
+	Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
+	
 	/* 身份管理 */
 	Route::get('roles', [RoleController::class, 'list'])->name('role.list');
 	Route::get('roles/list', [RoleController::class, 'list'])->name('role.list');

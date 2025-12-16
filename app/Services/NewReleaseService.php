@@ -44,8 +44,13 @@ class NewReleaseService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics()
+	public function getStatistics($configKey)
 	{
+		#20251216 要改成分兩段
+		#1. 只取DB資料到Cache => 頁面及排程要共用的部份
+		#2. Get data from cache, parsing data for output
+		$this->_actionKey = $configKey;
+		
 		#取新品設定
 		$config = config("web.newrelease.products.{$this->_actionKey}");
 		$cacheEnable = config('web.newrelease.cacheEnable');
