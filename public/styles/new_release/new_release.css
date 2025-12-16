@@ -9,7 +9,7 @@ body .content-wrapper {
 	.nav-tab {
 		position: absolute;
 		left: 50%;
-		bottom: 1rem;
+		bottom: .5rem;
 		transform: translateX(-50%);
 		justify-content: center;
 		background-color: rgba(255, 255, 255, .87);
@@ -36,7 +36,7 @@ body .content-wrapper {
 .tab-content {
 	background-color: transparent;
 	padding: 0;
-	margin: 0 1rem 64px;
+	margin: 0 1rem 80px;
 	
 	.tab-pane {
 		border-radius: .5rem;
@@ -60,6 +60,10 @@ body .content-wrapper {
 		margin: 0;
 		/* border: 1px solid rgba(0, 0, 0, .12); */
 		/* background-color: rgba(1, 87, 155, .87); */
+		
+		&.empty {
+			color: #ffcdd2;
+		}
 		
 		.row {
 			margin: 0;
@@ -88,9 +92,13 @@ body .content-wrapper {
 		width: auto;
 		max-height: calc(100vh - 64px - 5.5rem);
 		overflow: auto;
-		scrollbar-width: thin;
-		scrollbar-color: #33691e #f1f8e9; /*thumb - track*/
+		/* scrollbar-width: thin; */
+		scrollbar-color: #33691e #aed581; /*thumb - track*/
 		margin: 0;
+		
+		&.empty {
+			color: #b71c1c;
+		}
 		
 		table {
 			--bs-table-striped-bg : #f1f8e9;
@@ -190,12 +198,16 @@ body .content-wrapper {
 		justify-content: flex-start;
 		align-items: flex-start;
 		padding: 0;
-		height: calc(100vh - 64px - 5rem);
+		max-height: calc(100vh - 64px - 5rem);
 		border-radius: .375rem;
 		overflow: auto;
-		scrollbar-width: thin;
-		scrollbar-color: #f4511e #fff; /*thumb - track*/
+		/* scrollbar-width: thin; */
+		scrollbar-color: #f4511e var(--theme-surface-l1); /*thumb - track*/
 		margin: 0;
+		
+		&.empty {
+			color: #ffcdd2;
+		}
 		
 		/*共用Style*/
 		.card {

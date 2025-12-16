@@ -44,6 +44,11 @@
 <div class="tab-content" id="nav-tabContent">
 	<!-- 區域彙總 -->
 	<div class="tab-pane fade show active" id="area" role="tabpanel" aria-labelledby="nav-area-tab" tabindex="0">
+		@if(empty($viewModel->statistics['area']))
+		<section class="statistics-area section-wrapper empty">
+			無符合資料或無瀏覽權限
+		</section>
+		@else
 		<section class="statistics-area section-wrapper">
 			<div class="row">
 				<div class="col">區域</div>
@@ -65,10 +70,16 @@
 			</div>
 			@endforeach
 		</section>
+		@endif
 	</div>
 	
 	<!-- 店別明細 -->
 	<div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="nav-shop-tab" tabindex="0">
+		@if(empty($viewModel->statistics['area']))
+		<section class="statistics-shop section-wrapper empty">
+			無符合資料或無瀏覽權限
+		</section>
+		@else
 		<section class="statistics-shop section-wrapper scrollbar">
 			<table class="table table-striped">
 				<thead>
@@ -106,10 +117,16 @@
 				</tbody>
 			</table>
 		</section>
+		@endif
 	</div>
 	
 	<!-- 銷售排名 -->
 	<div class="tab-pane fade" id="ranking" role="tabpanel" aria-labelledby="nav-ranking-tab" tabindex="0">
+		@if(empty($viewModel->statistics['area']))
+		<section class="statistics-ranking section-wrapper empty">
+			無符合資料或無瀏覽權限
+		</section>
+		@else
 		<section class="statistics-ranking section-wrapper container-fluid">
 			<div class="card ranking-top">
 				<div class="card-body">
@@ -152,6 +169,7 @@
 				</div>
 			</div>
 		</section>
+		@endif
 	</div>
 </div>
 @endif

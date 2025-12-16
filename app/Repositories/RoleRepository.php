@@ -92,6 +92,26 @@ class RoleRepository extends Repository
 	{
 		$db = $this->connectSaleDashboard();
 			
+		$result = $db->table('Role as r')->selectRaw("r.RoleId, r.RoleName, r.RoleGroup, r.UpdateAt, 
+					(
+						select group_concat(p.Permission) from RolePermission as p where p.RoleId = r.RoleId
+					) as permissions")
+					->where('r.RoleId', '=', $id)
+					->get()->first();
+		
+		$result['Permission'] = explode(',', $result['permissions']);
+		
+		return $result;
+	}
+	
+	/* Get Role Data  (原MsSql語法)
+	 * @params: 
+	 * @return: array
+	 */
+	public function getRoleByIdMssql($id)
+	{
+		$db = $this->connectSaleDashboard();
+			
 		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 
 					permission = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
 					->where('RoleId', '=', $id)
@@ -101,6 +121,8 @@ class RoleRepository extends Repository
 		
 		return $result;
 	}
+	
+	
 	
 	/* Update Role
 	 * @params: string

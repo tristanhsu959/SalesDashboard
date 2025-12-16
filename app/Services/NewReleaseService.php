@@ -171,13 +171,13 @@ class NewReleaseService
 		}
 	}
 	
-	/* ===== 原Business Login, 流程已變更 - 廢棄 ===== */
+	/* ===== 原Business Login, 流程已變更 - 暫廢棄 ===== */
 	/* 取新品銷售統計-主流程
 	 * @params: string
 	 * @params: string
 	 * @return: array
 	 */
-	public function processStatistics($cacheKey)
+	/*public function processStatistics($cacheKey)
 	{
 		#initialize
 		$statistics = [
@@ -215,7 +215,7 @@ class NewReleaseService
 			#3.Parsing to base data(所有資料By ShopId)
 			$baseData = $this->_buildBaseData($data);
 			
-			/* Statistics Start */
+			/* Statistics Start *
 			#4.店別每日銷售
 			$statistics['shop'] = $this->_parsingByShop($baseData, $diffDays);
 			
@@ -234,7 +234,7 @@ class NewReleaseService
 		{
 			return ResponseLib::initialize($statistics)->fail($e->getMessage());
 		}
-	}
+	}*/
 	
 	/*==============================================================================*/
 	/* 取Config設定
@@ -379,11 +379,16 @@ class NewReleaseService
 		  "totalAvg" => 6.5
 		]
 		*/
+		
+		#會有無設定區域權限的狀況, 須判別
+		if (empty($baseData))
+			return [];
+		
 		#基本資料已有, 只要再計算=>銷售總量|平均銷售數量
 		$result = Arr::map($baseData, function($value, $key) use($diffDays) {
 			
 			$value['totalQty'] = array_sum($value['dayQty']); #所有日銷售量總和/店
-			$value['totalAvg'] = round($value['totalQty'] / $diffDays, 1); #銷售量總和/ 
+			$value['totalAvg'] = round($value['totalQty'] / $diffDays, 1); #銷售量總和
 			return $value;
 		});
 		
@@ -415,6 +420,10 @@ class NewReleaseService
 			"桃竹苗區" => array:5 []
 		]
 		*/
+		#會有無設定區域權限的狀況, 須判別
+		if (empty($baseData))
+			return [];
+		
 		$collection = collect($baseData);
 		$data = $collection->groupBy('area')->map(function($item, $key) use($diffDays) {
 			$temp['shopCount']		= count($item); #店家數
@@ -470,6 +479,11 @@ class NewReleaseService
 			]
 		]
 		*/
+		
+		#會有無設定區域權限的狀況, 須判別
+		if (empty($baseData))
+			return [[], []];
+		
 		$collection = collect($baseData);
 		$result = $collection->map(function($item, $key) use($endDate) {
 			$item['todayQty'] = intval(data_get($item, "dayQty.{$endDate}"));
