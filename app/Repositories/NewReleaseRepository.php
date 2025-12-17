@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use Exception;
 
-#新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同
+#新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
 class NewReleaseRepository extends Repository
 {
 	

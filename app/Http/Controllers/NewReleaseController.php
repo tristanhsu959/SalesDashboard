@@ -27,7 +27,7 @@ class NewReleaseController extends Controller
 		$segment = $request->segment(2);
 		$configKey = $this->_service->convertConfigKey($segment);
 		
-		$this->_viewModel->initialize(FormAction::List, $configKey);
+		$this->_viewModel->initialize(FormAction::List, $segment, $configKey);
 		
 		if (empty($configKey))
 			$this->_viewModel->fail('無法識別產品ID');
@@ -43,14 +43,15 @@ class NewReleaseController extends Controller
 	public function search(Request $request)
 	{
 		#query params
-		$configKey		= $request->input('configKey');
+		$segment 	= $request->segment(2);
+		$configKey 	= $this->_service->convertConfigKey($segment);
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		
-		$this->_viewModel->initialize(FormAction::List, $configKey);
+		$this->_viewModel->initialize(FormAction::List, $segment, $configKey);
 		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
 		
-		$response = $this->_service->getStatistics($configKey);
+		$response = $this->_service->getStatistics($configKey, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -64,7 +65,7 @@ class NewReleaseController extends Controller
 	
 	/* All Entry - 改為Search
 	 */
-	public function getStatistics(Request $request)
+	/*public function getStatistics(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::List);
 		
@@ -84,7 +85,7 @@ class NewReleaseController extends Controller
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
 		return view('new_release.new_release')->with('viewModel', $this->_viewModel);
-	}
+	}*/
 	
     /* 橙汁排骨
 	 */

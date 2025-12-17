@@ -2,7 +2,6 @@
 
 #新品
 return [
-	'cacheEnable' => true,
 	#New product items | BF=>八方 ｜BG=>梁社漢
 	#梁社漢須多處理複合店, 要多取八方DB
 	#不需含套餐，因已會拆成單品項
@@ -20,8 +19,8 @@ return [
 		],
 		
 		'tomatoBeef' => [
-			'saleDate' => '2025/10/13',
-			'saleEndDate' => '', #停售日
+			'saleDate' => '2025-10-13',
+			'saleEndDate' => NULL, #停售日
 			'name' => '番茄牛三寶',
 			'ids' => [
 				'main' => ['UC07100017', 'UC07100018', 'UC03000024', 'UC03000025', 'UC06100105', 'UC06100106'], #梁社漢
@@ -31,8 +30,8 @@ return [
 		],
 		
 		'braisedPork' => [
-			'saleDate' => '2025/12/16',
-			'saleEndDate' => '', #停售日
+			'saleDate' => '2025-12-16',
+			'saleEndDate' => NULL, #停售日
 			'name' => '主廚秘製滷肉飯',
 			'ids' => [
 				'main' => ['UC01000005', 'UC01000006', 'UC06100107', 'UC06100108'], #梁社漢
@@ -42,8 +41,8 @@ return [
 		],
 		
 		'eggTofu' => [
-			'saleDate' => '2025/12/16',
-			'saleEndDate' => '', #停售日
+			'saleDate' => '2025-12-16',
+			'saleEndDate' => NULL, #停售日
 			'name' => '老皮嫩肉',
 			'ids' => [
 				'main' => ['UC04000050', 'UC04000051'], #梁社漢
@@ -122,4 +121,6 @@ PS02100024
 
 秘製滷肉汁
 UC02300008
+PS02300011
+PS02300012
 */

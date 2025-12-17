@@ -15,6 +15,7 @@ body {
 		margin: 0 1rem 1rem;
 		border-radius: .5rem;
 		background: var(--theme-surface-bg);
+		box-sizing: border-box;
 		
 		.field {
 			margin-right: 1rem;
@@ -108,7 +109,7 @@ body {
 	.statistics-shop.section-wrapper {
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 64px - 5.5rem);
+		max-height: calc(100vh - 64px - 5.5rem - 46px - 1.5rem - 1rem);
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: #33691e #aed581; /*thumb - track*/
@@ -141,7 +142,7 @@ body {
 						color: rgba(0, 0, 0, .87);
 						
 						&.col-date span {
-							display: inline-flex;
+							display: flex;
 							flex-direction: column;
 							justify-content: center;
 							padding: 0 .5rem;
@@ -216,7 +217,7 @@ body {
 		justify-content: flex-start;
 		align-items: flex-start;
 		padding: 0;
-		max-height: calc(100vh - 64px - 5rem);
+		max-height: calc(100vh - 64px - 5.5rem - 46px - 1.5rem - 1rem);
 		border-radius: .375rem;
 		overflow: auto;
 		/* scrollbar-width: thin; */

@@ -59,11 +59,12 @@ class NewReleaseViewModel
 	 * @params: int
 	 * @return: void
 	 */
-	public function initialize($action , $configKey = '')
+	public function initialize($action , $segment, $configKey)
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']		= $action;
 		$this->_data['msg'] 		= '';
+		$this->_data['segment'] 	= $segment; #產URL用, 因Route已改變
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
@@ -92,6 +93,10 @@ class NewReleaseViewModel
 			data_set($this->_data, 'search.stMin', $config['saleDate']);
 			data_set($this->_data, 'search.endMax', $config['saleEndDate']);
 		}
+		
+		#Default search date
+		data_set($this->_data, 'search.stDate', $this->getDefaultSearchStDate());
+		data_set($this->_data, 'search.endDate', $this->getDefaultSearchEndDate());
 	}
 	
 	/* Keep user search data
@@ -112,6 +117,17 @@ class NewReleaseViewModel
 	public function getSearchEndDate()
 	{
 		return data_get($this->_data, 'search.endDate', '');
+	}
+	
+	public function getDefaultSearchStDate()
+    {
+		#一定會有
+		return data_get($this->_data, 'config.saleDate', '');
+	}
+	
+	public function getDefaultSearchEndDate()
+    {
+		return data_get($this->_data, 'config.saleEndDate', NULL) ?? Carbon::now()->format('Y-m-d'); #date picker必須為Y-m-d才能正常顯示
 	}
 	
 	/* 門市 */
@@ -165,4 +181,6 @@ class NewReleaseViewModel
     {
 		return data_get($this->_data, 'config.saleEndDate', '');
 	}
+	
+	
 }

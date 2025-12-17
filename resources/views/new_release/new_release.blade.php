@@ -20,9 +20,8 @@
 
 @section('content')
 <!-- Search by Date -->
-<form action="{{ route('new_releases.search') }}" method="post" id="searchForm">
+<form action="{{ route('new_releases.search', ['segment' => $viewModel->segment]) }}" method="post" id="searchForm">
 @csrf
-<input type="hidden" value="{{ $viewModel->configKey }}" name="configKey">
 
 <section class="searchbar section-wrapper dp-2">
 	<div class="input-field field-light-blue field">
@@ -165,7 +164,7 @@
 						<li class="list-group-item">
 							<div class="ranking">{{ $ranking + 1 }}</div>
 							<div class="info">
-								{{ $shop['area'] }}
+								{{ Area::getLabelByValue($shop['area']) }}
 								<div class="name">{{ $shop['shopName'] }}</div>
 								<span>{{ $shop['shopId'] }}</span>
 							</div>
@@ -185,7 +184,7 @@
 						<li class="list-group-item">
 							<div class="ranking">{{ $ranking + 1 }}</div>
 							<div class="info">
-								{{ $shop['area'] }}
+								{{ Area::getLabelByValue($shop['area']) }}
 								<div class="name">{{ $shop['shopName'] }}</div>
 								<span>{{ $shop['shopId'] }}</span>
 							</div>
