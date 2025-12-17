@@ -100,8 +100,8 @@ class RoleViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['roleGroup'] 	= RoleGroup::cases();
-		$this->_data['functionList']	= $this->getMenuFromConfig();
+		$this->_data['roleGroup'] 	= RoleGroup::getEnabledList();
+		$this->_data['functionList']= $this->getMenuFromConfig();
 	}
 	
 	/* Keep user form data
@@ -140,6 +140,13 @@ class RoleViewModel
 	}
 	
 	#Page operation permission
+	#內建身份判別
+	public function isSupervisorGroup($roleId)
+	{
+		return ($roleId == RoleGroup::SUPERVISOR->value);
+	}
+	
+	#使用者權限判別
 	public function canQuery()
 	{
 		return in_array(Operation::READ->name, $this->_data['operations']);

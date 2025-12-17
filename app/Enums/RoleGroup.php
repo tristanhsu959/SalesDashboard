@@ -4,15 +4,17 @@ namespace App\Enums;
 
 enum RoleGroup : int
 {
-    case ADMIN		= 1;
-	case USER 		= 2;
+	case SUPERVISOR	= 1;
+    case ADMIN		= 2;
+	case USER 		= 3;
 	
 	public function label() : string
     {
         return match ($this) 
 		{
-			self::ADMIN	=> '帳號管理員',
-			self::USER 	=> '使用者',
+			self::SUPERVISOR	=> 'SUPERVISOR',
+			self::ADMIN			=> '帳號管理員',
+			self::USER 			=> '使用者',
         };
     }
 	
@@ -23,9 +25,25 @@ enum RoleGroup : int
 		
 		return match($value)
 		{
-			self::ADMIN->value	=> self::ADMIN->label(),
-			self::USER->value 	=> self::USER->label(),
+			self::SUPERVISOR->value	=> self::SUPERVISOR->label(),
+			self::ADMIN->value		=> self::ADMIN->label(),
+			self::USER->value 		=> self::USER->label(),
 			default => 'UNKNOW',
 		};
+	}
+	
+	#Supervisor排除
+	public static function getEnabledList() : array
+	{
+		$enableList = [];
+		$list = self::cases();
+		
+		foreach($list as $item)
+		{
+			if ($item->value != self::SUPERVISOR->value)
+				$enableList[] = $item;
+		}
+		
+		return $enableList;
 	}
 }

@@ -49,12 +49,12 @@
 				<div class="col">{{ $role['RoleName'] }}</div>
 				<div class="col">{{ RoleGroup::getLabelByValue($role['RoleGroup']) }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate())
+					@if($viewModel->canUpdate() && ! $viewModel->isSupervisorGroup($role['RoleId']))
 					<a href="{{ route('role.update', [$role['RoleId']]) }}" class="btn btn-edit">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
 					@endif
-					@if($viewModel->canDelete())
+					@if($viewModel->canDelete() && ! $viewModel->isSupervisorGroup($role['RoleId']))
 					<a href="{{ route('role.delete.post', [$role['RoleId']]) }}" class="btn btn-delete">
 						<span class="material-symbols-outlined">delete</span>
 					</a>

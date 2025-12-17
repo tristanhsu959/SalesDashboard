@@ -13,7 +13,7 @@ body {
 	background: linear-gradient(to right bottom, #121212, #1c1c1c, #262626, #313131, #3c3c3c);
 	/* menu + content-wrapper */
 	main {
-		height: 100vh;
+		min-height: 100vh;
 		display: flex; 
 		justify-content: cetner;
 	}

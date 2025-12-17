@@ -23,6 +23,7 @@ Route::middleware([AuthPermission::class])->group(function(){
 	Route::get('new_releases/tomato_beef', [NewReleaseController::class, 'index']);
 	Route::get('new_releases/braised_pork', [NewReleaseController::class, 'index']);
 	Route::get('new_releases/egg_tofu', [NewReleaseController::class, 'index']);
+	Route::get('new_releases/braised_gravy', [NewReleaseController::class, 'index']);
 	Route::post('new_releases/{segment}/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 	
 	/* 身份管理 */

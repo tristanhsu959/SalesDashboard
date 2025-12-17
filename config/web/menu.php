@@ -48,6 +48,15 @@ return [
 				'operation'		=> [
 					Operation::READ
 				],
+			],
+			'braisedGravy' => [
+				'actionCode'	=> '10',
+				'segmentCode'	=> 'braised_gravy',
+				'name' 			=> '秘製滷肉汁',
+				'url' 			=> 'new_releases/braised_gravy',
+				'operation'		=> [
+					Operation::READ
+				],
 			]
 			
 		],
