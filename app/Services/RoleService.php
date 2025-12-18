@@ -107,18 +107,21 @@ class RoleService
 	}
 	
 	/* Update Role
+	 * @params: int
 	 * @params: string
 	 * @params: string
-	 * @params: hex string
+	 * @params: array
+	 * @params: array
 	 * @return: array
 	 */
-	public function updateRole($roleName, $roleGroup, $settingList, $roleId)
+	public function updateRole($id, $name, $group, $permission, $area)
 	{
 		try
 		{
-			#Build permission setting
-			$permissionList = $this->buildPermissionByFunction($settingList);
-			$this->_repository->updateRole($roleName, $roleGroup, $permissionList, $roleId);
+			$permission = json_encode($permission); 
+			$area = json_encode($area);
+			
+			$this->_repository->updateRole($id, $name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
 		}

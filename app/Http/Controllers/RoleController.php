@@ -70,7 +70,7 @@ class RoleController extends Controller
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($name, $group, $permission, $area);
+		$this->_viewModel->keepFormData(0, $name, $group, $permission, $area);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -102,7 +102,7 @@ class RoleController extends Controller
 	public function showUpdate(Request $request, $id)
 	{
 		#initialize
-		$this->_viewModel->initialize(FormAction::UPDATE, $id);
+		$this->_viewModel->initialize(FormAction::UPDATE);
 		
 		if (empty($id))
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
@@ -113,7 +113,7 @@ class RoleController extends Controller
 			return redirect()->route('role.list')->with('msg', $response->msg);
 		
 		$data = $response->data;
-		$this->_viewModel->keepFormData($data['roleName'], $data['roleGroup'],$data['rolePermission'], $data['roleId']);
+		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['roleGroup'], $data['rolePermission'], $data['roleArea']);
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -126,14 +126,13 @@ class RoleController extends Controller
 	public function update(Request $request)
 	{
 		#fetch form data
-		$id 			= $request->input('id');
-		$name 			= $request->input('name');
-		$group 			= $request->input('group');
-		$settingList	= $request->input('settingList');
+		$id 		= $request->input('id');
+		$name 		= $request->input('name');
+		$group 		= $request->input('group');
+		$permission	= $request->input('permission');
+		$area		= $request->input('area');
 		
-		#initialize
-		$this->_viewModel->initialize(FormAction::UPDATE, $id);
-		$this->_viewModel->keepFormData($name, $group, $settingList);
+		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
 		
 		if (empty($id))
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
@@ -149,7 +148,7 @@ class RoleController extends Controller
 			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateRole($name, $group, $settingList, $id);
+		$response = $this->_service->updateRole($id, $name, $group, $permission, $area);
 		
 		if ($response->status === FALSE)
 		{

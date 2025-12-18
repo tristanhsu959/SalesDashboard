@@ -75,12 +75,7 @@ class RoleViewModel
 		$this->_data['msg'] 	= '';
 		
 		if ($action != FormAction::List)
-		{
-			#$this->keepFormData(); #init
-		$this->_setOptions();
-		#todo 判別當前登入者的CRUD???
-		//$this->_data['allowOperations'] = $this->_service->getOperationPermissions();
-		}
+			$this->_setOptions();
 	}
 	
 	/* Form所屬的參數選項
@@ -112,7 +107,7 @@ class RoleViewModel
 	 * @params: 
 	 * @return: string
 	 */
-	public function keepFormData($name = '', $group = 0, $permission = [], $area = [], $roldId = 0)
+	public function keepFormData($roldId = 0, $name = '', $group = 0, $permission = [], $area = [])
     {
 		#todo area
 		data_set($this->_data, 'roleData.id', $roldId);
@@ -122,16 +117,6 @@ class RoleViewModel
 		data_set($this->_data, 'roleData.area', $area);
 	}
 	
-	
-	/* Create or Update Role Id 
-	 * @params: 
-	 * @return: string
-	 
-	public function getUpdateRoleId()
-    {
-		return data_get($this->_data, 'roleData.id', 0);
-	}
-	*/
 	/* Role Data
 	 * @params: 
 	 * @return: string

@@ -38,8 +38,6 @@ class RoleRepository extends Repository
 	 */
 	public function insertRole($name, $group, $permission, $area)
 	{
-		$db = $this->connectSaleDashboard('Role');
-		
 		$roleData['RoleName']		= $name;
 		$roleData['RoleGroup'] 		= $group;
 		$roleData['RolePermission'] = $permission;
@@ -47,6 +45,7 @@ class RoleRepository extends Repository
 		$roleData['CreateAt'] 		= now()->format('Y-m-d H:i:s');
 		$roleData['UpdateAt'] 		= $roleData['CreateAt'];
 		
+		$db = $this->connectSaleDashboard('Role');
 		$id = $db->insertGetId($roleData);
 		
 		return TRUE;
@@ -67,26 +66,6 @@ class RoleRepository extends Repository
 		return $result;
 	}
 	
-	/* Get Role Data  (原MsSql語法)
-	 * @params: 
-	 * @return: array
-	 
-	public function getRoleByIdMssql($id)
-	{
-		$db = $this->connectSaleDashboard();
-			
-		$result = $db->table('Role')->selectRaw("RoleId, RoleName, RoleGroup, UpdateAt, 
-					permission = stuff((select  ',' + Permission from SaleDashboard.dbo.RolePermission where RoleId=? FOR XML PATH('')), 1, 1, '')", [$id])
-					->where('RoleId', '=', $id)
-					->get()->first();
-		
-		$result['Permission'] = explode(',', $result['permission']);
-		
-		return $result;
-	}
-	*/
-	
-	
 	/* Update Role
 	 * @params: string
 	 * @params: string
@@ -94,37 +73,20 @@ class RoleRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateRole($roleName, $roleGroup, $permissionList, $roleId)
+	public function updateRole($id, $name, $group, $permission, $area)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard();
+		#只能用facade
 		
-			$db->beginTransaction();
-
-			$roleData['RoleName']	= $roleName;
-			$roleData['RoleGroup'] 	= $roleGroup;
-			$roleData['UpdateAt'] 	= now()->format('Y-m-d H:i:s');
-			
-			$db->table('Role')->where('RoleId', '=', $roleId)->update($roleData);
-			
-			$permissionData = $this->_buildPermissionData($roleId, $permissionList);
-			#Remove all setting by role id
-			$db->table('RolePermission')->where('RoleId', '=', $roleId)->delete();
-			$db->table('RolePermission')->insert($permissionData);
-			
-			$db->commit();
-			
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		$roleData['RoleName']		= $name;
+		$roleData['RoleGroup'] 		= $group;
+		$roleData['RolePermission']	= $permission;
+		$roleData['RoleArea'] 		= $area;
+		$roleData['UpdateAt'] 		= now()->format('Y-m-d H:i:s');
+		
+		$db = $this->connectSaleDashboard('Role');
+		$db->where('RoleId', '=', $id)->update($roleData);
+		
+		return TRUE;
 	}
 	
 	/* Remove Role
@@ -133,27 +95,9 @@ class RoleRepository extends Repository
 	 */
 	public function RemoveRole($roleId)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard();
+		$db = $this->connectSaleDashboard('Role');
+		$db->where('RoleId', '=', $roleId)->delete();
 		
-			$db->beginTransaction();
-
-			#Remove all setting by role id
-			$db->table('Role')->where('RoleId', '=', $roleId)->delete();
-			$db->table('RolePermission')->where('RoleId', '=', $roleId)->delete();
-			
-			$db->commit();
-			
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		return TRUE;
 	}
 }
