@@ -75,9 +75,9 @@ class SigninService
 			
 			#允許有帳號無Permission, 故不檢查
 			$roleData = $this->_repository->getUserPermission($userInfo['UserRoleId']);
-			$userInfo['RoleGroup']	= $roleData['RoleGroup'];
-			$userInfo['Permission'] = empty($roleData['RolePermission']) ? [] : json_decode($roleData['RolePermission'], TRUE);
-			$userInfo['Area'] 		= empty($roleData['RoleArea']) ? [] : json_decode($roleData['RoleArea'], TRUE);
+			$userInfo['roleGroup']	= $roleData['RoleGroup'];
+			$userInfo['permission'] = empty($roleData['RolePermission']) ? [] : json_decode($roleData['RolePermission'], TRUE);
+			$userInfo['area'] 		= empty($roleData['RoleArea']) ? [] : json_decode($roleData['RoleArea'], TRUE);
 			
 			return $userInfo;
 		}

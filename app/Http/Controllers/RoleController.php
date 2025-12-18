@@ -50,6 +50,7 @@ class RoleController extends Controller
 	{
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
+		$this->_viewModel->keepFormData(); #init
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -62,13 +63,14 @@ class RoleController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
-		$name 				= $request->input('name');
-		$group 				= $request->input('group');
-		$permissionSetting	= $request->input('permissionSetting');
+		$name 		= $request->input('name');
+		$group 		= $request->input('group');
+		$permission	= $request->input('permission');
+		$area		= $request->input('area');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($name, $group, $permissionSetting);
+		$this->_viewModel->keepFormData($name, $group, $permission, $area);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -82,7 +84,7 @@ class RoleController extends Controller
 			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createRole($name, $group, $permissionSetting);
+		$response = $this->_service->createRole($name, $group, $permission, $area);
 		
 		if ($response->status === FALSE)
 		{

@@ -35,7 +35,7 @@
 		<div class="input-select field-purple field required">
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
-				@foreach($viewModel->optionRoleGroup as $role)
+				@foreach($viewModel->option['roleGroupList'] as $role)
 				<option value="{{ $role->value }}" @selected($viewModel->selectedRoleGroup($role->value)) >
 				{{ $role->label() }}
 				</option>
@@ -46,7 +46,7 @@
 	</div>
 	
 	<div class="section role-permission field-group">
-		@foreach($viewModel->optionFunctionList as $groupKey => $group)
+		@foreach($viewModel->option['functionList'] as $groupKey => $group)
 		<ul class="list-group {{ Str::lower($group['type']) }}">
 			<div class="divider"></div>
 			<label class="title">
@@ -65,7 +65,7 @@
 						<input class="form-check-input" type="checkbox" 
 							value="{{ $operation->value }}" 
 							id="settingList-{{ $groupKey.$itemKey.$opKey }}" 
-							name="{{ Str::replaceArray('?', [$item['code']], 'permissionSetting[?][]') }}"
+							name="{{ Str::replaceArray('?', [$item['code']], 'permission[?][]') }}"
 							@checked($viewModel->checkedOperation($item['code'], $operation->value))
 						>
 						{{ $operation->label() }}
@@ -75,6 +75,15 @@
 			</li>
 			@endforeach
 		</ul>
+		@endforeach
+	</div>
+	<div class="section role-area">
+		<!--label class="title">管理區域</label-->
+		@foreach($viewModel->option['areaList'] as $idx => $area)
+		<label class="form-check-label" for="area{{$idx}}">
+			<input class="form-check-input" type="checkbox" name="area[]" id="area{{$idx}}" value="{{ $area->value }}"  @checked($viewModel->checkedArea($area->value))>
+			{{ $area->label() }}
+		</label>
 		@endforeach
 	</div>
 	<div class="toolbar">

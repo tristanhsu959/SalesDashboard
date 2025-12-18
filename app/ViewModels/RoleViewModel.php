@@ -7,6 +7,7 @@ use App\Libraries\MenuLib;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
 use App\Enums\Operation;
+use App\Enums\Area;
 
 class RoleViewModel
 {
@@ -27,6 +28,7 @@ class RoleViewModel
 		$this->_data['roleData']	= NULL; #For detail view form data
 		$this->_data['list'] 		= []; #For list view
 		$this->_data['operations'] 	= []; #????
+		$this->_data['option']		= [];
 	}
 	
 	public function __set($name, $value)
@@ -51,14 +53,14 @@ class RoleViewModel
 	 */
 	public function success($msg = NULL)
 	{
-		$this->_data['status'] = TRUE;
-		$this->_data['msg'] = $msg ?? '';
+		$this->_data['status'] 	= TRUE;
+		$this->_data['msg'] 	= $msg ?? '';
 	}
 	
 	public function fail($msg)
 	{
 		$this->_data['status'] 	= FALSE;
-		$this->_data['msg'] 		= $msg;
+		$this->_data['msg'] 	= $msg;
 	}
 	
 	/* initialize
@@ -66,11 +68,10 @@ class RoleViewModel
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function initialize($action , $roleId = 0)
+	public function initialize($action)
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']	= $action;
-		$this->_data['roleId']	= $roleId;
 		$this->_data['msg'] 	= '';
 		
 		if ($action != FormAction::List)
@@ -89,8 +90,9 @@ class RoleViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['optionRoleGroup'] 	= RoleGroup::getEnabledList();
-		$this->_data['optionFunctionList']	= MenuLib::all(); 
+		$this->_data['option']['roleGroupList'] = RoleGroup::getEnabledList();
+		$this->_data['option']['functionList']	= MenuLib::all();
+		$this->_data['option']['areaList'] 		= Area::cases(); #enum
 	}
 	
 	/* Form submit action for edit
@@ -110,13 +112,14 @@ class RoleViewModel
 	 * @params: 
 	 * @return: string
 	 */
-	public function keepFormData($name = '', $group = 0, $permissionSetting = [], $roldId = 0)
+	public function keepFormData($name = '', $group = 0, $permission = [], $area = [], $roldId = 0)
     {
 		#todo area
 		data_set($this->_data, 'roleData.id', $roldId);
 		data_set($this->_data, 'roleData.name', $name);
 		data_set($this->_data, 'roleData.group', $group);
-		data_set($this->_data, 'roleData.permission', $permissionSetting);
+		data_set($this->_data, 'roleData.permission', $permission);
+		data_set($this->_data, 'roleData.area', $area);
 	}
 	
 	
@@ -137,12 +140,23 @@ class RoleViewModel
     {
 		return data_get($this->_data, 'roleData.id', 0);
 	}
-	
 	public function getRoleName()
 	{
 		return data_get($this->_data, 'roleData.name', '');
 	}
-	
+	public function getRoleGroup()
+	{
+		return data_get($this->_data, 'roleData.group', 0);
+	}
+	public function getRolePermission()
+	{
+		return data_get($this->_data, 'roleData.permission', []);
+	}
+	public function getRoleArea()
+	{
+		return data_get($this->_data, 'roleData.area', []);
+	}
+	 
 	#Page operation permission
 	#內建身份判別
 	public function isSupervisorGroup($roleGroup)
@@ -181,21 +195,34 @@ class RoleViewModel
 		return $this->_title . ' | ' . $this->action->label();
 	}
 	
+	/* Selected option */
 	public function selectedRoleGroup($group)
 	{
 		$group = intval($group);
 		
-		return ($group == data_get($this->_data, 'roleData.group', 0));
+		return ($group == $this->getRoleGroup());
 	}
 	
 	/* Form setting => 是依據新增或編輯的User
 	 * @params: 
-	 * @return: string
+	 * @return: boolean
 	 */
 	public function checkedOperation($functionCode, $operationValue)
 	{
-		$permissionSetting 	= data_get($this->_data, 'roleData.permission', []); 
+		$permissionSetting 	= $this->getRolePermission(); 
 		$operationSetting	= data_get($permissionSetting, $functionCode, []);
+		
 		return in_array($operationValue, $operationSetting);
+	}
+	
+	/* Area checked prop
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function checkedArea($areaValue)
+	{
+		$areaSetting 	= $this->getRoleArea(); 
+		
+		return in_array($areaValue, $areaSetting);
 	}
 }

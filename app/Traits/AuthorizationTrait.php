@@ -42,7 +42,7 @@ trait AuthorizationTrait
 		if (empty($signinUser))
 			return [];
 		
-		$userPermission = $signinUser['Permission'];
+		$userPermission = $signinUser['permission'];
 		
 		return $userPermission;
 	}
@@ -69,7 +69,7 @@ trait AuthorizationTrait
 		return false;
 		$currentUser = $this->getSigninUserInfo();
 		
-		return ($currentUser['RoleGroup'] == RoleGroup::SUPERVISOR->value);
+		return ($currentUser['roleGroup'] == RoleGroup::SUPERVISOR->value);
 	}
 	
 	/* 取已授權的Menu (登入驗後) : AppServiceProvider

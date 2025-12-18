@@ -9,8 +9,7 @@ body {
 	margin: 0;
 	padding: 0;
 	background-color: var(--theme-bg);
-	/* background: linear-gradient(to right bottom, #121212, #1e1e1e, #292929, #353535, #424242); */
-	background: linear-gradient(to right bottom, #121212, #1c1c1c, #262626, #313131, #3c3c3c);
+	/* background: linear-gradient(to bottom, #121212, #1c1c1c, #262626, #313131, #3c3c3c); */
 	/* menu + content-wrapper */
 	main {
 		min-height: 100vh;
@@ -25,8 +24,8 @@ body {
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
 		height: 100%; /* 100vh sticky會失效 */
 		box-sizing: border-box;
+		margin-bottom: 1rem;
 		background-color: transparent;
-		
 	}
 	
 	/* list no data */

@@ -62,16 +62,18 @@ class RoleService
 	/* Create Role
 	 * @params: string
 	 * @params: string
-	 * @params: hex string
+	 * @params: array
+	 * @params: array
 	 * @return: array
 	 */
-	public function createRole($roleName, $roleGroup, $permissionList)
+	public function createRole($name, $group, $permission, $area)
 	{
 		try
 		{
-			#Create data & Build permission setting
-			#$permissionList = $this->buildPermissionByFunction($settingList);
-			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
+			$permission = json_encode($permission); 
+			$area = json_encode($area);
+			
+			$this->_repository->insertRole($name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
 		}

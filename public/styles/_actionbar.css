@@ -12,7 +12,8 @@
 	color: var(--theme-primary-color);
 	padding-left: 1rem;
 	padding-right: 1rem;
-	/* background-color: var(--nav-bg-color); */
+	background-color: var(--nav-bg-color);
+	
 	.navbar-home {
 		display: flex;
 		font-size: 1.5rem;

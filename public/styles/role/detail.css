@@ -153,6 +153,73 @@ body {
 		}
 	}
 	
+	/* 區域 */
+	.role-area {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		/* border: 1px solid #ce93d8;
+		border-radius: .5rem; 
+		padding: 1rem;
+		margin-top: 1rem;*/
+		position: relative;
+		
+		/* &.required label.title:before {
+			content: '\e1eb';
+			font-family: 'Material Symbols Outlined';
+			color: rgba(244, 67, 54, .87);
+		} */
+		
+		/* label.title {
+			position: absolute;
+			top: 0;
+			padding: 0 .25rem;
+			color: #ce93d8;
+			background-color: var(--theme-surface-bg);
+			display: flex;
+			align-items: center;
+			transform: translate(-0.25rem, -50%);
+		} */
+		
+		.form-check-label {
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 160px;
+			background-color: hsla(200, 19%, 18%, .87);
+			border: 1px solid #546e7a;
+			border-radius: 8px;
+			color: #546e7a;
+			margin: .5rem;
+			padding: 1rem;
+			box-sizing: border-box;
+			transition: border-color, color 0.2s ease-in-out 0.1s;
+			cursor: pointer;
+			
+			input {
+				display: none;
+			}
+			
+			&:before {
+				content: '\f236';
+				font-family: 'Material Symbols Outlined';
+				font-size: 1.3rem;
+				margin-right: .5rem;
+			}
+			
+			&:has(input:checked) {
+				border-color: #76ff03;
+				color: #76ff03;
+				background-color: hsla(200, 19%, 18%, 1);
+				
+				&:before {
+					content: '\e2e6';
+				}
+			}
+		}
+	}
+	
 	.toolbar {
 		.btn {
 			margin-right: .5rem;

@@ -36,57 +36,21 @@ class RoleRepository extends Repository
 	 * @params: array
 	 * @return: boolean
 	 */
-	public function insertRole($roleName, $roleGroup, $permissionList)
+	public function insertRole($name, $group, $permission, $area)
 	{
-		#只能用手動transaction寫法
-		try 
-		{
-			#只能用facade
-			$db = $this->connectSaleDashboard('Role');
+		$db = $this->connectSaleDashboard('Role');
 		
-			#$db->beginTransaction();
-
-			$roleData['RoleName']		= $roleName;
-			$roleData['RoleGroup'] 		= $roleGroup;
-			$roleData['RolePermission'] = json_encode($permissionList);
-			$roleData['RoleArea'] 		= json_encode([]);
-			$roleData['CreateAt'] 		= now()->format('Y-m-d H:i:s');
-			$roleData['UpdateAt'] 		= $roleData['CreateAt'];
-			
-			$id = $db->insertGetId($roleData);
-			
-			#$permissionData = $this->_buildPermissionData($id, $permissionList);
-			#$db->table('RolePermission')->insert($permissionData);
-			
-			#$db->commit();
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			#$db->rollBack();
-			throw $e;
-			return FALSE;
-		}
+		$roleData['RoleName']		= $name;
+		$roleData['RoleGroup'] 		= $group;
+		$roleData['RolePermission'] = $permission;
+		$roleData['RoleArea'] 		= $area;
+		$roleData['CreateAt'] 		= now()->format('Y-m-d H:i:s');
+		$roleData['UpdateAt'] 		= $roleData['CreateAt'];
+		
+		$id = $db->insertGetId($roleData);
+		
+		return TRUE;
 	}
-	
-	/* Create Role Permission data
-	 * @params: 
-	 * @return: boolean
-	 
-	private function _buildPermissionData($roleId, $permissionList)
-	{
-		#create insert data array
-		$permissions = [];
-		
-		foreach($permissionList as $permissionCode)
-		{
-			$permissions[] = ['RoleId' => $roleId, 'Permission' => $permissionCode];
-		}
-		
-		return $permissions;
-	}
-	*/
-	
 	
 	/* Get Role Data
 	 * @params: 

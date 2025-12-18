@@ -44,15 +44,7 @@
 		</label>
 		@endforeach
 	</div>
-	<div class="section user-area required">
-		<label class="title">管理區域</label>
-		@foreach($viewModel->area as $idx => $area)
-		<label class="form-check-label" for="area{{$idx}}">
-			<input class="form-check-input" type="checkbox" name="area[]" id="area{{$idx}}" value="{{ $area->value }}"  @checked($viewModel->checkedArea($area->value))>
-			{{ $area->label() }}
-		</label>
-		@endforeach
-	</div>
+	
 	<div class="toolbar">
 		<button type="button" class="btn btn-major btn-save">儲存</button>
 		<button type="button" class="btn btn-red btn-reset">取消</button>

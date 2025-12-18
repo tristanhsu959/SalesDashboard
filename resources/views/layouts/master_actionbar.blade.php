@@ -1,5 +1,5 @@
 
-<nav class="page navbar">
+<nav class="page navbar dp-4">
 	@hasSection('navHome')
 	<span>@yield('navHome')</span>
 	@else
