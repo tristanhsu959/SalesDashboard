@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @use('App\Enums\RoleGroup')
+@use('App\Enums\Area')
 
 @push('styles')
 	<link href="{{ asset('styles/role/list.css') }}" rel="stylesheet">
@@ -41,6 +42,8 @@
 				<div class="col col-1">#</div>
 				<div class="col">身份</div>
 				<div class="col">權限群組</div>
+				<div class="col col-4">管理區域</div>
+				<div class="col">更新時間</div>
 				<div class="col col-action">操作</div>
 			</div>
 			@foreach($viewModel->list as $idx => $role)
@@ -48,6 +51,12 @@
 				<div class="col col-1">{{ $idx + 1 }}</div>
 				<div class="col">{{ $role['RoleName'] }}</div>
 				<div class="col">{{ RoleGroup::getLabelByValue($role['RoleGroup']) }}</div>
+				<div class="col col-4 col-area">
+					@foreach($role['RoleArea'] as $area)
+					<div class="badge">{{ Area::getLabelByValue($area) }}</div>
+					@endforeach
+				</div>
+				<div class="col">{{ $role['UpdateAt'] }}</div>
 				<div class="col col-action">
 					@if($viewModel->canUpdate() && ! $viewModel->isSupervisorGroup($role['RoleId']))
 					<a href="{{ route('role.update', [$role['RoleId']]) }}" class="btn btn-edit">

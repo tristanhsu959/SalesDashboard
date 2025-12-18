@@ -4,6 +4,7 @@ namespace App\ViewModels;
 
 use App\Services\UserService;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str;
 
 class MenuViewModel
 {
@@ -30,7 +31,8 @@ class MenuViewModel
 	 */
 	public function activeActionStyle($segmentCode)
 	{
-		$segments = Request::segments();
+		$segments 		= Request::segments();
+		$segmentCode	= Str::snake($segmentCode);
 		
 		if (in_array($segmentCode, $segments))
 			return 'active';

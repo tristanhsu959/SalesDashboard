@@ -27,8 +27,8 @@ class RoleViewModel
 		
 		#form data
 		$this->_data['roleId']		= 0; #form create or update role id
-		$this->_data['roleData']	= NULL; #For detail view
-		$this->_data['list'] 		= []; #For list view
+		$this->_data['roleData']	= NULL; #DB _data
+		$this->_data['list'] 		= []; #DB data
 		$this->_data['operations'] 	= [];
 	}
 	
@@ -74,24 +74,13 @@ class RoleViewModel
 		#初始化各參數及Form Options
 		$this->_data['action']	= $action;
 		$this->_data['roleId']	= $roleId;
-		$this->_data['msg'] 	= '';
+		$this->_data['msg'] 		= '';
 		
 		$this->_setOptions();
-		$this->_data['operations'] = $this->_service->getOperationPermissions();
+		$this->_data['operations'] = $this->_service->getOperationPermission();
 	}
 	
-	/* Form所屬的參數選項
-	 * @params: enum
-	 * @params: array
-	 * @return: void
-	 */
-	private function _setOptions()
-	{
-		$this->_data['roleGroup'] 	= RoleGroup::getEnabledList();
-		$this->_data['functionList']= $this->getAvailableMenu(); 
-	}
-	
-	/* Form submit action for edit
+	/* Form submit action
 	 * @params: 
 	 * @return: 
 	 */
@@ -102,6 +91,17 @@ class RoleViewModel
 			FormAction::CREATE => route('role.create.post'),
 			FormAction::UPDATE => route('role.update.post'),
 		};
+	}
+	
+	/* Form所屬的參數選項
+	 * @params: enum
+	 * @params: array
+	 * @return: void
+	 */
+	private function _setOptions()
+	{
+		$this->_data['roleGroup'] 	= RoleGroup::getEnabledList();
+		$this->_data['functionList']= $this->getMenuFromConfig();
 	}
 	
 	/* Keep user form data
@@ -149,22 +149,22 @@ class RoleViewModel
 	#使用者權限判別
 	public function canQuery()
 	{
-		return in_array(Operation::READ->value, $this->_data['operations']);
+		return in_array(Operation::READ->name, $this->_data['operations']);
 	}
 	
 	public function canCreate()
 	{
-		return in_array(Operation::CREATE->value, $this->_data['operations']);
+		return in_array(Operation::CREATE->name, $this->_data['operations']);
 	}
 	
 	public function canUpdate()
 	{
-		return in_array(Operation::UPDATE->value, $this->_data['operations']);
+		return in_array(Operation::UPDATE->name, $this->_data['operations']);
 	}
 	
 	public function canDelete()
 	{
-		return in_array(Operation::DELETE->value, $this->_data['operations']);
+		return in_array(Operation::DELETE->name, $this->_data['operations']);
 	}
 	
 	
@@ -181,8 +181,10 @@ class RoleViewModel
 		return ($group == data_get($this->_data, 'roleData.RoleGroup', 0));
 	}
 	
-	public function checkedOperation($functionCode, $operationValue)
+	public function checkedOperation($hexGroupCode, $hexActionCode, $hexOperation)
 	{
-		return ($this->hasOperationPermission($functionCode, $operationValue));
+		$authPermission = data_get($this->_data, 'roleData.Permission', []);
+		
+		return ($this->hasOperationPermission($hexGroupCode, $hexActionCode, $hexOperation, $authPermission));
 	}
 }

@@ -10,5 +10,26 @@ body {
 	margin-right: 1rem;
 	border-radius: .5rem;
 	background: var(--theme-surface-l1);
+	
+	/* Area */
+	.list-data
+		.row {
+			.col {
+				display: flex;
+				align-items: center;
+				border-width: 0;
+				padding: .5rem;
+				
+				&.col-area .badge {
+					margin-right: .25rem;
+					border-radius: 2px;
+					background-color: #76ff03;
+					color: rgba(0, 0, 0, .87);
+					font-weight: 400;
+				}
+				
+			}
+		}
+	}
 }
 

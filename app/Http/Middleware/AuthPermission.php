@@ -22,7 +22,7 @@ class AuthPermission
 		if (empty($signinUser))
 			return redirect()->route('signin')->with('msg', '認證已過期，請重新登入');
 		
-		if (empty($signinUser['Permission']))
+		if (empty($signinUser['Permission']) && ! $this->isSupervisor())
 			return redirect()->route('signin')->with('msg', '使用者尚無系統授權');
 		
         return $next($request);

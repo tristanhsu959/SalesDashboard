@@ -1,5 +1,6 @@
 @use('App\Enums\RoleGroup')
 @use('App\Enums\Operation')
+@use('App\Enums\Area')
 
 @extends('layouts.master')
 
@@ -46,26 +47,26 @@
 	
 	<div class="section role-permission field-group">
 		@foreach($viewModel->functionList as $groupKey => $group)
-		<ul class="list-group {{ Str::lower($group['groupType']) }}">
+		<ul class="list-group {{ Str::lower($group['type']) }}">
 			<div class="divider"></div>
 			<label class="title">
-				<span class="material-symbols-outlined filled-icon">{{ $group['groupIcon']['name'] }}</span>
-				{{ $group['groupName'] }}
+				<span class="material-symbols-outlined filled-icon">{{ $group['style']['icon'] }}</span>
+				{{ $group['name'] }}
 			</label>
 			@foreach($group['items'] as $itemKey => $item)
 			<li class="list-group-item">
 				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="item{{ $groupKey.$itemKey }}">
-					<label class="form-check-label" for="item{{ $groupKey.$itemKey }}">{{ $item['name'] }}</label>
+					<input class="form-check-input" type="checkbox" id="item-{{ $itemKey }}">
+					<label class="form-check-label" for="item-{{ $itemKey }}">{{ $item['name'] }}</label>
 				</div>
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
-					<label class="form-check-label" for="settingList{{$groupKey.$itemKey.$opKey }}">
+					<label class="form-check-label" for="settingList-{{ $itemKey.$opKey }}">
 						<input class="form-check-input" type="checkbox" 
 							value="{{ $operation->value }}" 
-							id="settingList{{$groupKey.$itemKey.$opKey }}" 
-							name="{{ Str::replaceArray('?', [$group['groupCode'], $item['actionCode']], 'settingList[?][?][]') }}"
-							@checked($viewModel->checkedOperation($group['groupCode'], $item['actionCode'], $operation->value))
+							id="settingList-{{ $itemKey.$opKey }}" 
+							name="{{ Str::replaceArray('?', [$item['code']], 'settingList[?][]') }}"
+							@checked($viewModel->checkedOperation($item['code'], $operation->value))
 						>
 						{{ $operation->label() }}
 					</label>

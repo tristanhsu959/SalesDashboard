@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
 			if (in_array($view->getName(), ['signin']) == FALSE)
 			{				
 				$signinInfo = $this->getSigninUserInfo();
-				$appMenu = new MenuViewModel($this->getMenuByPermission());
+				$appMenu = new MenuViewModel($this->getAuthorizedMenu());
 				
 				if ($signinInfo) 
 					$view->with('signinInfo', $signinInfo)->with('appMenu', $appMenu);

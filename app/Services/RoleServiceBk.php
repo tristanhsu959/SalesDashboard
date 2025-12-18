@@ -16,7 +16,8 @@ class RoleService
 {
 	use AuthorizationTrait, RolePermissionTrait;
 	
-	private $_functionCode = 'roles';
+	private $_groupKey	= 'authManager';
+	private $_actionKey = 'roles';
 	private $_repository;
     
 	public function __construct(RoleRepository $roleRepository)
@@ -33,17 +34,6 @@ class RoleService
 		try
 		{
 			$list = $this->_repository->getList();
-			
-			#處理Json type
-			foreach($list as $key => $item)
-			{
-				$list[$key] = Arr::map($item, function ($value, string $key) {
-					if ($key == 'RoleArea')
-						return empty($value) ? [] : json_decode($value, TRUE);
-					else
-						return $value;
-				});
-			}
 			
 			return ResponseLib::initialize($list)->success();
 		}
@@ -136,15 +126,15 @@ class RoleService
 		}
 	}
 	
-	/* CRUD Permission List
-	 * @params: 
-	 * @return: array
+	/* CRUD Permission Check for Page
+	 * @params: int
+	 * @return: boolean
 	 */
-	 public function getOperationPermissions()
+	 public function getOperationPermission()
 	 {
 		try
 		{
-			return $this->getOperationPermissionsByFunction($this->_functionCode);
+			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
 		}
 		catch(Exception $e)
 		{

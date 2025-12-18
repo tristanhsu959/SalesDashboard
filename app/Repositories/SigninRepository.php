@@ -22,7 +22,7 @@ class SigninRepository extends Repository
 	{
 		$db = $this->connectSaleDashboard('User');
 			
-		$result = $db->select('UserId', 'UserAd', 'UserAreaId', 'UserRoleId')
+		$result = $db->select('UserId', 'UserAd', 'UserRoleId')
 					->where('UserAd', '=', $account)
 					->get()->first();
 		
@@ -35,11 +35,11 @@ class SigninRepository extends Repository
 	 */
 	public function getUserPermission($roleId)
 	{
-		$db = $this->connectSaleDashboard('RolePermission');
+		$db = $this->connectSaleDashboard('Role');
 		
-		$result = $db->select('Permission')
+		$result = $db->select('RoleGroup', 'RolePermission', 'RoleArea')
 					->where('RoleId', '=', $roleId)
-					->get();
+					->get()->first();
 						
 		return $result;
 	}

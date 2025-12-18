@@ -31,7 +31,7 @@ body {
 	border-radius: .5rem;
 	background: var(--theme-surface-bg);
 	
-	.list-data
+	/* .list-data
 		.row {
 			.col {
 				display: flex;
@@ -49,6 +49,6 @@ body {
 				
 			}
 		}
-	}
+	} */
 }
 

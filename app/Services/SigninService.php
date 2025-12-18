@@ -73,10 +73,11 @@ class SigninService
 			if (empty($userInfo))
 				return FALSE;
 			
-			#若是2維要再toArray, 允許有帳號無Permission, 故不檢查
-			$permission = $this->_repository->getUserPermission($userInfo['UserRoleId'])->toArray();
-			$userInfo['Permission'] = Arr::flatten($permission);
-			$userInfo['UserAreaId'] = empty($userInfo['UserAreaId']) ? [] : json_decode($userInfo['UserAreaId'], TRUE);
+			#允許有帳號無Permission, 故不檢查
+			$roleData = $this->_repository->getUserPermission($userInfo['UserRoleId']);
+			$userInfo['RoleGroup']	= $roleData['RoleGroup'];
+			$userInfo['Permission'] = empty($roleData['RolePermission']) ? [] : json_decode($roleData['RolePermission'], TRUE);
+			$userInfo['Area'] 		= empty($roleData['RoleArea']) ? [] : json_decode($roleData['RoleArea'], TRUE);
 			
 			return $userInfo;
 		}

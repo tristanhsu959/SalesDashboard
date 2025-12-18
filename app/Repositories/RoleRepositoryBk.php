@@ -23,7 +23,7 @@ class RoleRepository extends Repository
 		$db = $this->connectSaleDashboard('Role');
 			
 		$result = $db
-			->select('RoleId', 'RoleName', 'RoleGroup', 'RoleArea', 'UpdateAt')
+			->select('RoleId', 'RoleName', 'RoleGroup')
 			->get()
 			->toArray();
 				
