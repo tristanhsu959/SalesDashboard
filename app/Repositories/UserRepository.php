@@ -60,39 +60,20 @@ class UserRepository extends Repository
 	 * @params: string
 	 * @params: string
 	 * @params: int
-	 * @params: int
 	 * @return: boolean
 	 */
-	public function insertUser($adAccount, $displayName, $areaIds, $roleId)
+	public function insertUser($adAccount, $displayName, $roleId)
 	{
 		$db = $this->connectSaleDashboard('User');
 		
 		$data['UserAd']			= $adAccount;
 		$data['UserDisplayName']= $displayName;
-		$data['UserAreaId']		= json_encode($areaIds);
 		$data['UserRoleId'] 	= $roleId;
 		$data['CreateAt'] 		= now()->format('Y-m-d H:i:s');
 		$data['UpdateAt'] 		= $data['CreateAt'];
 			
 		$db->insert($data);
 		return TRUE;
-	}
-	
-	/* Create Role Permission data
-	 * @params: 
-	 * @return: boolean
-	 */
-	private function _buildPermissionData($roleId, $permissionList)
-	{
-		#create insert data array
-		$permissions = [];
-		
-		foreach($permissionList as $permissionCode)
-		{
-			$permissions[] = ['RoleId' => $roleId, 'Permission' => $permissionCode];
-		}
-		
-		return $permissions;
 	}
 	
 	/* Get User Data
@@ -103,30 +84,26 @@ class UserRepository extends Repository
 	{
 		$db = $this->connectSaleDashboard('User');
 			
-		$result = $db->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId')
+		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId')
 					->where('UserId', '=', $id)
 					->get()->first();
-		
-		$result['UserAreaId'] = empty($result['UserAreaId']) ? [] : json_decode($result['UserAreaId']);
 		
 		return $result;
 	}
 	
 	/* Update User
+	 * @params: int
 	 * @params: string
 	 * @params: string
-	 * @params: int
-	 * @params: int
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateUser($adAccount, $displayName, $areaIds, $roleId, $userId)
+	public function updateUser($userId, $adAccount, $displayName, $roleId)
 	{
 		$db = $this->connectSaleDashboard('User');
 		
 		$data['UserAd']			= $adAccount;
 		$data['UserDisplayName']= $displayName;
-		$data['UserAreaId']		= json_encode($areaIds);
 		$data['UserRoleId'] 	= $roleId;
 		$data['UpdateAt'] 		= now()->format('Y-m-d H:i:s');
 			

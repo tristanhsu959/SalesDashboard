@@ -92,14 +92,14 @@ class UserController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
+		$id			= $request->input('id');
 		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$area		= $request->input('area');
 		$role		= $request->input('role');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($adAccount, $displayName, $area, $role);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $role);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -113,7 +113,7 @@ class UserController extends Controller
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createUser($adAccount, $displayName, $area, $role);
+		$response = $this->_service->createUser($adAccount, $displayName, $role);
 		
 		if ($response->status === FALSE)
 		{
@@ -131,7 +131,7 @@ class UserController extends Controller
 	public function showUpdate(Request $request, $id)
 	{
 		#initialize
-		$this->_viewModel->initialize(FormAction::UPDATE, $id);
+		$this->_viewModel->initialize(FormAction::UPDATE);
 		
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
@@ -141,8 +141,8 @@ class UserController extends Controller
 		if ($response->status === FALSE)
 			return redirect()->route('user.list')->with('msg', $response->msg);
 		
-		$this->_viewModel->userData = $response->data; 
-		#$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['roleGroup'], $data['rolePermission'], $data['roleArea']);
+		$data = $response->data; 
+		$this->_viewModel->keepFormData($data['userId'], $data['userAd'], $data['userDisplayName'], $data['userRoleId']);
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);
@@ -158,12 +158,11 @@ class UserController extends Controller
 		$id 		= $request->input('id');
 		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$area		= $request->input('area');
 		$role		= $request->input('role');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE, $id);
-		$this->_viewModel->keepFormData($adAccount, $displayName, $area, $role);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $role);
 		
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
@@ -179,7 +178,7 @@ class UserController extends Controller
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateUser($adAccount, $displayName, $area, $role, $id);
+		$response = $this->_service->updateUser($id, $adAccount, $displayName, $role);
 		
 		if ($response->status === FALSE)
 		{

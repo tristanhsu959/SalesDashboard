@@ -87,12 +87,12 @@ class UserService
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function createUser($adAccount, $displayName, $areaIds, $roleId)
+	public function createUser($adAccount, $displayName, $roleId)
 	{
 		try
 		{
 			#Create data
-			$this->_repository->insertUser($adAccount, $displayName, $areaIds, $roleId);
+			$this->_repository->insertUser($adAccount, $displayName, $roleId);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -122,18 +122,17 @@ class UserService
 	}
 	
 	/* Update User
-	 * @params: string
-	 * @params: string
-	 * @params: array
 	 * @params: int
+	 * @params: string
+	 * @params: string
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateUser($adAccount, $displayName, $areaIds, $roleId, $userId)
+	public function updateUser($userId, $adAccount, $displayName, $roleId)
 	{
 		try
 		{
-			$this->_repository->updateUser($adAccount, $displayName, $areaIds, $roleId, $userId);
+			$this->_repository->updateUser($userId, $adAccount, $displayName, $roleId);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)

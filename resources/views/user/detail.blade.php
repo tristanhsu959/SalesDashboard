@@ -20,7 +20,7 @@
 @section('content')
 		
 <form action="{{ $viewModel->getFormAction() }}" method="post" id="userForm">
-<input type="hidden" value="{{ $viewModel->getUpdateUserId() }}" name="id">
+<input type="hidden" value="{{ $viewModel->getUserId() }}" name="id">
 @csrf
 
 <section class="section-wrapper">
@@ -37,10 +37,10 @@
 	</div>
 	<div class="section user-role required">
 		<label class="title">所屬身份</label>
-		@foreach($viewModel->roleList as $idx => $role)
-		<label class="form-check-label" for="role{{$idx}}">
-			<input class="form-check-input" type="radio" name="role" id="role{{$idx}}" value="{{ $role['RoleId'] }}" @checked($viewModel->checkedRole($role['RoleId'])) >
-			{{ $role['RoleName'] }}
+		@foreach($viewModel->option['roleList'] as $id => $name)
+		<label class="form-check-label" for="role-{{$id}}">
+			<input class="form-check-input" type="radio" name="role" id="role-{{$id}}" value="{{ $id }}" @checked($viewModel->checkedRole($id)) >
+			{{ $name }}
 		</label>
 		@endforeach
 	</div>
