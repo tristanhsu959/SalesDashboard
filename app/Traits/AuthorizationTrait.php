@@ -65,8 +65,6 @@ trait AuthorizationTrait
 	 */
 	public function isSupervisor()
 	{
-		#todo
-		return false;
 		$currentUser = $this->getSigninUserInfo();
 		
 		return ($currentUser['roleGroup'] == RoleGroup::SUPERVISOR->value);

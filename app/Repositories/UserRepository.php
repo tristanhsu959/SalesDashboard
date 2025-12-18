@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Enums\RoleGroup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Arr;
@@ -24,7 +25,7 @@ class UserRepository extends Repository
 		$db = $this->connectSaleDashboard('Role');
 			
 		$result = $db
-			->select('RoleId', 'RoleName')
+			->select('roleId', 'roleName')
 			->get()
 			->toArray();
 				
@@ -37,24 +38,20 @@ class UserRepository extends Repository
 	 */
 	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
 	{
-		$db = $this->connectSaleDashboard('User');
+		$db = $this->connectSaleDashboard('User as a');
 			
-		$db->select('UserId', 'UserAd', 'UserDisplayName', 'UserAreaId', 'UserRoleId');
+		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleGroup', 'b.roleArea')
+			->join('Role as b', 'b.RoleId', '=', 'a.UserRoleId');
 		
 		#query conditions
 		if (! is_null($searchAd))
-			$db->where('UserAd', 'like', "%{$searchAd}%");
+			$db->where('a.UserAd', 'like', "%{$searchAd}%");
 		if (! is_null($searchName))
-			$db->where('UserDisplayName', 'like', "%{$searchName}%");
+			$db->where('a.UserDisplayName', 'like', "%{$searchName}%");
 		if (! is_null($searchArea))
-			$db->whereJsonContains('UserAreaId', $searchArea);
+			$db->whereJsonContains('b.RoleArea', $searchArea);
 		
 		$result = $db->get()->toArray();
-		
-		$result = Arr::map($result, function ($item, string $key) {
-			$item['UserAreaId'] = empty($item['UserAreaId']) ? [] : json_decode($item['UserAreaId'], TRUE);
-			return $item;
-		});
 		
 		return $result;
 	}

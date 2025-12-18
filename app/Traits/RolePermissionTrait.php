@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Str;
 
+#Deprecated
 #Role Form : 身份表單功能使用
 trait RolePermissionTrait
 {

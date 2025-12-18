@@ -27,7 +27,6 @@ class RoleViewModel
 		#form data
 		$this->_data['roleData']	= NULL; #For detail view form data
 		$this->_data['list'] 		= []; #For list view
-		$this->_data['operations'] 	= []; #????
 		$this->_data['option']		= [];
 	}
 	

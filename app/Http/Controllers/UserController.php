@@ -79,6 +79,7 @@ class UserController extends Controller
 	{
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
+		$this->_viewModel->keepFormData(); #init
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);
@@ -141,6 +142,7 @@ class UserController extends Controller
 			return redirect()->route('user.list')->with('msg', $response->msg);
 		
 		$this->_viewModel->userData = $response->data; 
+		#$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['roleGroup'], $data['rolePermission'], $data['roleArea']);
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);

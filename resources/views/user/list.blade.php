@@ -41,7 +41,7 @@
 		<div class="input-select field-light-blue field">
 			<select class="form-select" id="searchArea" name="searchArea">
 				<option value="">請選擇</option>
-				@foreach($viewModel->area as $area)
+				@foreach($viewModel->option['area'] as $area)
 				<option value="{{ $area->value }}" @selected($viewModel->selectedSearchArea($area->value)) >{{ $area->label() }}</option>
 				@endforeach
 			</select>
@@ -69,29 +69,31 @@
 				<div class="col col-1">#</div>
 				<div class="col">AD帳號</div>
 				<div class="col">顯示名稱</div>
-				<div class="col col-4">管理區域</div>
+				<!--div class="col col-4">管理區域</div-->
 				<div class="col">權限身份</div>
+				<div class="col">更新時間</div>
 				<div class="col col-action">操作</div>
 			</div>
 			@foreach($viewModel->list as $idx => $user)
 			<div class="row">
 				<div class="col col-1">{{ $idx + 1 }}</div>
-				<div class="col">{{ $user['UserAd'] }}</div>
-				<div class="col">{{ $user['UserDisplayName'] }}</div>
-				<div class="col col-4 col-area">
-					@foreach($user['UserAreaId'] as $area)
+				<div class="col">{{ $user['userAd'] }}</div>
+				<div class="col">{{ $user['userDisplayName'] }}</div>
+				<!--div class="col col-4 col-area">
+					@foreach($user['roleArea'] as $area)
 					<div class="badge">{{ Area::getLabelByValue($area) }}</div>
 					@endforeach
-				</div>
-				<div class="col">{{ $viewModel->getRoleById($user['UserRoleId']) }}</div>
+				</div-->
+				<div class="col">{{ $viewModel->getRoleById($user['userRoleId']) }}</div>
+				<div class="col">{{ $user['updateAt'] }}</div>
 				<div class="col col-action">
 					@if($viewModel->canUpdate())
-					<a href="{{ route('user.update', [$user['UserId']]) }}" class="btn btn-edit">
+					<a href="{{ route('user.update', [$user['userId']]) }}" class="btn btn-edit">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
 					@endif
 					@if($viewModel->canDelete())
-					<a href="{{ route('user.delete.post', [$user['UserId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($user['UserAd']) }}">
+					<a href="{{ route('user.delete.post', [$user['userId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($user['roleGroup']) }}">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif

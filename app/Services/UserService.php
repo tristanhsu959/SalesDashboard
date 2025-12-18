@@ -15,8 +15,7 @@ class UserService
 {
 	use AuthorizationTrait;
 	
-	private $_groupKey	= 'authManager';
-	private $_actionKey = 'users';
+	private $_functionCode = 'users';
 	
 	private $_title = '帳號管理';
 	private $_repository;
@@ -24,6 +23,11 @@ class UserService
 	public function __construct(UserRepository $userRepository)
 	{
 		$this->_repository = $userRepository;
+	}
+	
+	public function getFunctionCode()
+	{
+		return $this->_functionCode;
 	}
 	
 	/* 取帳號清單(Get ALL)
@@ -35,6 +39,11 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getList();
+			
+			$list = Arr::map($list, function ($item, string $key) {
+				$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
+				return $item;
+			});
 			
 			return ResponseLib::initialize($list)->success();
 		}
@@ -56,6 +65,11 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getList($searchAd, $searchName, $searchArea);
+			
+			$list = Arr::map($list, function ($item, string $key) {
+				$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
+				return $item;
+			});
 			
 			return ResponseLib::initialize($list)->success();
 		}
@@ -156,6 +170,9 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getRoleList();
+			$list = Arr::mapWithKeys($list, function (array $item, int $key) {
+				return [$item['roleId'] => $item['roleName']];
+			});
 			
 			return $list;
 		}
