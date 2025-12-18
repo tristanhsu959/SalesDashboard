@@ -84,7 +84,7 @@ class RoleViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['option']['roleGroupList'] = RoleGroup::getEnabledList();
+		$this->_data['option']['roleGroupList'] = RoleGroup::cases();
 		$this->_data['option']['functionList']	= MenuLib::all();
 		$this->_data['option']['areaList'] 		= Area::cases(); #enum
 	}
@@ -208,5 +208,10 @@ class RoleViewModel
 		$areaSetting 	= $this->getRoleArea(); 
 		
 		return in_array($areaValue, $areaSetting);
+	}
+	
+	public function disabledSupervisor($deleteRoleGroup)
+	{
+		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
 	}
 }

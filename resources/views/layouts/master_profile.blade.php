@@ -19,11 +19,11 @@
 			</p>
 			<p>
 				<span>管理區域</span>
-				@if(empty($signinInfo['UserAreaId']))
+				@if(empty($signinInfo['area']))
 					<span class="text-danger">未設定</span>
 				@else
 					<div class="user-area">
-					@foreach($signinInfo['UserAreaId'] as $area)
+					@foreach($signinInfo['area'] as $area)
 						<span class="badge">{{ Area::getLabelByValue($area) }}</span>
 					@endforeach
 					</div>

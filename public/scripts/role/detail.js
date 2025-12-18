@@ -10,7 +10,7 @@ $(function(){
 	});
 	
 	$('#group').change(function(){
-		if ($(this).val() == $('#roleForm').data('admin'))
+		if ($(this).val() == $('#roleForm').data('admin') || $(this).val() == $('#roleForm').data('supervisor'))
 		{
 			$('.role-permission ul.admin .form-check-input').prop('disabled', false);
 			$('.role-permission ul.admin').show();

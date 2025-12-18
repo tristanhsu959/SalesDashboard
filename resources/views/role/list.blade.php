@@ -58,13 +58,13 @@
 				</div>
 				<div class="col">{{ $role['updateAt'] }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate() && ! $viewModel->isSupervisorGroup($role['roleGroup']))
+					@if($viewModel->canUpdate())
 					<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn btn-edit">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
 					@endif
-					@if($viewModel->canDelete() && ! $viewModel->isSupervisorGroup($role['roleGroup']))
-					<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn btn-delete">
+					@if($viewModel->canDelete())
+					<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($role['roleGroup']) }}">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif

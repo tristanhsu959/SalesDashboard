@@ -22,7 +22,7 @@
 @endsection
 
 @section('content')
-<form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
+<form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}" data-supervisor="{{ RoleGroup::SUPERVISOR->value }}">
 <input type="hidden" value="{{ $viewModel->getRoleId() }}" name="id">
 @csrf
 
@@ -47,7 +47,7 @@
 	
 	<div class="section role-permission field-group">
 		@foreach($viewModel->option['functionList'] as $groupKey => $group)
-		<ul class="list-group {{ Str::lower($group['type']) }}">
+		<ul class="list-group {{ Str::lower(Arr::toCssClasses($group['type'])) }}">
 			<div class="divider"></div>
 			<label class="title">
 				<span class="material-symbols-outlined filled-icon">{{ $group['style']['icon'] }}</span>

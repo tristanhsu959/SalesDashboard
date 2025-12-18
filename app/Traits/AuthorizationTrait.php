@@ -67,6 +67,9 @@ trait AuthorizationTrait
 	{
 		$currentUser = $this->getSigninUserInfo();
 		
+		if (empty($currentUser))
+			return FALSE;
+		
 		return ($currentUser['roleGroup'] == RoleGroup::SUPERVISOR->value);
 	}
 	

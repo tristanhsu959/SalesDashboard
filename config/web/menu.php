@@ -10,7 +10,7 @@ return [
 		[
 			'name' 	=> '新品銷售',
 			'style' => ['icon' => 'chart_data', 'color' => 'purple'], #filled-icon 
-			'type'	=> RoleGroup::USER->name,
+			'type'	=> [RoleGroup::USER->name],
 			'items' => [ 		#Function code or key => use Str::camel to check segment
 				'porkRibs',  
 				'tomatoBeef',
@@ -22,7 +22,7 @@ return [
 		[
 			'name'	=> '權限管理',
 			'style' => ['icon' => 'admin_panel_settings', 'color' => 'red'],
-			'type' 	=> RoleGroup::ADMIN->name,
+			'type' 	=> [RoleGroup::ADMIN->name, RoleGroup::SUPERVISOR->name],
 			'items' => [
 				'users',
 				'roles',

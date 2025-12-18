@@ -63,6 +63,7 @@ class RoleController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
+		$id 		= $request->input('id');
 		$name 		= $request->input('name');
 		$group 		= $request->input('group');
 		$permission	= $request->input('permission');
@@ -70,7 +71,7 @@ class RoleController extends Controller
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData(0, $name, $group, $permission, $area);
+		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
