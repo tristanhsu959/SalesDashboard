@@ -10,7 +10,7 @@ use LdapRecord\Query\Filter\Parser;
 use Log;
 use Exception;
 
-/* 認證 */
+/* AD認證 : 只負責驗證AD邏輯 */
 trait AuthenticationTrait
 {
 	#Refactor
@@ -47,8 +47,8 @@ trait AuthenticationTrait
 			$adInfo['company'] 		= data_get($result, 'company.0', '');
 			$adInfo['department'] 	= data_get($result, 'department.0', '');
 			$adInfo['title'] 		= data_get($result, 'title.0', '');
-			$adInfo['displayname'] 	= data_get($result, 'displayname.0', ''); #=>FirstName LastName CNName
-			$adInfo['employeeid'] 	= data_get($result, 'employeeid.0', ''); #=>CNName
+			$adInfo['displayName'] 	= data_get($result, 'displayname.0', ''); #=>FirstName LastName CNName
+			$adInfo['employeeId'] 	= data_get($result, 'employeeid.0', ''); #=>CNName
 			$adInfo['name'] 		= Str::remove(' ', data_get($result, 'name.0', '')); #=>CNName
 			$adInfo['mail'] 		= data_get($result, 'mail.0', '');
 			

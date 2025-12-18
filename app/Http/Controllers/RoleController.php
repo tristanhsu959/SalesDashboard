@@ -62,13 +62,13 @@ class RoleController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
-		$name 			= $request->input('name');
-		$group 			= $request->input('group');
-		$settingList	= $request->input('settingList');
+		$name 				= $request->input('name');
+		$group 				= $request->input('group');
+		$permissionSetting	= $request->input('permissionSetting');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($name, $group, $settingList);
+		$this->_viewModel->keepFormData($name, $group, $permissionSetting);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -82,7 +82,7 @@ class RoleController extends Controller
 			return view('role/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createRole($name, $group, $settingList);
+		$response = $this->_service->createRole($name, $group, $permissionSetting);
 		
 		if ($response->status === FALSE)
 		{
@@ -110,7 +110,8 @@ class RoleController extends Controller
 		if ($response->status === FALSE)
 			return redirect()->route('role.list')->with('msg', $response->msg);
 		
-		$this->_viewModel->roleData = $response->data;
+		$data = $response->data;
+		$this->_viewModel->keepFormData($data['roleName'], $data['roleGroup'],$data['rolePermission'], $data['roleId']);
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);

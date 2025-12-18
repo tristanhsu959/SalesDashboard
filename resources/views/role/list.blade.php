@@ -49,22 +49,22 @@
 			@foreach($viewModel->list as $idx => $role)
 			<div class="row">
 				<div class="col col-1">{{ $idx + 1 }}</div>
-				<div class="col">{{ $role['RoleName'] }}</div>
-				<div class="col">{{ RoleGroup::getLabelByValue($role['RoleGroup']) }}</div>
+				<div class="col">{{ $role['roleName'] }}</div>
+				<div class="col">{{ RoleGroup::getLabelByValue($role['roleGroup']) }}</div>
 				<div class="col col-4 col-area">
-					@foreach($role['RoleArea'] as $area)
+					@foreach($role['roleArea'] as $area)
 					<div class="badge">{{ Area::getLabelByValue($area) }}</div>
 					@endforeach
 				</div>
-				<div class="col">{{ $role['UpdateAt'] }}</div>
+				<div class="col">{{ $role['updateAt'] }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate() && ! $viewModel->isSupervisorGroup($role['RoleId']))
-					<a href="{{ route('role.update', [$role['RoleId']]) }}" class="btn btn-edit">
+					@if($viewModel->canUpdate() && ! $viewModel->isSupervisorGroup($role['roleGroup']))
+					<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn btn-edit">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
 					@endif
-					@if($viewModel->canDelete() && ! $viewModel->isSupervisorGroup($role['RoleId']))
-					<a href="{{ route('role.delete.post', [$role['RoleId']]) }}" class="btn btn-delete">
+					@if($viewModel->canDelete() && ! $viewModel->isSupervisorGroup($role['roleGroup']))
+					<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn btn-delete">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
 					@endif

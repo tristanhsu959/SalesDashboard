@@ -3,13 +3,15 @@
 namespace App\Traits;
 
 use App\Enums\RoleGroup;
+use App\Libraries\MenuLib;
 use Illuminate\Support\Str;
 
-/* 授權 */
+/* 負責登入後相關授權邏輯判別, 只針對登入使用者 */
 trait AuthorizationTrait
 {
 	const SESS_AUTH_USER = 'SessAuthUserInfo';
 	const SESS_AUTH_MENU = 'SessAuthMenu';
+	
 	
 	/* 儲存登入資訊
 	 * @params: array
@@ -32,12 +34,7 @@ trait AuthorizationTrait
 		return session()->get(self::SESS_AUTH_USER);
 	}
 	
-	public function removeSigninUserInfo()
-	{
-		session()->forget(self::SESS_AUTH_USER);
-		return TRUE;
-	}
-	
+	#只取Permission值
 	public function getSigninUserPermission()
 	{
 		$signinUser = $this->getSigninUserInfo();
@@ -50,36 +47,29 @@ trait AuthorizationTrait
 		return $userPermission;
 	}
 	
+	/* 清除登入資訊|Menu
+	 * @params: array
+	 * @params: array
+	 * @return: 
+	 */
+	public function removeSigninUserInfo()
+	{
+		session()->forget(self::SESS_AUTH_USER);
+		return TRUE;
+	}
+	
+	/* 內建Supervisor (RoleGroup)
+	 * @params: array
+	 * @params: array
+	 * @return: 
+	 */
 	public function isSupervisor()
 	{
+		#todo
+		return false;
 		$currentUser = $this->getSigninUserInfo();
 		
 		return ($currentUser['RoleGroup'] == RoleGroup::SUPERVISOR->value);
-	}
-	
-	/* 取All Menu List (權限設定用)
-	 * @params: 
-	 * @return: array
-	 */
-	public function getAvailableMenu()
-	{
-		$menu 		= [];
-		$groups 	= config('web.menu.groups');
-		$functions 	= config('web.menu.functions');
-		
-		foreach($groups as $key => $group)
-		{
-			$items = [];
-			foreach($group['items'] as $itemKey)
-			{
-				$items[] = data_get($functions, $itemKey, '');
-			}
-			
-			$group['items'] = $items;
-			$menu[$key] = $group;
-		}
-		
-		return $menu;
 	}
 	
 	/* 取已授權的Menu (登入驗後) : AppServiceProvider
@@ -95,10 +85,9 @@ trait AuthorizationTrait
 			return session()->get(self::SESS_AUTH_MENU);
 		
 		#2.取功能選單-ALL
-		$menuConfig = $this->getAvailableMenu();
+		$menuConfig = MenuLib::all();
 		
-		#3.驗證有權限的選單, 只要驗證到功能即可
-		
+		#3.驗證使用者有權限的選單, 只要驗證到功能即可
 		foreach($menuConfig as $key => $group)
 		{
 			$authMenu[$key] = $group;
@@ -118,13 +107,18 @@ trait AuthorizationTrait
 		return $authMenu;
 	}
 	
+	/* 登入授權Menu
+	 * @params: array
+	 * @params: array
+	 * @return: 
+	 */
 	public function removeAuthMenu()
 	{
 		session()->forget(self::SESS_AUTH_MENU);
 		return TRUE;
 	}
 	
-	/* Auth Function Permission
+	/* Auth Function Permission by Signin User
 	 * @params: string
 	 * @params: string
 	 * @return: boolean
@@ -140,7 +134,7 @@ trait AuthorizationTrait
 		return in_array($functionCode, $functionCodeList);
 	}
 	
-	/* Auth CRUD Permission
+	/* Auth CRUD Permission by Signin User
 	 * @params: string
 	 * @params: string
 	 * @params: string
@@ -157,6 +151,7 @@ trait AuthorizationTrait
 		return in_array($operationValue, $userOperations);
 	}
 	
+	#todo移走, 不關登入使用者的事
 	/* 取使用者在此頁面的CRUD權限清單
 	 * @params: int
 	 * @return: array

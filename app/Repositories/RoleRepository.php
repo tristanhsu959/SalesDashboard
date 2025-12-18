@@ -23,7 +23,7 @@ class RoleRepository extends Repository
 		$db = $this->connectSaleDashboard('Role');
 			
 		$result = $db
-			->select('RoleId', 'RoleName', 'RoleGroup', 'RoleArea', 'UpdateAt')
+			->select('roleId', 'roleName', 'roleGroup', 'roleArea', 'updateAt')
 			->get()
 			->toArray();
 				
@@ -42,26 +42,28 @@ class RoleRepository extends Repository
 		try 
 		{
 			#只能用facade
-			$db = $this->connectSaleDashboard();
+			$db = $this->connectSaleDashboard('Role');
 		
-			$db->beginTransaction();
+			#$db->beginTransaction();
 
-			$roleData['RoleName']	= $roleName;
-			$roleData['RoleGroup'] 	= $roleGroup;
-			$roleData['CreateAt'] 	= now()->format('Y-m-d H:i:s');
-			$roleData['UpdateAt'] 	= $roleData['CreateAt'];
+			$roleData['RoleName']		= $roleName;
+			$roleData['RoleGroup'] 		= $roleGroup;
+			$roleData['RolePermission'] = json_encode($permissionList);
+			$roleData['RoleArea'] 		= json_encode([]);
+			$roleData['CreateAt'] 		= now()->format('Y-m-d H:i:s');
+			$roleData['UpdateAt'] 		= $roleData['CreateAt'];
 			
-			$id = $db->table('Role')->insertGetId($roleData);
+			$id = $db->insertGetId($roleData);
 			
-			$permissionData = $this->_buildPermissionData($id, $permissionList);
-			$db->table('RolePermission')->insert($permissionData);
+			#$permissionData = $this->_buildPermissionData($id, $permissionList);
+			#$db->table('RolePermission')->insert($permissionData);
 			
-			$db->commit();
+			#$db->commit();
 			return TRUE;
 		} 
 		catch (Exception $e) 
 		{
-			$db->rollBack();
+			#$db->rollBack();
 			throw $e;
 			return FALSE;
 		}
@@ -70,7 +72,7 @@ class RoleRepository extends Repository
 	/* Create Role Permission data
 	 * @params: 
 	 * @return: boolean
-	 */
+	 
 	private function _buildPermissionData($roleId, $permissionList)
 	{
 		#create insert data array
@@ -83,6 +85,8 @@ class RoleRepository extends Repository
 		
 		return $permissions;
 	}
+	*/
+	
 	
 	/* Get Role Data
 	 * @params: 
@@ -90,16 +94,11 @@ class RoleRepository extends Repository
 	 */
 	public function getRoleById($id)
 	{
-		$db = $this->connectSaleDashboard();
+		$db = $this->connectSaleDashboard('Role');
 			
-		$result = $db->table('Role as r')->selectRaw("r.RoleId, r.RoleName, r.RoleGroup, r.UpdateAt, 
-					(
-						select group_concat(p.Permission) from RolePermission as p where p.RoleId = r.RoleId
-					) as permissions")
-					->where('r.RoleId', '=', $id)
+		$result = $db->select('roleId', 'roleName', 'roleGroup', 'rolePermission', 'roleArea', 'updateAt')
+					->where('roleId', '=', $id)
 					->get()->first();
-		
-		$result['Permission'] = explode(',', $result['permissions']);
 		
 		return $result;
 	}
@@ -107,7 +106,7 @@ class RoleRepository extends Repository
 	/* Get Role Data  (原MsSql語法)
 	 * @params: 
 	 * @return: array
-	 */
+	 
 	public function getRoleByIdMssql($id)
 	{
 		$db = $this->connectSaleDashboard();
@@ -121,7 +120,7 @@ class RoleRepository extends Repository
 		
 		return $result;
 	}
-	
+	*/
 	
 	
 	/* Update Role

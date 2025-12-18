@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Str;
 
+#Role Form : 身份表單功能使用
 trait RolePermissionTrait
 {
 	/* 建立Permission設定For DB

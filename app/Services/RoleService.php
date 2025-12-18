@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Repositories\RoleRepository;
 use App\Traits\AuthorizationTrait;
-use App\Traits\RolePermissionTrait;
+#use App\Traits\RolePermissionTrait;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -14,7 +14,7 @@ use Log;
 
 class RoleService
 {
-	use AuthorizationTrait, RolePermissionTrait;
+	use AuthorizationTrait;
 	
 	private $_functionCode = 'roles';
 	private $_repository;
@@ -22,6 +22,11 @@ class RoleService
 	public function __construct(RoleRepository $roleRepository)
 	{
 		$this->_repository = $roleRepository;
+	}
+	
+	public function getFunctionCode()
+	{
+		return $this->_functionCode;
 	}
 	
 	/* 取Role清單(Get ALL)
@@ -38,7 +43,7 @@ class RoleService
 			foreach($list as $key => $item)
 			{
 				$list[$key] = Arr::map($item, function ($value, string $key) {
-					if ($key == 'RoleArea')
+					if ($key == 'roleArea')
 						return empty($value) ? [] : json_decode($value, TRUE);
 					else
 						return $value;
@@ -60,12 +65,12 @@ class RoleService
 	 * @params: hex string
 	 * @return: array
 	 */
-	public function createRole($roleName, $roleGroup, $settingList)
+	public function createRole($roleName, $roleGroup, $permissionList)
 	{
 		try
 		{
 			#Create data & Build permission setting
-			$permissionList = $this->buildPermissionByFunction($settingList);
+			#$permissionList = $this->buildPermissionByFunction($settingList);
 			$this->_repository->insertRole($roleName, $roleGroup, $permissionList);
 		
 			return ResponseLib::initialize()->success();
@@ -86,6 +91,10 @@ class RoleService
 		try
 		{
 			$result = $this->_repository->getRoleById($id);
+			
+			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
+			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+			
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)

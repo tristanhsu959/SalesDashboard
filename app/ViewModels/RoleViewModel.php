@@ -3,16 +3,13 @@
 namespace App\ViewModels;
 
 use App\Services\RoleService;
-use App\Traits\AuthorizationTrait;
-use App\Traits\RolePermissionTrait;
+use App\Libraries\MenuLib;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
 use App\Enums\Operation;
 
 class RoleViewModel
 {
-	use AuthorizationTrait, RolePermissionTrait;
-	
 	private $_service;
 	private $_title = '身份管理';
 	private $_data = [];
@@ -20,16 +17,16 @@ class RoleViewModel
 	public function __construct(RoleService $roleService)
 	{
 		$this->_service = $roleService;
+		
 		#initialize
 		$this->_data['action'] 	= NULL; #enum form action
 		$this->_data['status']	= FALSE;
 		$this->_data['msg'] 	= '';
 		
 		#form data
-		$this->_data['roleId']		= 0; #form create or update role id
-		$this->_data['roleData']	= NULL; #For detail view
+		$this->_data['roleData']	= NULL; #For detail view form data
 		$this->_data['list'] 		= []; #For list view
-		$this->_data['operations'] 	= [];
+		$this->_data['operations'] 	= []; #????
 	}
 	
 	public function __set($name, $value)
@@ -76,8 +73,13 @@ class RoleViewModel
 		$this->_data['roleId']	= $roleId;
 		$this->_data['msg'] 	= '';
 		
+		if ($action != FormAction::List)
+		{
+			#$this->keepFormData(); #init
 		$this->_setOptions();
-		$this->_data['operations'] = $this->_service->getOperationPermissions();
+		#todo 判別當前登入者的CRUD???
+		//$this->_data['allowOperations'] = $this->_service->getOperationPermissions();
+		}
 	}
 	
 	/* Form所屬的參數選項
@@ -87,8 +89,8 @@ class RoleViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['roleGroup'] 	= RoleGroup::getEnabledList();
-		$this->_data['functionList']= $this->getAvailableMenu(); 
+		$this->_data['optionRoleGroup'] 	= RoleGroup::getEnabledList();
+		$this->_data['optionFunctionList']	= MenuLib::all(); 
 	}
 	
 	/* Form submit action for edit
@@ -108,63 +110,68 @@ class RoleViewModel
 	 * @params: 
 	 * @return: string
 	 */
-	public function keepFormData($name, $group, $settingList)
+	public function keepFormData($name = '', $group = 0, $permissionSetting = [], $roldId = 0)
     {
-		data_set($this->_data, 'roleData.RoleName', $name);
-		data_set($this->_data, 'roleData.RoleGroup', $group);
-		data_set($this->_data, 'roleData.Permission', $this->buildPermissionByFunction($settingList));
+		#todo area
+		data_set($this->_data, 'roleData.id', $roldId);
+		data_set($this->_data, 'roleData.name', $name);
+		data_set($this->_data, 'roleData.group', $group);
+		data_set($this->_data, 'roleData.permission', $permissionSetting);
 	}
 	
 	
 	/* Create or Update Role Id 
 	 * @params: 
 	 * @return: string
-	 */
+	 
 	public function getUpdateRoleId()
     {
-		return data_get($this->_data, 'roleId', 0);
+		return data_get($this->_data, 'roleData.id', 0);
 	}
-	
+	*/
 	/* Role Data
 	 * @params: 
 	 * @return: string
 	 */
 	public function getRoleId()
     {
-		return data_get($this->_data, 'roleData.RoleId', 0);
+		return data_get($this->_data, 'roleData.id', 0);
 	}
 	
 	public function getRoleName()
 	{
-		return data_get($this->_data, 'roleData.RoleName', '');
+		return data_get($this->_data, 'roleData.name', '');
 	}
 	
 	#Page operation permission
 	#內建身份判別
-	public function isSupervisorGroup($roleId)
+	public function isSupervisorGroup($roleGroup)
 	{
-		return ($roleId == RoleGroup::SUPERVISOR->value);
+		return ($roleGroup == RoleGroup::SUPERVISOR->value);
 	}
 	
-	#使用者權限判別
+	/* 指登入使用者的功能CRUD權限(#call from Authorization trait)
+	 * @params: 
+	 * @return: string
+	 */
 	public function canQuery()
 	{
-		return in_array(Operation::READ->value, $this->_data['operations']);
+		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
 	}
 	
 	public function canCreate()
 	{
-		return in_array(Operation::CREATE->value, $this->_data['operations']);
+		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
 	}
 	
 	public function canUpdate()
 	{
-		return in_array(Operation::UPDATE->value, $this->_data['operations']);
+		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
 	}
 	
 	public function canDelete()
 	{
-		return in_array(Operation::DELETE->value, $this->_data['operations']);
+		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
 	}
 	
 	
@@ -178,11 +185,17 @@ class RoleViewModel
 	{
 		$group = intval($group);
 		
-		return ($group == data_get($this->_data, 'roleData.RoleGroup', 0));
+		return ($group == data_get($this->_data, 'roleData.group', 0));
 	}
 	
+	/* Form setting => 是依據新增或編輯的User
+	 * @params: 
+	 * @return: string
+	 */
 	public function checkedOperation($functionCode, $operationValue)
 	{
-		return ($this->hasOperationPermission($functionCode, $operationValue));
+		$permissionSetting 	= data_get($this->_data, 'roleData.permission', []); 
+		$operationSetting	= data_get($permissionSetting, $functionCode, []);
+		return in_array($operationValue, $operationSetting);
 	}
 }

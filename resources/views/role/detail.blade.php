@@ -23,7 +23,7 @@
 
 @section('content')
 <form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}">
-<input type="hidden" value="{{ $viewModel->getUpdateRoleId() }}" name="id">
+<input type="hidden" value="{{ $viewModel->getRoleId() }}" name="id">
 @csrf
 
 <section class="section-wrapper dp-2">
@@ -35,7 +35,7 @@
 		<div class="input-select field-purple field required">
 			<select class="form-select" id="group" name="group">
 				<option value="">請選擇</option>
-				@foreach($viewModel->roleGroup as $role)
+				@foreach($viewModel->optionRoleGroup as $role)
 				<option value="{{ $role->value }}" @selected($viewModel->selectedRoleGroup($role->value)) >
 				{{ $role->label() }}
 				</option>
@@ -46,7 +46,7 @@
 	</div>
 	
 	<div class="section role-permission field-group">
-		@foreach($viewModel->functionList as $groupKey => $group)
+		@foreach($viewModel->optionFunctionList as $groupKey => $group)
 		<ul class="list-group {{ Str::lower($group['type']) }}">
 			<div class="divider"></div>
 			<label class="title">
@@ -56,16 +56,16 @@
 			@foreach($group['items'] as $itemKey => $item)
 			<li class="list-group-item">
 				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="item-{{ $itemKey }}">
-					<label class="form-check-label" for="item-{{ $itemKey }}">{{ $item['name'] }}</label>
+					<input class="form-check-input" type="checkbox" id="item-{{ $groupKey.$itemKey }}">
+					<label class="form-check-label" for="item-{{ $groupKey.$itemKey }}">{{ $item['name'] }}</label>
 				</div>
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
-					<label class="form-check-label" for="settingList-{{ $itemKey.$opKey }}">
+					<label class="form-check-label" for="settingList-{{ $groupKey.$itemKey.$opKey }}">
 						<input class="form-check-input" type="checkbox" 
 							value="{{ $operation->value }}" 
-							id="settingList-{{ $itemKey.$opKey }}" 
-							name="{{ Str::replaceArray('?', [$item['code']], 'settingList[?][]') }}"
+							id="settingList-{{ $groupKey.$itemKey.$opKey }}" 
+							name="{{ Str::replaceArray('?', [$item['code']], 'permissionSetting[?][]') }}"
 							@checked($viewModel->checkedOperation($item['code'], $operation->value))
 						>
 						{{ $operation->label() }}

@@ -8,8 +8,8 @@
 	<div class="offcanvas-body">
 		<div class="section info-head">
 			<span class="material-symbols-outlined filled-icon">assignment_ind</span>
-			<p>{{ $signinInfo['employeeid'] }}</p>
-			<p class="name">{{ $signinInfo['displayname'] }}</p>
+			<p>{{ $signinInfo['employeeId'] }}</p>
+			<p class="name">{{ $signinInfo['displayName'] }}</p>
 			<p class="mail">{{ $signinInfo['mail'] }}</p>
 		</div>
 		<div class="section info-body">
