@@ -79,6 +79,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
@@ -122,7 +123,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('解析查詢參數發生錯誤');
 		}
 	}
@@ -172,7 +173,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取POS DB資料失敗');
 		}
 	}
@@ -221,6 +222,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize($this->_statistics)->fail('解析報表資料發生錯誤');
 		}
 	}

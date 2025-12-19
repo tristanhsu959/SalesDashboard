@@ -49,7 +49,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
 		}
 	}
@@ -75,7 +75,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('查詢時發生錯誤');
 		}
 	}
@@ -98,7 +98,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('新增帳號失敗');
 		}
 	}
@@ -116,7 +116,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('讀取帳號資料發生錯誤');
 		}
 	}
@@ -137,7 +137,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('編輯帳號失敗');
 		}
 	}
@@ -155,7 +155,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('刪除帳號失敗');
 		}
 	}
@@ -177,7 +177,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return [];
 		}
 	}
@@ -194,7 +194,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return [];
 		}
 	 }

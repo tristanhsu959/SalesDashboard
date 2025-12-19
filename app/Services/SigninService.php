@@ -54,7 +54,7 @@ class SigninService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
@@ -83,6 +83,7 @@ class SigninService
 		}
 		catch(Exception $e)
 		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('驗證帳號註冊狀態，發生錯誤');
 		}
 	}
