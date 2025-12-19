@@ -22,7 +22,7 @@ class UserRepository extends Repository
 	 */
 	public function getRoleList()
 	{
-		$db = $this->connectSaleDashboard('Role');
+		$db = $this->connectSaleDashboard('role');
 			
 		$result = $db
 			->select('roleId', 'roleName')
@@ -38,18 +38,18 @@ class UserRepository extends Repository
 	 */
 	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
 	{
-		$db = $this->connectSaleDashboard('User as a');
+		$db = $this->connectSaleDashboard('user as a');
 			
 		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleGroup', 'b.roleArea')
-			->join('Role as b', 'b.RoleId', '=', 'a.UserRoleId');
+			->join('role as b', 'b.roleId', '=', 'a.userRoleId');
 		
 		#query conditions
 		if (! is_null($searchAd))
-			$db->where('a.UserAd', 'like', "%{$searchAd}%");
+			$db->where('a.userAd', 'like', "%{$searchAd}%");
 		if (! is_null($searchName))
-			$db->where('a.UserDisplayName', 'like', "%{$searchName}%");
+			$db->where('a.userDisplayName', 'like', "%{$searchName}%");
 		if (! is_null($searchArea))
-			$db->whereJsonContains('b.RoleArea', $searchArea);
+			$db->whereJsonContains('b.roleArea', $searchArea);
 		
 		$result = $db->get()->toArray();
 		
@@ -64,13 +64,13 @@ class UserRepository extends Repository
 	 */
 	public function insertUser($adAccount, $displayName, $roleId)
 	{
-		$db = $this->connectSaleDashboard('User');
+		$db = $this->connectSaleDashboard('user');
 		
-		$data['UserAd']			= $adAccount;
-		$data['UserDisplayName']= $displayName;
-		$data['UserRoleId'] 	= $roleId;
-		$data['CreateAt'] 		= now()->format('Y-m-d H:i:s');
-		$data['UpdateAt'] 		= $data['CreateAt'];
+		$data['userAd']			= $adAccount;
+		$data['userDisplayName']= $displayName;
+		$data['userRoleId'] 	= $roleId;
+		$data['createAt'] 		= now()->format('Y-m-d H:i:s');
+		$data['updateAt'] 		= $data['createAt'];
 			
 		$db->insert($data);
 		return TRUE;
@@ -82,10 +82,10 @@ class UserRepository extends Repository
 	 */
 	public function getUserById($id)
 	{
-		$db = $this->connectSaleDashboard('User');
+		$db = $this->connectSaleDashboard('user');
 			
 		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId')
-					->where('UserId', '=', $id)
+					->where('userId', '=', $id)
 					->get()->first();
 		
 		return $result;
@@ -100,14 +100,14 @@ class UserRepository extends Repository
 	 */
 	public function updateUser($userId, $adAccount, $displayName, $roleId)
 	{
-		$db = $this->connectSaleDashboard('User');
+		$db = $this->connectSaleDashboard('user');
 		
-		$data['UserAd']			= $adAccount;
-		$data['UserDisplayName']= $displayName;
-		$data['UserRoleId'] 	= $roleId;
-		$data['UpdateAt'] 		= now()->format('Y-m-d H:i:s');
+		$data['userAd']			= $adAccount;
+		$data['userDisplayName']= $displayName;
+		$data['userRoleId'] 	= $roleId;
+		$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
 			
-		$db->where('UserId', '=', $userId)->update($data);
+		$db->where('userId', '=', $userId)->update($data);
 		return TRUE;
 	}
 	
@@ -117,8 +117,8 @@ class UserRepository extends Repository
 	 */
 	public function RemoveUser($userId)
 	{
-		$db = $this->connectSaleDashboard('User');
-		$db->where('UserId', '=', $userId)->delete();
+		$db = $this->connectSaleDashboard('user');
+		$db->where('userId', '=', $userId)->delete();
 
 		return FALSE;
 	}

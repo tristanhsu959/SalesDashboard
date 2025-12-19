@@ -8,7 +8,8 @@ use Exception;
 
 class SigninRepository extends Repository
 {
-	
+	#Windows default is case-insensitive, Linex is case-sensitive
+	#mysql是系統預設改不了或無效|檔案有分(table name)|Column & data似乎依編碼沒分
 	public function __construct()
 	{
 		
@@ -20,10 +21,10 @@ class SigninRepository extends Repository
 	 */
 	public function getUserByAccount($account)
 	{
-		$db = $this->connectSaleDashboard('User');
+		$db = $this->connectSaleDashboard('user');
 			
-		$result = $db->select('UserId', 'UserAd', 'UserRoleId')
-					->where('UserAd', '=', $account)
+		$result = $db->select('userId', 'userAd', 'userRoleId')
+					->where('userAd', '=', $account)
 					->get()->first();
 		
 		return $result;
@@ -35,16 +36,12 @@ class SigninRepository extends Repository
 	 */
 	public function getUserPermission($roleId)
 	{
-		$db = $this->connectSaleDashboard('Role');
+		$db = $this->connectSaleDashboard('role');
 		
-		$result = $db->select('RoleGroup', 'RolePermission', 'RoleArea')
-					->where('RoleId', '=', $roleId)
+		$result = $db->select('roleGroup', 'rolePermission', 'roleArea')
+					->where('roleId', '=', $roleId)
 					->get()->first();
 						
 		return $result;
 	}
-	
-	
-	
-	
 }
