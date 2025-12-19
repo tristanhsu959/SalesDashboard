@@ -45,7 +45,7 @@ class NewReleaseService
 	 */
 	public function convertConfigKey($segment)
 	{
-		#action key = config key
+		#action key = config key | 因多個report共用故是動態傳進來的
 		$this->_actionKey = Str::camel($segment);
 		return $this->_actionKey;
 	}
@@ -161,6 +161,13 @@ class NewReleaseService
 				}
 			}
 			
+			/* 每筆訂單的資料格式
+			["SHOP_ID" => "235001"
+			  "QTY" => "1.0000"
+			  "SALE_DATE" => "2025-12-19 17:13:11.000"
+			  "SHOP_NAME" => "御廚中和直營店"
+			]
+			*/
 			return $mainData;
 		}
 		catch(Exception $e)
@@ -184,6 +191,15 @@ class NewReleaseService
 			$startDate = new Carbon($this->_statistics['startDate']);
 			$endDate = new Carbon($this->_statistics['endDate']);
 			$diffDays = $startDate->diffInDays($endDate) + 1; 
+			
+			/*
+			413001 => array:4 [▼
+				"shopId" => "413001"
+				"shopName" => "御廚台中霧峰店"
+				"area" => 4
+				"dayQty" => array:91 [▶]
+			  ]
+			*/
 			
 			#2.Build base data(所有資料By ShopId)
 			$baseData = $this->_buildBaseData($srcData);
@@ -245,7 +261,7 @@ class NewReleaseService
 	private function _filterByAreaPermission($baseData)
 	{
 		$userInfo = $this->getSigninUserInfo();
-		$userAreaIds = $userInfo['UserAreaId'];
+		$userAreaIds = $userInfo['area'];
 			
 		$baseData = Arr::reject($baseData, function ($item, $key) use($userAreaIds) {
 			return ! in_array($item['area'], $userAreaIds);

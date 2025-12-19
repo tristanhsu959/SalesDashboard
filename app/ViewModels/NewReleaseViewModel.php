@@ -64,7 +64,7 @@ class NewReleaseViewModel
 		#初始化各參數及Form Options
 		$this->_data['action']		= $action;
 		$this->_data['msg'] 		= '';
-		$this->_data['segment'] 	= $segment; #產URL用, 因Route已改變
+		$this->_data['segment'] 	= $segment; #產URL用,因Search route共用
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
@@ -129,18 +129,6 @@ class NewReleaseViewModel
     {
 		return data_get($this->_data, 'config.saleEndDate', NULL) ?? Carbon::now()->format('Y-m-d'); #date picker必須為Y-m-d才能正常顯示
 	}
-	
-	/* 門市 */
-	/*
-	public function getShopHeader()
-    {
-		# array = [shopid=>data]
-		$before	= ['h1'=>'區域', 'h2'=>'門店代號', 'h3'=>'門店名稱'];
-		$last 	= ['f1'=>'銷售總量', 'f2'=>'平均銷售數量'];
-		$dateList = $this->_getDateRangeList($this->data['statistics']['startDate'], $this->data['statistics']['endDate']);
-		
-		return array_merge($before, $dateList, $last);
-    }*/
 	
 	/* 取時間序
 	 * @params: boolean #default desc
