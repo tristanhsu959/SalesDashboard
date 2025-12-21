@@ -3,6 +3,7 @@
 $(function(){
 	$('.btn-search').click(function(e){
 		e.preventDefault();
+		$('#loading').addClass('active');
 		$('#searchForm')[0].submit();
 	});
 	

@@ -14,6 +14,7 @@ $(function(){
 	
 	$('.btn-search').click(function(e){
 		e.preventDefault();
+		$('#loading').addClass('active');
 		$('#searchForm')[0].submit();
 		/*if (validateForm('#searchAd') || validateForm('#searchName') || validateForm('#searchArea'))
 			$('#searchForm').submit();

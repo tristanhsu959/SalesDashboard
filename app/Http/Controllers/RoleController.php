@@ -130,8 +130,8 @@ class RoleController extends Controller
 		$id 		= $request->input('id');
 		$name 		= $request->input('name');
 		$group 		= $request->input('group');
-		$permission	= $request->input('permission');
-		$area		= $request->input('area');
+		$permission	= $request->array('permission');
+		$area		= $request->array('area');
 		
 		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
 		
