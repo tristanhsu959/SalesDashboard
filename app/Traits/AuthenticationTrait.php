@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-#use App\Libraries\LoggerLib;;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use LdapRecord\Connection;
@@ -22,7 +22,7 @@ trait AuthenticationTrait
 	public function authenticationAD($account, $password)
 	{
 		#for local non ad env
-		if (App::environment('local_home')) {
+		if (App::environment('nonad')) {
 			#fake data
 			return [
 				"company" => "八方雲集國際股份有限公司",
