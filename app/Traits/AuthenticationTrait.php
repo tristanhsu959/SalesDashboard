@@ -28,8 +28,8 @@ trait AuthenticationTrait
 				"company" => "八方雲集國際股份有限公司",
 				"department" => "資訊處",
 				"title" => "經理",
-				"displayname" => "Tristan Hsu 許方毓",
-				"employeeid" => "T2025098",
+				"displayName" => "Tristan Hsu 許方毓",
+				"employeeId" => "T2025098",
 				"name" => "許方毓",
 				"mail" => "tristan.hsu@8way.com.tw",
 			];
