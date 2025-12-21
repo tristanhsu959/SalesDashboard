@@ -62,7 +62,7 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 		
-		'LocalSalesDashboard' => [
+		'SalesDashboard' => [
             'driver' => 'mysql',
             'host' => env('LSD_DB_HOST', '127.0.0.1'),
             'port' => env('LSD_DB_PORT', '3306'),
@@ -72,7 +72,7 @@ return [
             'fetch' => PDO::FETCH_ASSOC,
         ],
 		
-		'SaleDashboard' => [
+		'RemoteSaleDashboard' => [
             'driver' => 'sqlsrv',
             'host' => env('SD_DB_HOST', '192.168.1.237'),
             'port' => env('SD_DB_PORT', '1433'),

@@ -22,9 +22,9 @@ class Repository
 	protected function connectLocalSalesDashboard($table = NULL)
 	{
 		if (empty($table))
-			return DB::connection('LocalSalesDashboard');
+			return DB::connection('SalesDashboard');
 		else
-			return DB::connection('LocalSalesDashboard')->table($table); #無法用nolock
+			return DB::connection('SalesDashboard')->table($table); #無法用nolock
 	}
 	
 	/* 原測試機已改為Local MySql */

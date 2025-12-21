@@ -40,6 +40,6 @@ class ShopLib
 		else if (Str::startsWith($shopId, ['8', '9']))
 			return Area::KAOHSIUNG->value; #'大高雄區'
 		else
-			return 'UNKNOW';
+			return 0;
     }
 }

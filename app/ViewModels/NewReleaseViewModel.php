@@ -68,7 +68,7 @@ class NewReleaseViewModel
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
-			$this->_data['config'] 	= config("web.newrelease.products.{$configKey}");
+			$this->_data['config'] 	= config("web.new_release.products.{$configKey}");
 		
 		$this->_setOptions();
 	}
@@ -88,7 +88,7 @@ class NewReleaseViewModel
 		}
 		else
 		{
-			$config = config("web.newrelease.products.{$configKey}");
+			$config = config("web.new_release.products.{$configKey}");
 			
 			data_set($this->_data, 'search.stMin', $config['saleDate']);
 			data_set($this->_data, 'search.endMax', $config['saleEndDate']);
