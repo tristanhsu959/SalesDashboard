@@ -20,10 +20,10 @@ class PosRepository extends Repository
 	 * @params: product ids
 	 * @return: collection
 	 */
-	public function getBgSaleData($startDateTime, $endDateTime, $productIds)
+	public function getBgSaleData($startDateTime, $endDateTime, $productIds, $valueAdded)
 	{
 		$db = $this->connectBGPosErp('SALE01 as a');
-		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds);
+		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds, $valueAdded);
 		
 		return $result;
 	}
@@ -35,10 +35,10 @@ class PosRepository extends Repository
 	 * @params: bafang shop id
 	 * @return: collection
 	 */
-	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $shopIds)
+	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $valueAdded, $shopIds)
 	{
 		$db = $this->connectBFPosErp('SALE01 as a');
-		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds, $shopIds);
+		$result = $this->_getSaleResult($db, $startDateTime, $endDateTime, $productIds, $valueAdded, $shopIds);
 		
 		return $result;
 	}
@@ -50,7 +50,7 @@ class PosRepository extends Repository
 	 * @params: bafang shop id
 	 * @return: collection
 	 */
-	private function _getSaleResult($db, $startDateTime, $endDateTime, $productIds, $shopIds = NULL)
+	private function _getSaleResult($db, $startDateTime, $endDateTime, $productIds, $valueAdded, $shopIds = NULL)
 	{
 		$query = $db
 				->select('a.SHOP_ID', 'a.QTY', 'b.SALE_DATE', 'c.SHOP_NAME')
@@ -59,12 +59,18 @@ class PosRepository extends Repository
 							->on('a.SALE_ID', '=', 'b.SALE_ID');
 				})
 				->join('SHOP00 as c', 'a.SHOP_ID', '=', 'c.SHOP_ID')
-				->whereIn('a.PROD_ID', $productIds)
 				->where('b.SALE_DATE', '>=', $startDateTime)
 				->where('b.SALE_DATE', '<=', $endDateTime)
+				->where(function ($db) {
+					$db->whereIn('a.PROD_ID', $productIds);
+					
+					if (! empty($valueAdded))
+						$db->orWhereLike('TASTE_Memo', "%{$valueAdded}%");	
+				})
+				
 				->orderBy('b.SALE_DATE', 'DESC')
 				->orderBy('a.SHOP_ID');
-				
+		
 		if (! is_null($shopIds))
 			$query->whereIn('a.SHOP_ID', $shopIds);
 		
