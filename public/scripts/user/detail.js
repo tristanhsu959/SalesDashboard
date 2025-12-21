@@ -14,7 +14,10 @@ $(function(){
 function submitForm()
 {
 	if (validateForm(['#adAccount', 'input[name=role]:checked']))
+	{
+		$('#loading').addClass('active');
 		$('#userForm').submit();
+	}
 	else
 		showAlertDialog('AD帳號，所屬身份為必填');
 }

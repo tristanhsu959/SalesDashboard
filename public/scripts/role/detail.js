@@ -45,7 +45,10 @@ function submitForm()
 {
 	//沒有設定權限也可以Submit
 	if (validateForm(['#name', '#group']))
+	{
+		$('#loading').addClass('active');
 		$('#roleForm').submit();
+	}
 	else
 		showAlertDialog('身份及權限群組為必填');
 }

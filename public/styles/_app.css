@@ -105,6 +105,7 @@ body {
 	position: fixed;
 	top: calc(64px - 8px);
 	display: none;
+	z-index: 20;
 	
 	&.active {
 		display: block;
