@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Libraries\ShopLib;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 #新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
@@ -74,15 +75,17 @@ class PosRepository extends Repository
 		if (! is_null($shopIds))
 			$query->whereIn('a.SHOP_ID', $shopIds);
 		
+		Log::channel('commandLog')->error($query->toRawSql(), [ __class__, __function__, __line__]);
+		
 		return $query->get();
 	}
 	
-	/* Insert pos data to mariadb
+	/* Insert pos data to mariadb by initialize
 	 * @params: string
 	 * @params: array
 	 * @return: boolean
 	 */
-	public function posToLocal($configKey, $posData)
+	public function insertPosToLocal($configKey, $posData)
 	{
 		/* 每筆訂單的資料格式
 		["SHOP_ID" => "235001"
@@ -104,6 +107,42 @@ class PosRepository extends Repository
 			$data['areaId']		= ShopLib::getAreaIdByShopId($data['SHOP_ID']);
 			$data['qty']		= $data['QTY'];
 			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d');
+			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
+				
+			$db->insert($data);
+		}
+	}
+	
+	/* Insert pos data to mariadb by initialize
+	 * @params: string
+	 * @params: array
+	 * @return: boolean
+	 */
+	public function updatePosToLocal($configKey, $posData, $stDate, $endDate)
+	{
+		/* 每筆訂單的資料格式
+		["SHOP_ID" => "235001"
+		  "QTY" => "1.0000"
+		  "SALE_DATE" => "2025-12-19 17:13:11.000"
+		  "SHOP_NAME" => "御廚中和直營店"
+		]
+		*/
+		#Initialize前要先清空
+		$table = $config = config("web.new_release.DbMapping.{$configKey}");
+		
+		$db = $this->connectLocalSalesDashboard();
+		$db->table($table)
+			->where('saleDate', '>=', $stDate)
+			->where('saleDate', '<=', $endDate)
+			->delete();
+		
+		foreach($posData as $data)
+		{
+			$data['shopId']		= $data['SHOP_ID'];
+			$data['shopName']	= $data['SHOP_NAME'];
+			$data['areaId']		= ShopLib::getAreaIdByShopId($data['SHOP_ID']);
+			$data['qty']		= $data['QTY'];
+			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d'); #只存至Date
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
 			$db->insert($data);

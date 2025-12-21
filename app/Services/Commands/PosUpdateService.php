@@ -1,24 +1,26 @@
 <?php
-
-namespace App\Services;
+#Command Service
+namespace App\Services\Commands;
 
 use App\Repositories\PosRepository;
-use App\Libraries\ShopLib;
-use App\Enums\Area;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Exception;
 
 
-class PosService
+class PosUpdateService
 {
 	private $_configKey 	= '';
 	private $_data			= [];
     private $_repository;
+	private $_diffDays		= 7;
 	
+	/* Update locay by lastest days
+	 * @params: class
+	 * @return: 
+	 */
 	public function __construct(PosRepository $posRepository)
 	{
 		$this->_repository = $posRepository;
@@ -41,8 +43,8 @@ class PosService
 	public function getParams()
 	{
 		$params = [ 
-			'stTime' 	=> '',
-			'endTime'	=> '',
+			'stDate' 	=> '',
+			'endDate'	=> '',
 			'bgIds'		=> [],
 			'bfIds'		=> [],
 			'valueAdded'=> []
@@ -55,10 +57,10 @@ class PosService
 			$brand = data_get($config, 'brand');
 						
 			#計算initialize要取的時間, 以開賣日起算
-			list($stTime, $endTime) = $this->_calcFetchTime($config['saleDate']);
+			list($stDate, $endDate) = $this->_calcFetchTime($config['saleDate']);
 			
-			data_set($params, 'stTime', $stTime);
-			data_set($params, 'endTime', $endTime);
+			data_set($params, 'stDate', $stDate);
+			data_set($params, 'endDate', $endDate);
 			data_set($params, 'bgIds', data_get($config, 'ids.main'));
 			data_set($params, 'bfIds', data_get($config, 'ids.mapping'));
 			data_set($params, 'valueAdded', data_get($config, 'valueAdded', []));
@@ -83,13 +85,16 @@ class PosService
 			if (empty($saleDate))
 				throw new Exception('開賣日未設定');
 			
-			$stTime		= new Carbon($saleDate); #開賣日
-			$endTime 	= Carbon::now()->subDay(); #取到前一天即可
+			$saleStTime	= new Carbon($saleDate); #開賣日
+			$diffStTime	= Carbon::now()->subDay($this->_diffDays); #取到前7天
 			
-			$stTime 	= $stTime->format('Y-m-d 00:00:00');
-			$endTime 	= $endTime->format('Y-m-d 23:59:59');
+			$stDate		= $saleStTime->greaterThan($diffStTime) ? $saleStTime : $diffStTime;
+			$endDate	= Carbon::now(); 
 			
-			return [$stTime, $endTime];
+			$stDate 	= $stDate->format('Y-m-d');
+			$endDate 	= $endDate->format('Y-m-d');
+			
+			return [$stDate, $endDate];
 		}
 		catch(Exception $e)
 		{
@@ -107,8 +112,12 @@ class PosService
 	{
 		try
 		{
+			#Pos有存到time, 以防萬一
+			$stDateTime		= (new Carbon($params['stDate']))->format('Y-m-d 00:00:00');
+			$endDateTime	= (new Carbon($params['endDate']))->format('Y-m-d 23:59:59');
+			
 			#Get main data first
-			$mainData = $this->_repository->getBgSaleData($params['stTime'], $params['endTime'], $params['bgIds'], $params['valueAdded']);
+			$mainData = $this->_repository->getBgSaleData($stDateTime, $endDateTime, $params['bgIds'], $params['valueAdded']);
 			
 			if (! empty($params['bfIds'])) #梁社漢新品時會有值
 			{
@@ -116,7 +125,7 @@ class PosService
 				$shopIdMapping 	= config('web.new_release.multiBrandShopidMapping');
 				$shopIds 		= array_keys($shopIdMapping);
 			
-				$mappingData = $this->_repository->getBfSaleData($params['stTime'], $params['endTime'], $params['bfIds'], $params['valueAdded'], $shopIds);
+				$mappingData = $this->_repository->getBfSaleData($stDateTime, $endDateTime, $params['bfIds'], $params['valueAdded'], $shopIds);
 				
 				#避免未抓到資料的狀況
 				if (! empty($mappingData))
@@ -152,8 +161,8 @@ class PosService
 	 * @params: array
 	 * @return: array
 	 */
-	public function saveToLocalDB($posData)
+	public function saveToLocalDB($posData, $stDate, $endDate)
 	{
-		$this->_repository->posToLocal($this->_configKey, $posData);
+		$this->_repository->updatePosToLocal($this->_configKey, $posData, $stDate, $endDate);
 	}
 }

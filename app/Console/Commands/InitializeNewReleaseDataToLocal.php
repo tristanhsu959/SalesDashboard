@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\PosService;
+use App\Services\Commands\PosInitializeService;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,46 +14,67 @@ class InitializeNewReleaseDataToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'new-release:initialize-to-local';
+    protected $signature = 'new-release:initialize-to-local {configKey?}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fetch Pos Data to Local DB';
+    protected $description = 'Initialize Pos Data to Local DB';
 
     /**
      * Execute the console command.
      */
-    public function handle(PosService $posService)
+    public function handle(PosInitializeService $posService)
     {
         try
 		{
-			$configKey = 'porkRibs';
-			#新品目前似乎只有梁社漢有
-			$posService->setConfig($configKey);
+			$configKeys = [];
 			
-			#1. Get params fetch date
-			$this->info('Get Params-----');
-			$params = $posService->getParams();
-			$this->info(json_encode($params));
-						
-			#2. Get POS DB data
-			$this->info('Fetch data from POSDB -----');
-			$posData = [];
-			$posData = $posService->getDataFromPosDB($params);
+			#只執行指定table的參數
+			$argument = $this->argument('configKey');
 			
-			#3. Save data to local
-			$this->info('Save Data to Local -----');
-			$posService->saveToLocalDB();
+			if (empty($argument))
+			{
+				$list = config('web.new_release.products');
+				$configKeys = array_keys($list);
+			}
+			else
+				$configKeys[] = $argument;
 			
-			$this->info('initialize completed -----');
+			foreach($configKeys as $configKey)
+			{
+				Log::channel('commandLog')->info("Initialize Start : {$configKey}", [ __class__, __function__, __line__]);
+			
+				$this->info("Initialize Start : {$configKey} -----");
+				#新品目前似乎只有梁社漢有
+				$posService->setConfig($configKey);
+				
+				#1. Get params fetch date
+				$this->info('Get Params-----');
+				$params = $posService->getParams();
+				$this->info(json_encode($params));
+							
+				#2. Get POS DB data
+				$this->info('Fetch data from POSDB -----');
+				$posData = [];
+				$posData = $posService->getDataFromPosDB($params);
+				$count = count($posData);
+				$this->info("Data count : {$count} -----");
+				
+				#3. Save data to local
+				$this->info('Save Data to Local -----');
+				$posService->saveToLocalDB($posData);
+				
+				$this->info("Initialize {$configKey} completed -----");
+				Log::channel('commandLog')->info("Initialize {$configKey} completed", [ __class__, __function__, __line__]);
+			}
 		}
 		catch(Exception $e)
 		{
-			Log::channel('commandLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			$this->error($e->getMessage());
+			Log::channel('commandLog')->error('Initialize : ' . $e->getMessage(), [ __class__, __function__, __line__]);
+			$this->fail($e->getMessage());
 		}
     }
 }
