@@ -20,8 +20,8 @@ class NewReleaseService
 {
 	use AuthorizationTrait;
 	
-	private $_groupKey		= 'newRelease';
-	private $_actionKey 	= '';
+	#private $_groupKey		= 'newRelease';
+	private $_configKey 	= '';
 	private $_statistics	= [];
     private $_repository;
 	
@@ -41,19 +41,19 @@ class NewReleaseService
 	
 	/* Transfer url segment to new releast config key
 	 * @params: string
-	 * @return: array
+	 * @return: string
 	 */
 	public function convertConfigKey($segment)
 	{
 		#action key = config key | 因多個report共用故是動態傳進來的
-		$this->_actionKey = Str::camel($segment);
-		return $this->_actionKey;
+		$this->_configKey = Str::camel($segment);
+		return $this->_configKey;
 	}
 	
 	/* 取新品銷售統計-入口
 	 * @params: string
-	 * @params: string
-	 * @params: string
+	 * @params: date
+	 * @params: date
 	 * @return: array
 	 */
 	public function getStatistics($configKey, $searchStDate, $searchEndDate)
@@ -61,7 +61,7 @@ class NewReleaseService
 		try
 		{
 			#20251216 : 之後要改存至Local DB
-			$this->_actionKey = $configKey;
+			$this->_configKey = $configKey;
 			
 			#1. Get params
 			list($startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams($searchStDate, $searchEndDate);
@@ -85,15 +85,15 @@ class NewReleaseService
 	}
 	
 	/* 取Config設定及查詢時間區間參數
-	 * @params: string
-	 * @params: string
+	 * @params: date
+	 * @params: date
 	 * @return: array
 	 */
 	private function _getParams($searchStDate, $searchEndDate)
 	{
 		try
 		{
-			$config = config("web.new_release.products.{$this->_actionKey}");
+			$config = config("web.new_release.products.{$this->_configKey}");
 			
 			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
 			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日
@@ -129,11 +129,11 @@ class NewReleaseService
 	}
 	
 	/* Get main data & mapping data
-	 * @params: string
-	 * @params: string
+	 * @params: date
+	 * @params: date
 	 * @params: array
 	 * @params: array => product ids of BF
-	 * @return: collection
+	 * @return: array
 	 */
 	private function _getDataFromDB($startDateTime, $endDateTime, $productIds, $bfProductIds)
 	{
@@ -179,9 +179,7 @@ class NewReleaseService
 	}
 	
 	/* 取使用者可讀取區域資料(原主邏輯不動)
-	 * @params: string
-	 * @params: string
-	 * @params: string
+	 * @params: array
 	 * @return: array
 	 */
 	private function _outputReport($srcData)
@@ -358,14 +356,6 @@ class NewReleaseService
 		$result['雲嘉南區'] 	= data_get($data, Area::YCN->value, []);
 		$result['大高雄區'] 	= data_get($data, Area::KAOHSIUNG->value, []);
 		
-		/* 已改為Area Id
-		$result['大台北區'] 	= data_get($data, '大台北區');
-		$result['宜蘭區'] 	= data_get($data, '宜蘭區');
-		$result['桃竹苗區'] 	= data_get($data, '桃竹苗區');
-		$result['中彰投區'] 	= data_get($data, '中彰投區');
-		$result['雲嘉南區'] 	= data_get($data, '雲嘉南區');
-		$result['大高雄區'] 	= data_get($data, '大高雄區');
-		*/
 		$result['total']['shopCount'] 	= collect($data)->pluck('shopCount')->sum(); 
 		$result['total']['totalQty'] 	= collect($data)->pluck('totalQty')->sum();
 		$result['total']['avgDayQty'] 	= collect($data)->pluck('avgDayQty')->sum();
@@ -377,7 +367,7 @@ class NewReleaseService
 	
 	/* 當日銷售前10名
 	 * @params: array
-	 * @params: string
+	 * @params: date
 	 * @return: array
 	 */
 	private function _parsingByRanking($baseData, $endDate)
@@ -412,24 +402,25 @@ class NewReleaseService
 		return [$top, $last];
 	}
 	
+	/* ===== 暫廢棄 ===== */
 	/* CRUD Permission Check for Page
 	 * @params: int
 	 * @return: boolean
-	 */
+	 *
 	 public function getOperationPermission()
 	 {
 		try
 		{
-			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
+			return $this->allowOperationPermissionList($this->_groupKey, $this->_configKey);
 		}
 		catch(Exception $e)
 		{
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
 			return [];
 		}
-	 }
+	 }*/
 	 
-	 	/* ===== 原Business Login, 流程已變更 - 暫廢棄 ===== */
+	/* ===== 原Business Login, 流程已變更 - 暫廢棄 ===== */
 	/* 取新品銷售統計-主流程
 	 * @params: string
 	 * @params: string

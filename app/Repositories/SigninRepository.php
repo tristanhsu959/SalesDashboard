@@ -15,7 +15,7 @@ class SigninRepository extends Repository
 		
 	}
 	
-	/* Get Signin User Data
+	/* Get user by account
 	 * @params: string
 	 * @return: array
 	 */
@@ -30,8 +30,8 @@ class SigninRepository extends Repository
 		return $result;
 	}
 	
-	/* Get Signin User Permission
-	 * @params: 
+	/* Get permission of the user
+	 * @params: int
 	 * @return: boolean
 	 */
 	public function getUserPermission($roleId)

@@ -5,6 +5,7 @@ namespace App\Libraries;
 use Illuminate\Support\Str;
 use Log;
 
+#暫時deprecated不使用
 class LoggerLib
 {
 	private $_title;
@@ -15,7 +16,7 @@ class LoggerLib
 	}
 	
 	/* initialize
-	 * @params: array
+	 * @params: string
 	 * @return: object
 	 */
     public static function initialize($title)

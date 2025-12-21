@@ -23,7 +23,7 @@ class RoleController extends Controller
 	
 	/* 列表
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function list(Request $request)
 	{
@@ -44,7 +44,7 @@ class RoleController extends Controller
 	
 	/* 新增Form
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function showCreate(Request $request)
 	{
@@ -58,7 +58,7 @@ class RoleController extends Controller
 	
 	/* 新增 POST
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function create(Request $request)
 	{
@@ -98,7 +98,8 @@ class RoleController extends Controller
 	
 	/* 編輯Form
 	 * @params: request
-	 * @return: array
+	 * @params: int	id
+	 * @return: view
 	 */
 	public function showUpdate(Request $request, $id)
 	{
@@ -122,7 +123,7 @@ class RoleController extends Controller
 	
 	/* 編輯Form
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function update(Request $request)
 	{
@@ -162,7 +163,8 @@ class RoleController extends Controller
 	
 	/* 刪除
 	 * @params: request
-	 * @return: array
+	 * @params: int	id
+	 * @return: view
 	 */
 	public function delete(Request $request, $id)
 	{

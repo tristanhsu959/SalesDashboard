@@ -38,7 +38,7 @@ class NewReleaseController extends Controller
 	
 	/* Search
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function search(Request $request)
 	{

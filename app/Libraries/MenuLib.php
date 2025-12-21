@@ -8,8 +8,8 @@ use Illuminate\Support\Arr;
 class MenuLib
 {
 	/* All menu Groups - 取選單, 無Business logic
-	 * @params: array
-	 * @return: object
+	 * @params: 
+	 * @return: array
 	 */
     public static function all()
     {
@@ -33,8 +33,8 @@ class MenuLib
     }
 	
 	/* Functions
-	 * @params: array
-	 * @return: object
+	 * @params: string
+	 * @return: array
 	 */
     public static function functions($key = NULL)
     {

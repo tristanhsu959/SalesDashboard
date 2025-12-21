@@ -7,6 +7,10 @@ use App\Enums\Area;
 
 class ShopLib
 {
+	/* Get area name
+	 * @params: string
+	 * @return: string
+	 */
     public static function getAreaByShopId($shopId)
     {
 		if (intval($shopId) >= 100000 and intval($shopId) <= 259999)
@@ -25,6 +29,10 @@ class ShopLib
 			return 'UNKNOW';
     }
 	
+	/* Get area id
+	 * @params: string
+	 * @return: string
+	 */
 	public static function getAreaIdByShopId($shopId)
     {
 		if (intval($shopId) >= 100000 and intval($shopId) <= 259999)

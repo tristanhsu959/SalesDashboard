@@ -16,7 +16,7 @@ trait AuthorizationTrait
 	/* 儲存登入資訊
 	 * @params: array
 	 * @params: array
-	 * @return: 
+	 * @return: boolean
 	 */
 	public function saveUserToSession($adInfo, $userInfo)
 	{
@@ -26,6 +26,10 @@ trait AuthorizationTrait
 		return TRUE;
 	}
 	
+	/* Get current user
+	 * @params: 
+	 * @return: array
+	 */
 	public function getSigninUserInfo()
 	{
 		if (session()->missing(self::SESS_AUTH_USER))
@@ -34,7 +38,10 @@ trait AuthorizationTrait
 		return session()->get(self::SESS_AUTH_USER);
 	}
 	
-	#只取Permission值
+	/* Get current user permissions
+	 * @params: 
+	 * @return: array
+	 */
 	public function getSigninUserPermission()
 	{
 		$signinUser = $this->getSigninUserInfo();
@@ -48,9 +55,8 @@ trait AuthorizationTrait
 	}
 	
 	/* 清除登入資訊|Menu
-	 * @params: array
-	 * @params: array
-	 * @return: 
+	 * @params: 
+	 * @return: boolean
 	 */
 	public function removeSigninUserInfo()
 	{
@@ -59,9 +65,8 @@ trait AuthorizationTrait
 	}
 	
 	/* 內建Supervisor (RoleGroup)
-	 * @params: array
-	 * @params: array
-	 * @return: 
+	 * @params:  
+	 * @return: boolean
 	 */
 	public function isSupervisor()
 	{
@@ -109,9 +114,8 @@ trait AuthorizationTrait
 	}
 	
 	/* 登入授權Menu
-	 * @params: array
-	 * @params: array
-	 * @return: 
+	 * @params:  
+	 * @return: boolean
 	 */
 	public function removeAuthMenu()
 	{
@@ -119,8 +123,7 @@ trait AuthorizationTrait
 		return TRUE;
 	}
 	
-	/* Auth Function Permission by Signin User
-	 * @params: string
+	/* Auth permission of function by current user
 	 * @params: string
 	 * @return: boolean
 	 */
@@ -135,8 +138,7 @@ trait AuthorizationTrait
 		return in_array($functionCode, $functionCodeList);
 	}
 	
-	/* Auth CRUD Permission by Signin User
-	 * @params: string
+	/* Auth permission of CRUD by current user
 	 * @params: string
 	 * @params: string
 	 * @return: boolean
@@ -152,11 +154,11 @@ trait AuthorizationTrait
 		return in_array($operationValue, $userOperations);
 	}
 	
-	#todo移走, 不關登入使用者的事
+	##todo: 應該可廢棄
 	/* 取使用者在此頁面的CRUD權限清單
 	 * @params: int
 	 * @return: array
-	 */
+	 *
 	 public function getOperationPermissionsByFunction($functionCode)
 	 {
 		$canPermission = [];
@@ -173,6 +175,6 @@ trait AuthorizationTrait
 		
 		return $canPermission;
 	 }
-	 
+	 */
 	 
 }

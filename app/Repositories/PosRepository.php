@@ -16,10 +16,11 @@ class PosRepository extends Repository
 	}
 	
 	/* 取主資料-BuyGood
-	 * @params: start date
-	 * @params: end date
-	 * @params: product ids
-	 * @return: collection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @return: array
 	 */
 	public function getBgSaleData($startDateTime, $endDateTime, $productIds, $valueAdded)
 	{
@@ -30,11 +31,12 @@ class PosRepository extends Repository
 	}
 	
 	/* 取Mapping資料 | 複合店情境 - BaFang
-	 * @params: start date
-	 * @params: end date
-	 * @params: product ids
-	 * @params: bafang shop id
-	 * @return: collection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: string
+	 * @params: array
+	 * @return: array
 	 */
 	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $valueAdded, $shopIds)
 	{
@@ -45,11 +47,13 @@ class PosRepository extends Repository
 	}
 	
 	/* Build query string | 新品:八方/梁社漢共用
-	 * @params: start date
-	 * @params: end date
-	 * @params: product ids
-	 * @params: bafang shop id
-	 * @return: collection
+	 * @params: query builder
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: string
+	 * @params: array
+	 * @return: array
 	 */
 	private function _getSaleResult($db, $startDateTime, $endDateTime, $productIds, $valueAdded, $shopIds = NULL)
 	{
@@ -111,11 +115,15 @@ class PosRepository extends Repository
 				
 			$db->insert($data);
 		}
+		
+		return TRUE;
 	}
 	
 	/* Insert pos data to mariadb by initialize
 	 * @params: string
 	 * @params: array
+	 * @params: date
+	 * @params: date
 	 * @return: boolean
 	 */
 	public function updatePosToLocal($configKey, $posData, $stDate, $endDate)
@@ -147,5 +155,7 @@ class PosRepository extends Repository
 				
 			$db->insert($data);
 		}
+		
+		return TRUE;
 	}
 }

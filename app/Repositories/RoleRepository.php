@@ -13,8 +13,8 @@ class RoleRepository extends Repository
 	{
 		
 	}
-	
-	/* Get Roles Data from DB
+	/* Case-sensitive in ubuntu */
+	/* Get role list from DB 
 	 * @params: 
 	 * @return: array
 	 */
@@ -33,7 +33,8 @@ class RoleRepository extends Repository
 	/* Create Role
 	 * @params: string
 	 * @params: string
-	 * @params: array
+	 * @params: json string
+	 * @params: json string
 	 * @return: boolean
 	 */
 	public function insertRole($name, $group, $permission, $area)
@@ -52,7 +53,7 @@ class RoleRepository extends Repository
 	}
 	
 	/* Get Role Data
-	 * @params: 
+	 * @params: int
 	 * @return: array
 	 */
 	public function getRoleById($id)
@@ -67,10 +68,11 @@ class RoleRepository extends Repository
 	}
 	
 	/* Update Role
-	 * @params: string
-	 * @params: string
-	 * @params: array
 	 * @params: int
+	 * @params: string
+	 * @params: int
+	 * @params: json string
+	 * @params: json string
 	 * @return: boolean
 	 */
 	public function updateRole($id, $name, $group, $permission, $area)

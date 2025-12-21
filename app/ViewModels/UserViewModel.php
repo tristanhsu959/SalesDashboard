@@ -48,7 +48,6 @@ class UserViewModel
 	
 	/* initialize
 	 * @params: enum
-	 * @params: int
 	 * @return: void
 	 */
 	public function initialize($action)
@@ -61,7 +60,7 @@ class UserViewModel
 	}
 	
 	/* Status / Msg
-	 * @params: 
+	 * @params: string
 	 * @return: boolean
 	 */
 	public function success($msg = NULL)
@@ -78,7 +77,7 @@ class UserViewModel
 	
 	/* Form submit action
 	 * @params: 
-	 * @return: 
+	 * @return: string
 	 */
 	public function getFormAction() : string
     {
@@ -90,8 +89,7 @@ class UserViewModel
 	}
 	
 	/* Form所屬的參數選項
-	 * @params: enum
-	 * @params: array
+	 * @params:  
 	 * @return: void
 	 */
 	private function _setOptions()
@@ -100,8 +98,10 @@ class UserViewModel
 		$this->_data['option']['roleList']	= $this->_service->getRoleOptions();
 	}
 	
-	/* Keep user search data
-	 * @params: 
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: int
 	 * @return: string
 	 */
 	public function keepSearchData($adAccount, $displayName, $area)
@@ -111,6 +111,12 @@ class UserViewModel
 		data_set($this->_data, 'search.userAreaId', $area);
 	}
 	
+	/* Get search data
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: string
+	 */
 	public function getSearchAd()
 	{
 		return data_get($this->_data, 'search.userAd', '');
@@ -127,8 +133,11 @@ class UserViewModel
 	}
 	
 	/* Keep user form data
-	 * @params: 
-	 * @return: string
+	 * @params: int
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: void
 	 */
 	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $role = 0)
     {
@@ -138,7 +147,7 @@ class UserViewModel
 		data_set($this->_data, 'userData.roleId', $role);
 	}
 	
-	/* User Data
+	/* Get user data
 	 * @params: 
 	 * @return: string
 	 */
@@ -164,8 +173,8 @@ class UserViewModel
 	
 	/* User Data End */
 	
-	/* List Data
-	 * @params: 
+	/* Get role name of list
+	 * @params: int
 	 * @return: string
 	 */
 	public function getRoleById($roleId)
@@ -177,6 +186,10 @@ class UserViewModel
 	
 	#Page operation permission
 	#判別登入使用者權限
+	/* Delete permission
+	 * @params: 
+	 * @return: boolean
+	 */
 	public function canQuery()
 	{
 		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
@@ -192,10 +205,6 @@ class UserViewModel
 		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
 	}
 	
-	/* Delete permission
-	 * @params: int : 欲刪除的user id
-	 * @return: boolean
-	 */
 	public function canDelete()
 	{
 		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);

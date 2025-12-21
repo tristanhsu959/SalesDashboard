@@ -28,7 +28,7 @@ class SigninService
 	/* 登入驗證(由trait決定驗證方式)
 	 * @params: string
 	 * @params: string
-	 * @return: boolean
+	 * @return: array
 	 */
 	public function authSiginIn($adAccount, $adPassword)
 	{
@@ -61,8 +61,7 @@ class SigninService
 	
 	/* 驗證帳號是否有在系統註冊
 	 * @params: string
-	 * @params: string
-	 * @return: boolean
+	 * @return: mixed
 	 */
 	private function _authAccountRegister($adAccount)
 	{

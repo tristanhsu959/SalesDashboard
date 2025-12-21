@@ -56,7 +56,8 @@ class NewReleaseViewModel
 	
 	/* initialize
 	 * @params: enum
-	 * @params: int
+	 * @params: string
+	 * @params: string
 	 * @return: void
 	 */
 	public function initialize($action , $segment, $configKey)
@@ -99,9 +100,10 @@ class NewReleaseViewModel
 		data_set($this->_data, 'search.endDate', $this->getDefaultSearchEndDate());
 	}
 	
-	/* Keep user search data
-	 * @params: 
-	 * @return: string
+	/* Keep form search data
+	 * @params: date
+	 * @params: date
+	 * @return: void
 	 */
 	public function keepSearchData($searchStDate, $searchEndDate)
     {
@@ -109,6 +111,11 @@ class NewReleaseViewModel
 		data_set($this->_data, 'search.endDate', $searchEndDate);
 	}
 	
+	/* Get initial data of search form 
+	 * @params: date
+	 * @params: date
+	 * @return: void
+	 */
 	public function getSearchStDate()
 	{
 		return data_get($this->_data, 'search.stDate', '');

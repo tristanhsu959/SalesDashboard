@@ -25,6 +25,10 @@ class UserService
 		$this->_repository = $userRepository;
 	}
 	
+	/* Function code define (match to menu define)
+	 * @params: 
+	 * @return: array
+	 */
 	public function getFunctionCode()
 	{
 		return $this->_functionCode;
@@ -83,9 +87,8 @@ class UserService
 	/* Create Account
 	 * @params: string
 	 * @params: string
-	 * @params: array
 	 * @params: int
-	 * @return: boolean
+	 * @return: array
 	 */
 	public function createUser($adAccount, $displayName, $roleId)
 	{
@@ -105,7 +108,7 @@ class UserService
 	
 	/* Update:取User Data
 	 * @params: int
-	 * @return: object array
+	 * @return: array
 	 */
 	public function getUserById($id)
 	{
@@ -126,7 +129,7 @@ class UserService
 	 * @params: string
 	 * @params: string
 	 * @params: int
-	 * @return: boolean
+	 * @return: array
 	 */
 	public function updateUser($userId, $adAccount, $displayName, $roleId)
 	{
@@ -144,7 +147,7 @@ class UserService
 	
 	/* Remove User
 	 * @params: int
-	 * @return: boolean
+	 * @return: array
 	 */
 	public function deleteUser($userId)
 	{
@@ -185,7 +188,7 @@ class UserService
 	/* CRUD Permission Check for Page
 	 * @params: int
 	 * @return: boolean
-	 */
+	 *
 	 public function getOperationPermission()
 	 {
 		try
@@ -197,5 +200,5 @@ class UserService
 			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return [];
 		}
-	 }
+	 }*/
 }

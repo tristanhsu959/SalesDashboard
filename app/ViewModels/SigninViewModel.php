@@ -36,7 +36,6 @@ class SigninViewModel
 	
 	/* initialize
 	 * @params: enum
-	 * @params: int
 	 * @return: void
 	 */
 	public function initialize($action)
@@ -46,8 +45,8 @@ class SigninViewModel
 	}
 	
 	/* Keep signin form data : account only, 以防會使用到
-	 * @params: 
-	 * @return: string
+	 * @params: string
+	 * @return: void
 	 */
 	public function keepFormData($adAccount)
     {
@@ -55,8 +54,8 @@ class SigninViewModel
 	}
 	
 	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
+	 * @params: string
+	 * @return: void
 	 */
 	public function success($msg = NULL)
 	{

@@ -14,10 +14,10 @@ class NewReleaseRepository extends Repository
 	}
 	
 	/* 取主資料-BuyGood
-	 * @params: start date
-	 * @params: end date
-	 * @params: product ids
-	 * @return: collection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @return: array
 	 */
 	public function getBgSaleData($startDateTime, $endDateTime, $productIds)
 	{
@@ -28,11 +28,11 @@ class NewReleaseRepository extends Repository
 	}
 	
 	/* 取Mapping資料 | 複合店情境 - BaFang
-	 * @params: start date
-	 * @params: end date
-	 * @params: brand code
-	  * @params: bafang shop id
-	 * @return: collection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @return: array
 	 */
 	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $shopIds)
 	{
@@ -43,10 +43,12 @@ class NewReleaseRepository extends Repository
 	}
 	
 	/* Build query string | 新品:八方/梁社漢共用
-	 * @params: start date
-	 * @params: end date
-	 * @params: brand code
-	 * @return: collection
+	 * @params: query builder
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @return: array
 	 */
 	private function _getSaleResult($db, $startDateTime, $endDateTime, $productIds, $shopIds = NULL)
 	{

@@ -17,7 +17,7 @@ return [
 				'main' => ['UC06000126', 'UC06000127', 'UC00000042', 'UC00000043'], #梁社漢
 				'mapping' => ['PS02100021', 'PS02100022', 'PS02200047', 'PS02200048'], #八方(複合店)
 			],
-			'valueAdded' => [], #加值判別
+			'valueAdded' => '', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
@@ -29,7 +29,7 @@ return [
 				'main' => ['UC07100017', 'UC07100018', 'UC03000024', 'UC03000025', 'UC06100105', 'UC06100106'], #梁社漢
 				'mapping' => ['PS02600009', 'PS02600010', 'PS04000046', 'PS04000047', 'PS02400026', 'PS02400027'], #八方(複合店)
 			],
-			'valueAdded' => [], #加值判別
+			'valueAdded' => '', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
@@ -41,7 +41,7 @@ return [
 				'main' => ['UC01000005', 'UC01000006', 'UC06100107', 'UC06100108'], #梁社漢
 				'mapping' => ['PS02400028', 'PS02400029'], #八方(複合店)
 			],
-			'valueAdded' => [], #加值判別
+			'valueAdded' => '', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
@@ -53,7 +53,7 @@ return [
 				'main' => ['UC04000050', 'UC04000051'], #梁社漢
 				'mapping' => ['PS02100023', 'PS02100024'], #八方(複合店)
 			],
-			'valueAdded' => [], #加值判別
+			'valueAdded' => '', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
@@ -65,7 +65,7 @@ return [
 				'main' => ['UC02300008'], #梁社漢
 				'mapping' => ['PS02300011', 'PS02300012'], #八方(複合店)
 			],
-			'valueAdded' => ['秘製滷肉汁'], #加值判別
+			'valueAdded' => '秘製滷肉汁', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
     ],

@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-#use App\Libraries\LoggerLib;;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use LdapRecord\Connection;

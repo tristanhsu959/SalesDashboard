@@ -16,7 +16,7 @@ class UserRepository extends Repository
 		
 	}
 	
-	/* Get Roles Data from DB
+	/* Get role list
 	 * @params: 
 	 * @return: array
 	 */
@@ -32,8 +32,10 @@ class UserRepository extends Repository
 		return $result;
 	}
 	
-	/* Get User Data from DB
-	 * @params: 
+	/* Get user list by query conditions
+	 * @params: string
+	 * @params: string
+	 * @params: int
 	 * @return: array
 	 */
 	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
@@ -76,8 +78,8 @@ class UserRepository extends Repository
 		return TRUE;
 	}
 	
-	/* Get User Data
-	 * @params: 
+	/* Get user by id
+	 * @params: int
 	 * @return: array
 	 */
 	public function getUserById($id)
@@ -91,7 +93,7 @@ class UserRepository extends Repository
 		return $result;
 	}
 	
-	/* Update User
+	/* Update user data by id
 	 * @params: int
 	 * @params: string
 	 * @params: string
@@ -111,7 +113,7 @@ class UserRepository extends Repository
 		return TRUE;
 	}
 	
-	/* Remove User
+	/* Remove user by id
 	 * @params: int
 	 * @return: boolean
 	 */
