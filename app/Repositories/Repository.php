@@ -19,7 +19,7 @@ class Repository
 	}
 	
 	/* Local Sale[s]_Dashboard */
-	protected function connectLocalSalesDashboard($table = NULL)
+	protected function connectSaleDashboard($table = NULL)
 	{
 		if (empty($table))
 			return DB::connection('SalesDashboard');
@@ -28,15 +28,15 @@ class Repository
 	}
 	
 	/* 原測試機已改為Local MySql */
-	protected function connectSaleDashboard($table = NULL)
+	/*protected function connectSaleDashboard($table = NULL)
 	{
 		return $this->connectLocalSalesDashboard($table);
 		
-		/* deprecated
+		#deprecated
 		if (empty($table))
 			return DB::connection('SaleDashboard');
 		else
 			return DB::connection('SaleDashboard')->table($table)->lock('WITH(NOLOCK)');
-		*/
-	}
+		
+	}*/
 }
