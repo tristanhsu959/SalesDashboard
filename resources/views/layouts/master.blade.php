@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>八方雲集{{ empty(env('APP_ENV_HEAD')) ? '': '-' . env(APP_ENV_HEAD)}}</title>
+		<title>八方雲集{{ empty(env('APP_ENV_HEAD')) ? '': '-' . env('APP_ENV_HEAD')}}</title>
 		
 		<link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
 		
