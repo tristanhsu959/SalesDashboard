@@ -22,7 +22,7 @@ body {
 		position: relative;
 		flex-grow: 1;
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
-		height: 100%; /* 100vh sticky會失效 */
+		/* height: 100%; */ /* 100vh sticky會失效 */
 		box-sizing: border-box;
 		margin-bottom: 1rem;
 		background-color: transparent;
