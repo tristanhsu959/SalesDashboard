@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Libraries\ShopLib;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Exception;
 
 #新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
@@ -101,7 +102,7 @@ class PosRepository extends Repository
 		#Initialize前要先清空
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
-		$db = $this->connectLocalSalesDashboard();
+		$db = $this->connectSalesDashboard();
 		$db->table($table)->truncate();
 		
 		foreach($posData as $data)
@@ -113,7 +114,7 @@ class PosRepository extends Repository
 			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d');
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
-			$db->insert($data);
+			$db->table($table)->insert($data);
 		}
 		
 		return TRUE;
@@ -138,22 +139,22 @@ class PosRepository extends Repository
 		#Initialize前要先清空
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
-		$db = $this->connectLocalSalesDashboard();
+		$db = $this->connectSalesDashboard();
 		$db->table($table)
 			->where('saleDate', '>=', $stDate)
 			->where('saleDate', '<=', $endDate)
 			->delete();
 		
-		foreach($posData as $data)
+		foreach($posData as $row)
 		{
-			$data['shopId']		= $data['SHOP_ID'];
-			$data['shopName']	= $data['SHOP_NAME'];
-			$data['areaId']		= ShopLib::getAreaIdByShopId($data['SHOP_ID']);
-			$data['qty']		= $data['QTY'];
-			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d'); #只存至Date
+			$data['shopId']		= $row['SHOP_ID'];
+			$data['shopName']	= $row['SHOP_NAME'];
+			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
+			$data['qty']		= intval($row['QTY']);
+			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d'); #只存至Date
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
-			$db->insert($data);
+			$db->table($table)->insert($data);
 		}
 		
 		return TRUE;

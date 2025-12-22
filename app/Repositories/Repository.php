@@ -19,7 +19,7 @@ class Repository
 	}
 	
 	/* Local Sale[s]_Dashboard */
-	protected function connectSaleDashboard($table = NULL)
+	protected function connectSalesDashboard($table = NULL)
 	{
 		if (empty($table))
 			return DB::connection('SalesDashboard');

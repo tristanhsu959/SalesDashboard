@@ -110,6 +110,26 @@ class PosUpdateService
 	 */
 	public function getDataFromPosDB($params)
 	{
+		return [
+			[	
+				"SHOP_ID" => "235001",
+				"QTY" => "1.0000",
+				"SALE_DATE" => "2025-12-19 17:13:11.000",
+				"SHOP_NAME" => "御廚中和直營店",
+			],
+			[	
+				"SHOP_ID" => "235001",
+				"QTY" => "1.0000",
+				"SALE_DATE" => "2025-12-19 17:13:11.000",
+				"SHOP_NAME" => "御廚中和直營店",
+			],
+			[	
+				"SHOP_ID" => "235001",
+				"QTY" => "1.0000",
+				"SALE_DATE" => "2025-12-19 17:13:11.000",
+				"SHOP_NAME" => "御廚中和直營店",
+			],
+		];
 		try
 		{
 			#Pos有存到time, 以防萬一

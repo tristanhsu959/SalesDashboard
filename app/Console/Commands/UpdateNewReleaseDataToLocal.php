@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Commands\PosUpdateService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class UpdateNewReleaseDataToLocal extends Command
 {
@@ -12,7 +13,7 @@ class UpdateNewReleaseDataToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'new-release:update-to-local {configKey?}';
+    protected $signature = 'new-release:update-to-local {configKey}';
 
     /**
      * The console command description.

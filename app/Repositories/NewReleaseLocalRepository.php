@@ -31,7 +31,7 @@ class NewReleaseLocalRepository extends Repository
 		
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
-		$db = $this->connectSaleDashboard($table); #Local DB
+		$db = $this->connectSalesDashboard($table); #Local DB
 		$query = $db
 				->select('shopId', 'shopName', 'qty', 'saleDate', 'areaId')
 				->where('saleDate', '>=', $stDate)
