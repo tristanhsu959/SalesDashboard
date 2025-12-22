@@ -2,27 +2,168 @@
 
 namespace App\Services;
 
+use App\Repositories\RoleRepository;
+use App\Traits\AuthorizationTrait;
+#use App\Traits\RolePermissionTrait;
 use App\Libraries\ResponseLib;
-use App\Traits\MenuTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Exception;
+use Log;
 
 class RoleService
 {
-	use MenuTrait;
+	use AuthorizationTrait;
 	
+	private $_functionCode = 'roles';
 	private $_repository;
     
-	public function __construct()
+	public function __construct(RoleRepository $roleRepository)
 	{
-		// $this->_repository = $partyRepository;
+		$this->_repository = $roleRepository;
 	}
 	
+	public function getFunctionCode()
+	{
+		return $this->_functionCode;
+	}
+	
+	/* 取Role清單(Get ALL)
+	 * @params: 
+	 * @return: object array
+	 */
 	public function getList()
 	{
-		return $result = ResponseLib::initialize([])->fail('test')->get();
+		try
+		{
+			$list = $this->_repository->getList();
+			
+			#處理Json type
+			foreach($list as $key => $item)
+			{
+				$list[$key] = Arr::map($item, function ($value, string $key) {
+					if ($key == 'roleArea')
+						return empty($value) ? [] : json_decode($value, TRUE);
+					else
+						return $value;
+				});
+			}
+			
+			return ResponseLib::initialize($list)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
+		}
 	}
+	
+	/* Create Role
+	 * @params: string
+	 * @params: string
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function createRole($name, $group, $permission, $area)
+	{
+		try
+		{
+			$permission = json_encode($permission); 
+			$area = json_encode($area);
+			
+			$this->_repository->insertRole($name, $group, $permission, $area);
+		
+			return ResponseLib::initialize()->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('新增身份失敗');
+		}
+	}
+	
+	/* 取Role Data
+	 * @params: int
+	 * @return: object array
+	 */
+	public function getRoleById($id)
+	{
+		try
+		{
+			$result = $this->_repository->getRoleById($id);
+			
+			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
+			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+			
+			return ResponseLib::initialize($result)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('讀取身份設定資料發生錯誤');
+		}
+	}
+	
+	/* Update Role
+	 * @params: int
+	 * @params: string
+	 * @params: string
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function updateRole($id, $name, $group, $permission, $area)
+	{
+		try
+		{
+			$permission = json_encode($permission); 
+			$area = json_encode($area);
+			
+			$this->_repository->updateRole($id, $name, $group, $permission, $area);
+		
+			return ResponseLib::initialize()->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('編輯身份失敗');
+		}
+	}
+	
+	/* Remove Role
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function deleteRole($roleId)
+	{
+		try
+		{
+			$this->_repository->removeRole($roleId);
+			return ResponseLib::initialize()->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('刪除身份失敗');
+		}
+	}
+	
+	/* CRUD Permission List
+	 * @params: 
+	 * @return: array
+	 */
+	 public function getOperationPermissions()
+	 {
+		try
+		{
+			return $this->getOperationPermissionsByFunction($this->_functionCode);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return [];
+		}
+	 }
 }

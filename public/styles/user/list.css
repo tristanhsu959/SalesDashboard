@@ -1,0 +1,54 @@
+/* Role list */
+
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
+.searchbar.section-wrapper {
+	display: flex;
+	align-items: center;
+	padding: .75rem;
+	/* padding-top: 1rem; */ /* for input field */
+	/* margin top setting in _app */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
+	
+	.field {
+		margin-right: 1rem;
+	}
+	.btn {
+		margin-right: .5rem;
+	}
+}
+
+.user-list.section-wrapper {
+	padding: .75rem;
+	margin-top: 1rem; /* for input field */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
+	
+	/* .list-data
+		.row {
+			.col {
+				display: flex;
+				align-items: center;
+				border-width: 0;
+				padding: .5rem;
+				
+				&.col-area .badge {
+					margin-right: .25rem;
+					border-radius: 2px;
+					background-color: #76ff03;
+					color: rgba(0, 0, 0, .87);
+					font-weight: 400;
+				}
+				
+			}
+		}
+	} */
+}
+

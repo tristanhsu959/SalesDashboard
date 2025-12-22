@@ -52,14 +52,32 @@ return [
 
     'channels' => [
 		
-		#user define
-		'webLog' => [
+		/* User Define */
+		
+		'webSysLog' => [
 			'driver' => 'daily',
+			'days' => 15,
 			#'channels' => ['daily'],
 			'ignore_exceptions' => false,
-			'path' => storage_path('logs/web.log'),
+			'path' => storage_path('logs/webSys.log'),
 		],
-		#user define end
+		'commandLog' => [
+			'driver' => 'daily',
+			'days' => 15,
+			#'channels' => ['daily'],
+			'ignore_exceptions' => false,
+			'path' => storage_path('logs/command.log'),
+		],
+		// 'webDBLog' => [
+			// 'driver' => 'daily',
+			// 'days' => 15,
+			// #'channels' => ['daily'],
+			// 'ignore_exceptions' => false,
+			// 'path' => storage_path('logs/webDB.log'),
+		// ],
+		
+		/* User Define End */
+		
 		
         'stack' => [
             'driver' => 'stack',

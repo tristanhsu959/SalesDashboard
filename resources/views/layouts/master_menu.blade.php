@@ -1,19 +1,19 @@
-@inject('service', 'App\Services\HomeService')
-@inject('viewHelper', 'App\ViewHelpers\MenuHelper')
 
-<div class="aside menu">
+<div class="aside menu dp-8">
 	<div class="logo">
-		<img src="{{ asset('images/logo.png') }}" />
+		<div class="logo-wrapper">
+			<img src="{{ asset('images/logo.png') }}" />
+		</div>
 	</div>
 	<div class="container-fluid">
-		@foreach($service->getAuthorizeMenu() as $key => $group)
+		@foreach($appMenu->getMenu() as $key => $group)
 		<div class="menu-group">
-			<a href="#collapse{{ $key }}" class="list-title" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse{{ $key }}">
-				<span class="material-symbols-outlined {{ $viewHelper->getIconStyle($group['groupIcon']['filled']) }}">{{ $group['groupIcon']['name'] }}</span>{{ $group['groupName'] }}
+			<a href="#collapse-{{ $key }}" class="list-title" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-{{ $key }}">
+				<span class="material-symbols-outlined {{ $group['style']['color'] }}">{{ $group['style']['icon'] }}</span>{{ $group['name'] }}
 			</a>
-			<ul id="collapse{{ $key }}" class="list-group collapse">
+			<ul id="collapse-{{ $key }}" class="list-group collapse">
 				@foreach($group['items'] as $item)
-				<li class="list-group-item"><a href="{{ url($item['url']) }}" class="{{ $viewHelper->getCurrentActionStyle($item['segmentCode']) }}">{{ $item['name'] }}</a></li>
+				<li class="list-group-item"><a href="{{ url($item['url']) }}" class="{{ $appMenu->activeActionStyle($item['code']) }}">{{ $item['name'] }}</a></li>
 				@endforeach
 			</ul>
 		</div>

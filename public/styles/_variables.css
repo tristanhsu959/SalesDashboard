@@ -1,21 +1,38 @@
 /* Variables Define */
 
 :root {
+	
 	/* 官網主色紅 */
-	--bg-brand-primary-color: #cb1a19; /* red */
-	--bg-brand-secondary-color: #f5ac2d; /* amber */
-	--bg-brand-secondary-light-color: #ffd180;
+	--brand-red-bg: #ff3b1e;
+	--brand-secondary-red-bg: #cb1a19;
+	--brand-orange-bg: #f5ac2d; 
 	
-	--bg-menu-color: #263238; /*#263238;*/
+	--theme-bg: #121212; /* #2f3135; */
+	--theme-surface-l1: #424242;
+	--theme-surface-l2: #616161;
+	--theme-surface-l3: #757575;
 	
-	--bg-default-color: #eceff1; /* grey */
-	--bg-primary-color: #ed5a65; /* red */
-	--bg-secondary-color: #ffc107; /* amber */
+	--theme-primary-color: rgba(255 255 255 / .87);
+	--theme-secondary-color: rgba(255 255 255 / .6);
+	--theme-placeholder-color: rgba(255 255 255 / .48);
+	--theme-disabled-color: rgba(255 255 255 / .38); /* disabled or hint */
+	--theme-divider-color: rgba(255 255 255 / .12);
 	
-	/* Button */
-	--bg-btn-create-color: #00e676;
-	--btn-create-color: #1b5e20;
+	/* --theme-bg: #121212; */ /*hsl(0 0% 7%);*/
+	/* --theme-on-bg: #fafafa; */ /* #fafafa */
 	
+	/* TBD */
+	--theme-primary: #cb1a19;
+	--theme-on-primary: #ffffff;
+	--theme-secondary: #f5ac2d;
+	--theme-on-secondary: #212121;
 	
-	/*** Bootstrap Variables ***/
+	/* For different primary bg */
+	--theme-primary-alpha: 100%;
+	--theme-secondary-alpha: 70%;
+	--theme-disabled-alpha: 30%;
+	--theme-hint-alpha: 30%;
+	--theme-divider-alpha: 12%;
+	
+	/* Theme Color Define */
 }

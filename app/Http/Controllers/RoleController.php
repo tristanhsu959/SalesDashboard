@@ -4,16 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\RoleService;
+use App\ViewModels\RoleViewModel;
+use App\Enums\FormAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class RoleController extends Controller
 {
 	private $_service;
+	private $_viewModel;
 	
-	public function __construct(RoleService $roleService)
+	public function __construct(RoleService $roleService, RoleViewModel $roleViewModel)
 	{
-		$this->_service = $roleService;
+		$this->_service		= $roleService;
+		$this->_viewModel 	= $roleViewModel;
 	}
 	
 	/* 列表
@@ -22,34 +27,157 @@ class RoleController extends Controller
 	 */
 	public function list(Request $request)
 	{
-		return view('role/list');
-		// $validator = Validator::make($request->all(), [
-            // 'ad_account' => 'required|max:20',
-			// 'ad_password' => 'required|max:20',
-        // ]);
- 
-        // if ($validator->fails()) 
-			// return redirect('login')->with('msg', '登入失敗，帳號或密碼輸入錯誤');
+		$this->_viewModel->initialize(FormAction::List);
 		
+		$response = $this->_service->getList();
 		
-		// $account = $request->input('ad_account');
-		// $password = $request->input('ad_password');
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+		{
+			$this->_viewModel->success();
+			$this->_viewModel->list = $response->data;
+		}
 		
-		// $response = $this->_service->authUser($account, $password);
-		
-		// if ($response['status'] === FALSE)
-			// return redirect('login')->with('msg', '登入失敗，帳號或密碼錯誤');
-		// else
-			// return redirect('home');
+		return view('role/list')->with('viewModel', $this->_viewModel);
 	}
 	
-	/* 新增
+	/* 新增Form
+	 * @params: request
+	 * @return: array
+	 */
+	public function showCreate(Request $request)
+	{
+		#initialize
+		$this->_viewModel->initialize(FormAction::CREATE);
+		$this->_viewModel->keepFormData(); #init
+		$this->_viewModel->success();
+		
+		return view('role/detail')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* 新增 POST
 	 * @params: request
 	 * @return: array
 	 */
 	public function create(Request $request)
 	{
-		$response = [];
-		return view('role/create', $response);
+		#fetch form data
+		$id 		= $request->input('id');
+		$name 		= $request->input('name');
+		$group 		= $request->input('group');
+		$permission	= $request->input('permission');
+		$area		= $request->input('area');
+		
+		#initialize
+		$this->_viewModel->initialize(FormAction::CREATE);
+		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
+		
+		#validate input
+		$validator = Validator::make($request->all(), [
+            'name' => 'required|max:10',
+			'group' => 'required|min:1',
+        ]);
+ 
+        if ($validator->fails()) 
+		{
+			$this->_viewModel->fail('資料輸入不完整');
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
+		
+		$response = $this->_service->createRole($name, $group, $permission, $area);
+		
+		if ($response->status === FALSE)
+		{
+			$this->_viewModel->fail($response->msg);
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
+		else
+			return redirect()->route('role.list')->with('msg', '新增身份完成');;
+	}
+	
+	/* 編輯Form
+	 * @params: request
+	 * @return: array
+	 */
+	public function showUpdate(Request $request, $id)
+	{
+		#initialize
+		$this->_viewModel->initialize(FormAction::UPDATE);
+		
+		if (empty($id))
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+		
+		$response = $this->_service->getRoleById($id);
+		
+		if ($response->status === FALSE)
+			return redirect()->route('role.list')->with('msg', $response->msg);
+		
+		$data = $response->data;
+		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['roleGroup'], $data['rolePermission'], $data['roleArea']);
+		$this->_viewModel->success();
+		
+		return view('role/detail')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* 編輯Form
+	 * @params: request
+	 * @return: array
+	 */
+	public function update(Request $request)
+	{
+		#fetch form data
+		$id 		= $request->input('id');
+		$name 		= $request->input('name');
+		$group 		= $request->input('group');
+		$permission	= $request->array('permission');
+		$area		= $request->array('area');
+		
+		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
+		
+		if (empty($id))
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+		
+		$validator = Validator::make($request->all(), [
+            'name' => 'required|max:10',
+			'group' => 'required|min:1',
+        ]);
+ 
+        if ($validator->fails()) 
+		{
+			$this->_viewModel->fail('資料輸入不完整');
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
+		
+		$response = $this->_service->updateRole($id, $name, $group, $permission, $area);
+		
+		if ($response->status === FALSE)
+		{
+			$this->_viewModel->fail($response->msg);
+			return view('role/detail')->with('viewModel', $this->_viewModel);
+		}
+		else
+			return redirect()->route('role.list')->with('msg', '編輯身份完成');
+	}
+	
+	/* 刪除
+	 * @params: request
+	 * @return: array
+	 */
+	public function delete(Request $request, $id)
+	{
+		#initialize
+		$this->_viewModel->initialize(FormAction::DELETE, $id);
+		
+		/*跟validator整併即可*/
+		if (empty($id))
+			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
+		
+		$response = $this->_service->deleteRole($id);
+		
+		if ($response->status === FALSE)
+			return redirect()->route('role.list')->with('msg', $response->msg);
+		else
+			return redirect()->route('role.list')->with('msg', '刪除身份完成');
 	}
 }

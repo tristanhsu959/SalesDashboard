@@ -8,13 +8,16 @@
     <script src=""></script>
 @endpush
 
+@section('navHome')
+<div class="navbar-home">
+	<span class="sales">sales</span><span class="dashboard">Dashboard</span>
+</div>
+@endsection
+
+@section('navAction', '')
+
 @section('content')
-<div class="form-floating mb-3">
-  <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-  <label for="floatingInput">Email address</label>
-</div>
-<div class="form-floating">
-  <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-  <label for="floatingPassword">Password</label>
-</div>
-@endsection()
+	<section class="searchbar section-wrapper">
+		
+	</section>
+@endsection

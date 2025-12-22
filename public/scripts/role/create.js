@@ -1,5 +1,0 @@
-/* New Release JS */
-
-/*$(function(){
-	
-});*/

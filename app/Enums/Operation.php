@@ -2,12 +2,12 @@
 
 namespace App\Enums;
 
-enum Operation : string
+enum Operation : int
 {
-    case CREATE	= '0001';
-	case READ 	= '0002';
-	case UPDATE = '0004';
-	case DELETE = '0008';
+    case CREATE	= 1;
+	case READ 	= 2;
+	case UPDATE = 3;
+	case DELETE = 4;
 	
 	public function label() : string
     {

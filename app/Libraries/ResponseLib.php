@@ -24,26 +24,19 @@ class ResponseLib
 		return new ResponseLib($data);
     }
 	
-	public function data($data = [])
-	{
-		$this->_response['data'] = $data;
-		return $this;
-	}
-	
-	public function msg($msg = '')
-	{
-		$this->_response['msg'] = $msg;
-		return $this;
+	public function __get($name)
+    {
+		return data_get($this->_response, $name, FALSE);
 	}
 	
 	/* set to success : responseLib::initialize($initData)->success($resultData)->get()
 	 * @params: array
 	 * @return: object
 	 */
-	public function success($data = [])
+	public function success($msg = NULL)
 	{
-		if (! empty($data))
-			$this->_response['data'] = $data;
+		if (! empty($msg))
+			$this->_response['msg'] = $msg;
 		
 		$this->_response['status'] = TRUE;
 		
@@ -56,7 +49,9 @@ class ResponseLib
 	 */
 	public function fail($msg = NULL)
 	{
-		$this->_response['msg'] = $msg;
+		if (! empty($msg))
+			$this->_response['msg'] = $msg;
+		
 		$this->_response['status'] = FALSE;
 		
 		return $this;
@@ -66,4 +61,17 @@ class ResponseLib
 	{
 		return $this->_response;
 	}
+	
+	/*public function data($data = [])
+	{
+		$this->_response['data'] = $data;
+		return $this;
+	}
+	
+	public function msg($msg = '')
+	{
+		$this->_response['msg'] = $msg;
+		return $this;
+	}*/
+	
 }

@@ -43,8 +43,8 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 		#梁社漢
 		'BGPosErp' => [
@@ -58,8 +58,31 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+        ],
+		
+		'SalesDashboard' => [
+            'driver' => 'mysql',
+            'host' => env('LSD_DB_HOST', '127.0.0.1'),
+            'port' => env('LSD_DB_PORT', '3306'),
+            'database' => env('LSD_DB_DATABASE', 'sales_dashboard'),
+            'username' => env('LSD_DB_USERNAME', 'salesdashboard'),
+            'password' => env('LSD_DB_PASSWORD', ''),
+            'fetch' => PDO::FETCH_ASSOC,
+        ],
+		
+		'RemoteSaleDashboard' => [
+            'driver' => 'sqlsrv',
+            'host' => env('SD_DB_HOST', '192.168.1.237'),
+            'port' => env('SD_DB_PORT', '1433'),
+            'database' => env('SD_DB_DATABASE', 'SaleDashbaord'),
+            'username' => env('SD_DB_USERNAME', 'sa'),
+            'password' => env('SD_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+			'fetch' => PDO::FETCH_ASSOC,
         ],
 		
 		/*

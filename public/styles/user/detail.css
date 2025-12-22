@@ -1,0 +1,133 @@
+/* list */
+
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
+.section-wrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	
+	padding: .75rem;
+	/* padding-top: 1rem; */ /* for input field */
+	/* margin top setting in _app */
+	margin-left: 1rem;
+	margin-right: 1rem;
+	border-radius: .5rem;
+	background: var(--theme-surface-bg);
+	
+	.section {
+		height: 100%;
+		margin-bottom: 1rem;
+	}
+	
+	.user-data {
+		flex: 1;
+		display: inline-flex;
+		
+		.field {
+			margin-right: 1rem;
+			
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+	
+	/* 身份 */
+	.user-role {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		border: 1px solid #00bcd4;
+		border-radius: .5rem;
+		padding: 1rem;
+		margin-top: 1rem;
+		position: relative;
+		
+		&.required label.title:before {
+			content: '\e1eb';
+			font-family: 'Material Symbols Outlined';
+			color: rgba(244, 67, 54, .87);
+		}
+		
+		label.title {
+			position: absolute;
+			top: 0;
+			padding: 0 .25rem;
+			color: rgba(0, 229, 255, .87);
+			background-color: var(--theme-surface-bg);
+			display: flex;
+			align-items: center;
+			transform: translate(-0.25rem, -50%);
+		}
+		
+		.form-check-label {
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 160px;
+			height: 88px;
+			background-color: hsla(200, 19%, 18%, .6);
+			border: 1px solid #546e7a;
+			border-radius: 0 0 4px 4px;
+			color: #546e7a;
+			margin: .5rem;
+			padding: 1rem;
+			box-sizing: border-box;
+			transition: border-color, color 0.2s ease-in-out 0.1s;
+			cursor: pointer;
+			
+			input {
+				display: none;
+			}
+			
+			&:before {
+				content: '';
+				width: 160px;
+				height: .5rem;
+				background-color: #ff4081;
+				position: absolute;
+				top: 0;
+				opacity: 0;
+				transition: opacity 0.2s ease-in-out 0.1s;
+			}
+			&:after {
+				content: '';
+				width: 0;
+				height: 0;
+				border-width: 16px 24px 0;
+				border-color: transparent;
+				border-top-color: #ff4081;
+				border-style: solid;
+				position: absolute;
+				top: .5rem;
+				opacity: 0;
+				transition: opacity 0.2s ease-in-out 0.1s;
+			}
+			
+			&:has(input:checked) {
+				border-color: #ff4081;
+				color: #ff4081;
+				background-color: hsla(200, 19%, 18%, 1);
+				
+				&:before,  &:after{
+					opacity: 1;
+				}
+			}
+		}
+	}
+	
+	
+	.toolbar {
+		.btn {
+			margin-right: .5rem;
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+}
+

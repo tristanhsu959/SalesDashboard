@@ -2,19 +2,18 @@
 
 namespace App\Repositories;
 
-use Illuminate\Support\Facades\DB;
 use Exception;
 
-#新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同
+#新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
 class NewReleaseRepository extends Repository
 {
-	
+	#MSSQL
 	public function __construct()
 	{
 		
 	}
 	
-	/* 取主資料
+	/* 取主資料-BuyGood
 	 * @params: start date
 	 * @params: end date
 	 * @params: product ids
@@ -28,10 +27,11 @@ class NewReleaseRepository extends Repository
 		return $result;
 	}
 	
-	/* 取Mapping資料 | 複合店情境
+	/* 取Mapping資料 | 複合店情境 - BaFang
 	 * @params: start date
 	 * @params: end date
 	 * @params: brand code
+	  * @params: bafang shop id
 	 * @return: collection
 	 */
 	public function getBfSaleData($startDateTime, $endDateTime, $productIds, $shopIds)
