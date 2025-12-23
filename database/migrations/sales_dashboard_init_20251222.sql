@@ -140,11 +140,6 @@ ALTER TABLE `pork_ribs`
   ADD KEY `saleDate` (`saleDate`),
   ADD KEY `areaId` (`areaId`);
 
---
--- 資料表索引 `role`
---
-ALTER TABLE `role`
-  ADD PRIMARY KEY (`roleId`);
 
 --
 -- 資料表索引 `tomatobeef`
@@ -154,11 +149,6 @@ ALTER TABLE `tomatobeef`
   ADD KEY `saleDate` (`saleDate`),
   ADD KEY `areaId` (`areaId`);
 
---
--- 資料表索引 `user`
---
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`userId`);
 
 --
 -- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
@@ -188,11 +178,6 @@ ALTER TABLE `egg_tofu`
 ALTER TABLE `pork_ribs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
---
--- 使用資料表自動遞增(AUTO_INCREMENT) `role`
---
-ALTER TABLE `role`
-  MODIFY `roleId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `tomatobeef`
@@ -201,10 +186,7 @@ ALTER TABLE `tomatobeef`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用資料表自動遞增(AUTO_INCREMENT) `user`
---
-ALTER TABLE `user`
-  MODIFY `userId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

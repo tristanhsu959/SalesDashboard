@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Libraries\ShopLib;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Exception;
 
 #新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
@@ -66,11 +67,11 @@ class PosRepository extends Repository
 				->join('SHOP00 as c', 'a.SHOP_ID', '=', 'c.SHOP_ID')
 				->where('b.SALE_DATE', '>=', $startDateTime)
 				->where('b.SALE_DATE', '<=', $endDateTime)
-				->where(function ($db) {
+				->where(function ($db) use ($productIds, $valueAdded){
 					$db->whereIn('a.PROD_ID', $productIds);
 					
 					if (! empty($valueAdded))
-						$db->orWhereLike('TASTE_Memo', "%{$valueAdded}%");	
+						$db->orWhereLike('TASTE_MEMO', "%{$valueAdded}%");	
 				})
 				
 				->orderBy('b.SALE_DATE', 'DESC')
@@ -78,8 +79,8 @@ class PosRepository extends Repository
 		
 		if (! is_null($shopIds))
 			$query->whereIn('a.SHOP_ID', $shopIds);
-		
-		Log::channel('commandLog')->error($query->toRawSql(), [ __class__, __function__, __line__]);
+	
+		Log::channel('commandLog')->info($query->toRawSql(), [ __class__, __function__, __line__]);
 		
 		return $query->get();
 	}
@@ -102,18 +103,20 @@ class PosRepository extends Repository
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
 		$db = $this->connectLocalSalesDashboard();
-		$db->table($table)->truncate();
+		#$db->table($table)->truncate();
 		
-		foreach($posData as $data)
+		foreach($posData as $row) #$data重覆了
 		{
-			$data['shopId']		= $data['SHOP_ID'];
-			$data['shopName']	= $data['SHOP_NAME'];
-			$data['areaId']		= ShopLib::getAreaIdByShopId($data['SHOP_ID']);
-			$data['qty']		= $data['QTY'];
-			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d');
+			$data['shopId']		= $row['SHOP_ID'];
+			$data['shopName']	= $row['SHOP_NAME'];
+			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
+			$data['qty']		= floatval($row['QTY']);
+			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d');
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
-			$db->insert($data);
+			$id = $db->table($table)->insertGetId($data);
+			if (empty($id))
+				Log::channel('commandLog')->error($db->toRawSql());
 		}
 		
 		return TRUE;
@@ -144,16 +147,16 @@ class PosRepository extends Repository
 			->where('saleDate', '<=', $endDate)
 			->delete();
 		
-		foreach($posData as $data)
+		foreach($posData as $row)
 		{
-			$data['shopId']		= $data['SHOP_ID'];
-			$data['shopName']	= $data['SHOP_NAME'];
-			$data['areaId']		= ShopLib::getAreaIdByShopId($data['SHOP_ID']);
-			$data['qty']		= $data['QTY'];
-			$data['saleDate']	= (new Carbon($data['SALE_DATE']))->format('Y-m-d'); #只存至Date
+			$data['shopId']		= $row['SHOP_ID'];
+			$data['shopName']	= $row['SHOP_NAME'];
+			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
+			$data['qty']		= $row['QTY'];
+			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d'); #只存至Date
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
-			$db->insert($data);
+			$db->table($table)->insert($data);
 		}
 		
 		return TRUE;

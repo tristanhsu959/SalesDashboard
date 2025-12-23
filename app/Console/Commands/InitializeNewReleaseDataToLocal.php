@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Commands\PosInitializeService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -45,15 +46,21 @@ class InitializeNewReleaseDataToLocal extends Command
 			
 			foreach($configKeys as $configKey)
 			{
-				Log::channel('commandLog')->info("Initialize Start : {$configKey}", [ __class__, __function__, __line__]);
+				$productName = config("web.new_release.products.{$configKey}.name");
+				Log::channel('commandLog')->info("Initialize Start : {$productName}", [ __class__, __function__, __line__]);
 			
-				$this->info("Initialize Start : {$configKey} -----");
+				$this->info("Initialize Start : {$productName} -----");
 				#新品目前似乎只有梁社漢有
 				$posService->setConfig($configKey);
 				
 				#1. Get params fetch date
 				$this->info('Get Params-----');
 				$params = $posService->getParams();
+				
+				#for testing
+				data_set($params, 'stDate', '2025-11-01');
+				data_set($params, 'endDate', '2025-12-22');
+				
 				$this->info(json_encode($params));
 							
 				#2. Get POS DB data
@@ -62,13 +69,14 @@ class InitializeNewReleaseDataToLocal extends Command
 				$posData = $posService->getDataFromPosDB($params);
 				$count = count($posData);
 				$this->info("Data count : {$count} -----");
-				
+				// Log::channel('commandLog')->info("Data : ". json_encode($posData));
+				// return;
 				#3. Save data to local
 				$this->info('Save Data to Local -----');
 				$posService->saveToLocalDB($posData);
 				
-				$this->info("Initialize {$configKey} completed -----");
-				Log::channel('commandLog')->info("Initialize {$configKey} completed", [ __class__, __function__, __line__]);
+				$this->info("Initialize {$productName} completed -----");
+				Log::channel('commandLog')->info("Initialize {$productName} completed", [ __class__, __function__, __line__]);
 			}
 		}
 		catch(Exception $e)
