@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Schedule;
 use App\Console\Commands\UpdateNewReleaseDataToLocal;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
