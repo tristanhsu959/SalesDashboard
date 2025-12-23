@@ -22,7 +22,7 @@ class UserRepository extends Repository
 	 */
 	public function getRoleList()
 	{
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 			
 		$result = $db
 			->select('roleId', 'roleName')
@@ -40,7 +40,7 @@ class UserRepository extends Repository
 	 */
 	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
 	{
-		$db = $this->connectSaleDashboard('user as a');
+		$db = $this->connectSalesDashboard('user as a');
 			
 		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleGroup', 'b.roleArea')
 			->join('role as b', 'b.roleId', '=', 'a.userRoleId');
@@ -66,7 +66,7 @@ class UserRepository extends Repository
 	 */
 	public function insertUser($adAccount, $displayName, $roleId)
 	{
-		$db = $this->connectSaleDashboard('user');
+		$db = $this->connectSalesDashboard('user');
 		
 		$data['userAd']			= $adAccount;
 		$data['userDisplayName']= $displayName;
@@ -84,7 +84,7 @@ class UserRepository extends Repository
 	 */
 	public function getUserById($id)
 	{
-		$db = $this->connectSaleDashboard('user');
+		$db = $this->connectSalesDashboard('user');
 			
 		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId')
 					->where('userId', '=', $id)
@@ -102,7 +102,7 @@ class UserRepository extends Repository
 	 */
 	public function updateUser($userId, $adAccount, $displayName, $roleId)
 	{
-		$db = $this->connectSaleDashboard('user');
+		$db = $this->connectSalesDashboard('user');
 		
 		$data['userAd']			= $adAccount;
 		$data['userDisplayName']= $displayName;
@@ -119,7 +119,7 @@ class UserRepository extends Repository
 	 */
 	public function RemoveUser($userId)
 	{
-		$db = $this->connectSaleDashboard('user');
+		$db = $this->connectSalesDashboard('user');
 		$db->where('userId', '=', $userId)->delete();
 
 		return FALSE;

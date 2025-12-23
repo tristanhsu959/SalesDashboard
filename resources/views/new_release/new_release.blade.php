@@ -20,9 +20,9 @@
 
 @section('content')
 <!-- Search by Date -->
-<form action="{{ route('new_releases.search', ['segment' => $viewModel->segment]) }}" method="post" id="searchForm">
+<form action="{{ route('new_releases.search', ['segment' => $viewModel->getSegment() ]) }}" method="post" id="searchForm">
 @csrf
-
+<input type="hidden" name="configKey" value="{{ $viewModel->configKey }}">
 <section class="searchbar section-wrapper dp-2">
 	<div class="input-field field-light-blue field">
 		<input type="date" class="form-control valid" 

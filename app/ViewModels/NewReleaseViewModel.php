@@ -60,12 +60,11 @@ class NewReleaseViewModel
 	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($action , $segment, $configKey)
+	public function initialize($action , $configKey)
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']		= $action;
 		$this->_data['msg'] 		= '';
-		$this->_data['segment'] 	= $segment; #產URL用,因Search route共用
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
@@ -135,6 +134,11 @@ class NewReleaseViewModel
 	public function getDefaultSearchEndDate()
     {
 		return data_get($this->_data, 'config.saleEndDate', NULL) ?? Carbon::now()->format('Y-m-d'); #date picker必須為Y-m-d才能正常顯示
+	}
+	
+	public function getSegment()
+    {
+		return Str::snake(data_get($this->_data, 'configKey'), '_');
 	}
 	
 	/* 取時間序

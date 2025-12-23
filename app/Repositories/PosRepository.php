@@ -102,8 +102,8 @@ class PosRepository extends Repository
 		#Initialize前要先清空
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
-		$db = $this->connectLocalSalesDashboard();
-		#$db->table($table)->truncate();
+		$db = $this->connectSalesDashboard();
+		$db->table($table)->truncate();
 		
 		foreach($posData as $row) #$data重覆了
 		{
@@ -114,9 +114,7 @@ class PosRepository extends Repository
 			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d');
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				
-			$id = $db->table($table)->insertGetId($data);
-			if (empty($id))
-				Log::channel('commandLog')->error($db->toRawSql());
+			$db->table($table)->insert($data);
 		}
 		
 		return TRUE;
@@ -141,7 +139,7 @@ class PosRepository extends Repository
 		#Initialize前要先清空
 		$table = $config = config("web.new_release.DbMapping.{$configKey}");
 		
-		$db = $this->connectLocalSalesDashboard();
+		$db = $this->connectSalesDashboard();
 		$db->table($table)
 			->where('saleDate', '>=', $stDate)
 			->where('saleDate', '<=', $endDate)
@@ -152,7 +150,7 @@ class PosRepository extends Repository
 			$data['shopId']		= $row['SHOP_ID'];
 			$data['shopName']	= $row['SHOP_NAME'];
 			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
-			$data['qty']		= $row['QTY'];
+			$data['qty']		= intval($row['QTY']);
 			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d'); #只存至Date
 			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
 				

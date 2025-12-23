@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Commands\PosUpdateService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class UpdateNewReleaseDataToLocal extends Command
 {
@@ -12,7 +13,7 @@ class UpdateNewReleaseDataToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'new-release:update-to-local {configKey?}';
+    protected $signature = 'new-release:update-to-local {configKey}';
 
     /**
      * The console command description.
@@ -28,15 +29,13 @@ class UpdateNewReleaseDataToLocal extends Command
     {
 		try
 		{
-			#每次都只更新一個Table, 由不同的Schedule執行
-			$configKeys = [];
-			
 			#只執行指定table的參數
-			$argument = $this->argument('configKey');
+			$configKey = $this->argument('configKey');
+			$productName = config("web.new_release.products.{$configKey}.name");
 			
-			Log::channel('commandLog')->info("Update Start : {$configKey}", [ __class__, __function__, __line__]);
+			Log::channel('commandLog')->info("Update Start : {$productName}", [ __class__, __function__, __line__]);
 			
-			$this->info("Update Start : {$configKey} -----");
+			$this->info("Update Start : {$productName} -----");
 			#新品目前似乎只有梁社漢有
 			$posService->setConfig($configKey);
 			
@@ -56,8 +55,8 @@ class UpdateNewReleaseDataToLocal extends Command
 			$this->info('Save Data to Local -----');
 			$posService->saveToLocalDB($posData, $params['stDate'], $params['endDate']);
 			
-			$this->info("Update {$configKey} completed -----");
-			Log::channel('commandLog')->info("Update {$configKey} completed", [ __class__, __function__, __line__]);
+			$this->info("Update {$productName} completed -----");
+			Log::channel('commandLog')->info("Update {$productName} completed", [ __class__, __function__, __line__]);
 		}
 		catch(Exception $e)
 		{

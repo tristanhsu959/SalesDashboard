@@ -10,7 +10,7 @@ body {
 	justify-content: space-between;
 	padding: .75rem;
 	/* 	padding-top: 1rem; */ /* for input field */
-	
+	margin-top: .25rem;
 	margin-left: 1rem;
 	margin-right: 1rem;
 	border-radius: .5rem;

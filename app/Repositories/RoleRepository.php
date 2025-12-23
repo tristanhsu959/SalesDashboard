@@ -20,7 +20,7 @@ class RoleRepository extends Repository
 	 */
 	public function getList()
 	{
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 			
 		$result = $db
 			->select('roleId', 'roleName', 'roleGroup', 'roleArea', 'updateAt')
@@ -46,7 +46,7 @@ class RoleRepository extends Repository
 		$roleData['createAt'] 		= now()->format('Y-m-d H:i:s');
 		$roleData['updateAt'] 		= $roleData['createAt'];
 		
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 		$id = $db->insertGetId($roleData);
 		
 		return TRUE;
@@ -58,7 +58,7 @@ class RoleRepository extends Repository
 	 */
 	public function getRoleById($id)
 	{
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 			
 		$result = $db->select('roleId', 'roleName', 'roleGroup', 'rolePermission', 'roleArea', 'updateAt')
 					->where('roleId', '=', $id)
@@ -85,7 +85,7 @@ class RoleRepository extends Repository
 		$roleData['roleArea'] 		= $area;
 		$roleData['updateAt'] 		= now()->format('Y-m-d H:i:s');
 		
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 		$db->where('roleId', '=', $id)->update($roleData);
 		
 		return TRUE;
@@ -97,7 +97,7 @@ class RoleRepository extends Repository
 	 */
 	public function RemoveRole($roleId)
 	{
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 		$db->where('roleId', '=', $roleId)->delete();
 		
 		return TRUE;
