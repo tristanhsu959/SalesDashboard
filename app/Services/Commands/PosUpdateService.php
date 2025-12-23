@@ -36,11 +36,10 @@ class PosUpdateService
 	}
 	
 	/* 取Config設定及查詢時間區間參數
-	 * @params: string
-	 * @params: string
+	 * @params: int
 	 * @return: array
 	 */
-	public function getParams()
+	public function getParams($argDiffDays = 0)
 	{
 		$params = [ 
 			'stDate' 	=> '',
@@ -57,7 +56,7 @@ class PosUpdateService
 			$brand = data_get($config, 'brand');
 						
 			#計算initialize要取的時間, 以開賣日起算
-			list($stDate, $endDate) = $this->_calcFetchTime($config['saleDate']);
+			list($stDate, $endDate) = $this->_calcFetchTime($config['saleDate'], $argDiffDays);
 			
 			data_set($params, 'stDate', $stDate);
 			data_set($params, 'endDate', $endDate);
@@ -78,7 +77,7 @@ class PosUpdateService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _calcFetchTime($saleDate)
+	private function _calcFetchTime($saleDate, $argDiffDays)
 	{
 		try
 		{
@@ -86,7 +85,8 @@ class PosUpdateService
 				throw new Exception('開賣日未設定');
 			
 			$saleStTime	= new Carbon($saleDate); #開賣日
-			$diffStTime	= Carbon::now()->subDay($this->_diffDays); #取到前7天
+			$diffDays 	= empty($argDiffDays) ?  $this->_diffDays : $argDiffDays; #取參數或預設
+			$diffStTime	= Carbon::now()->subDay($diffDays - 1); 
 			
 			$stDate		= $saleStTime->greaterThan($diffStTime) ? $saleStTime : $diffStTime;
 			$endDate	= Carbon::now(); 
