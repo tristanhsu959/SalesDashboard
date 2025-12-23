@@ -10,15 +10,15 @@ use App\Console\Commands\UpdateNewReleaseDataToLocal;
 
 #Update data for current day
 #橙汁排骨
-Schedule::command('new-release:update-to-local porkRibs 1')->everyFifteenMinutes()->between('10:00', '21:00');
+Schedule::command('new-release:update-to-local porkRibs 1')->everyFifteenMinutes()->between('10:00', '23:00');
 #蕃茄牛三寶
-Schedule::command('new-release:update-to-local tomatoBeef 1')->everyFifteenMinutes()->between('10:00', '21:00');
+Schedule::command('new-release:update-to-local tomatoBeef 1')->everyFifteenMinutes()->between('10:00', '23:00');
 #主廚秘製滷肉飯
-Schedule::command('new-release:update-to-local braisedPork 1')->everyFifteenMinutes()->between('10:00', '21:00');
+Schedule::command('new-release:update-to-local braisedPork 1')->everyFifteenMinutes()->between('10:00', '23:00');
 #老皮嫩肉
-Schedule::command('new-release:update-to-local eggTofu 1')->everyFifteenMinutes()->between('10:00', '21:00');
+Schedule::command('new-release:update-to-local eggTofu 1')->everyFifteenMinutes()->between('10:00', '23:00');
 #秘製滷肉汁
-Schedule::command('new-release:update-to-local braisedGravy 1')->everyFifteenMinutes()->between('10:00', '21:00');
+Schedule::command('new-release:update-to-local braisedGravy 1')->everyFifteenMinutes()->between('10:00', '23:00');
 
 #Update data for last 7 day
 #橙汁排骨
