@@ -29,7 +29,7 @@ body {
 		position: fixed;
 		left: 50%;
 		bottom: .5rem;
-		transform: translateX(-50%);
+		transform: translateX(-50% + 256px);
 		justify-content: center;
 		background-color: rgba(255, 255, 255, .87);
 		z-index: 20;
