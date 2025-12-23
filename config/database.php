@@ -66,7 +66,7 @@ return [
             'driver' => 'mysql',
             'host' => env('LSD_DB_HOST', '127.0.0.1'),
             'port' => env('LSD_DB_PORT', '3306'),
-            'database' => env('LSD_DB_DATABASE', 'sales_dashboard'),
+            'database' => env('LSD_DB_DATABASE', 'dev_sales_dashboard'),
             'username' => env('LSD_DB_USERNAME', 'salesdashboard'),
             'password' => env('LSD_DB_PASSWORD', ''),
             'fetch' => PDO::FETCH_ASSOC,
