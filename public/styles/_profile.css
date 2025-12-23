@@ -65,8 +65,10 @@
 					color: #212121;
 					font-size: .85rem;
 					font-weight: 400;
+					padding: .3rem .65rem ;
+					line-height: 1.2;
 					border-radius: 1rem;
-					border: 2px solid var(--brand-red-bg);
+					border: 3px solid var(--brand-red-bg);
 					margin: .125rem 0;
 				}
 			}
