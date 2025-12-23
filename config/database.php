@@ -85,7 +85,7 @@ return [
 			'fetch' => PDO::FETCH_ASSOC,
         ],
 		
-		/*
+		
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
@@ -96,7 +96,7 @@ return [
             'journal_mode' => null,
             'synchronous' => null,
         ],
-
+/*
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
