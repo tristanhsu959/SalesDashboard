@@ -21,6 +21,10 @@ class SigninController extends Controller
 		$this->_viewModel 	= $signinViewModel;
 	}
 	
+	/* Signin view
+	 * @params: request
+	 * @return: view
+	 */
 	public function showSignin()
 	{
 		return view('signin')->with('viewModel', $this->_viewModel);
@@ -28,7 +32,7 @@ class SigninController extends Controller
 	
 	/* 登入驗證
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function signin(Request $request)
 	{
@@ -60,9 +64,9 @@ class SigninController extends Controller
 			return redirect('home');
 	}
 	
-	/* 登出
+	/* Signout
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function signout(Request $request)
 	{

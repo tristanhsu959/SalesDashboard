@@ -30,7 +30,7 @@ class ResponseLib
 	}
 	
 	/* set to success : responseLib::initialize($initData)->success($resultData)->get()
-	 * @params: array
+	 * @params: string
 	 * @return: object
 	 */
 	public function success($msg = NULL)
@@ -44,7 +44,7 @@ class ResponseLib
 	}
 	
 	/* set to fail : responseLib::initialize($initData)->fail($msg)->get()
-	 * @params: array
+	 * @params: string
 	 * @return: object
 	 */
 	public function fail($msg = NULL)
@@ -57,6 +57,10 @@ class ResponseLib
 		return $this;
 	}
 	
+	/* Return response format
+	 * @params: string
+	 * @return: array
+	 */
 	public function get()
 	{
 		return $this->_response;

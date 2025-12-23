@@ -64,8 +64,7 @@ class RoleViewModel
 	
 	/* initialize
 	 * @params: enum
-	 * @params: int
-	 * @return: boolean
+	 * @return: void
 	 */
 	public function initialize($action)
 	{
@@ -78,8 +77,7 @@ class RoleViewModel
 	}
 	
 	/* Form所屬的參數選項
-	 * @params: enum
-	 * @params: array
+	 * @params:  
 	 * @return: void
 	 */
 	private function _setOptions()
@@ -91,7 +89,7 @@ class RoleViewModel
 	
 	/* Form submit action for edit
 	 * @params: 
-	 * @return: 
+	 * @return: string
 	 */
 	public function getFormAction() : string
     {
@@ -103,8 +101,12 @@ class RoleViewModel
 	}
 	
 	/* Keep user form data
-	 * @params: 
-	 * @return: string
+	 * @params: int
+	 * @params: string
+	 * @params: int
+	 * @params: array
+	 * @params: array
+	 * @return: void
 	 */
 	public function keepFormData($roldId = 0, $name = '', $group = 0, $permission = [], $area = [])
     {
@@ -116,7 +118,7 @@ class RoleViewModel
 		data_set($this->_data, 'roleData.area', $area);
 	}
 	
-	/* Role Data
+	/* Get role data
 	 * @params: 
 	 * @return: string
 	 */
@@ -150,7 +152,7 @@ class RoleViewModel
 	
 	/* 指登入使用者的功能CRUD權限(#call from Authorization trait)
 	 * @params: 
-	 * @return: string
+	 * @return: boolean
 	 */
 	public function canQuery()
 	{

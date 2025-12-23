@@ -56,15 +56,15 @@ class NewReleaseViewModel
 	
 	/* initialize
 	 * @params: enum
-	 * @params: int
+	 * @params: string
+	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($action , $segment, $configKey)
+	public function initialize($action , $configKey)
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']		= $action;
 		$this->_data['msg'] 		= '';
-		$this->_data['segment'] 	= $segment; #產URL用,因Search route共用
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
@@ -99,9 +99,10 @@ class NewReleaseViewModel
 		data_set($this->_data, 'search.endDate', $this->getDefaultSearchEndDate());
 	}
 	
-	/* Keep user search data
-	 * @params: 
-	 * @return: string
+	/* Keep form search data
+	 * @params: date
+	 * @params: date
+	 * @return: void
 	 */
 	public function keepSearchData($searchStDate, $searchEndDate)
     {
@@ -109,6 +110,11 @@ class NewReleaseViewModel
 		data_set($this->_data, 'search.endDate', $searchEndDate);
 	}
 	
+	/* Get initial data of search form 
+	 * @params: date
+	 * @params: date
+	 * @return: void
+	 */
 	public function getSearchStDate()
 	{
 		return data_get($this->_data, 'search.stDate', '');
@@ -128,6 +134,11 @@ class NewReleaseViewModel
 	public function getDefaultSearchEndDate()
     {
 		return data_get($this->_data, 'config.saleEndDate', NULL) ?? Carbon::now()->format('Y-m-d'); #date picker必須為Y-m-d才能正常顯示
+	}
+	
+	public function getSegment()
+    {
+		return Str::snake(data_get($this->_data, 'configKey'), '_');
 	}
 	
 	/* 取時間序

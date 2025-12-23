@@ -24,7 +24,7 @@ class UserController extends Controller
 	
 	/* 列表
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function list(Request $request)
 	{
@@ -45,7 +45,7 @@ class UserController extends Controller
 	
 	/* Search
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function search(Request $request)
 	{
@@ -73,7 +73,7 @@ class UserController extends Controller
 	
 	/* 新增Form
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function showCreate(Request $request)
 	{
@@ -87,7 +87,7 @@ class UserController extends Controller
 	
 	/* 新增 POST
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function create(Request $request)
 	{
@@ -126,7 +126,8 @@ class UserController extends Controller
 	
 	/* 編輯Form
 	 * @params: request
-	 * @return: array
+	 * @params: int	id
+	 * @return: view
 	 */
 	public function showUpdate(Request $request, $id)
 	{
@@ -150,7 +151,7 @@ class UserController extends Controller
 	
 	/* 編輯Form
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function update(Request $request)
 	{
@@ -191,7 +192,8 @@ class UserController extends Controller
 	
 	/* 刪除
 	 * @params: request
-	 * @return: array
+	 * @params: int	id
+	 * @return: view
 	 */
 	public function delete(Request $request, $id)
 	{

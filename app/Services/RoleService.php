@@ -31,7 +31,7 @@ class RoleService
 	
 	/* 取Role清單(Get ALL)
 	 * @params: 
-	 * @return: object array
+	 * @return: array
 	 */
 	public function getList()
 	{
@@ -59,9 +59,9 @@ class RoleService
 		}
 	}
 	
-	/* Create Role
+	/* Create role
 	 * @params: string
-	 * @params: string
+	 * @params: int
 	 * @params: array
 	 * @params: array
 	 * @return: array
@@ -84,9 +84,9 @@ class RoleService
 		}
 	}
 	
-	/* 取Role Data
+	/* Get role by id
 	 * @params: int
-	 * @return: object array
+	 * @return: array
 	 */
 	public function getRoleById($id)
 	{
@@ -109,7 +109,7 @@ class RoleService
 	/* Update Role
 	 * @params: int
 	 * @params: string
-	 * @params: string
+	 * @params: int
 	 * @params: array
 	 * @params: array
 	 * @return: array
@@ -134,7 +134,7 @@ class RoleService
 	
 	/* Remove Role
 	 * @params: int
-	 * @return: boolean
+	 * @return: array
 	 */
 	public function deleteRole($roleId)
 	{
@@ -150,10 +150,11 @@ class RoleService
 		}
 	}
 	
+	#todo: 應該可廢棄
 	/* CRUD Permission List
 	 * @params: 
 	 * @return: array
-	 */
+	 *
 	 public function getOperationPermissions()
 	 {
 		try
@@ -166,4 +167,5 @@ class RoleService
 			return [];
 		}
 	 }
+	 */
 }

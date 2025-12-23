@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\NewReleaseService;
+use App\Services\NewReleaseLocalService;
 use App\ViewModels\NewReleaseViewModel;
 use App\Enums\FormAction;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class NewReleaseController extends Controller
 	private $_service;
 	private $_viewModel;
 	
-	public function __construct(NewReleaseService $newReleaseService, NewReleaseViewModel $newReleaseViewModel)
+	public function __construct(NewReleaseLocalService $newReleaseService, NewReleaseViewModel $newReleaseViewModel)
 	{
 		$this->_service 	= $newReleaseService;
 		$this->_viewModel 	= $newReleaseViewModel;
@@ -27,7 +27,7 @@ class NewReleaseController extends Controller
 		$segment = $request->segment(2);
 		$configKey = $this->_service->convertConfigKey($segment);
 		
-		$this->_viewModel->initialize(FormAction::List, $segment, $configKey);
+		$this->_viewModel->initialize(FormAction::List, $configKey);
 		
 		if (empty($configKey))
 			$this->_viewModel->fail('無法識別產品ID');
@@ -38,19 +38,18 @@ class NewReleaseController extends Controller
 	
 	/* Search
 	 * @params: request
-	 * @return: array
+	 * @return: view
 	 */
 	public function search(Request $request)
 	{
 		#query params
-		$segment 	= $request->segment(2);
-		$configKey 	= $this->_service->convertConfigKey($segment);
+		$configKey 		= $request->input('configKey');
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		
-		$this->_viewModel->initialize(FormAction::List, $segment, $configKey);
+		$this->_viewModel->initialize(FormAction::List, $configKey);
 		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
-		
+	
 		$response = $this->_service->getStatistics($configKey, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)

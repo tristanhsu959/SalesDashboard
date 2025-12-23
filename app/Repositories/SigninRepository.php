@@ -15,13 +15,13 @@ class SigninRepository extends Repository
 		
 	}
 	
-	/* Get Signin User Data
+	/* Get user by account
 	 * @params: string
 	 * @return: array
 	 */
 	public function getUserByAccount($account)
 	{
-		$db = $this->connectSaleDashboard('user');
+		$db = $this->connectSalesDashboard('user');
 			
 		$result = $db->select('userId', 'userAd', 'userRoleId')
 					->where('userAd', '=', $account)
@@ -30,13 +30,13 @@ class SigninRepository extends Repository
 		return $result;
 	}
 	
-	/* Get Signin User Permission
-	 * @params: 
+	/* Get permission of the user
+	 * @params: int
 	 * @return: boolean
 	 */
 	public function getUserPermission($roleId)
 	{
-		$db = $this->connectSaleDashboard('role');
+		$db = $this->connectSalesDashboard('role');
 		
 		$result = $db->select('roleGroup', 'rolePermission', 'roleArea')
 					->where('roleId', '=', $roleId)

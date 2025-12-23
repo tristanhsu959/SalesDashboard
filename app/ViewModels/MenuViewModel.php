@@ -25,7 +25,7 @@ class MenuViewModel
 		return $this->_menu;
 	}
 	
-	/* 當前功能
+	/* Set current function active style
 	 * @params: string
 	 * @return: array
 	 */
