@@ -1,0 +1,32 @@
+/* list */
+
+body {
+	--theme-surface-bg : var(--theme-surface-l1);
+}
+
+.section-wrapper {
+	display: flex;
+	
+	margin-left: 1rem;
+	margin-right: 1rem;
+	
+	.purchase {
+		width: 320px;
+		height: 100%;
+		border-radius: 1rem;
+		padding: .75rem;
+		background: var(--theme-surface-bg);
+		
+		ul, li {
+			background-color: transparent;
+			border-color: transparent;
+		}
+		
+		h6 {
+			background-color: #ea80fc;
+		}
+	}
+	
+	
+}
+

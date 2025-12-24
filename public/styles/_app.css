@@ -30,10 +30,9 @@ body {
 	
 	/* list no data */
 	.section-wrapper {
-		&:first-child {
-			margin-top: 1.25rem;
+		&:first-of-type {
+			margin-top: .25rem;
 		}
-		
 		.empty-list {
 			.row {
 				padding: 0 .5rem;

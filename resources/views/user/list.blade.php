@@ -27,9 +27,9 @@
 	</form>
 
 	@if ($viewModel->canQuery())
-	<form action="{{ route('user.search') }}" method="post" id="searchForm">
-	@csrf
 	<section class="searchbar section-wrapper">
+		<form action="{{ route('user.search') }}" method="post" id="searchForm">
+		@csrf
 		<div class="input-field field-light-blue field">
 			<input type="text" class="form-control valid" id="searchAd" name="searchAd" value="{{ $viewModel->getSearchAd() }}" maxlength="20" placeholder=" ">
 			<label for="searchAd" class="form-label">AD帳號</label>
@@ -51,10 +51,11 @@
 			<span class="material-symbols-outlined filled-icon">search</span>
 		</button>
 		<button class="btn btn-search-reset" type="button">
-		<span class="material-symbols-outlined filled-icon">ink_eraser</span>
-	</button>
+			<span class="material-symbols-outlined filled-icon">ink_eraser</span>
+		</button>
+		</form>
 	</section>
-	</form>
+	
 
 	<section class="user-list section-wrapper">
 		@if(empty(($viewModel->list)))

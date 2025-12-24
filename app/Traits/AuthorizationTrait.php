@@ -96,7 +96,7 @@ trait AuthorizationTrait
 		#3.驗證使用者有權限的選單, 只要驗證到功能即可
 		foreach($menuConfig as $key => $group)
 		{
-			$authMenu[$key] = $group;
+			#$authMenu[$key] = $group;
 			$authItems = [];
 				
 			foreach($group['items'] as $functions)
@@ -104,8 +104,12 @@ trait AuthorizationTrait
 				if ($this->hasFunctionPermission($functions['code']))
 					$authItems[] = $functions;
 			}
-				
-			$authMenu[$key]['items'] = $authItems;
+			
+			if (! empty($authItems))
+			{
+				$authMenu[$key] = $group;
+				$authMenu[$key]['items'] = $authItems;
+			}
 		}
 		
 		session()->put(self::SESS_AUTH_MENU, $authMenu);
