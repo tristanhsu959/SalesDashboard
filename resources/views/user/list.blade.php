@@ -48,7 +48,7 @@
 			<label for="group" class="form-label">管理區域</label>
 		</div>
 		<button class="btn btn-search" type="button">
-			<span class="material-symbols-outlined filled-icon">search</span>
+			<span class="material-symbols-outlined filled-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">search</span>
 		</button>
 		<button class="btn btn-search-reset" type="button">
 			<span class="material-symbols-outlined filled-icon">ink_eraser</span>
