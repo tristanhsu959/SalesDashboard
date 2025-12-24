@@ -14,9 +14,10 @@ return [
 			'items' => [ 		#Function code or key => use Str::camel to check segment
 				'porkRibs',  
 				'tomatoBeef',
-				'braisedPork',
 				'eggTofu',
-				'braisedGravy',
+				#'braisedPork',
+				#'braisedGravy',
+				'porkGravy'#滷肉飯要加滷汁一起算
 			],
 		],
 		[
@@ -48,6 +49,14 @@ return [
 				Operation::READ
 			],
 		],
+		'eggTofu' => [
+			'code'	=> 'eggTofu',
+			'name' 		=> '老皮嫩肉',
+			'url' 		=> 'new_releases/egg_tofu',
+			'operation'	=> [
+				Operation::READ
+			],
+		],
 		'braisedPork'	=> [
 			'code'		=> 'braisedPork',
 			'name' 		=> '主廚秘製滷肉飯',
@@ -68,6 +77,15 @@ return [
 			'code'		=> 'braisedGravy',
 			'name' 		=> '秘製滷肉汁',
 			'url' 		=> 'new_releases/braised_gravy',
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		#滷肉飯加滷汁 = braisedPork + braisedGravy
+		'porkGravy' => [
+			'code'		=> 'porkGravy',
+			'name' 		=> '滷肉飯加滷汁',
+			'url' 		=> 'new_releases/pork_gravy',
 			'operation'	=> [
 				Operation::READ
 			],

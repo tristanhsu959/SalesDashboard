@@ -33,18 +33,6 @@ return [
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
-		'braisedPork' => [
-			'saleDate' => '2025-12-16',
-			'saleEndDate' => NULL, #停售日
-			'name' => '主廚秘製滷肉飯',
-			'ids' => [
-				'main' => ['UC01000005', 'UC01000006', 'UC06100107', 'UC06100108'], #梁社漢
-				'mapping' => ['PS02400028', 'PS02400029'], #八方(複合店)
-			],
-			'valueAdded' => '', #加值判別
-			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
-		],
-		
 		'eggTofu' => [
 			'saleDate' => '2025-12-16',
 			'saleEndDate' => NULL, #停售日
@@ -57,11 +45,37 @@ return [
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
 		
+		#滷肉飯要加滷汁一起算, 但config排程也會用到, 原設定不能動
+		'braisedPork' => [
+			'saleDate' => '2025-12-16',
+			'saleEndDate' => NULL, #停售日
+			'name' => '主廚秘製滷肉飯',
+			'ids' => [
+				'main' => ['UC01000005', 'UC01000006', 'UC06100107', 'UC06100108'], #梁社漢
+				'mapping' => ['PS02400028', 'PS02400029'], #八方(複合店)
+			],
+			'valueAdded' => '', #加值判別
+			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
+		],
+		
 		'braisedGravy' => [
 			'saleDate' => '2025-12-16',
 			'saleEndDate' => NULL, #停售日
 			'name' => '秘製滷肉汁',
 			'ids' => [
+				'main' => ['UC02300008'], #梁社漢
+				'mapping' => ['PS02300011', 'PS02300012'], #八方(複合店)
+			],
+			'valueAdded' => '秘製滷肉汁', #加值判別
+			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
+		],
+		#組合 braisedPork + braisedGravy
+		'porkGravy' => [
+			'saleDate' => '2025-12-16',
+			'saleEndDate' => NULL, #停售日
+			'name' => '滷肉飯加滷汁',
+			#ids, valueAdded條件不影響, 因排程是抓原來的config
+			'ids' => [ 
 				'main' => ['UC02300008'], #梁社漢
 				'mapping' => ['PS02300011', 'PS02300012'], #八方(複合店)
 			],
@@ -86,6 +100,7 @@ return [
 		'braisedPork' 	=> 'braised_pork',
 		'eggTofu' 		=> 'egg_tofu',
 		'braisedGravy' 	=> 'braised_gravy' ,
+		'porkGravy'		=> ['braised_pork', 'braised_gravy'],
 	],
 ];
 
