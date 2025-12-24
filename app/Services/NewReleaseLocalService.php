@@ -78,7 +78,8 @@ class NewReleaseLocalService
 			*/
 			$userInfo = $this->getSigninUserInfo();
 			$userAreaIds = $userInfo['area'];
-		
+			
+			#這裏取到的是collection array, 先不用toArray
 			$srcData = [];
 			$srcData = $this->_repository->getDataFromDB($configKey, $stDate, $endDate, $userAreaIds);
 			
@@ -105,17 +106,15 @@ class NewReleaseLocalService
 			
 			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
 			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日
-			$searchStDate	= new Carbon($searchStDate);
-			$searchEndDate	= new Carbon($searchEndDate);
 			$today 			= Carbon::now();
 			
-			#開始時間
-			$stDate 	= empty($searchStDate) ? $saleDate : $searchStDate;
+			#開始時間 | 先new Carbon, empty時不會是TRUE
+			$stDate 	= empty($searchStDate) ? $saleDate : new Carbon($searchStDate);
 			$stDate		= $saleDate->greaterThan($stDate) ? $saleDate : $stDate;
 			$stDate 	= $stDate->format('Y-m-d'); #local只有日期
 			
 			#結束時間
-			$endDate 	= empty($searchEndDate) ? $saleEndDate : $searchEndDate;
+			$endDate 	= empty($searchEndDate) ? $saleEndDate : new Carbon($searchEndDate);
 			$endDate	= $endDate->greaterThan($today) ? $today : $endDate;
 			$endDate	= $endDate->format('Y-m-d');
 			
@@ -129,7 +128,7 @@ class NewReleaseLocalService
 	}
 	
 	/* 取使用者可讀取區域資料(原主邏輯不動)
-	 * @params: array
+	 * @params: collection
 	 * @return: array
 	 */
 	private function _outputReport($srcData)
