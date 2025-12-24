@@ -336,6 +336,8 @@ class NewReleaseLocalService
 		$collection = collect($baseData);
 		$result = $collection->map(function($item, $key) use($endDate) {
 			$item['todayQty'] = intval(data_get($item, "dayQty.{$endDate}"));
+			#若剛好只有退貨或退貨大於銷售, 會是負值, 故統一顯示0, 不影響統計
+			$item['todayQty'] = ($item['todayQty'] < 0) ? 0 : $item['todayQty']; 
 			return $item;
 		});
 		
