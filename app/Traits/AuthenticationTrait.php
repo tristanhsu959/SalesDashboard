@@ -27,11 +27,11 @@ trait AuthenticationTrait
 			return [
 				"company" => "八方雲集國際股份有限公司",
 				"department" => "資訊處",
-				"title" => "經理",
-				"displayName" => "Tristan Hsu 許方毓",
-				"employeeId" => "T2025098",
-				"name" => "許方毓",
-				"mail" => "tristan.hsu@8way.com.tw",
+				"title" => "Machine #9",
+				"displayName" => "Akh",
+				"employeeId" => "T9099099",
+				"name" => "Akh",
+				"mail" => "machine.akh@8way.com.tw",
 			];
 		}
 		
