@@ -17,6 +17,7 @@
 @section('navAction', '')
 
 @section('content')
+{{--
 	<section class="section-wrapper">
 		<div class="purchase dp-2">
 			<h6>台北 屯山 結單</h6>
@@ -28,4 +29,5 @@
 			</ul>
 		</div>
 	</section>
+--}}
 @endsection
