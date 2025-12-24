@@ -11,9 +11,12 @@
 	@endif
 	<span class="navbar-action">
 		@yield('navAction')
+		
+		@sectionMissing('navHome')
 		<a class="btn btn-home" href="{{ route('home') }}" role="button">
 			<span class="material-symbols-outlined">home</span>
 		</a>
+		@endif
 		<a class="btn btn-profile" data-bs-toggle="offcanvas" href="#popup-profile" role="button" aria-controls="popup-profile">
 			<span class="material-symbols-outlined">person</span>
 		</a>

@@ -6,13 +6,13 @@ body {
 
 .content-wrapper {
 	
-	height: 100vh;
+	/* height: 100vh; */
 	
 	.searchbar {
 		display: flex;
 		align-items: center;
 		padding: .75rem;
-		margin: .25rem 1rem 1rem;
+		margin: 0 1rem 1rem;
 		border-radius: .5rem;
 		background: var(--theme-surface-bg);
 		box-sizing: border-box;
