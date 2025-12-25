@@ -62,14 +62,15 @@
 				align-items: center;
 				padding: .5rem 1rem;
 				text-decoration: none;
-				color: var(--menu-group-color);
+				/* color: var(--menu-group-color); */
 				
 				.material-symbols-outlined {
 					margin-right: .5rem;
 				}
 				
 				&:hover /*, &.active, &[aria-expanded='true']*/ {
-					color: var(--menu-hover-color);
+					/* color: var(--menu-hover-color); */
+					filter: brightness(150%);
 					cursor: pointer;
 				}
 				
