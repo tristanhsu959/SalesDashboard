@@ -18,6 +18,7 @@
 
 @section('content')
 <section class="section-wrapper">
+{{--
 	<div class="purchase dp-2">
 		<h6>台北 屯山</h6>
 		<ul class="list-group">
@@ -36,5 +37,6 @@
 			<li class="list-group-item"><span>非基改雞蛋豆腐</span><span>202 個</span></li>
 		</ul>
 	</div>
+--}}
 </section>
 @endsection

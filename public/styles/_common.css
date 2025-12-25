@@ -72,7 +72,8 @@ body {
 		0px 9px 46px 8px rgba(0, 0, 0, 0.12); 
 	}
 	
-	.material-symbols-outlined { /* accetn-1 */
+	/* Menu or common use */
+	.material-symbols-outlined, .menu-group a.list-title { /* accetn-1 */
 		&.purple {
 			color: #ea80fc;
 		}

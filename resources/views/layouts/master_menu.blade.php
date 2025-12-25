@@ -8,7 +8,7 @@
 	<div class="container-fluid">
 		@foreach($appMenu->getMenu() as $key => $group)
 		<div class="menu-group">
-			<a href="#collapse-{{ $key }}" class="list-title" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-{{ $key }}">
+			<a href="#collapse-{{ $key }}" class="list-title {{ $group['style']['color'] }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-{{ $key }}">
 				<span class="material-symbols-outlined {{ $group['style']['color'] }}">{{ $group['style']['icon'] }}</span>{{ $group['name'] }}
 			</a>
 			<ul id="collapse-{{ $key }}" class="list-group collapse">
