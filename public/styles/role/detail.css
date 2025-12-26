@@ -8,10 +8,10 @@ body {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	padding: .75rem;
+	padding: 1rem;
 	/* 	padding-top: 1rem; */ /* for input field */
-	margin-left: 1rem;
-	margin-right: 1rem;
+	/* margin-left: 1rem;
+	margin-right: 1rem; */
 	border-radius: .5rem;
 	background: var(--theme-surface-bg);
 	
@@ -156,7 +156,7 @@ body {
 	.role-area {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: flex-start;
+		justify-content: space-between;
 		/* border: 1px solid #ce93d8;
 		border-radius: .5rem; 
 		padding: 1rem;

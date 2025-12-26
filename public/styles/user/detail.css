@@ -9,11 +9,11 @@ body {
 	flex-direction: column;
 	justify-content: space-between;
 	
-	padding: .75rem;
+	padding: 1rem;
 	/* padding-top: 1rem; */ /* for input field */
 	/* margin top setting in _app */
-	margin-left: 1rem;
-	margin-right: 1rem;
+	/* margin-left: 1rem;
+	margin-right: 1rem; */
 	border-radius: .5rem;
 	background: var(--theme-surface-bg);
 	
@@ -43,7 +43,7 @@ body {
 		border: 1px solid #00bcd4;
 		border-radius: .5rem;
 		padding: 1rem;
-		margin-top: 1rem;
+		/* margin-top: 1rem; */
 		position: relative;
 		
 		&.required label.title:before {
