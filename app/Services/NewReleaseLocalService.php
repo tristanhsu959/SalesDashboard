@@ -76,8 +76,8 @@ class NewReleaseLocalService
 			  "SHOP_NAME" => "御廚中和直營店"
 			]
 			*/
-			$userInfo = $this->getSigninUserInfo();
-			$userAreaIds = $userInfo['area'];
+			$userInfo = $this->getCurrentUser();
+			$userAreaIds = $userInfo->area;
 			
 			#這裏取到的是collection array, 先不用toArray
 			$srcData = [];

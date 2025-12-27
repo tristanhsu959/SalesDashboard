@@ -47,4 +47,21 @@ trait AuthorizationTrait
 		
 		return session()->get(self::SESS_AUTH_USER);
 	}
+	
+	/* Check url link
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function hasRoutePermission($segments, $currentUser)
+	{
+		foreach($segments as $segment)
+		{
+			$functionCode = config("web.menu.functions.{$segment}.code");
+			
+			if ($currentUser->hasFunctionPermission($functionCode))
+				return TRUE;
+		}
+		
+		return FALSE;
+	}
 }

@@ -13,14 +13,11 @@ class RoleViewModel
 {
 	use MenuTrait;
 	
-	private $_service;
 	private $_title = '身份管理';
 	private $_data = [];
 	
-	public function __construct(RoleService $roleService)
+	public function __construct(protected RoleService $_service)
 	{
-		$this->_service = $roleService;
-		
 		#initialize
 		$this->_data['action'] 	= NULL; #enum form action
 		$this->_data['status']	= FALSE;

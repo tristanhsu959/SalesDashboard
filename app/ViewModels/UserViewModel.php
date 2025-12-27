@@ -10,14 +10,11 @@ use App\Enums\RoleGroup;
 
 class UserViewModel
 {
-	private $_service;
 	private $_title = '帳號管理';
 	private $_data = [];
 	
-	public function __construct(UserService $userService)
+	public function __construct(protected UserService $_service)
 	{
-		$this->_service = $userService;
-		
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
 		$this->_data['status']		= FALSE;
@@ -190,24 +187,24 @@ class UserViewModel
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function canQuery()
+	public function canQuery($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
 	}
 	
-	public function canCreate()
+	public function canCreate($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
 	}
 	
-	public function canUpdate()
+	public function canUpdate($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
 	}
 	
-	public function canDelete()
+	public function canDelete($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
 	}
 	
 	/* Form Style */
@@ -243,6 +240,6 @@ class UserViewModel
 	 */
 	public function disabledSupervisor($deleteRoleGroup)
 	{
-		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
+		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup);
 	}
 }

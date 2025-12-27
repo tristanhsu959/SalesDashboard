@@ -18,11 +18,9 @@ class UserService
 	private $_functionCode = 'users';
 	
 	private $_title = '帳號管理';
-	private $_repository;
-    
-	public function __construct(UserRepository $userRepository)
+	
+	public function __construct(protected UserRepository $_repository)
 	{
-		$this->_repository = $userRepository;
 	}
 	
 	/* Function code define (match to menu define)
@@ -185,20 +183,4 @@ class UserService
 		}
 	}
 	
-	/* CRUD Permission Check for Page
-	 * @params: int
-	 * @return: boolean
-	 *
-	 public function getOperationPermission()
-	 {
-		try
-		{
-			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
-		}
-	 }*/
 }

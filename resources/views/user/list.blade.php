@@ -12,7 +12,7 @@
 @section('navHead', $viewModel->getBreadcrumb())
 
 @section('navAction')
-@if($viewModel->canCreate())
+@if($viewModel->canCreate($currentUser))
 <a href="{{ route('user.create') }}" class="btn btn-create">
 	<span class="material-symbols-outlined filled-icon">add</span>
 	<span class="title">新增</span>
@@ -26,7 +26,7 @@
 	@csrf
 	</form>
 
-	@if ($viewModel->canQuery())
+	@if ($viewModel->canQuery($currentUser))
 	<section class="searchbar section-wrapper">
 		<form action="{{ route('user.search') }}" method="post" id="searchForm">
 		@csrf
@@ -88,16 +88,12 @@
 				<div class="col">{{ $viewModel->getRoleById($user['userRoleId']) }}</div>
 				<div class="col">{{ $user['updateAt'] }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate())
-					<a href="{{ route('user.update', [$user['userId']]) }}" class="btn btn-edit">
+					<a href="{{ route('user.update', [$user['userId']]) }}" class="btn btn-edit @disabled(! $viewModel->canUpdate($currentUser))">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
-					@endif
-					@if($viewModel->canDelete())
-					<a href="{{ route('user.delete.post', [$user['userId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($user['roleGroup']) }}">
+					<a href="{{ route('user.delete.post', [$user['userId']]) }}" class="btn btn-delete  @disabled(! $viewModel->canDelete($currentUser) || $viewModel->disabledSupervisor($user['roleGroup']))">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
-					@endif
 				</div>
 			</div>
 			@endforeach

@@ -23,12 +23,9 @@ class NewReleaseService
 	#private $_groupKey		= 'newRelease';
 	private $_configKey 	= '';
 	private $_statistics	= [];
-    private $_repository;
-	
-	public function __construct(NewReleaseRepository $newReleaseRepository)
+    
+	public function __construct(protected NewReleaseRepository $_repository)
 	{
-		$this->_repository = $newReleaseRepository;
-		
 		$this->_statistics = [
 			'startDate'	=> '', #Y-m-d
             'endDate'   => '',

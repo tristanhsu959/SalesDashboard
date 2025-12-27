@@ -13,13 +13,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-	private $_service;
-	private $_viewModel;
 	
-	public function __construct(UserService $userService, UserViewModel $userViewModel)
+	public function __construct(protected UserService $_service, protected UserViewModel $_viewModel)
 	{
-		$this->_service 	= $userService;
-		$this->_viewModel 	= $userViewModel;
 	}
 	
 	/* 列表
