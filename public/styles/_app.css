@@ -12,27 +12,29 @@ body {
 	/* background: linear-gradient(to bottom, #121212, #1c1c1c, #262626, #313131, #3c3c3c); */
 	/* menu + content-wrapper */
 	main {
+		max-width: 100vw;
 		min-height: 100vh;
+		padding: 0;
+		margin: 0;
 		display: flex; 
-		justify-content: cetner;
+		/* justify-content: cetner; */
 	}
 	
 	/* actionbar + section-wrapper */
 	.content-wrapper{
 		position: relative;
-		flex-grow: 1;
+		/* flex-grow: 1; */
 		width: calc(100vw - 256px - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
-		/* height: 100%; */ /* 100vh sticky會失效 */
+		/* height: calc(100vh - 64px); */ /* 100vh sticky會失效 */
 		box-sizing: border-box;
-		margin-bottom: 1rem;
-		background-color: transparent;
+		padding: 0 1rem 1rem;
 	}
 	
 	/* list no data */
 	.section-wrapper {
-		&:first-of-type {
+		/* &:first-of-type {
 			margin-top: .25rem;
-		}
+		} */
 		.empty-list {
 			.row {
 				padding: 0 .5rem;

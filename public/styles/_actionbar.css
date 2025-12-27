@@ -10,9 +10,10 @@
 	
 	/* Default */
 	color: var(--theme-primary-color);
-	padding-left: 1rem;
-	padding-right: 1rem;
+	/* padding-left: 1rem;
+	padding-right: 1rem; */
 	background-color: var(--nav-bg-color);
+	margin-bottom: .5rem;
 	
 	.navbar-home {
 		display: flex;
@@ -115,6 +116,7 @@
 			}
 		}
 		a.btn-return {
+			margin-left: 0;
 			margin-right: .5rem;
 			/* border: 1px solid #000; */
 			
