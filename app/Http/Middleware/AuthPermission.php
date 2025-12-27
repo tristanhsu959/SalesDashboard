@@ -17,13 +17,13 @@ class AuthPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-		$signinUser = $this->getSigninUserInfo();
+		// $signinUser = $this->getSigninUserInfo();
 		
-		if (empty($signinUser))
-			return redirect()->route('signin')->with('msg', '認證已過期，請重新登入');
+		// if (empty($signinUser))
+			// return redirect()->route('signin')->with('msg', '認證已過期，請重新登入');
 		
-		if (empty($signinUser['permission']) && ! $this->isSupervisor())
-			return redirect()->route('signin')->with('msg', '使用者尚無系統授權');
+		// if (empty($signinUser['permission']) && ! $this->isSupervisor())
+			// return redirect()->route('signin')->with('msg', '使用者尚無系統授權');
 		
         return $next($request);
     }

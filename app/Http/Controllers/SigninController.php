@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\SigninService;
+use App\Services\AppService;
 use App\ViewModels\SigninViewModel;
 use App\Libraries\ResponseLib;
 use App\Enums\FormAction;
@@ -12,13 +12,9 @@ use Illuminate\Support\Facades\Validator;
 
 class SigninController extends Controller
 {
-	private $_service;
-	private $_viewModel;
 	
-	public function __construct(SigninService $signinService, SigninViewModel $signinViewModel)
+	public function __construct(protected AppService $_service, protected SigninViewModel $_viewModel)
 	{
-		$this->_service 	= $signinService;
-		$this->_viewModel 	= $signinViewModel;
 	}
 	
 	/* Signin view
@@ -53,7 +49,7 @@ class SigninController extends Controller
 			return view('signin')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->authSiginIn($adAccount, $adPassword);
+		$response = $this->_service->siginIn($adAccount, $adPassword);
 		
 		if ($response->status === FALSE)
 		{

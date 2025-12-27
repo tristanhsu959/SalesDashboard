@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Carbon;
 use Exception;
 
 class SigninRepository extends Repository
@@ -19,11 +18,27 @@ class SigninRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getUserByAccount($account)
+	public function getByAccount($account)
+	{
+		$user = $this->_getUserByAccount($account);
+		
+		#Parsing
+		$user['permission'] = empty($user['rolePermission']) ? [] : json_decode($user['rolePermission'], TRUE);
+		$user['area'] 		= empty($user['roleArea']) ? [] : json_decode($user['roleArea'], TRUE);
+			
+		return $user;
+	}
+	
+	/* Get permission of the user
+	 * @params: int
+	 * @return: boolean
+	 */
+	private function _getUserByAccount($account)
 	{
 		$db = $this->connectSalesDashboard('user');
 			
-		$result = $db->select('userId', 'userAd', 'userRoleId')
+		$result = $db->select('userId', 'userAd', 'userRoleId', 'roleGroup', 'rolePermission', 'roleArea')
+					->join('role', 'userRoleId', '=', 'roleId')
 					->where('userAd', '=', $account)
 					->get()->first();
 		

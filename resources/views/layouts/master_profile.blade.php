@@ -8,28 +8,28 @@
 	<div class="offcanvas-body">
 		<div class="section info-head">
 			<span class="material-symbols-outlined filled-icon">assignment_ind</span>
-			<p>{{ $signinInfo['employeeId'] }}</p>
-			<p class="name">{{ $signinInfo['displayName'] }}</p>
-			<p class="mail">{{ $signinInfo['mail'] }}</p>
+			<p>{{ $currentUser->employeeId }}</p>
+			<p class="name">{{ $currentUser->displayName }}</p>
+			<p class="mail">{{ $currentUser->mail }}</p>
 		</div>
 		<div class="section info-body">
 			<p>
-				<span>{{ $signinInfo['department'] }}</span>
-				<span>{{ $signinInfo['title'] }}</span>
+				<span>{{ $currentUser->department }}</span>
+				<span>{{ $currentUser->title }}</span>
 			</p>
 			<p>
 				<span>管理區域</span>
-				@if(empty($signinInfo['area']))
+				@if(empty($currentUser->area))
 					<span class="text-danger">未設定</span>
 				@else
 					<div class="user-area">
-					@foreach($signinInfo['area'] as $area)
+					@foreach($currentUser->area as $area)
 						<span class="badge">{{ Area::getLabelByValue($area) }}</span>
 					@endforeach
 					</div>
 				@endif
 			</p>
-			<p>{{ $signinInfo['company'] }}</p>
+			<p>{{ $currentUser->company }}</p>
 		</div>
 		<a href="{{ route('signout') }}" class="btn btn-signout" type="button">
 			<span class="material-symbols-outlined filled-icon">logout</span>
