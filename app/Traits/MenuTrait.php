@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Str;
 
 /* 負責登入後相關授權邏輯判別, 只針對登入使用者 */
 trait MenuTrait

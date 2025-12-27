@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\RoleRepository;
-use App\Traits\AuthorizationTrait;
-#use App\Traits\RolePermissionTrait;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -14,7 +12,7 @@ use Log;
 
 class RoleService
 {
-	use AuthorizationTrait;
+	// use AuthorizationTrait;
 	
 	private $_functionCode = 'roles';
 	private $_repository;
@@ -150,22 +148,4 @@ class RoleService
 		}
 	}
 	
-	#todo: 應該可廢棄
-	/* CRUD Permission List
-	 * @params: 
-	 * @return: array
-	 *
-	 public function getOperationPermissions()
-	 {
-		try
-		{
-			return $this->getOperationPermissionsByFunction($this->_functionCode);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
-		}
-	 }
-	 */
 }

@@ -34,7 +34,7 @@
 		</div>
 		<div class="input-select field-purple field required">
 			<select class="form-select" id="group" name="group">
-				<option value="">請選擇</option>
+				<!--option value="">請選擇</option-->
 				@foreach($viewModel->option['roleGroupList'] as $role)
 				<option value="{{ $role->value }}" @selected($viewModel->selectedRoleGroup($role->value)) >
 				{{ $role->label() }}

@@ -49,13 +49,27 @@ class CurrentUser
 		if ($this->isSupervisor())
 			return TRUE;
 		
-		$userPermission		= data_get($this->_data, 'permission', []);
-		$functionCodeList	= array_keys($userPermission); #Key same as code
+		$userPermission	= data_get($this->_data, 'permission', []);
+		$userFunctions	= array_keys($userPermission); #Key same as code
 		
-		return in_array($functionCode, $functionCodeList);
+		return in_array($functionCode, $userFunctions);
 	}
 	
-	
+	/* Auth permission of CRUD by current user
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasOperationPermission($functionCode, $operationValue)
+	{
+		if ($this->isSupervisor())
+			return TRUE;
+		
+		$userPermission = data_get($this->_data, 'permission', []);
+		$userOperations = data_get($userPermission, $functionCode, []); #array
+		
+		return in_array($operationValue, $userOperations);
+	}
 	
 	
 	
@@ -84,20 +98,6 @@ class CurrentUser
 	
 	
 	
-	/* Auth permission of CRUD by current user
-	 * @params: string
-	 * @params: string
-	 * @return: boolean
-	 */
-	public function hasOperationPermission($functionCode, $operationValue)
-	{
-		if ($this->isSupervisor())
-			return TRUE;
-		
-		$userPermission = $this->getSigninUserPermission();
-		$userOperations = data_get($userPermission, $functionCode, []); #array
-		
-		return in_array($operationValue, $userOperations);
-	}
+	
 	
 }

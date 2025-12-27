@@ -3,7 +3,7 @@
 namespace App\ViewModels;
 
 use App\Services\RoleService;
-use App\Libraries\MenuLib;
+use App\Traits\MenuTrait;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
 use App\Enums\Operation;
@@ -11,6 +11,8 @@ use App\Enums\Area;
 
 class RoleViewModel
 {
+	use MenuTrait;
+	
 	private $_service;
 	private $_title = '身份管理';
 	private $_data = [];
@@ -83,7 +85,7 @@ class RoleViewModel
 	private function _setOptions()
 	{
 		$this->_data['option']['roleGroupList'] = RoleGroup::cases();
-		$this->_data['option']['functionList']	= MenuLib::all();
+		$this->_data['option']['functionList']	= $this->getMenu();
 		$this->_data['option']['areaList'] 		= Area::cases(); #enum
 	}
 	
@@ -110,7 +112,8 @@ class RoleViewModel
 	 */
 	public function keepFormData($roldId = 0, $name = '', $group = 0, $permission = [], $area = [])
     {
-		#todo area
+		$group = empty($group) ? RoleGroup::USER->value : $group; #default
+			
 		data_set($this->_data, 'roleData.id', $roldId);
 		data_set($this->_data, 'roleData.name', $name);
 		data_set($this->_data, 'roleData.group', $group);
@@ -154,24 +157,25 @@ class RoleViewModel
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function canQuery()
+	public function canQuery($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
 	}
 	
-	public function canCreate()
+	public function canCreate($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
+		#show/hide
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
 	}
 	
-	public function canUpdate()
+	public function canUpdate($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
 	}
 	
-	public function canDelete()
+	public function canDelete($currentUser)
 	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
+		return $currentUser->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
 	}
 	
 	
@@ -214,6 +218,6 @@ class RoleViewModel
 	
 	public function disabledSupervisor($deleteRoleGroup)
 	{
-		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
+		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup);
 	}
 }
