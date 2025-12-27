@@ -11,13 +11,9 @@ use Illuminate\Support\Facades\Validator;
 
 class RoleController extends Controller
 {
-	private $_service;
-	private $_viewModel;
 	
-	public function __construct(RoleService $roleService, RoleViewModel $roleViewModel)
+	public function __construct(protected RoleService $_service, protected RoleViewModel $_viewModel)
 	{
-		$this->_service		= $roleService;
-		$this->_viewModel 	= $roleViewModel;
 	}
 	
 	/* 列表

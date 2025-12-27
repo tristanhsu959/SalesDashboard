@@ -15,11 +15,9 @@ class RoleService
 	// use AuthorizationTrait;
 	
 	private $_functionCode = 'roles';
-	private $_repository;
-    
-	public function __construct(RoleRepository $roleRepository)
+	
+	public function __construct(protected RoleRepository $_repository)
 	{
-		$this->_repository = $roleRepository;
 	}
 	
 	public function getFunctionCode()
