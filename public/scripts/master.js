@@ -1,6 +1,10 @@
 /* Common JS */
 
 $(function(){
+	$(document).on('contextmenu', function(e){
+		e.preventDefault();
+	});
+	
 	/* Menu */
 	$('.menu .menu-group').each(function($item, $key){
 		$(this).find('a.list-title').removeClass('active');
