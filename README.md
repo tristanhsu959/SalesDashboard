@@ -65,3 +65,12 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+
+## ENV Files Config
+.env.local : 本地開發
+.env.develop : 正式機的Develop環境設定
+.env.production : 正式機的Production環境設定
+
+Apache has config var : APP_ENV (Local無此設定)
+1.將APP_ENV設定為對應的env檔
+2.同時copy and rename to .env : 排程只能讀取到.env
