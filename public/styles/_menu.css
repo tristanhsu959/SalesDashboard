@@ -117,3 +117,16 @@
 		}
 	}
 }
+
+/* Menu color define */
+.material-symbols-outlined, .menu-group a.list-title { /* accetn-1 */
+	&.purple {
+		color: #ea80fc;
+	}
+	&.red {
+		color: #ff8a80;
+	}
+	&.teal {
+		color: #a7ffeb;
+	}
+}

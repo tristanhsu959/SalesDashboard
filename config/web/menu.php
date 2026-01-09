@@ -21,6 +21,14 @@ return [
 			],
 		],
 		[
+			'name' 	=> '進銷存報表',
+			'style' => ['icon' => 'trolley', 'color' => 'teal'], #filled-icon 
+			'type'	=> [RoleGroup::USER->name],
+			'items' => [ 		#Function code or key => use Str::camel to check segment
+				'purchase',  
+			],
+		],
+		[
 			'name'	=> '權限管理',
 			'style' => ['icon' => 'admin_panel_settings', 'color' => 'red'],
 			'type' 	=> [RoleGroup::ADMIN->name, RoleGroup::SUPERVISOR->name],
@@ -33,6 +41,16 @@ return [
 	
 	#Function
 	'functions' => [
+		/* 進銷存報表 */
+		'purchase' => [
+			'code'		=> 'purchase', #判別用
+			'name'		=> '進貨',
+			'url' 		=> 'purchase', 
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		/* 新品銷售 */
 		'porkRibs' => [
 			'code'		=> 'porkRibs', #判別用
 			'name'		=> '橙汁排骨',
@@ -90,6 +108,7 @@ return [
 				Operation::READ
 			],
 		],
+		/* 權限管理 */
 		'users' => [
 			'code'		=> 'users',
 			'name' 		=> '帳號管理',

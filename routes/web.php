@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Middleware\AuthPermission;
 
 /* Login */
@@ -26,6 +27,10 @@ Route::middleware([AuthPermission::class])->group(function(){
 	#Route::get('new_releases/braised_gravy', [NewReleaseController::class, 'index']);
 	Route::get('new_releases/pork_gravy', [NewReleaseController::class, 'index']);
 	Route::post('new_releases/{segment}/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
+	
+	/* 進銷存報表 */
+	Route::get('purchase', [PurchaseController::class, 'index']);
+	Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
 	
 	/* 身份管理 */
 	Route::get('roles', [RoleController::class, 'list'])->name('role.list');

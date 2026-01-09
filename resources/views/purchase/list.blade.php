@@ -2,38 +2,42 @@
 @use('App\Enums\Area')
 
 @push('styles')
-    <link href="{{ asset('styles/new_release/new_release.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/purchase/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/new_release/new_release.js') }}" defer></script>
+    <script src="{{ asset('scripts/purchase/list.js') }}" defer></script>
 @endpush
 
 @section('navHead')
 {{ $viewModel->getBreadcrumb() }}
-<div class="new-release-info">
-	<div>發售日</div>
-	<div>{{ $viewModel->getSaleDate() }}</div>
-</div>
 @endsection
 
 
 @section('content')
 <!-- Search by Date -->
-<form action="{{ route('new_releases.search', ['segment' => $viewModel->getSegment() ]) }}" method="post" id="searchForm">
+<form action="{{ route('purchase.search') }}" method="post" id="searchForm">
 @csrf
-<input type="hidden" name="configKey" value="{{ $viewModel->configKey }}">
 <section class="searchbar section-wrapper dp-2">
-	<div class="input-field field-light-blue field">
+	<div class="input-select field-cyan field">
+		<select class="form-select" id="searchBrand" name="searchBrand">
+			<!--option value="">請選擇</option-->
+			@foreach($viewModel->option['brandList'] as $brand)
+			<option value="{{ $brand->value }}" @selected($brand->value == $viewModel->getSearchBrand()) >{{ $brand->label() }}</option>
+			@endforeach
+		</select>
+		<label for="group" class="form-label">品牌</label>
+	</div>
+	<div class="input-field field-cyan field">
 		<input type="date" class="form-control valid" 
 			id="searchStDate" name="searchStDate" value="{{ $viewModel->getSearchStDate() }}" 
-			maxlength="10" placeholder=" " min="{{ $viewModel->getSaleDate() }}">
+			maxlength="10" placeholder=" ">
 		<label for="searchStDate" class="form-label">開始日期</label>
 	</div>
-	<div class="input-field field-light-blue field">
+	<div class="input-field field-cyan field">
 		<input type="date" class="form-control valid" 
 			id="searchEndDate" name="searchEndDate" value="{{ $viewModel->getSearchEndDate() }}" 
-			maxlength="10" placeholder=" " max="{{ $viewModel->getSaleEndDate() }}">
+			maxlength="10" placeholder=" " max="{{ now()->format('Y-m-d') }}">
 		<label for="searchEndDate" class="form-label">結束日期</label>
 	</div>
 	
@@ -58,12 +62,6 @@
 		<button class="nav-link" id="nav-shop-tab" type="button" role="tab" 
 			data-bs-toggle="pill" data-bs-target="#shop" aria-controls="nav-shop" aria-selected="true">
 			店別明細
-		</button>
-	</li>
-	<li class="nav-item" role="presentation">
-		<button class="nav-link" id="nav-ranking-tab" type="button" role="tab" 
-			data-bs-toggle="pill" data-bs-target="#ranking" aria-controls="nav-ranking" aria-selected="true">
-			銷售排名
 		</button>
 	</li>
 </ul>
@@ -143,58 +141,6 @@
 					@endforeach
 				</tbody>
 			</table>
-		</section>
-		@endif
-	</div>
-	
-	<!-- 銷售排名 -->
-	<div class="tab-pane fade" id="ranking" role="tabpanel" aria-labelledby="nav-ranking-tab" tabindex="0">
-		@if(empty($viewModel->statistics['top']) && empty($viewModel->statistics['last']))
-		<section class="statistics-ranking section-wrapper empty">
-			無符合資料或無瀏覽權限
-		</section>
-		@else
-		<section class="statistics-ranking section-wrapper container-fluid">
-			<div class="card ranking-top">
-				<div class="card-body">
-					<h5 class="card-title">當日銷售前10名</h5>
-					<ul class="list-group">
-					@foreach($viewModel->statistics['top'] as $ranking => $shopGroup)
-						@foreach($shopGroup as $shop)
-						<li class="list-group-item">
-							<div class="ranking">{{ $ranking + 1 }}</div>
-							<div class="info">
-								{{ Area::getLabelByValue($shop['area']) }}
-								<div class="name">{{ $shop['shopName'] }}</div>
-								<span>{{ $shop['shopId'] }}</span>
-							</div>
-							<span class="badge rounded-pill">{{ $shop['todayQty'] }}</span>
-						</li>
-						@endforeach
-					@endforeach
-					</ul>
-				</div>
-			</div>
-			<div class="card ranking-last">
-				<div class="card-body">
-					<h5 class="card-title">當日銷售後10名</h5>
-					<ul class="list-group">
-					@foreach($viewModel->statistics['last'] as $ranking => $shopGroup)
-						@foreach($shopGroup as $shop)
-						<li class="list-group-item">
-							<div class="ranking">{{ $ranking + 1 }}</div>
-							<div class="info">
-								{{ Area::getLabelByValue($shop['area']) }}
-								<div class="name">{{ $shop['shopName'] }}</div>
-								<span>{{ $shop['shopId'] }}</span>
-							</div>
-							<span class="badge rounded-pill">{{ $shop['todayQty'] }}</span>
-						</li>
-						@endforeach
-					@endforeach	
-					</ul>
-				</div>
-			</div>
 		</section>
 		@endif
 	</div>

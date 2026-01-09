@@ -27,6 +27,26 @@ class Repository
 			return DB::connection('SalesDashboard')->table($table); #無法用nolock
 	}
 	
+	#屯山(北區)
+	protected function connectOrderTS($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('OrderTS');
+		else
+			return DB::connection('OrderTS')->table($table)->lock('WITH(NOLOCK)'); 
+	}
+	
+	#二崙(南區)
+	protected function connectOrderRL($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('OrderRL');
+		else
+			return DB::connection('OrderRL')->table($table)->lock('WITH(NOLOCK)'); 
+	}
+	
+	
+	
 	/* 原測試機已改為Local MySql */
 	/*protected function connectSaleDashboard($table = NULL)
 	{

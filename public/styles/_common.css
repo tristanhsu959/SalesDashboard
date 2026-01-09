@@ -72,15 +72,7 @@ body {
 		0px 9px 46px 8px rgba(0, 0, 0, 0.12); 
 	}
 	
-	/* Menu or common use */
-	.material-symbols-outlined, .menu-group a.list-title { /* accetn-1 */
-		&.purple {
-			color: #ea80fc;
-		}
-		&.red {
-			color: #ff8a80;
-		}
-	}
+	
 }
 
 /* Theme Base Color Define */

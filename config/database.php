@@ -84,7 +84,35 @@ return [
             'prefix_indexes' => true,
 			'fetch' => PDO::FETCH_ASSOC,
         ],
-		
+		#舊訂貨系統
+		'OrderTS' => [
+            'driver' => 'sqlsrv',
+            #'url' => env('DATABASE_URL'),
+            'host' => env('OTS_DB_HOST', '65.52.163.96'),
+            'port' => env('OTS_DB_PORT', '1433'),
+            'database' => env('OTS_DB_DATABASE', 'OrderTS'),
+            'username' => env('OTS_DB_USERNAME', 'OrderSystem'),
+            'password' => env('OTS_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+        ],
+		'OrderRL' => [
+            'driver' => 'sqlsrv',
+            #'url' => env('DATABASE_URL'),
+            'host' => env('ORL_DB_HOST', '65.52.163.96'),
+            'port' => env('ORL_DB_PORT', '1433'),
+            'database' => env('ORL_DB_DATABASE', 'OrderTS'),
+            'username' => env('ORL_DB_USERNAME', 'OrderSystem'),
+            'password' => env('ORL_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+        ],
 		
         'sqlite' => [
             'driver' => 'sqlite',
