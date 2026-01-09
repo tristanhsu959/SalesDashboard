@@ -27,6 +27,7 @@ class PurchaseService
 	{
 		$this->_statistics = [
 			'brand'		=> '',
+			'header'	=> [],
 			'shop' 		=> [],
 			'area' 		=> [],
 		];
@@ -46,6 +47,8 @@ class PurchaseService
 			if ($searchBrand != Brand::BUYGOOD->value)
 				throw new Exception('無品牌代碼');
 			
+			$this->_statistics['brand'] = $searchBrand;
+			
 			#1. Get data
 			$srcData = [];
 			$srcData = $this->_getBaseDataByBg($searchStDate, $searchEndDate);
@@ -57,8 +60,9 @@ class PurchaseService
 				$srcData = $this->_getBaseDataByBf($searchStDate, $searchEndDate);
 			*/
 			
-			return $this->_outputReport($srcData);
+			$statistics = $this->_outputReport($srcData);
 			
+			return $statistics;
 		}
 		catch(Exception $e)
 		{
@@ -156,18 +160,18 @@ class PurchaseService
 	{
 		try
 		{
-			#1.Build base data(所有資料By ShopId)
-			$baseData = $this->_buildBaseData($srcData);
+			#1.Filter By Area (By User Permission)
+			$baseData = $this->_filterByAreaPermission($srcData);
 			
-			#3.Filter By Area (By User Permission)
-			$baseData = $this->_filterByAreaPermission($baseData);
-			dd($baseData);
 			/* Statistics Start */
-			#6.店別每日銷售
-			// $this->_statistics['shop'] = $this->_parsingByShop($baseData, $diffDays);
-				
-			#7.區域彙總
-			// $this->_statistics['area'] = $this->_parsingByArea($baseData, $diffDays);
+			#2.建共用Header, by product
+			$this->_statistics['header'] = $this->_buildListHeader($baseData);
+			
+			#3.By店別
+			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
+			
+			#4.區域彙總
+			$this->_statistics['area'] = $this->_parsingByArea($baseData);
 				
 			return ResponseLib::initialize($this->_statistics)->success();
 		}
@@ -178,13 +182,44 @@ class PurchaseService
 		}
 	}
 	
-	/* 先分組成可共用的基底資料
+	/* 區域權限過濾
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($sourceData)
+	private function _filterByAreaPermission($srcData)
 	{
-		/* 重整資料格式, 取區域
+		$userInfo = $this->getSigninUserInfo();
+		$userAreaIds = $userInfo['area'];
+		
+		$baseData = Arr::reject($srcData, function ($item, $key) use($userAreaIds) {
+			return ! in_array($item['areaId'], $userAreaIds);
+		});
+		
+		return $baseData;
+	}
+	
+	/* List header
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildListHeader($sourceData)
+	{
+		$sourceData = collect($sourceData);
+		$header = $sourceData->mapToGroups(function (array $item, int $key){
+			return [$item['productNo'] => $item['productName']];
+		})->map(function($item, int $key){
+			return $item[0];
+		})->sortKeys()->toArray();
+		
+		return $header;
+	}
+	/* By店別進貨統計
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _parsingByShop($sourceData)
+	{
+		/* 重整資料格式
 		[
 			"orderDate" => "2026-01-08"
 			"shopId" => "330005"
@@ -210,6 +245,7 @@ class PurchaseService
 				$temp['shopName'] 	= $item->pluck('shopName')->get(0);
 				$temp['areaId'] 	= $item->pluck('areaId')->get(0);
 				$temp['area'] 		= $item->pluck('area')->get(0);
+				$temp['totalAmount']= $item->pluck('amount')->sum();
 				
 				$temp['products'] 	= $item->groupBy('productNo')
 					->map(function($item, $key){
@@ -220,7 +256,7 @@ class PurchaseService
 						$temp['amount'] 		= $item->sum('amount');
 						$item = $temp;
 						return $item;
-					})->toArray();
+					})->sortKeys()->toArray();
 				
 				$item = $temp;	
 				return $item;
@@ -231,77 +267,24 @@ class PurchaseService
 		return $result;
 	}
 	
-	/* 區域權限過濾
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _filterByAreaPermission($baseData)
-	{
-		$userInfo = $this->getSigninUserInfo();
-		$userAreaIds = $userInfo['area'];
-		
-		$baseData = Arr::reject($baseData, function ($item, $key) use($userAreaIds) {
-			return ! in_array($item['areaId'], $userAreaIds);
-		});
-		
-		return $baseData;
-	}
-	
-	
-	/* 店別每日銷售
-	 * @params: array
-	 * @params: int
-	 * @return: array
-	 */
-	private function _parsingByShop($baseData, $diffDays)
-	{
-		/* 
-		[
-		330002 => [
-		  "shopId" => "330002"
-		  "shopName" => "御廚桃園中山東店"
-		  "area" => "桃竹苗區"
-		  "dayQty" =>  [
-			"2025-09-15" => 6.0
-			"2025-09-14" => 7.0
-			]
-		  "totalQty" => 13.0
-		  "totalAvg" => 6.5
-		]
-		*/
-		
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [];
-		
-		#基本資料已有, 只要再計算=>銷售總量|平均銷售數量
-		$result = Arr::map($baseData, function($value, $key) use($diffDays) {
-			
-			$value['totalQty'] = array_sum($value['dayQty']); #所有日銷售量總和/店
-			$value['totalAvg'] = round($value['totalQty'] / $diffDays, 1); #銷售量總和
-			return $value;
-		});
-		
-		$result = Arr::sort($result);
-		
-		return $result;
-	}
-	
 	/* 區域彙總
 	 * @params: array
 	 * @params: int
 	 * @return: array
 	 */
-	private function _parsingByArea($baseData, $diffDays)
+	private function _parsingByArea($baseData)
 	{
 		/*
 		"area" => [
 			"大台北區" => [
-				"shopCount" => 101
-				"totalQty" => 22208
-				"avgDayQty" => 965.6
-				"avgShopQty" => 219.9
-				"avgDayShopQty" => 9.6
+				"totalAmount" => 101
+				"products" => [
+					'productNo'
+					'productName'
+					'unit'
+					'quantity'
+					'amount'
+				]
 			]
 			"大高雄區" => array:5 []
 			"宜蘭區" => array:5 []
@@ -315,152 +298,34 @@ class PurchaseService
 			return [];
 		
 		$collection = collect($baseData);
-		$data = $collection->groupBy('area')->map(function($item, $key) use($diffDays) {
-			$temp['shopCount']		= count($item); #店家數
-			$temp['totalQty'] 		= intval($item->pluck('dayQty')->flatten()->sum()); #區域銷售總量
-			$temp['avgDayQty'] 		= round($temp['totalQty'] / $diffDays, 1); #區域平均日銷售量: 區域銷售總量/天數
-			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
-			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $diffDays / $temp['shopCount'], 1); #區域每店平均日銷量: 區域銷售總量/店家數/天數
-			
-			return $temp;
-		})->toArray();
+		$data = $collection->groupBy('areaId')
+			->map(function($item, $key) {
+				$temp['totalAmount']= $item->pluck('amount')->sum();
+				$temp['products'] 	= $item->groupBy('productNo')
+					->map(function($item, $key){
+						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
+						$temp['productName'] 	= $item->pluck('productName')->get(0);
+						$temp['unit'] 			= $item->pluck('unit')->get(0);
+						$temp['quantity'] 		= $item->sum('quantity');
+						$temp['amount'] 		= $item->sum('amount');
+						
+						$item = $temp;
+						return $item;
+					})->sortKeys()->toArray();
+				
+				$item = $temp;	
+				return $item;
+				
+			})->toArray();
 		
 		#重排區域的順序以保持顯示一致(系統跑會依抓到資料的順序)
-		$result['大台北區'] 	= data_get($data, Area::TAIPEI->value, []);
-		$result['宜蘭區'] 	= data_get($data, Area::YILAN->value, []);
-		$result['桃竹苗區'] 	= data_get($data, Area::TCM->value, []);
-		$result['中彰投區'] 	= data_get($data, Area::CCT->value, []);
-		$result['雲嘉南區'] 	= data_get($data, Area::YCN->value, []);
-		$result['大高雄區'] 	= data_get($data, Area::KAOHSIUNG->value, []);
-		
-		$result['total']['shopCount'] 	= collect($data)->pluck('shopCount')->sum(); 
-		$result['total']['totalQty'] 	= collect($data)->pluck('totalQty')->sum();
-		$result['total']['avgDayQty'] 	= collect($data)->pluck('avgDayQty')->sum();
-		$result['total']['avgShopQty'] 	= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
-		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
+		$result[Area::TAIPEI->label()] 		= data_get($data, Area::TAIPEI->value, []);
+		$result[Area::YILAN->label()] 		= data_get($data, Area::YILAN->value, []);
+		$result[Area::TCM->label()] 		= data_get($data, Area::TCM->value, []);
+		$result[Area::CCT->label()] 		= data_get($data, Area::CCT->value, []);
+		$result[Area::YCN->label()] 		= data_get($data, Area::YCN->value, []);
+		$result[Area::KAOHSIUNG->label()] 	= data_get($data, Area::KAOHSIUNG->value, []);
 		
 		return $result;
 	}
-	
-	/* 當日銷售前10名
-	 * @params: array
-	 * @params: date
-	 * @return: array
-	 */
-	private function _parsingByRanking($baseData, $endDate)
-	{
-		/* 以銷售量來group shop
-		[
-		29 => [
-			0 => [
-				"shopId" => "103001"
-				"shopName" => "御廚民生承德直營店"
-				"area" => "大台北區"
-				"dayQty" => array:5 [▶]
-				"todayQty" => 29
-			]
-		]
-		*/
-		
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [[], []];
-		
-		#排名是依最後一天的值
-		$collection = collect($baseData);
-		$result = $collection->map(function($item, $key) use($endDate) {
-			$item['todayQty'] = intval(data_get($item, "dayQty.{$endDate}"));
-			return $item;
-		});
-		
-		$top = $result->sortByDesc('todayQty')->groupBy('todayQty')->take(10)->values()->toArray();
-		$last = $result->sortBy('todayQty')->groupBy('todayQty')->take(10)->values()->toArray();
-		
-		return [$top, $last];
-	}
-	
-	/* ===== 暫廢棄 ===== */
-	/* CRUD Permission Check for Page
-	 * @params: int
-	 * @return: boolean
-	 *
-	 public function getOperationPermission()
-	 {
-		try
-		{
-			return $this->allowOperationPermissionList($this->_groupKey, $this->_configKey);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return [];
-		}
-	 }*/
-	 
-	/* ===== 原Business Login, 流程已變更 - 暫廢棄 ===== */
-	/* 取新品銷售統計-主流程
-	 * @params: string
-	 * @params: string
-	 * @return: array
-	 */
-	/*public function processStatistics($cacheKey)
-	{
-		#initialize
-		$statistics = [
-			'productName' 	=> '',
-			'saleDate' 		=> '',
-			'saleEndDate' 	=> '',
-			'startDate' 	=> '',
-			'endDate' 		=> '',
-			'shop' 	=> [],
-			'area' 	=> [],
-			'top' 	=> [],
-			'last' 	=> [],
-		];
-			
-			
-		try 
-		{
-			#1.取新品參數 & Initialize 
-			list($productName, $saleDate, $saleEndDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams();
-			
-			$statistics['productName']	= $productName;
-			$statistics['saleDate'] 	= (new Carbon($saleDate))->format('Y-m-d');
-			$statistics['saleEndDate'] 	= (new Carbon($saleEndDate))->format('Y-m-d');
-			$statistics['startDate'] 	= (new Carbon($startDateTime))->format('Y-m-d');
-			$statistics['endDate'] 		= (new Carbon($endDateTime))->format('Y-m-d');
-			
-			#取查詢範圍總天數
-			$startDate = new Carbon($startDateTime);
-			$endDate = new Carbon($endDateTime);
-			$diffDays = $startDate->diffInDays($endDate) + 1; 
-			
-			#2.Get data from DB(不同品牌DB不同)
-			$data = $this->_getData($startDateTime, $endDateTime, $productIds, $bfProductIds);
-			
-			#3.Parsing to base data(所有資料By ShopId)
-			$baseData = $this->_buildBaseData($data);
-			
-			/* Statistics Start *
-			#4.店別每日銷售
-			$statistics['shop'] = $this->_parsingByShop($baseData, $diffDays);
-			
-			#5.區域彙總
-			$statistics['area'] = $this->_parsingByArea($baseData, $diffDays);
-			
-			#6.當日銷售前10名 | 當日銷售後10名
-			list($statistics['top'], $statistics['last']) = $this->_parsingByRanking($baseData, $statistics['endDate']);
-			
-			#7.Save to Cache
-			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
-			
-			return ResponseLib::initialize($statistics)->success();
-		}
-		catch(Exception $e)
-		{
-			return ResponseLib::initialize($statistics)->fail($e->getMessage());
-		}
-	}*/
-	/*==============================================================================*/
-
 }
