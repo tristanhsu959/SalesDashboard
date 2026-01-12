@@ -29,7 +29,7 @@ Route::middleware([AuthPermission::class])->group(function(){
 	Route::post('new_releases/{segment}/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 	
 	/* 進銷存報表 */
-	Route::get('purchase', [PurchaseController::class, 'index']);
+	Route::get('purchase/bg', [PurchaseController::class, 'showSearchBg']);
 	Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
 	
 	/* 身份管理 */

@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @use('App\Enums\Area')
+@use('Illuminate\Support\Number')
 
 @push('styles')
     <link href="{{ asset('styles/purchase/list.css') }}" rel="stylesheet">
@@ -18,7 +19,10 @@
 <!-- Search by Date -->
 <form action="{{ route('purchase.search') }}" method="post" id="searchForm">
 @csrf
+<input type="hidden" name="searchBrand" value="{{ $viewModel->search['brand'] }}" />
+
 <section class="searchbar section-wrapper dp-2">
+{{--
 	<div class="input-select field-cyan field">
 		<select class="form-select" id="searchBrand" name="searchBrand">
 			<!--option value="">請選擇</option-->
@@ -28,10 +32,11 @@
 		</select>
 		<label for="group" class="form-label">品牌</label>
 	</div>
+--}}
 	<div class="input-field field-cyan field">
 		<input type="date" class="form-control valid" 
 			id="searchStDate" name="searchStDate" value="{{ $viewModel->getSearchStDate() }}" 
-			maxlength="10" placeholder=" ">
+			maxlength="10" placeholder=" " max="{{ now()->format('Y-m-d') }}">
 		<label for="searchStDate" class="form-label">開始日期</label>
 	</div>
 	<div class="input-field field-cyan field">
@@ -71,29 +76,39 @@
 	<div class="tab-pane fade show active" id="area" role="tabpanel" aria-labelledby="nav-area-tab" tabindex="0">
 		@if(empty($viewModel->statistics['area']))
 		<section class="statistics-area section-wrapper empty">
-			無符合資料或無瀏覽權限
+			無符合資料
 		</section>
 		@else
 		<section class="statistics-area section-wrapper">
-			<div class="row">
-				<div class="col">區域</div>
-				<div class="col">店家數</div>
-				<div class="col">區域銷售總量</div>
-				<div class="col">區域平均日銷售量</div>
-				<div class="col">區域每店平均銷量</div>
-				<div class="col">區域每店平均日銷量</div>
+			<div class="d-table-row">
+				<div class="d-table-cell">區域</div>
+				@foreach($viewModel->statistics['header'] as $product)
+				<div class="d-table-cell">{{ $product['productName'] }}</div>
+				@endforeach
 			</div>
 			
 			@foreach($viewModel->statistics['area'] as $name => $area)
-			<div class="row">
-				<div class="col">{{ $name == 'total' ? '全區合計' : $name }}</div>
-				<div class="col">{{ data_get($area, 'shopCount', 0) }}</div>
-				<div class="col">{{ data_get($area, 'totalQty', 0) }}</div>
-				<div class="col">{{ data_get($area, 'avgDayQty', 0) }}</div>
-				<div class="col">{{ data_get($area, 'avgShopQty', 0) }}</div>
-				<div class="col">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
+			<div class="d-table-row">
+				<div class="d-table-cell">{{ $name }}</div>
+				@foreach($viewModel->statistics['header'] as $no => $product)
+				<div class="d-table-cell">
+					{{ Number::currency(intval(data_get($area, "products.{$no}.amount")), precision: 0) }}
+					
+					<!--b-->
+					{{-- intval(data_get($area, "products.{$no}.quantity")) --}}
+					{{-- $product['unit'] --}}
+					<!--/b-->
+				</div>
+				@endforeach
 			</div>
 			@endforeach
+			
+			<div class="d-table-row">
+				<div class="d-table-cell">合計</div>
+				@foreach($viewModel->statistics['header'] as $product)
+				<div class="d-table-cell">{{ Number::currency($product['totalAmount'], precision: 0) }}</div>
+				@endforeach
+			</div>
 		</section>
 		@endif
 	</div>
@@ -106,41 +121,29 @@
 		</section>
 		@else
 		<section class="statistics-shop section-wrapper scrollbar">
-			<table class="table table-striped">
-				<thead>
-					<tr>
-						<th>區域</th>
-						<th>門店代號</th>
-						<th>門店名稱</th>
-						@foreach($viewModel->getDateRange() as $date)
-						<th class="col-date">
-							<span>{{ Str::before($date, '-') }}</span>
-							<span>{{ Str::after($date, '-') }}</span>
-						</th>
-						@endforeach
-						<th>銷售總量</th>
-						<th>平均銷售數量</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach($viewModel->statistics['shop'] as $shop)
-					<tr>
-						<th>{{ Area::getLabelByValue($shop['area']) }}</th>
-						<th>{{ $shop['shopId'] }}</th>
-						<th>{{ $shop['shopName'] }}</th>
-						
-						@foreach($viewModel->getDateRange() as $date)
-						<td>
-							{{ data_get($shop, "dayQty.$date", 0) }}
-						</td>
-						@endforeach
-						
-						<td>{{ $shop['totalQty'] }}</td>
-						<td>{{ $shop['totalAvg'] }}</td>
-					</tr>
-					@endforeach
-				</tbody>
-			</table>
+			<div class="d-table-row">
+				<div class="d-table-cell">區域</div>
+				<div class="d-table-cell">門店代號</div>
+				<div class="d-table-cell">門店名稱</div>
+				@foreach($viewModel->statistics['header'] as $product)
+				<div class="d-table-cell">{{ $product['productName'] }}</div>
+				@endforeach
+				<div class="d-table-cell">總金額</div>
+			</div>
+			
+			@foreach($viewModel->statistics['shop'] as $shop)
+			<div class="d-table-row">
+				<div class="d-table-cell">{{ $shop['area'] }}</div>
+				<div class="d-table-cell">{{ $shop['shopId'] }}</div>
+				<div class="d-table-cell">{{ $shop['shopName'] }}</div>
+				@foreach($viewModel->statistics['header'] as $no => $product)
+				<div class="d-table-cell">
+					{{ Number::currency(intval(data_get($shop, "products.{$no}.amount")), precision: 0) }}
+				</div>
+				@endforeach
+				<div class="d-table-cell">{{ Number::currency($shop['totalAmount'], precision: 0) }}</div>
+			</div>
+			@endforeach
 		</section>
 		@endif
 	</div>

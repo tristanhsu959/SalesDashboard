@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\PurchaseService;
 use App\ViewModels\PurchaseViewModel;
 use App\Enums\FormAction;
+use App\Enums\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -16,9 +17,9 @@ class PurchaseController extends Controller
 	{
 	}
 	
-	public function index(Request $request)
+	public function showSearchBg(Request $request)
 	{
-		$this->_viewModel->initialize(FormAction::List);
+		$this->_viewModel->initialize(FormAction::List, Brand::BUYGOOD->value);
 		
 		#Status is NULL
 		return view('purchase.list')->with('viewModel', $this->_viewModel);

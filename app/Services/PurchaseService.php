@@ -115,7 +115,7 @@ class PurchaseService
 	 */
 	private function _rebuildBaseData($source)
 	{
-		/* 重整資料格式, 取區域
+		/* 重整資料格式/命名/區域
 		[
 			"orderData" => "2026-01-08"
 			"shopId" => "106004"
@@ -160,17 +160,20 @@ class PurchaseService
 	{
 		try
 		{
-			#1.Filter By Area (By User Permission)
+			#1.Filter by area (By User Permission)
 			$baseData = $this->_filterByAreaPermission($srcData);
 			
+			#2.Filter by product
+			$baseData = $this->_filterByProduct($srcData);
+			
 			/* Statistics Start */
-			#2.建共用Header, by product
+			#3.建共用Header, by product
 			$this->_statistics['header'] = $this->_buildListHeader($baseData);
 			
-			#3.By店別
+			#4.By店別
 			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
 			
-			#4.區域彙總
+			#5.區域彙總
 			$this->_statistics['area'] = $this->_parsingByArea($baseData);
 				
 			return ResponseLib::initialize($this->_statistics)->success();
@@ -198,6 +201,21 @@ class PurchaseService
 		return $baseData;
 	}
 	
+	/* Product過濾
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _filterByProduct($srcData)
+	{
+		#過濾物品類(目前不確定規則)
+		$baseData = Arr::reject($srcData, function ($item, $key) {
+			$productNo = intval($item['productNo']);
+			return ($productNo >= 6000 && $productNo <= 9999);
+		});
+		
+		return $baseData;
+	}
+	
 	/* List header
 	 * @params: collection
 	 * @return: array
@@ -206,9 +224,19 @@ class PurchaseService
 	{
 		$sourceData = collect($sourceData);
 		$header = $sourceData->mapToGroups(function (array $item, int $key){
-			return [$item['productNo'] => $item['productName']];
+			$temp['productName']= $item['productName'];
+			$temp['unit']		= $item['unit'];
+			$temp['quantity'] 	= $item['quantity'];
+			$temp['amount'] 	= $item['amount'];
+			return [$item['productNo'] => $temp];
+			
 		})->map(function($item, int $key){
-			return $item[0];
+			$data = collect($item);
+			$temp['productName']= $data->pluck('productName')->first();
+			$temp['unit']		= $data->pluck('unit')->first();
+			$temp['totalQty'] 	= $data->pluck('quantity')->sum();
+			$temp['totalAmount']= $data->pluck('amount')->sum();
+			return $temp;
 		})->sortKeys()->toArray();
 		
 		return $header;
@@ -226,6 +254,7 @@ class PurchaseService
 			"shopName" => "御廚桃園桃鶯直營店"
 			"areaId" => 1
 			"area" => "桃竹苗區"
+			"totalAmount" => 123
 			"products" => array:43 [
 				2052 => array:5 [
 					"productNo" => "2052"
@@ -278,13 +307,13 @@ class PurchaseService
 		"area" => [
 			"大台北區" => [
 				"totalAmount" => 101
-				"products" => [
+				"products" => productNo => [
 					'productNo'
 					'productName'
 					'unit'
 					'quantity'
 					'amount'
-				]
+				], ....
 			]
 			"大高雄區" => array:5 []
 			"宜蘭區" => array:5 []
@@ -302,7 +331,7 @@ class PurchaseService
 			->map(function($item, $key) {
 				$temp['totalAmount']= $item->pluck('amount')->sum();
 				$temp['products'] 	= $item->groupBy('productNo')
-					->map(function($item, $key){
+					->map(function($item, $key){ 
 						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
 						$temp['productName'] 	= $item->pluck('productName')->get(0);
 						$temp['unit'] 			= $item->pluck('unit')->get(0);

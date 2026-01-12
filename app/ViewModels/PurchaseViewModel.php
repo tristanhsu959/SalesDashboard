@@ -16,7 +16,7 @@ class PurchaseViewModel
 	public function __construct()
 	{
 		#initialize
-		$this->_data['brand']		= Brand::BUYGOOD->value;
+		$this->_data['brand']		= '';
 		$this->_data['action'] 		= NULL; #enum form action
 		$this->_data['status']		= NULL;
 		$this->_data['msg'] 		= '';
@@ -62,15 +62,15 @@ class PurchaseViewModel
 	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($action)
+	public function initialize($action, $brand = NULL)
 	{
 		#初始化各參數及Form Options
-		$this->_data['action'] = $action;
+		$this->_data['action']	= $action;
 		$this->success();
 		
 		#default today
 		$today = now()->format('Y-m-d');
-		$this->keepSearchData($this->_data['brand'], $today, $today);
+		$this->keepSearchData($brand, $today, $today);
 		
 		$this->_setOptions();
 	}
