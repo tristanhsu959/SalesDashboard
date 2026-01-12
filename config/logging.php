@@ -53,7 +53,13 @@ return [
     'channels' => [
 		
 		/* User Define */
-		
+		'appServiceLog' => [
+			'driver' => 'daily',
+			'days' => 15,
+			#'channels' => ['daily'],
+			'ignore_exceptions' => false,
+			'path' => storage_path('logs/service.log'),
+		],
 		'webSysLog' => [
 			'driver' => 'daily',
 			'days' => 15,

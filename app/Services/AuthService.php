@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Repositories\AuthRepository;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthTrait;
-use App\Enums\AuthType;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +28,7 @@ class AuthService
 	 * @params: int
 	 * @return: array
 	 */
-	public function signin($account, $password, $authType)
+	public function signin($account, $password)
 	{
 		try
 		{
@@ -37,16 +36,13 @@ class AuthService
 			$this->removeCurrentUser();
 			
 			#2. auth by AD
-			$adInfo = $this->_authenticationByAD($account, $password, $authType);
+			$adInfo = $this->_authenticationByAD($account, $password);
 			
 			#3. auth DB account permission
-			$userInfo = $this->_authenticationBySystem($account, $password, $authType);
-			
+			$userInfo = $this->_authAccountRegister($account);
+			dd($userInfo);
 			#4. Save to session
 			$this->saveCurrentUser($adInfo, $userInfo);
-			
-			#5. Sync Ad info to DB
-			$this->_repository->syncAdInfo($userInfo['userId'], $adInfo);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -63,10 +59,10 @@ class AuthService
 	 * @params: int
 	 * @return: array
 	 */
-	public function _authenticationByAD($account, $password, $authType)
+	public function _authenticationByAD($account, $password)
 	{
 		#for local non ad env
-		if (env('APP_ENV_TYPE', '') == 'nonad' OR $authType == AuthType::SYSTEM->value) 
+		if (env('APP_ENV_TYPE', '') == 'nonad') 
 		{
 			return [
 				"company" => "八方雲集國際股份有限公司",
@@ -129,30 +125,30 @@ class AuthService
 		}
 	}
 	
-	
-	/* 驗證系統帳密
+	/* 驗證帳號是否有在系統註冊
 	 * @params: string
-	 * @params: string
-	 * @params: int
 	 * @return: mixed
 	 */
-	private function _authenticationBySystem($account, $password, $authType)
+	private function _authAccountRegister($account)
 	{
-		$userInfo = $this->_repository->getUserByAccount($account);
-		
-		if ($userInfo === FALSE)
-			throw new Exception('讀取帳號資訊發生錯誤');
-		
-		if (empty($userInfo))
-			throw new Exception('登入失敗，此帳號尚未在系統註冊');
-		
-		if ($authType == AuthType::SYSTEM->value)
+		try
 		{
-			if (Hash::check($password, $userInfo['userPassword']) == FALSE)
-				throw new Exception('系統驗證失敗，帳號或密碼錯誤');
+			$userInfo = $this->_repository->getUserByAccount($account);
+			dd($userInfo);
+			if (empty($userInfo))
+				return FALSE;
+			
+			$userInfo['rolePermission'] = empty($userInfo['rolePermission']) ? [] : json_decode($userInfo['rolePermission'], TRUE);
+			$userInfo['areaPermission'] = empty($userInfo['roleArea']) ? [] : json_decode($userInfo['roleArea'], TRUE);
+			unset($userInfo['roleArea']);
+			
+			return $userInfo;
 		}
-		
-		return $userInfo;
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('驗證帳號註冊狀態，發生錯誤');
+		}
 	}
 	
 	/* 登出

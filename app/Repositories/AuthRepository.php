@@ -25,56 +25,14 @@ class AuthRepository extends Repository
 	{
 		try
 		{
-			$db = $this->connectItPortal('user');
+			$db = $this->connectSalesDashboard('user');
 				
-			$result = $db->select('userId', 'userAd', 'userPassword', 'userRoleId', 'roleGroup', 'rolePermission')
+			$result = $db->select('userId', 'userAd', 'userRoleId', 'userRoleId', 'roleGroup', 'rolePermission', 'roleArea')
 						->join('role', 'roleId', '=', 'userRoleId')
 						->where('userAd', '=', $account)
 						->get()->first();
 			
 			return $result;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return FALSE;
-		}
-	}
-	
-	/* Get permission of the user
-	 * @params: int
-	 * @params: array
-	 * @return: boolean
-	 */
-	public function syncAdInfo($userId, $adInfo)
-	{
-		try
-		{
-			$data = [];
-			
-			#有資料才更新
-			if (! empty(data_get($adInfo, 'company', '')))
-				$data['adCompany'] = data_get($adInfo, 'company');
-			
-			if (! empty(data_get($adInfo, 'department', '')))
-				$data['adDepartment'] = data_get($adInfo, 'department');
-			
-			if (! empty(data_get($adInfo, 'employeeId', '')))
-				$data['adEmployeeId'] = data_get($adInfo, 'employeeId');
-			
-			if (! empty(data_get($adInfo, 'displayName', '')))
-				$data['adDisplayName'] = data_get($adInfo, 'displayName');
-			
-			if (! empty(data_get($adInfo, 'mail', '')))
-				$data['adMail'] = data_get($adInfo, 'mail');
-			
-			if (empty($data))
-				return TRUE;
-			
-			$db = $this->connectItPortal('user_ad_info');
-			$result = $db->updateOrInsert(['adUserId' => $userId], $data);
-					
-			return TRUE;
 		}
 		catch(Exception $e)
 		{

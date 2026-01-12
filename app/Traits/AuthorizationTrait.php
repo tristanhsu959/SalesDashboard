@@ -89,7 +89,7 @@ trait AuthorizationTrait
 		$refresh = (env('APP_ENV') == 'local') ? TRUE : FALSE; #for develop
 		
 		#1.若有取過, 直接取Session
-		if (! $refresh && $session()->has(self::SESS_AUTH_MENU))
+		if (! $refresh && session()->has(self::SESS_AUTH_MENU))
 			return session()->get(self::SESS_AUTH_MENU);
 		
 		#2.取功能選單-ALL

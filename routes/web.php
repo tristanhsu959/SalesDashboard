@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SigninController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\RoleController;
@@ -10,10 +10,10 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Middleware\AuthPermission;
 
 /* Login */
-Route::get('/', [SigninController::class, 'showSignin'])->name('signin');
-Route::get('signin', [SigninController::class, 'showSignin'])->name('signin');
-Route::post('signin', [SigninController::class, 'signin'])->name('signin.post');
-Route::get('signout', [SigninController::class, 'signout'])->name('signout');
+Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
+Route::get('signin', [AuthController::class, 'showSignin'])->name('signin');
+Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
+Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 
 Route::middleware([AuthPermission::class])->group(function(){
 	/* Home */

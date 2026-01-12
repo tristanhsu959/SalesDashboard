@@ -32,26 +32,24 @@ class AuthController extends Controller
 	 */
 	public function signin(Request $request)
 	{
-		$account 	= $request->input('account');
-		$password	= $request->input('password');
-		$authType 	= $request->input('authType');
+		$account 	= $request->input('adAccount');
+		$password	= $request->input('adAccount');
 		
 		$this->_viewModel->action = FormAction::SIGNIN;
-		$this->_viewModel->keepFormData($account, $authType); #account only
+		$this->_viewModel->keepFormData($account); #account only
 		
 		$validator = Validator::make($request->all(), [
-            'account' => 'required|max:20',
-			'password' => 'required|max:20',
-			'authType' => 'required',
+            'adAccount' => 'required|max:20',
+			'adAccount' => 'required|max:20',
         ]);
  
         if ($validator->fails())
 		{
-			$this->_viewModel->fail('登入失敗，帳號或密碼空白');
+			$this->_viewModel->fail('登入失敗，帳號或密碼輸入不完整');
 			return view('signin')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->signin($account, $password, $authType);
+		$response = $this->_service->signin($account, $password);
 		
 		if ($response->status === FALSE)
 		{
