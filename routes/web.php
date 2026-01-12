@@ -29,8 +29,10 @@ Route::middleware([AuthPermission::class])->group(function(){
 	Route::post('new_releases/{segment}/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 	
 	/* 進銷存報表 */
-	Route::get('purchase/bg', [PurchaseController::class, 'showSearchBg']);
+	Route::get('purchase', [PurchaseController::class, 'showSearch']);
 	Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
+	Route::get('sales', [SalesController::class, 'showSales']);
+	Route::post('sales/search', [SalesController::class, 'search'])->name('sales.search');
 	
 	/* 身份管理 */
 	Route::get('roles', [RoleController::class, 'list'])->name('role.list');

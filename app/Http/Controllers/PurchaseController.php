@@ -17,7 +17,7 @@ class PurchaseController extends Controller
 	{
 	}
 	
-	public function showSearchBg(Request $request)
+	public function showSearch(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::List, Brand::BUYGOOD->value);
 		

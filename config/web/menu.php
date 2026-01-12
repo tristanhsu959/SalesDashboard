@@ -25,7 +25,8 @@ return [
 			'style' => ['icon' => 'trolley', 'color' => 'teal'], #filled-icon 
 			'type'	=> [RoleGroup::USER->name],
 			'items' => [ 		#Function code or key => use Str::camel to check segment
-				'purchaseBg',  
+				'purchaseBg',
+				'salesBg',
 			],
 		],
 		[
@@ -43,9 +44,17 @@ return [
 	'functions' => [
 		/* 進銷存報表 */
 		'purchaseBg' => [
-			'code'		=> 'purchaseBg', #判別用
+			'code'		=> 'purchase', #判別用
 			'name'		=> '梁社漢-進貨',
-			'url' 		=> 'purchase/bg', 
+			'url' 		=> 'purchase', 
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		'salesBg' => [
+			'code'		=> 'sales', #判別用
+			'name'		=> '梁社漢-銷售',
+			'url' 		=> 'sales', 
 			'operation'	=> [
 				Operation::READ
 			],
