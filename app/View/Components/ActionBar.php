@@ -12,9 +12,9 @@ class ActionBar extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(protected array $breadcrumb, protected $routeName)
+    public function __construct(protected string $isHome, protected array $breadcrumb, protected $routeName)
     {
-       
+      
     }
 
     /**
@@ -27,6 +27,7 @@ class ActionBar extends Component
 	
 	public function renderBreadcrumb()
 	{
+		#<span class="material-symbols-outlined filled-icon">bubble_chart</span>
 		$divider = '<span class="material-symbols-outlined">keyboard_arrow_right</span>';
 		return Arr::join($this->breadcrumb, $divider);
 	}
@@ -39,5 +40,10 @@ class ActionBar extends Component
 	public function active()
 	{
 		return empty($this->routeName) ? '' : 'active';
+	}
+	
+	public function isHome()
+	{
+		return boolval($this->isHome);
 	}
 }

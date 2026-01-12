@@ -3,6 +3,7 @@
 .offcanvas.offcanvas-start {
 	width: 320px;
 	border-width: 0;
+	transition: transform .3s ease-in-out;
 	
 	.offcanvas-header h5 {
 		font-family: 'Orbitron';

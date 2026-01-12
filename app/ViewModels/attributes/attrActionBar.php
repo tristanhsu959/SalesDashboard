@@ -7,6 +7,16 @@ use App\Enums\FormAction;
 #Breadcrumb | backurl
 trait attrActionBar
 {
+	public function isHome()
+	{
+		$action = data_get($this->_data, 'action', NULL);
+		
+		if (empty($action))
+			return FALSE;
+		else
+			return ($action == FormAction::HOME);
+	}
+	
 	/* Set status & msg
 	 * @params: string
 	 * @return: void

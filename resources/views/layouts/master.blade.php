@@ -39,7 +39,8 @@
 			<x-menu />
 		
 			<div class='content-wrapper'>
-				@include('layouts.master_actionbar')
+				<x-action-bar :isHome="$viewModel->isHome()" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
+				
 				@hasSection('content')
 					@yield('content')
 				@endif

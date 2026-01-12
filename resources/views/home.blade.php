@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @push('styles')
-    <link href="{{ asset('styles/home/purchase.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/home/purchase_board.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -13,8 +13,6 @@
 	<span class="sales">sales</span><span class="dashboard">Dashboard</span>
 </div>
 @endsection
-
-@section('navAction', '')
 
 @section('content')
 <section class="section-wrapper">
