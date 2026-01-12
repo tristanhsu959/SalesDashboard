@@ -40,4 +40,18 @@ enum Area : int
 			default => 'UNKNOW',
 		};
 	}
+	
+	public static function getAll() : array
+	{
+		$list = [];
+		
+		$list[] = self::TAIPEI->value;
+		$list[] = self::YILAN->value;
+		$list[] = self::TCM->value;
+		$list[] = self::CCT->value;
+		$list[] = self::YCN->value;
+		$list[] = self::KAOHSIUNG->value;
+		
+		return $list;
+	}
 }

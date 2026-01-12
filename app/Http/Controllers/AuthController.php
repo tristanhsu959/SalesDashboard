@@ -33,14 +33,14 @@ class AuthController extends Controller
 	public function signin(Request $request)
 	{
 		$account 	= $request->input('adAccount');
-		$password	= $request->input('adAccount');
+		$password	= $request->input('adPassword');
 		
 		$this->_viewModel->action = FormAction::SIGNIN;
 		$this->_viewModel->keepFormData($account); #account only
 		
 		$validator = Validator::make($request->all(), [
             'adAccount' => 'required|max:20',
-			'adAccount' => 'required|max:20',
+			'adPassword' => 'required|max:20',
         ]);
  
         if ($validator->fails())

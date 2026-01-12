@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Repositories\AuthRepository;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthTrait;
+use App\Enums\RoleGroup;
+use App\Enums\Area;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +42,7 @@ class AuthService
 			
 			#3. auth DB account permission
 			$userInfo = $this->_authAccountRegister($account);
-			dd($userInfo);
+			
 			#4. Save to session
 			$this->saveCurrentUser($adInfo, $userInfo);
 			
@@ -134,13 +136,12 @@ class AuthService
 		try
 		{
 			$userInfo = $this->_repository->getUserByAccount($account);
-			dd($userInfo);
+			
 			if (empty($userInfo))
 				return FALSE;
 			
-			$userInfo['rolePermission'] = empty($userInfo['rolePermission']) ? [] : json_decode($userInfo['rolePermission'], TRUE);
-			$userInfo['areaPermission'] = empty($userInfo['roleArea']) ? [] : json_decode($userInfo['roleArea'], TRUE);
-			unset($userInfo['roleArea']);
+			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value OR $userInfo['roleGroup'] == RoleGroup::SUPERUSER->value)
+				$userInfo['roleArea'] = Area::getAll();
 			
 			return $userInfo;
 		}

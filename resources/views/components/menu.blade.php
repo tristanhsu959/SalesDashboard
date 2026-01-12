@@ -1,41 +1,23 @@
 <!-- Menu component -->
 
-<div class="aside menu">
-	<div class="head">IT Portal</div>
+<div class="aside menu dp-8">
+	<div class="logo">
+		<div class="logo-wrapper">
+			<img src="{{ asset('images/logo.png') }}" />
+		</div>
+	</div>
 	<div class="container-fluid">
-		<ul>
-			@foreach($menu as $item)
-			<li class="{{ $item['style']['width'] }}">
-				<a href="{{ $item['url'] }}" class="{{ $isActive($item['url']) }}">
-					<span class="material-symbols-outlined">{{ $item['style']['icon'] }}</span>
-					<span>{{ $item['name'] }}</span>
-				</a>
-			</li>
-			@endforeach
-			<li class="">
-				<a href="" class="">
-					<span class="material-symbols-outlined"></span>
-					<span>UnDefined</span>
-				</a>
-			</li>
-			<li class="">
-				<a href="" class="">
-					<span class="material-symbols-outlined"></span>
-					<span>UnDefined</span>
-				</a>
-			</li>
-			<li class="">
-				<a href="" class="">
-					<span class="material-symbols-outlined"></span>
-					<span>UnDefined</span>
-				</a>
-			</li>
-			<li class="">
-				<a href="" class="">
-					<span class="material-symbols-outlined"></span>
-					<span>UnDefined</span>
-				</a>
-			</li>
-		</ul>
+		@foreach($menu as $key => $group)
+		<div class="menu-group">
+			<a href="#collapse-{{ $key }}" class="list-title {{ $group['style']['color'] }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-{{ $key }}">
+				<span class="material-symbols-outlined {{ $group['style']['color'] }}">{{ $group['style']['icon'] }}</span>{{ $group['name'] }}
+			</a>
+			<ul id="collapse-{{ $key }}" class="list-group collapse">
+				@foreach($group['items'] as $function)
+				<li class="list-group-item"><a href="{{ url($function['url']) }}" class="{{ $isActive($function['url']) }}">{{ $function['name'] }}</a></li>
+				@endforeach
+			</ul>
+		</div>
+		@endforeach
 	</div>
 </div>

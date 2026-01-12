@@ -1,3 +1,4 @@
+@use(App\Enums\Area)
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="popup-profile" aria-labelledby="popup-profile">
 	<div class="offcanvas-header">
@@ -6,7 +7,7 @@
 	</div>
 	<div class="offcanvas-body">
 		<div class="section info-head">
-			<span class="material-symbols-outlined filled-icon">person_pin</span>
+			<span class="material-symbols-outlined filled-icon">assignment_ind</span>
 			<p>{{ $currentUser->employeeId }}</p>
 			<p class="name">{{ $currentUser->displayName }}</p>
 			<p class="mail">{{ $currentUser->mail }}</p>
@@ -15,6 +16,18 @@
 			<p>
 				<span>{{ $currentUser->department }}</span>
 				<span>{{ $currentUser->title }}</span>
+			</p>
+			<p>
+				<span>管理區域</span>
+				@if(empty($currentUser->roleArea))
+					<span class="text-danger">未設定</span>
+				@else
+					<div class="user-area">
+					@foreach($currentUser->roleArea as $area)
+						<span class="badge">{{ Area::getLabelByValue($area) }}</span>
+					@endforeach
+					</div>
+				@endif
 			</p>
 			<p>{{ $currentUser->company }}</p>
 		</div>

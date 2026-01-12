@@ -36,7 +36,7 @@
 				@yield('signin')
 			</div>
 		@else
-			@include('layouts.master_menu')
+			<x-menu />
 		
 			<div class='content-wrapper'>
 				@include('layouts.master_actionbar')
@@ -45,7 +45,7 @@
 				@endif
 			</div>
 			
-			@include('layouts.master_profile')
+			<x-profile />
 		@endif
 		</main>
 		

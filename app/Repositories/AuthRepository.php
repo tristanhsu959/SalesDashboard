@@ -32,6 +32,9 @@ class AuthRepository extends Repository
 						->where('userAd', '=', $account)
 						->get()->first();
 			
+			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
+			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+			
 			return $result;
 		}
 		catch(Exception $e)

@@ -59,7 +59,7 @@ trait AuthTrait
 		$authMenu = [];
 		
 		#1.若有取過, 直接取Session
-		if (session()->has(self::SESS_AUTH_MENU))
+		if (env('APP_DEBUG', TRUE) == FALSE && session()->has(self::SESS_AUTH_MENU))
 			return session()->get(self::SESS_AUTH_MENU);
 		
 		#2.取目前登入使用者
@@ -69,13 +69,24 @@ trait AuthTrait
 			return $authMenu;
 		
 		#3.取功能選單設定檔
-		$menuConfig = config('web.menu.enabled');
+		$menuConfig = config('web.menu.groups');
 		
-		#3.驗證使用者有權限的選單, 只要驗證到功能即可
-		foreach($menuConfig as $functionKey)
+		#4.驗證使用者有權限的選單, 只要驗證到功能即可
+		foreach($menuConfig as $group)
 		{
-			if ($currentUser->hasFunctionPermission($functionKey))
-				$authMenu[] = config("web.menu.available.{$functionKey}");
+			$items 	= [];
+			
+			foreach($group['items'] as $functionKey)
+			{
+				if ($currentUser->hasFunctionPermission($functionKey))
+					$items[] = config("web.menu.functions.{$functionKey}");
+			}
+			
+			if (! empty($items))
+			{
+				$group['items'] = $items;
+				$authMenu[] = $group;
+			}
 		}
 		
 		session()->put(self::SESS_AUTH_MENU, $authMenu);
