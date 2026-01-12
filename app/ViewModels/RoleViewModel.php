@@ -72,7 +72,7 @@ class RoleViewModel
 		$this->_data['action']	= $action;
 		$this->_data['msg'] 	= '';
 		
-		if ($action != FormAction::List)
+		if ($action != FormAction::LIST)
 			$this->_setOptions();
 	}
 	

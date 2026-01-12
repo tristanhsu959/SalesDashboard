@@ -27,7 +27,7 @@ class RoleController extends Controller
 	 */
 	public function list(Request $request)
 	{
-		$this->_viewModel->initialize(FormAction::List);
+		$this->_viewModel->initialize(FormAction::LIST);
 		
 		$response = $this->_service->getList();
 		
