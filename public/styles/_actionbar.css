@@ -39,7 +39,6 @@
 		
 		&> .material-symbols-outlined {
 			color: rgba(255, 152, 0, .87);
-			margin-right: .5rem;
 		}
 		/* New release info */
 		.new-release-info {

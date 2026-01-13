@@ -50,13 +50,26 @@
 		}
 	}
 	/* List button */
-	&.btn-edit {
+	&.btn-list-create {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		background-color: hsl(123, 41%, 45%);
+		align-self: center;
+		
+		&:hover {
+			background-color: hsl(123, 41%, 49%);
+		}
+	}
+	&.btn-list-edit {
 		background-color: hsl(262, 52%, 47%);
 		&:hover {
 			background-color: hsl(262, 52%, 51%);
 		}
 	}
-	&.btn-delete {
+	&.btn-list-delete {
 		background-color: hsl(4, 90%, 58%);
 		&:hover {
 			background-color: hsl(4, 90%, 62%);
@@ -113,6 +126,12 @@
 }
 
 /* Common Define */
+.grid-header {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	margin-bottom: .25rem;
+}
 .grid {
 	--table-head-color: rgba(255 255 255 / 1); 
 	--table-row-border-color: var(--theme-divider-color);

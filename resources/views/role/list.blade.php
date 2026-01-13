@@ -10,26 +10,25 @@
     <script src="{{ asset('scripts/role/list.js') }}" defer></script>
 @endpush
 
-@section('navHead', $viewModel->getBreadcrumb())
-
-@section('navAction')
-@if($viewModel->canCreate())
-<a href="{{ route('role.create') }}" class="btn btn-create">
-	<span class="material-symbols-outlined filled-icon">add</span>
-	<span class="title">新增</span>
-</a>
-@endif
-@endsection
-
 @section('content')
-
-@if($viewModel->status === TRUE)
+<!-- Content -->
+@if($viewModel->status() === TRUE)
 	<form action="" method="post" id="roleListForm">
 	@csrf
 	</form>
 
 	@if ($viewModel->canQuery())
 	<section class="role-list section-wrapper">
+		<!-- Create button -->
+		@if($viewModel->canCreate())
+		<div class="grid-header">
+			<a href="{{ route('role.create') }}" class="btn btn-list-create">
+				<span class="material-symbols-outlined filled-icon">add</span>
+			</a>
+		</div>
+		@endif
+		
+		<!-- List -->
 		@if(empty(($viewModel->list)))
 		<div class="container-fluid empty-list">
 			<div class="row">
@@ -58,16 +57,12 @@
 				</div>
 				<div class="col">{{ $role['updateAt'] }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate())
-					<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn btn-edit">
+					<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn btn-list-edit @disabled(! ($viewModel->canUpdate() && $viewModel->canUpdateThisRole($role['roleGroup'])))">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
-					@endif
-					@if($viewModel->canDelete())
-					<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($role['roleGroup']) }}">
+					<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn btn-list-delete @disabled(! ($viewModel->canDelete() && $viewModel->canDeleteThisRole($role['roleGroup'])))">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
-					@endif
 				</div>
 			</div>
 			@endforeach
@@ -76,4 +71,5 @@
 	</section>
 	@endif
 @endif
+<!-- Content -->
 @endsection()

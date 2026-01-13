@@ -4,7 +4,7 @@ namespace App\ViewModels\Attributes;
 
 use App\Models\CurrentUser;
 use App\Traits\AuthTrait;
-use App\Enums\Permission;
+use App\Enums\Operation;
 
 #Status & Message
 trait attrAllowAction
@@ -25,24 +25,24 @@ trait attrAllowAction
 	public function canQuery()
 	{
 		$currentUser = $this->getCurrentUser();
-		return $currentUser->hasActionPermission($this->_function, Permission::READ->value);
+		return $currentUser->hasActionPermission($this->_function, Operation::READ->value);
 	}
 	
 	public function canCreate()
 	{
 		$currentUser = $this->getCurrentUser();
-		return $currentUser->hasActionPermission($this->_function, Permission::CREATE->value);
+		return $currentUser->hasActionPermission($this->_function, Operation::CREATE->value);
 	}
 	
 	public function canUpdate()
 	{
 		$currentUser = $this->getCurrentUser();
-		return $currentUser->hasActionPermission($this->_function, Permission::UPDATE->value);
+		return $currentUser->hasActionPermission($this->_function, Operation::UPDATE->value);
 	}
 	
 	public function canDelete()
 	{
 		$currentUser = $this->getCurrentUser();
-		return $currentUser->hasActionPermission($this->_function, Permission::DELETE->value);
+		return $currentUser->hasActionPermission($this->_function, Operation::DELETE->value);
 	}
 }

@@ -2,32 +2,35 @@
 
 namespace App\ViewModels;
 
-use App\Services\RoleService;
 use App\Libraries\MenuLib;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
 use App\Enums\Operation;
 use App\Enums\Area;
+use App\Enums\Functions;
+use App\ViewModels\Attributes\attrStatus;
+use App\ViewModels\Attributes\attrActionBar;
+use App\ViewModels\Attributes\attrAllowAction;
 
 class RoleViewModel
 {
-	private $_service;
-	private $_title = '身份管理';
-	private $_data = [];
+	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct(RoleService $roleService)
+	private $_function 	= Functions::ROLE;
+	private $_backRoute	= 'role.list';
+	private $_data 		= [];
+	
+	public function __construct()
 	{
-		$this->_service = $roleService;
-		
 		#initialize
 		$this->_data['action'] 	= NULL; #enum form action
 		$this->_data['status']	= FALSE;
 		$this->_data['msg'] 	= '';
 		
 		#form data
-		$this->_data['roleData']	= NULL; #For detail view form data
-		$this->_data['list'] 		= []; #For list view
-		$this->_data['option']		= [];
+		$this->_data['detail']	= NULL; #For detail view form data
+		$this->_data['list'] 	= []; #For list view
+		$this->_data['option']	= [];
 	}
 	
 	public function __set($name, $value)
@@ -46,22 +49,6 @@ class RoleViewModel
 		return array_key_exists($name, $this->_data);
 	}
 	
-	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function success($msg = NULL)
-	{
-		$this->_data['status'] 	= TRUE;
-		$this->_data['msg'] 	= $msg ?? '';
-	}
-	
-	public function fail($msg)
-	{
-		$this->_data['status'] 	= FALSE;
-		$this->_data['msg'] 	= $msg;
-	}
-	
 	/* initialize
 	 * @params: enum
 	 * @return: void
@@ -70,7 +57,7 @@ class RoleViewModel
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']	= $action;
-		$this->_data['msg'] 	= '';
+		$this->success();
 		
 		if ($action != FormAction::LIST)
 			$this->_setOptions();
@@ -82,7 +69,7 @@ class RoleViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['option']['roleGroupList'] = RoleGroup::cases();
+		$this->_data['option']['roleGroupList'] = RoleGroup::getEnabledList();
 		$this->_data['option']['functionList']	= MenuLib::all();
 		$this->_data['option']['areaList'] 		= Area::cases(); #enum
 	}
@@ -143,62 +130,12 @@ class RoleViewModel
 		return data_get($this->_data, 'roleData.area', []);
 	}
 	 
-	#Page operation permission
-	#內建身份判別
-	public function isSupervisorGroup($roleGroup)
-	{
-		return ($roleGroup == RoleGroup::SUPERVISOR->value);
-	}
-	
-	/* 指登入使用者的功能CRUD權限(#call from Authorization trait)
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function canQuery()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
-	}
-	
-	public function canCreate()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
-	}
-	
-	public function canUpdate()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
-	}
-	
-	public function canDelete()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
-	}
-	
-	
-	/* Form Style */
-	public function getBreadcrumb()
-    {
-		return $this->_title . ' | ' . $this->action->label();
-	}
-	
 	/* Selected option */
 	public function selectedRoleGroup($group)
 	{
 		$group = intval($group);
 		
 		return ($group == $this->getRoleGroup());
-	}
-	
-	/* Form setting => 是依據新增或編輯的User
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function checkedOperation($functionCode, $operationValue)
-	{
-		$permissionSetting 	= $this->getRolePermission(); 
-		$operationSetting	= data_get($permissionSetting, $functionCode, []);
-		
-		return in_array($operationValue, $operationSetting);
 	}
 	
 	/* Area checked prop
@@ -212,8 +149,17 @@ class RoleViewModel
 		return in_array($areaValue, $areaSetting);
 	}
 	
-	public function disabledSupervisor($deleteRoleGroup)
+	/* 判別列表Role是否可編或可刪
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function canUpdateThisRole($roleGroup)
 	{
-		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
+		return (RoleGroup::SUPERVISOR->value == $roleGroup) ? FALSE : TRUE; #super visor can not edit
+	}
+	
+	public function canDeleteThisRole($roleGroup)
+	{
+		return (RoleGroup::SUPERVISOR->value == $roleGroup) ? FALSE : TRUE; #super visor can not edit
 	}
 }

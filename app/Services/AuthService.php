@@ -140,7 +140,7 @@ class AuthService
 			if (empty($userInfo))
 				return FALSE;
 			
-			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value OR $userInfo['roleGroup'] == RoleGroup::SUPERUSER->value)
+			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value) # OR $userInfo['roleGroup'] == RoleGroup::SUPERUSER->value)
 				$userInfo['roleArea'] = Area::getAll();
 			
 			return $userInfo;

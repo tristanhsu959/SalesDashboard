@@ -22,7 +22,7 @@ class MenuLib
 			$items = [];
 			foreach($group['items'] as $itemKey)
 			{
-				$items[] = data_get($functions, $itemKey, '');
+				$items[$itemKey] = data_get($functions, $itemKey, '');
 			}
 			
 			$group['items'] = $items;

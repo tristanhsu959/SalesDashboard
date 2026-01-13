@@ -6,10 +6,13 @@
 	</div>
 	@else
 	<span class="navbar-head">
+		@if(! empty($getRoute()))
 		<a href="{{ $getRoute() }}" class="btn btn-return {{ $active() }}">
 			<span class="material-symbols-outlined filled-icon">arrow_back</span>
 			<span class="title">回列表</span>
 		</a>
+		@endif
+		
 		{!! $renderBreadcrumb !!}
 	</span>
 	@endif

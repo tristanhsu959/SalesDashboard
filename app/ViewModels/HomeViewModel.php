@@ -3,6 +3,7 @@
 namespace App\ViewModels;
 
 use App\Enums\FormAction;
+use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 
@@ -10,7 +11,7 @@ class HomeViewModel
 {
 	use attrStatus, attrActionBar;
 	
-	private $_title 	= '首頁';
+	private $_function 	= Functions::HOME;
 	private $_backRoute	= 'home'; #set by route name
 	private $_data 		= [];
 	

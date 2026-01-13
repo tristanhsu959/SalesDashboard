@@ -24,9 +24,10 @@ trait attrActionBar
 	public function breadcrumb()
 	{
 		$breadcrumb 	= [];
+		$function		= $this->_function;
 		$action 		= data_get($this->_data, 'action', '');
 		
-		$breadcrumb[] 	= $this->_title;
+		$breadcrumb[] 	= $function->label();
 		$actionName 	= $action->label();
 		
 		if (empty($actionName))

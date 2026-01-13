@@ -43,16 +43,16 @@ return [
 	#Function
 	'functions' => [
 		/* 進銷存報表 */
-		'purchaseBg' => [
-			'code'		=> 'purchase', #判別用
+		'bg-purchase' => [
+			#'code'		=> 'bg-purchase', #判別用
 			'name'		=> '梁社漢-進貨',
-			'url' 		=> 'purchase', 
+			'url' 		=> 'bg/purchase', 
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'salesBg' => [
-			'code'		=> 'sales', #判別用
+		'bg-sales' => [
+			#'code'		=> 'sales', #判別用
 			'name'		=> '梁社漢-銷售',
 			'url' 		=> 'sales', 
 			'operation'	=> [
@@ -60,48 +60,48 @@ return [
 			],
 		],
 		/* 新品銷售 */
-		'porkRibs' => [
-			'code'		=> 'porkRibs', #判別用
+		'bg-porkRibs' => [
+			#'code'		=> 'porkRibs', #判別用
 			'name'		=> '橙汁排骨',
 			'url' 		=> 'new_releases/pork_ribs', 
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'tomatoBeef' => [
-			'code'		=> 'tomatoBeef',
+		'bg-tomatoBeef' => [
+			#'code'		=> 'tomatoBeef',
 			'name' 		=> '番茄牛三寶麵',
 			'url' 		=> 'new_releases/tomato_beef',
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'eggTofu' => [
-			'code'	=> 'eggTofu',
+		'bg-eggTofu' => [
+			#'code'	=> 'eggTofu',
 			'name' 		=> '老皮嫩肉',
 			'url' 		=> 'new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'braisedPork'	=> [
-			'code'		=> 'braisedPork',
+		'bg-braisedPork'	=> [
+			#'code'		=> 'braisedPork',
 			'name' 		=> '主廚秘製滷肉飯',
 			'url' 		=> 'new_releases/braised_pork',
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'eggTofu' => [
-			'code'	=> 'eggTofu',
+		'bg-eggTofu' => [
+			#'code'	=> 'eggTofu',
 			'name' 		=> '老皮嫩肉',
 			'url' 		=> 'new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
 			],
 		],
-		'braisedGravy' => [
-			'code'		=> 'braisedGravy',
+		'bg-braisedGravy' => [
+			#'code'		=> 'braisedGravy',
 			'name' 		=> '秘製滷肉汁',
 			'url' 		=> 'new_releases/braised_gravy',
 			'operation'	=> [
@@ -109,8 +109,8 @@ return [
 			],
 		],
 		#滷肉飯加滷汁 = braisedPork + braisedGravy
-		'porkGravy' => [
-			'code'		=> 'porkGravy',
+		'bg-porkGravy' => [
+			#'code'		=> 'porkGravy',
 			'name' 		=> '滷肉飯加滷汁',
 			'url' 		=> 'new_releases/pork_gravy',
 			'operation'	=> [
@@ -119,7 +119,7 @@ return [
 		],
 		/* 權限管理 */
 		'users' => [
-			'code'		=> 'users',
+			#'code'		=> 'users',
 			'name' 		=> '帳號管理',
 			'url' 		=> 'users', 
 			'operation'	=> [
@@ -127,7 +127,7 @@ return [
 			],
 		],
 		'roles' => [
-			'code'		=> 'roles',
+			#'code'		=> 'roles',
 			'name' 		=> '身份管理',
 			'url' 		=> 'roles',
 			'operation'	=> [
