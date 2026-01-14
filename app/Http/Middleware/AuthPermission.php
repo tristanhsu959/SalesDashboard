@@ -5,11 +5,11 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Traits\AuthorizationTrait;
+#use App\Traits\AuthorizationTrait;
 
 class AuthPermission
 {
-	use AuthorizationTrait;
+	#use AuthorizationTrait;
     /**
      * Handle an incoming request.
      *

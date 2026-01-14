@@ -45,7 +45,7 @@ return [
 		/* 進銷存報表 */
 		'bg-purchase' => [
 			#'code'		=> 'bg-purchase', #判別用
-			'name'		=> '梁社漢-進貨',
+			'name'		=> '御廚-進貨',
 			'url' 		=> 'bg/purchase', 
 			'operation'	=> [
 				Operation::READ
@@ -53,7 +53,7 @@ return [
 		],
 		'bg-sales' => [
 			#'code'		=> 'sales', #判別用
-			'name'		=> '梁社漢-銷售',
+			'name'		=> '御廚-銷售',
 			'url' 		=> 'bg/sales', 
 			'operation'	=> [
 				Operation::READ
@@ -62,7 +62,7 @@ return [
 		/* 新品銷售 */
 		'bg-porkRibs' => [
 			#'code'		=> 'porkRibs', #判別用
-			'name'		=> '橙汁排骨',
+			'name'		=> '御廚-橙汁排骨',
 			'url' 		=> 'bg/new_releases/pork_ribs', 
 			'operation'	=> [
 				Operation::READ
@@ -70,7 +70,7 @@ return [
 		],
 		'bg-tomatoBeef' => [
 			#'code'		=> 'tomatoBeef',
-			'name' 		=> '番茄牛三寶麵',
+			'name' 		=> '御廚-番茄牛三寶麵',
 			'url' 		=> 'bg/new_releases/tomato_beef',
 			'operation'	=> [
 				Operation::READ
@@ -78,7 +78,7 @@ return [
 		],
 		'bg-eggTofu' => [
 			#'code'	=> 'eggTofu',
-			'name' 		=> '老皮嫩肉',
+			'name' 		=> '御廚-老皮嫩肉',
 			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
@@ -86,7 +86,7 @@ return [
 		],
 		'bg-braisedPork'	=> [
 			#'code'		=> 'braisedPork',
-			'name' 		=> '主廚秘製滷肉飯',
+			'name' 		=> '御廚-主廚秘製滷肉飯',
 			'url' 		=> 'bg/new_releases/braised_pork',
 			'operation'	=> [
 				Operation::READ
@@ -94,7 +94,7 @@ return [
 		],
 		'bg-eggTofu' => [
 			#'code'	=> 'eggTofu',
-			'name' 		=> '老皮嫩肉',
+			'name' 		=> '御廚-老皮嫩肉',
 			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
@@ -102,7 +102,7 @@ return [
 		],
 		'bg-braisedGravy' => [
 			#'code'		=> 'braisedGravy',
-			'name' 		=> '秘製滷肉汁',
+			'name' 		=> '御廚-秘製滷肉汁',
 			'url' 		=> 'bg/new_releases/braised_gravy',
 			'operation'	=> [
 				Operation::READ
@@ -111,7 +111,7 @@ return [
 		#滷肉飯加滷汁 = braisedPork + braisedGravy
 		'bg-porkGravy' => [
 			#'code'		=> 'porkGravy',
-			'name' 		=> '滷肉飯加滷汁',
+			'name' 		=> '御廚-滷肉飯加滷汁',
 			'url' 		=> 'bg/new_releases/pork_gravy',
 			'operation'	=> [
 				Operation::READ

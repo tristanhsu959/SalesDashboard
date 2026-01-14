@@ -11,11 +11,9 @@ use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
-use App\Traits\AuthTrait;
 
 class UserViewModel
 {
-	use AuthTrait;
 	use attrStatus, attrActionBar, attrAllowAction;
 	
 	private $_function 	= Functions::USER;
@@ -26,8 +24,7 @@ class UserViewModel
 	{
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
-		$this->_data['status']		= FALSE;
-		$this->_data['msg'] 		= '';
+		$this->success();
 		
 		#Form Data
 		$this->_data['list'] 		= []; #DB data
@@ -166,14 +163,6 @@ class UserViewModel
 		return ($roleId == $this->_data['roleId']);
 	}
 	
-	/* supervisor permission
-	 * @params: int : 欲刪除的user id(排除supervisor)
-	 * @return: boolean
-	 */
-	public function disabledSupervisor($deleteRoleGroup)
-	{
-		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
-	}
 	
 	/* 判別列表Role是否可編或可刪
 	 * @params: 
@@ -181,13 +170,7 @@ class UserViewModel
 	 */
 	public function canUpdateThisUser($thisRoleGroup)
 	{
-		$currentUser = $this->getCurrentUser();
-		
-		#Supervisor才能編輯自己
-		if (! $currentUser->isSupervisor() && $thisRoleGroup == RoleGroup::SUPERVISOR->value)
-			return FALSE;
-		else
-			return TRUE;
+		return ! ($thisRoleGroup == RoleGroup::SUPERVISOR->value);
 	}
 	
 	public function canDeleteThisUser($thisRoleGroup)

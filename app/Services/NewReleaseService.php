@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Repositories\NewReleaseRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
-use App\Traits\AuthorizationTrait;
+#use App\Traits\AuthorizationTrait;
 use App\Traits\MenuTrait;
 use App\Enums\Area;
 use Illuminate\Support\Arr;
@@ -18,7 +18,7 @@ use Exception;
 
 class NewReleaseService
 {
-	use AuthorizationTrait;
+	#use AuthorizationTrait;
 	
 	#private $_groupKey		= 'newRelease';
 	private $_configKey 	= '';

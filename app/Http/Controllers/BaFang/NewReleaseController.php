@@ -1,33 +1,29 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BaFang;
 
 use App\Http\Controllers\Controller;
 use App\Services\NewReleaseLocalService;
 use App\ViewModels\NewReleaseViewModel;
 use App\Enums\FormAction;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 #目前邏輯相同, 故用同一個Controller
 class NewReleaseController extends Controller
 {
-	private $_service;
-	private $_viewModel;
-	
-	public function __construct(NewReleaseLocalService $newReleaseService, NewReleaseViewModel $newReleaseViewModel)
+	public function __construct(protected NewReleaseLocalService $_service, protected NewReleaseViewModel $_viewModel)
 	{
-		$this->_service 	= $newReleaseService;
-		$this->_viewModel 	= $newReleaseViewModel;
 	}
 	
 	public function index(Request $request)
-	{
+	{dd(111);
 		#取新品config用, 要存到Form
-		$segment = $request->segment(2);
+		$segment = Arr::last($request->segments());
 		$configKey = $this->_service->convertConfigKey($segment);
 		
-		$this->_viewModel->initialize(FormAction::List, $configKey);
+		$this->_viewModel->initialize(FormAction::LIST, $configKey);
 		
 		if (empty($configKey))
 			$this->_viewModel->fail('無法識別產品ID');

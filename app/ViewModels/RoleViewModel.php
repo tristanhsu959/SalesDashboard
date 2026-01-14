@@ -24,8 +24,7 @@ class RoleViewModel
 	{
 		#initialize
 		$this->_data['action'] 	= NULL; #enum form action
-		$this->_data['status']	= FALSE;
-		$this->_data['msg'] 	= '';
+		$this->success();
 		
 		#form data
 		$this->_data['list'] 	= []; #For list view

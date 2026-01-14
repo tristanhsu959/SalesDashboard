@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Repositories\PurchaseRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
-use App\Traits\AuthorizationTrait;
+#use App\Traits\AuthorizationTrait;
 use App\Traits\MenuTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
@@ -19,7 +19,7 @@ use Exception;
 
 class PurchaseService
 {
-	use AuthorizationTrait;
+	#use AuthorizationTrait;
 	
 	private $_statistics	= [];
     

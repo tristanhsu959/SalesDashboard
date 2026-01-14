@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\RoleRepository;
-use App\Traits\AuthorizationTrait;
-#use App\Traits\RolePermissionTrait;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -14,7 +12,6 @@ use Log;
 
 class RoleService
 {
-	use AuthorizationTrait;
 	
 	public function __construct(protected RoleRepository $_repository)
 	{

@@ -7,12 +7,12 @@ use Illuminate\Database\Events\StatementPrepared;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use PDO;
-use App\Traits\AuthorizationTrait;
+#use App\Traits\AuthorizationTrait;
 use App\ViewModels\MenuViewModel;
 
 class AppServiceProvider extends ServiceProvider
 {
-	use AuthorizationTrait;
+	#use AuthorizationTrait;
     /**
      * Register any application services.
      */

@@ -1,7 +1,10 @@
 <?php
 
-namespace App\ViewModels;
+namespace App\ViewModels\BuyGood;
 
+use App\ViewModels\Attributes\attrStatus;
+use App\ViewModels\Attributes\attrActionBar;
+use App\ViewModels\Attributes\attrAllowAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -9,14 +12,17 @@ use Carbon\CarbonPeriod;
 
 class NewReleaseViewModel
 {
+	use attrStatus, attrActionBar, attrAllowAction;
+	
+	private $_function 	= NULL;
+	private $_breadcrumbByAction = FALSE; #不取自Action
+	private $_backRoute	= '';
 	private $_data = [];
 	
 	public function __construct()
 	{
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
-		$this->_data['status']		= NULL;
-		$this->_data['msg'] 		= '';
 		$this->_data['statistics']	= [];
 		$this->_data['configKey']	= '';
 		$this->_data['config']		= [];
@@ -38,20 +44,9 @@ class NewReleaseViewModel
 		return array_key_exists($name, $this->_data);
 	}
 	
-	/* Status / Msg
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function success($msg = NULL)
+	public function getFunctionKey()
 	{
-		$this->_data['status'] 	= TRUE;
-		$this->_data['msg'] 	= $msg ?? '';
-	}
-	
-	public function fail($msg)
-	{
-		$this->_data['status'] 	= FALSE;
-		$this->_data['msg'] 	= $msg;
+		return $this->_function->value; #view無法存enum
 	}
 	
 	/* initialize
@@ -60,16 +55,18 @@ class NewReleaseViewModel
 	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($action , $configKey)
+	public function initialize($action , $configKey, $functionKey)
 	{
+		$this->_function 			= $functionKey;
 		#初始化各參數及Form Options
 		$this->_data['action']		= $action;
-		$this->_data['msg'] 		= '';
+		$this->fail(''); #因共用頁面, 故default false判別顯示用
 		$this->_data['configKey'] 	= $configKey;
 		
 		if (! empty($configKey))
-			$this->_data['config'] 	= config("web.new_release.products.{$configKey}");
+			$this->_data['config'] 	= config("buygood.new_release.products.{$configKey}");
 		
+		$this->_data['actionName']	= $this->_data['config']['name']; #For breadcrumb
 		$this->_setOptions();
 	}
 	
@@ -79,8 +76,6 @@ class NewReleaseViewModel
 	 */
 	private function _setOptions()
 	{
-		$configKey = $this->_data['configKey'];
-		
 		if (empty($configKey))
 		{
 			data_set($this->_data, 'search.stMin', '');
@@ -88,10 +83,8 @@ class NewReleaseViewModel
 		}
 		else
 		{
-			$config = config("web.new_release.products.{$configKey}");
-			
-			data_set($this->_data, 'search.stMin', $config['saleDate']);
-			data_set($this->_data, 'search.endMax', $config['saleEndDate']);
+			data_set($this->_data, 'search.stMin', $this->_data['config']['saleDate']);
+			data_set($this->_data, 'search.endMax', $this->_data['config']['saleEndDate']);
 		}
 		
 		#Default search date
@@ -115,6 +108,7 @@ class NewReleaseViewModel
 	 * @params: date
 	 * @return: void
 	 */
+	
 	public function getSearchStDate()
 	{
 		return data_get($this->_data, 'search.stDate', '');
@@ -139,6 +133,15 @@ class NewReleaseViewModel
 	public function getSegment()
     {
 		return Str::snake(data_get($this->_data, 'configKey'), '_');
+	}
+	
+	public function isDataEmpty()
+	{
+		if (empty($this->_data['statistics']) OR (empty($this->_data['statistics']['area']) && empty($this->_data['statistics']['shop']) 
+			&& empty($this->_data['statistics']['top']) && empty($this->_data['statistics']['last'])))
+			return TRUE;
+		else
+			return FALSE;
 	}
 	
 	/* 取時間序
@@ -166,11 +169,6 @@ class NewReleaseViewModel
 	}
 	
 	/* Form Style */
-	public function getBreadcrumb()
-    {
-		return data_get($this->_data, 'config.name', 'UNKNOW');
-	}
-	
 	public function getSaleDate()
     {
 		return data_get($this->_data, 'config.saleDate', '');

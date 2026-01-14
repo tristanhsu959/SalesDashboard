@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Repositories\NewReleaseLocalRepository;
 use App\Libraries\ResponseLib;
-use App\Traits\AuthorizationTrait;
+use App\Traits\AuthTrait;
 use App\Enums\Area;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -16,17 +16,14 @@ use Exception;
 #This service will fetch data from local db
 class NewReleaseLocalService
 {
-	use AuthorizationTrait;
+	use AuthTrait;
 	
 	#private $_groupKey		= 'newRelease';
 	private $_configKey 	= '';
 	private $_statistics	= [];
-    private $_repository;
-	
-	public function __construct(NewReleaseLocalRepository $newReleaseRepository)
+    
+	public function __construct(protected NewReleaseLocalRepository $_repository)
 	{
-		$this->_repository = $newReleaseRepository;
-		
 		$this->_statistics = [
 			'startDate'	=> '', #Y-m-d
             'endDate'   => '',
@@ -88,7 +85,7 @@ class NewReleaseLocalService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
@@ -122,7 +119,7 @@ class NewReleaseLocalService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('解析查詢參數發生錯誤');
 		}
 	}
@@ -165,7 +162,7 @@ class NewReleaseLocalService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize($this->_statistics)->fail('解析報表資料發生錯誤');
 		}
 	}

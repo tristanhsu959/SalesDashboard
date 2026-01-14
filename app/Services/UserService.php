@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use App\Traits\AuthorizationTrait;
 use App\Libraries\ResponseLib;
 use App\Enums\RoleGroup;
 use Illuminate\Support\Arr;
@@ -14,8 +13,6 @@ use Log;
 
 class UserService
 {
-	use AuthorizationTrait;
-	
 	private $_title = '帳號管理';
 	
 	public function __construct(protected UserRepository $_repository)
