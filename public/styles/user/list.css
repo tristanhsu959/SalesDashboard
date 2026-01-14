@@ -31,11 +31,12 @@ body {
 	border-radius: .5rem;
 	background: var(--theme-surface-bg);
 	
-	/* .list-data
+	.list-data
 		.row {
 			.col {
 				display: flex;
 				align-items: center;
+				flex-wrap: wrap;
 				border-width: 0;
 				padding: .5rem;
 				
@@ -49,6 +50,6 @@ body {
 				
 			}
 		}
-	} */
+	}
 }
 

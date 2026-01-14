@@ -7,24 +7,29 @@ use App\Enums\FormAction;
 use App\Enums\Area;
 use App\Enums\Operation;
 use App\Enums\RoleGroup;
+use App\Enums\Functions;
+use App\ViewModels\Attributes\attrStatus;
+use App\ViewModels\Attributes\attrActionBar;
+use App\ViewModels\Attributes\attrAllowAction;
+use App\Traits\AuthTrait;
 
 class UserViewModel
 {
-	private $_service;
-	private $_title = '帳號管理';
+	use AuthTrait;
+	use attrStatus, attrActionBar, attrAllowAction;
+	
+	private $_function 	= Functions::USER;
+	private $_backRoute	= 'user.list';
 	private $_data = [];
 	
-	public function __construct(UserService $userService)
+	public function __construct(protected UserService $_service)
 	{
-		$this->_service = $userService;
-		
 		#initialize
 		$this->_data['action'] 		= NULL; #enum form action
 		$this->_data['status']		= FALSE;
 		$this->_data['msg'] 		= '';
 		
 		#Form Data
-		$this->_data['userData'] 	= NULL; #DB data
 		$this->_data['list'] 		= []; #DB data
 		$this->_data['search']		= [];
 		$this->_data['option']		= [];
@@ -54,26 +59,20 @@ class UserViewModel
 	{
 		#初始化各參數及Form Options
 		$this->_data['action']	= $action;
-		$this->_data['msg'] 	= '';
+		$this->success();
 		
 		$this->_setOptions();
 	}
 	
-	/* Status / Msg
-	 * @params: string
-	 * @return: boolean
+	/* Form所屬的參數選項
+	 * @params:  
+	 * @return: void
 	 */
-	public function success($msg = NULL)
+	private function _setOptions()
 	{
-		$this->_data['status'] 	= TRUE;
-		$this->_data['msg'] 	= $msg ?? '';
+		$this->_data['option']['area'] 		= Area::cases(); #enum
+		$this->_data['option']['roleList']	= $this->_service->getRoleOptions();
 	}
-	
-	public function fail($msg)
-	{
-		$this->_data['status'] 	= FALSE;
-		$this->_data['msg'] 	= $msg;
-	}          
 	
 	/* Form submit action
 	 * @params: 
@@ -86,16 +85,6 @@ class UserViewModel
 			FormAction::CREATE => route('user.create.post'),
 			FormAction::UPDATE => route('user.update.post'),
 		};
-	}
-	
-	/* Form所屬的參數選項
-	 * @params:  
-	 * @return: void
-	 */
-	private function _setOptions()
-	{
-		$this->_data['option']['area'] 		= Area::cases(); #enum
-		$this->_data['option']['roleList']	= $this->_service->getRoleOptions();
 	}
 	
 	/* Keep search data of form
@@ -141,36 +130,11 @@ class UserViewModel
 	 */
 	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $role = 0)
     {
-		data_set($this->_data, 'userData.id', $id);
-		data_set($this->_data, 'userData.ad', $adAccount);
-		data_set($this->_data, 'userData.displayName', $displayName);
-		data_set($this->_data, 'userData.roleId', $role);
+		data_set($this->_data, 'id', $id);
+		data_set($this->_data, 'ad', $adAccount);
+		data_set($this->_data, 'displayName', $displayName);
+		data_set($this->_data, 'roleId', $role);
 	}
-	
-	/* Get user data
-	 * @params: 
-	 * @return: string
-	 */
-	public function getUserId()
-    {
-		return data_get($this->_data, 'userData.id', 0);
-	}
-	
-	public function getUserAd()
-	{
-		return data_get($this->_data, 'userData.ad', '');
-	}
-	
-	public function getUserDisplayName()
-	{
-		return data_get($this->_data, 'userData.displayName', '');
-	}
-	
-	public function getUserRoleId()
-	{
-		return data_get($this->_data, 'userData.roleId', 0);
-	}
-	
 	/* User Data End */
 	
 	/* Get role name of list
@@ -181,39 +145,6 @@ class UserViewModel
 	{
 		$list = $this->_data['option']['roleList'];
 		return data_get($list, $roleId, '');
-	}
-	
-	
-	#Page operation permission
-	#判別登入使用者權限
-	/* Delete permission
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function canQuery()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::READ->value);
-	}
-	
-	public function canCreate()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::CREATE->value);
-	}
-	
-	public function canUpdate()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::UPDATE->value);
-	}
-	
-	public function canDelete()
-	{
-		return $this->_service->hasOperationPermission($this->_service->getFunctionCode(), Operation::DELETE->value);
-	}
-	
-	/* Form Style */
-	public function getBreadcrumb()
-    {
-		return $this->_title . ' | ' . $this->action->label();
 	}
 	
 	/* Search form */
@@ -232,9 +163,7 @@ class UserViewModel
 	
 	public function checkedRole($roleId)
 	{
-		$userRoleId = $this->getUserRoleId();
-		
-		return ($roleId == $userRoleId);
+		return ($roleId == $this->_data['roleId']);
 	}
 	
 	/* supervisor permission
@@ -244,5 +173,25 @@ class UserViewModel
 	public function disabledSupervisor($deleteRoleGroup)
 	{
 		return (RoleGroup::SUPERVISOR->value == $deleteRoleGroup) ? 'disabled' : '';
+	}
+	
+	/* 判別列表Role是否可編或可刪
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function canUpdateThisUser($thisRoleGroup)
+	{
+		$currentUser = $this->getCurrentUser();
+		
+		#Supervisor才能編輯自己
+		if (! $currentUser->isSupervisor() && $thisRoleGroup == RoleGroup::SUPERVISOR->value)
+			return FALSE;
+		else
+			return TRUE;
+	}
+	
+	public function canDeleteThisUser($thisRoleGroup)
+	{
+		return ! ($thisRoleGroup == RoleGroup::SUPERVISOR->value);
 	}
 }

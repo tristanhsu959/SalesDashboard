@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\UserRepository;
 use App\Traits\AuthorizationTrait;
 use App\Libraries\ResponseLib;
+use App\Enums\RoleGroup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -15,23 +16,10 @@ class UserService
 {
 	use AuthorizationTrait;
 	
-	private $_functionCode = 'users';
-	
 	private $_title = '帳號管理';
-	private $_repository;
-    
-	public function __construct(UserRepository $userRepository)
-	{
-		$this->_repository = $userRepository;
-	}
 	
-	/* Function code define (match to menu define)
-	 * @params: 
-	 * @return: array
-	 */
-	public function getFunctionCode()
+	public function __construct(protected UserRepository $_repository)
 	{
-		return $this->_functionCode;
 	}
 	
 	/* 取帳號清單(Get ALL)
@@ -53,7 +41,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
 		}
 	}
@@ -79,7 +67,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('查詢時發生錯誤');
 		}
 	}
@@ -101,7 +89,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('新增帳號失敗');
 		}
 	}
@@ -119,7 +107,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('讀取帳號資料發生錯誤');
 		}
 	}
@@ -140,7 +128,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('編輯帳號失敗');
 		}
 	}
@@ -158,7 +146,7 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail('刪除帳號失敗');
 		}
 	}
@@ -172,6 +160,10 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getRoleList();
+			$list = Arr::where($list, function ($item, int $key) {
+				return ($item['roleGroup'] != RoleGroup::SUPERVISOR->value);
+			});
+			
 			$list = Arr::mapWithKeys($list, function (array $item, int $key) {
 				return [$item['roleId'] => $item['roleName']];
 			});
@@ -180,25 +172,9 @@ class UserService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return [];
 		}
 	}
 	
-	/* CRUD Permission Check for Page
-	 * @params: int
-	 * @return: boolean
-	 *
-	 public function getOperationPermission()
-	 {
-		try
-		{
-			return $this->allowOperationPermissionList($this->_groupKey, $this->_actionKey);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
-		}
-	 }*/
 }

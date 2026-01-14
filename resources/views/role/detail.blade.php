@@ -14,14 +14,14 @@
 
 @section('content')
 <form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}" data-supervisor="{{ RoleGroup::SUPERVISOR->value }}">
-	<input type="hidden" value="{{ $viewModel->getRoleId() }}" name="id">
+	<input type="hidden" value="{{ $viewModel->id }}" name="id">
 	@csrf
 
 <section class="section-wrapper dp-2">
 	
 	<div class="section role-data">
 		<div class="input-field field-purple field required">
-			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->getRoleName() }}" maxlength="10" placeholder=" " required>
+			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->name }}" maxlength="10" placeholder=" " required>
 			<label for="name" class="form-label">身份</label>
 		</div>
 		<div class="input-select field-purple field required">
@@ -49,16 +49,17 @@
 			@foreach($group['items'] as $itemKey => $item)
 			<li class="list-group-item">
 				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="item-{{ $groupKey.$itemKey }}">
-					<label class="form-check-label" for="item-{{ $groupKey$itemKey }}">{{ $item['name'] }}</label>
+					<input class="form-check-input" type="checkbox" id="item-{{$groupKey}}-{{$itemKey}}">
+					<label class="form-check-label" for="item-{{$groupKey}}-{{$itemKey}}">{{ $item['name'] }}</label>
 				</div>
 				<div class="permission-group-items">
 					@foreach($item['operation'] as $opKey => $operation)
-					<label class="form-check-label" for="settingList-{{ $groupKey.$itemKey.$opKey }}">
+					<label class="form-check-label" for="permission-{{$groupKey}}-{{$itemKey}}-{{$opKey}}">
 						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" 
-							id="settingList-{{ $groupKey.$itemKey.$opKey }}" 
-							name="{{ Str::replaceArray('?', [$itemKey], 'permission[?][]') }}">
-						<!-- checked($viewModel->checkedOperation($item['code'], $operation->value)) -->
+							id="permission-{{$groupKey}}-{{$itemKey}}-{{$opKey}}" 
+							name="{{ Str::replaceArray('?', [$itemKey], 'permission[?][]') }}"
+							@checked($viewModel->checkedOperation($itemKey, $operation->value))
+							>
 						{{ $operation->label() }}
 					</label>
 					@endforeach
@@ -68,7 +69,7 @@
 		</ul>
 		@endforeach
 	</div>
-	<?php /*
+	
 	<div class="section role-area">
 		<!--label class="title">管理區域</label-->
 		@foreach($viewModel->option['areaList'] as $idx => $area)
@@ -81,7 +82,7 @@
 	<div class="toolbar">
 		<button type="button" class="btn btn-primary btn-major btn-save">儲存</button>
 		<button type="button" class="btn btn-red btn-reset">重設</button>
-	</div> */ ?>
+	</div>
 </section>
 </form>
 

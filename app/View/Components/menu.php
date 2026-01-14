@@ -7,6 +7,8 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class menu extends Component
 {
@@ -32,7 +34,9 @@ class menu extends Component
 	
 	public function isActive(string $url): string
 	{
-		$segments = request()->segments();
-		return in_array($url, $segments) ? 'active' : '';
+		$segments = request()->segments(); 
+		$segmentsStr = Arr::join($segments, '/');
+		
+		return Str::contains($segmentsStr, $url) ? 'active' : '';
 	}
 }

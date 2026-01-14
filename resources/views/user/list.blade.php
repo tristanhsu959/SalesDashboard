@@ -1,5 +1,5 @@
-@use('App\Enums\Area')
 @extends('layouts.master')
+@use('App\Enums\Area')
 
 @push('styles')
     <link href="{{ asset('styles/user/list.css') }}" rel="stylesheet">
@@ -9,19 +9,9 @@
     <script src="{{ asset('scripts/user/list.js') }}" defer></script>
 @endpush
 
-@section('navHead', $viewModel->getBreadcrumb())
-
-@section('navAction')
-@if($viewModel->canCreate())
-<a href="{{ route('user.create') }}" class="btn btn-create">
-	<span class="material-symbols-outlined filled-icon">add</span>
-	<span class="title">新增</span>
-</a>
-@endif
-@endsection
-
 @section('content')
-@if($viewModel->status === TRUE)
+
+@if($viewModel->status() === TRUE)
 	<form action="" method="post" id="userListForm">
 	@csrf
 	</form>
@@ -58,6 +48,15 @@
 	
 
 	<section class="user-list section-wrapper">
+		<!-- Create button -->
+		@if($viewModel->canCreate())
+		<div class="grid-header">
+			<a href="{{ route('user.create') }}" class="btn btn-list-create">
+				<span class="material-symbols-outlined filled-icon">add</span>
+			</a>
+		</div>
+		@endif
+		
 		@if(empty(($viewModel->list)))
 		<div class="container-fluid empty-list">
 			<div class="row">
@@ -70,7 +69,7 @@
 				<div class="col col-1">#</div>
 				<div class="col">AD帳號</div>
 				<div class="col">顯示名稱</div>
-				<!--div class="col col-4">管理區域</div-->
+				<div class="col col-4">管理區域</div>
 				<div class="col">權限身份</div>
 				<div class="col">更新時間</div>
 				<div class="col col-action">操作</div>
@@ -80,24 +79,20 @@
 				<div class="col col-1">{{ $idx + 1 }}</div>
 				<div class="col">{{ $user['userAd'] }}</div>
 				<div class="col">{{ $user['userDisplayName'] }}</div>
-				<!--div class="col col-4 col-area">
+				<div class="col col-4 col-area">
 					@foreach($user['roleArea'] as $area)
 					<div class="badge">{{ Area::getLabelByValue($area) }}</div>
 					@endforeach
-				</div-->
+				</div>
 				<div class="col">{{ $viewModel->getRoleById($user['userRoleId']) }}</div>
 				<div class="col">{{ $user['updateAt'] }}</div>
 				<div class="col col-action">
-					@if($viewModel->canUpdate())
-					<a href="{{ route('user.update', [$user['userId']]) }}" class="btn btn-edit">
+					<a href="{{ route('user.update', [$user['userId']]) }}" class="btn btn-list-edit @disabled(! ($viewModel->canUpdate() && $viewModel->canUpdateThisUser($user['roleGroup'])))">
 						<span class="material-symbols-outlined">edit</span>
 					</a>
-					@endif
-					@if($viewModel->canDelete())
-					<a href="{{ route('user.delete.post', [$user['userId']]) }}" class="btn btn-delete {{ $viewModel->disabledSupervisor($user['roleGroup']) }}">
+					<a href="{{ route('user.delete.post', [$user['userId']]) }}" class="btn btn-list-delete @disabled(! ($viewModel->canDelete() && $viewModel->canDeleteThisUser($user['roleGroup'])))">
 						<span class="material-symbols-outlined">delete</span>
 					</a>
-					@endif
 				</div>
 			</div>
 			@endforeach

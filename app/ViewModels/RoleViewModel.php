@@ -28,7 +28,6 @@ class RoleViewModel
 		$this->_data['msg'] 	= '';
 		
 		#form data
-		$this->_data['detail']	= NULL; #For detail view form data
 		$this->_data['list'] 	= []; #For list view
 		$this->_data['option']	= [];
 	}
@@ -98,55 +97,40 @@ class RoleViewModel
 	public function keepFormData($roldId = 0, $name = '', $group = 0, $permission = [], $area = [])
     {
 		#todo area
-		data_set($this->_data, 'roleData.id', $roldId);
-		data_set($this->_data, 'roleData.name', $name);
-		data_set($this->_data, 'roleData.group', $group);
-		data_set($this->_data, 'roleData.permission', $permission);
-		data_set($this->_data, 'roleData.area', $area);
+		data_set($this->_data, 'id', $roldId);
+		data_set($this->_data, 'name', $name);
+		data_set($this->_data, 'group', $group);
+		data_set($this->_data, 'permission', $permission);
+		data_set($this->_data, 'area', $area);
 	}
 	
-	/* Get role data
-	 * @params: 
-	 * @return: string
-	 */
-	public function getRoleId()
-    {
-		return data_get($this->_data, 'roleData.id', 0);
-	}
-	public function getRoleName()
-	{
-		return data_get($this->_data, 'roleData.name', '');
-	}
-	public function getRoleGroup()
-	{
-		return data_get($this->_data, 'roleData.group', 0);
-	}
-	public function getRolePermission()
-	{
-		return data_get($this->_data, 'roleData.permission', []);
-	}
-	public function getRoleArea()
-	{
-		return data_get($this->_data, 'roleData.area', []);
-	}
-	 
 	/* Selected option */
 	public function selectedRoleGroup($group)
 	{
 		$group = intval($group);
 		
-		return ($group == $this->getRoleGroup());
+		return ($group == $this->_data['group']);
 	}
 	
 	/* Area checked prop
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function checkedArea($areaValue)
+	public function checkedArea($area)
 	{
-		$areaSetting 	= $this->getRoleArea(); 
+		return in_array($area, $this->_data['area']);
+	}
+	
+	/* Form permission => 是依據新增或編輯的Role
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function checkedOperation($functionKey, $operation)
+	{
+		$permissions	= $this->_data['permission']; 
+		$operations		= data_get($permissions, $functionKey, []);
 		
-		return in_array($areaValue, $areaSetting);
+		return in_array($operation, $operations);
 	}
 	
 	/* 判別列表Role是否可編或可刪

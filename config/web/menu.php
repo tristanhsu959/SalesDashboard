@@ -12,12 +12,12 @@ return [
 			'style' => ['icon' => 'chart_data', 'color' => 'purple'], #filled-icon 
 			'type'	=> [RoleGroup::USER->name],
 			'items' => [ 		#Function code or key => use Str::camel to check segment
-				'porkRibs',  
-				'tomatoBeef',
-				'eggTofu',
+				'bg-porkRibs',  
+				'bg-tomatoBeef',
+				'bg-eggTofu',
+				'bg-porkGravy'#滷肉飯要加滷汁一起算
 				#'braisedPork',
 				#'braisedGravy',
-				'porkGravy'#滷肉飯要加滷汁一起算
 			],
 		],
 		[
@@ -25,8 +25,8 @@ return [
 			'style' => ['icon' => 'trolley', 'color' => 'teal'], #filled-icon 
 			'type'	=> [RoleGroup::USER->name],
 			'items' => [ 		#Function code or key => use Str::camel to check segment
-				'purchaseBg',
-				'salesBg',
+				'bg-purchase',
+				'bg-sales',
 			],
 		],
 		[
@@ -34,8 +34,8 @@ return [
 			'style' => ['icon' => 'admin_panel_settings', 'color' => 'red'],
 			'type' 	=> [RoleGroup::ADMIN->name, RoleGroup::SUPERVISOR->name],
 			'items' => [
-				'users',
-				'roles',
+				'user',
+				'role',
 			],
 		],
 	],
@@ -54,7 +54,7 @@ return [
 		'bg-sales' => [
 			#'code'		=> 'sales', #判別用
 			'name'		=> '梁社漢-銷售',
-			'url' 		=> 'sales', 
+			'url' 		=> 'bg/sales', 
 			'operation'	=> [
 				Operation::READ
 			],
@@ -63,7 +63,7 @@ return [
 		'bg-porkRibs' => [
 			#'code'		=> 'porkRibs', #判別用
 			'name'		=> '橙汁排骨',
-			'url' 		=> 'new_releases/pork_ribs', 
+			'url' 		=> 'bg/new_releases/pork_ribs', 
 			'operation'	=> [
 				Operation::READ
 			],
@@ -71,7 +71,7 @@ return [
 		'bg-tomatoBeef' => [
 			#'code'		=> 'tomatoBeef',
 			'name' 		=> '番茄牛三寶麵',
-			'url' 		=> 'new_releases/tomato_beef',
+			'url' 		=> 'bg/new_releases/tomato_beef',
 			'operation'	=> [
 				Operation::READ
 			],
@@ -79,7 +79,7 @@ return [
 		'bg-eggTofu' => [
 			#'code'	=> 'eggTofu',
 			'name' 		=> '老皮嫩肉',
-			'url' 		=> 'new_releases/egg_tofu',
+			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
 			],
@@ -87,7 +87,7 @@ return [
 		'bg-braisedPork'	=> [
 			#'code'		=> 'braisedPork',
 			'name' 		=> '主廚秘製滷肉飯',
-			'url' 		=> 'new_releases/braised_pork',
+			'url' 		=> 'bg/new_releases/braised_pork',
 			'operation'	=> [
 				Operation::READ
 			],
@@ -95,7 +95,7 @@ return [
 		'bg-eggTofu' => [
 			#'code'	=> 'eggTofu',
 			'name' 		=> '老皮嫩肉',
-			'url' 		=> 'new_releases/egg_tofu',
+			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
 				Operation::READ
 			],
@@ -103,7 +103,7 @@ return [
 		'bg-braisedGravy' => [
 			#'code'		=> 'braisedGravy',
 			'name' 		=> '秘製滷肉汁',
-			'url' 		=> 'new_releases/braised_gravy',
+			'url' 		=> 'bg/new_releases/braised_gravy',
 			'operation'	=> [
 				Operation::READ
 			],
@@ -112,24 +112,24 @@ return [
 		'bg-porkGravy' => [
 			#'code'		=> 'porkGravy',
 			'name' 		=> '滷肉飯加滷汁',
-			'url' 		=> 'new_releases/pork_gravy',
+			'url' 		=> 'bg/new_releases/pork_gravy',
 			'operation'	=> [
 				Operation::READ
 			],
 		],
 		/* 權限管理 */
-		'users' => [
+		'user' => [
 			#'code'		=> 'users',
 			'name' 		=> '帳號管理',
-			'url' 		=> 'users', 
+			'url' 		=> 'user', 
 			'operation'	=> [
 				Operation::READ, Operation::CREATE, Operation::UPDATE, Operation::DELETE, 
 			],
 		],
-		'roles' => [
+		'role' => [
 			#'code'		=> 'roles',
 			'name' 		=> '身份管理',
-			'url' 		=> 'roles',
+			'url' 		=> 'role',
 			'operation'	=> [
 				Operation::READ, Operation::CREATE, Operation::UPDATE, Operation::DELETE, 
 			],

@@ -25,7 +25,7 @@ class UserRepository extends Repository
 		$db = $this->connectSalesDashboard('role');
 			
 		$result = $db
-			->select('roleId', 'roleName')
+			->select('roleId', 'roleName', 'roleGroup')
 			->get()
 			->toArray();
 				

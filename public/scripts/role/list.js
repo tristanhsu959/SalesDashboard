@@ -1,7 +1,7 @@
 /* JS */
 
 $(function(){
-	$('.btn-delete').click(function(e){
+	$('.btn-list-delete').click(function(e){
 		e.preventDefault();
 		let action = $(this).attr('href');
 		
