@@ -38,7 +38,7 @@ class AuthService
 			$this->removeCurrentUser();
 			
 			#2. auth by AD
-			$adInfo = $this->_authenticationByAD($account, $password);
+			$adInfo = $this->_authenticationByAD(/* $account */'tristan.hsu', $password);
 			
 			#3. auth DB account permission
 			$userInfo = $this->_authAccountRegister($account);

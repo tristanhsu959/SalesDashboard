@@ -99,6 +99,11 @@
 		</div>
 		@endif
 	</section>
+	@else
+	<div class="alert alert-danger">
+		無查詢權限
+	</div>
 	@endif
+
 @endif
 @endsection()
