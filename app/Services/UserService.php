@@ -13,8 +13,6 @@ use Log;
 
 class UserService
 {
-	private $_title = '帳號管理';
-	
 	public function __construct(protected UserRepository $_repository)
 	{
 	}

@@ -145,4 +145,13 @@ class RoleViewModel
 	{
 		return (RoleGroup::SUPERVISOR->value == $roleGroup) ? FALSE : TRUE; #super visor can not edit
 	}
+	
+	/* breadcrumb
+	 * @params: 
+	 * @return: array
+	 */
+	public function breadcrumb()
+	{
+		return $this->getBreadcrumbByDefault();
+	}
 }

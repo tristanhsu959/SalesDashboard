@@ -13,13 +13,13 @@ class NewReleaseLocalRepository extends Repository
 		
 	}
 	
-	/* Build query string | 新品:八方/梁社漢共用
+	/* Build query string | 新品:梁社漢
 	 * @params: string
 	 * @params: datetime
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getDataFromDB($configKey, $stDate, $endDate, $userAreaIds)
+	public function getBgDataFromDB($configKey, $stDate, $endDate, $userAreaIds)
 	{
 		/* 每筆訂單的資料格式
 		["SHOP_ID" => "235001"
@@ -29,8 +29,9 @@ class NewReleaseLocalRepository extends Repository
 		]
 		*/
 		
-		$tables = $config = config("web.new_release.DbMapping.{$configKey}");
-
+		$tables = config("buygood.new_release.DbMapping.{$configKey}");
+		
+		#目前有取兩個table data的狀況
 		if (is_array($tables))
 		{
 			$data = collect([]);
@@ -71,7 +72,7 @@ class NewReleaseLocalRepository extends Repository
 				->whereIn('areaId', $userAreaIds)
 				->orderBy('saleDate', 'DESC')
 				->orderBy('shopId');
-		
+		#dd($query->toRawSql());
 		return $query->get();
 	}
 }

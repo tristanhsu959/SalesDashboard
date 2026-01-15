@@ -7,7 +7,7 @@ use App\Http\Controllers\BuyGood\NewReleaseController as BgNewReleaseController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PurchaseController;
-use App\Http\Middleware\AuthPermission;
+use App\Http\Middleware\AccessPermissionMiddleware;
 
 /* Login */
 Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
@@ -15,7 +15,7 @@ Route::get('signin', [AuthController::class, 'showSignin'])->name('signin');
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 
-Route::middleware([AuthPermission::class])->group(function(){
+Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 	/* Home */
 	Route::get('home', [HomeController::class, 'index'])->name('home');
 	
@@ -25,17 +25,15 @@ Route::middleware([AuthPermission::class])->group(function(){
 	
 	/* 梁社漢 */
 	Route::namespace('App\Http\Controllers\BuyGood')->prefix('bg')->group(function () {
+		/* 新品 */
 		Route::get('new_releases/pork_ribs', [BgNewReleaseController::class, 'porkRibs']);
-		
+		Route::get('new_releases/tomato_beef', [BgNewReleaseController::class, 'tomatoBeef']);
+		Route::get('new_releases/egg_tofu', [BgNewReleaseController::class, 'eggTofu']);
+		Route::get('new_releases/pork_gravy', [BgNewReleaseController::class, 'porkGravy']);
 		Route::post('new_releases/{segment}/search', [BgNewReleaseController::class, 'search'])->name('bg.new_releases.search');
+		#Route::get('new_releases/braised_pork', [BgNewReleaseController::class, 'index']);
+		#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);
 	});
-	
-	/* 新品 */
-	Route::get('bg/new_releases/tomato_beef', [BgNewReleaseController::class, 'index']);
-	Route::get('bg/new_releases/egg_tofu', [BgNewReleaseController::class, 'index']);
-	#Route::get('new_releases/braised_pork', [BgNewReleaseController::class, 'index']);
-	#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);
-	Route::get('bg/new_releases/pork_gravy', [BgNewReleaseController::class, 'index']);
 	
 	/* 進銷存報表 */
 	Route::get('bg/purchase', [PurchaseController::class, 'showSearch']);

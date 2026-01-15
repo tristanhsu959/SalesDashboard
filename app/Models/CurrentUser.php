@@ -8,6 +8,24 @@ class CurrentUser
 {
 	private $_data = [];
 	
+	/*
+	[
+		"company" => "八方雲集國際股份有限公司"
+		"department" => "資訊處"
+		"title" => "經理"
+		"displayName" => "Tristan Hsu 許方毓"
+		"employeeId" => "T2025098"
+		"name" => "許方毓"
+		"mail" => "tristan.hsu@8way.com.tw"
+		"userId" => 1
+		"userAd" => "tristan.hsu"
+		"userRoleId" => 1
+		"roleGroup" => 1
+		"rolePermission" => array:7 [▶]
+		"roleArea" => array:6 [▶]
+	]
+	*/
+  
 	public function __construct($adInfo, $userInfo)
 	{
 		$info = array_merge($adInfo, $userInfo);

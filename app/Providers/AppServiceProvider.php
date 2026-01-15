@@ -7,13 +7,11 @@ use Illuminate\Database\Events\StatementPrepared;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use PDO;
-#use App\Traits\AuthorizationTrait;
 use App\ViewModels\MenuViewModel;
 
 class AppServiceProvider extends ServiceProvider
 {
-	#use AuthorizationTrait;
-    /**
+	/**
      * Register any application services.
      */
     public function register(): void
@@ -32,16 +30,17 @@ class AppServiceProvider extends ServiceProvider
 		});
 		
 		#View share not work, because session is not available
-		View::composer('*', function ($view) {
+		#Deprecated
+		/*View::composer('*', function ($view) {
 			
 			if (in_array($view->getName(), ['signin']) == FALSE)
 			{				
-				// $signinInfo = $this->getSigninUserInfo();
-				// $appMenu = new MenuViewModel($this->getAuthorizedMenu());
+				$signinInfo = $this->getSigninUserInfo();
+				$appMenu = new MenuViewModel($this->getAuthorizedMenu());
 				
-				// if ($signinInfo) 
-					// $view->with('signinInfo', $signinInfo)->with('appMenu', $appMenu);
+				if ($signinInfo) 
+					$view->with('signinInfo', $signinInfo)->with('appMenu', $appMenu);
 			}
-		});
+		});*/
     }
 }

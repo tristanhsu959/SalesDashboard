@@ -17,28 +17,26 @@ trait attrActionBar
 			return ($action == FormAction::HOME);
 	}
 	
-	/* Set status & msg
-	 * @params: string
-	 * @return: void
+	/* Get breadcrumb use default logic
+	 * @params: 
+	 * @return: array
 	 */
-	public function breadcrumb()
+	public function getBreadcrumbByDefault()
 	{
 		$breadcrumb 	= [];
 		$function		= $this->_function;
 		$action 		= data_get($this->_data, 'action', '');
-		$byAction		= isset($this->_breadcrumbByAction) ? $this->_breadcrumbByAction : TRUE;
 		
 		$breadcrumb[] 	= $function->label();
-		$actionName 	= ($byAction) ? $action->label() : data_get($this->_data, 'actionName', '');
-		
-		if (empty($actionName))
-			return $breadcrumb;
-		
-		$breadcrumb[] = $actionName;
+		$breadcrumb[] 	= $action->label();
 		
 		return $breadcrumb;
 	}
 	
+	/* Get back route name
+	 * @params: 
+	 * @return: array
+	 */
 	public function backRoute()
 	{
 		$action = data_get($this->_data, 'action', '');

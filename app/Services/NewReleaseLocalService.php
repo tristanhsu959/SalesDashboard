@@ -73,12 +73,12 @@ class NewReleaseLocalService
 			  "SHOP_NAME" => "御廚中和直營店"
 			]
 			*/
-			$userInfo = $this->getSigninUserInfo();
-			$userAreaIds = $userInfo['area'];
+			$currentUser = $this->getCurrentUser(); 
+			$userAreaIds = $currentUser->roleArea;
 			
 			#這裏取到的是collection array, 先不用toArray
 			$srcData = [];
-			$srcData = $this->_repository->getDataFromDB($configKey, $stDate, $endDate, $userAreaIds);
+			$srcData = $this->_repository->getBgDataFromDB($configKey, $stDate, $endDate, $userAreaIds);
 			
 			return $this->_outputReport($srcData);
 			
@@ -99,7 +99,7 @@ class NewReleaseLocalService
 	{
 		try
 		{
-			$config = config("web.new_release.products.{$this->_configKey}");
+			$config = config("buygood.new_release.products.{$this->_configKey}");
 			
 			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
 			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日

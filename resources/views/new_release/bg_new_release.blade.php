@@ -44,6 +44,7 @@
 	<button class="btn btn-search-reset" type="button">
 		<span class="material-symbols-outlined filled-icon">backspace</span>
 	</button>
+	<div class="sales-info">銷售日：{{ $viewModel->getSaleDate() }}</div>
 </section>
 </form>
 @if($viewModel->status() === TRUE)

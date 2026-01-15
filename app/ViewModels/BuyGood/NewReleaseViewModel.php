@@ -15,7 +15,6 @@ class NewReleaseViewModel
 	use attrStatus, attrActionBar, attrAllowAction;
 	
 	private $_function 	= NULL;
-	private $_breadcrumbByAction = FALSE; #不取自Action
 	private $_backRoute	= '';
 	private $_data = [];
 	
@@ -66,7 +65,6 @@ class NewReleaseViewModel
 		if (! empty($configKey))
 			$this->_data['config'] 	= config("buygood.new_release.products.{$configKey}");
 		
-		$this->_data['actionName']	= $this->_data['config']['name']; #For breadcrumb
 		$this->_setOptions();
 	}
 	
@@ -179,5 +177,18 @@ class NewReleaseViewModel
 		return data_get($this->_data, 'config.saleEndDate', '');
 	}
 	
+	/* breadcrumb
+	 * @params: 
+	 * @return: array
+	 */
+	public function breadcrumb()
+	{
+		#Custom
+		$breadcrumb 	= [];#wifi_1_bar
+		$breadcrumb[] 	= '御廚．新品銷售';
+		$breadcrumb[]	= $this->_function->label(); 
+		
+		return $breadcrumb;
+	}
 	
 }

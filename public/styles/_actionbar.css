@@ -35,10 +35,10 @@
 		display: flex;
 		align-items: center;
 		font-weight: 500;
-		color: var(--theme-primary-color);
+		color: #ffe0b2; /* var(--theme-primary-color); */
 		
 		&> .material-symbols-outlined {
-			color: rgba(255, 152, 0, .87);
+			color: rgba(255, 255, 255, .38);
 		}
 		/* New release info */
 		.new-release-info {

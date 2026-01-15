@@ -9,6 +9,7 @@ body {
 	/* height: 100vh; */
 	
 	.searchbar {
+		position: relative;
 		display: flex;
 		align-items: center;
 		padding: 1rem;
@@ -22,6 +23,13 @@ body {
 		}
 		.btn {
 			margin-right: .5rem;
+		}
+		
+		.sales-info {
+			position: absolute;
+			right: 1rem;
+			color: #f8bbd0;
+			
 		}
 	}
 	
@@ -146,7 +154,7 @@ body {
 							display: flex;
 							flex-direction: column;
 							justify-content: center;
-							padding: 0 .5rem;
+							/* padding: 0 .5rem; */
 							
 							&:first-child {
 								/* font-size: .9rem; */

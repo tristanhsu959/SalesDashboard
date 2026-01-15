@@ -177,4 +177,13 @@ class UserViewModel
 	{
 		return ! ($thisRoleGroup == RoleGroup::SUPERVISOR->value);
 	}
+	
+	/* breadcrumb
+	 * @params: 
+	 * @return: array
+	 */
+	public function breadcrumb()
+	{
+		return $this->getBreadcrumbByDefault();
+	}
 }
