@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\BuyGood\NewReleaseController as BgNewReleaseController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\BuyGood\NewReleaseController as BgNewReleaseController;
+use App\Http\Controllers\BuyGood\PurchaseController as BgPurchaseController;
+use App\Http\Controllers\BuyGood\SalesController as BgSalesController;
 use App\Http\Middleware\AccessPermissionMiddleware;
 
 /* Login */
@@ -33,13 +34,14 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 		Route::post('new_releases/{segment}/search', [BgNewReleaseController::class, 'search'])->name('bg.new_releases.search');
 		#Route::get('new_releases/braised_pork', [BgNewReleaseController::class, 'index']);
 		#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);
+		
+		/* 進銷存報表 */
+		Route::get('purchase', [BgPurchaseController::class, 'showSearch']);
+		Route::post('purchase/search', [BgPurchaseController::class, 'search'])->name('bg.purchase.search');
+		Route::get('sales', [BgSalesController::class, 'showSearch']);
+		Route::post('sales/search', [BgSalesController::class, 'search'])->name('bg.sales.search');
 	});
 	
-	/* 進銷存報表 */
-	Route::get('bg/purchase', [PurchaseController::class, 'showSearch']);
-	Route::post('bg/purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
-	Route::get('bg/sales', [SalesController::class, 'showSales']);
-	Route::post('bg/sales/search', [SalesController::class, 'search'])->name('sales.search');
 	
 	/* 身份管理 */
 	Route::get('role', [RoleController::class, 'list'])->name('role.list');

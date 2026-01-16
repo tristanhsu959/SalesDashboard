@@ -37,4 +37,13 @@ class HomeViewModel
     {
 		return array_key_exists($name, $this->_data);
 	}
+	
+	/* breadcrumb
+	 * @params: 
+	 * @return: array
+	 */
+	public function breadcrumb()
+	{
+		return $this->getBreadcrumbByDefault();
+	}
 }

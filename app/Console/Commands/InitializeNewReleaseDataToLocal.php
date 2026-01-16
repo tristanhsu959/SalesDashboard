@@ -38,7 +38,7 @@ class InitializeNewReleaseDataToLocal extends Command
 			
 			if (empty($argument))
 			{
-				$list = config('web.new_release.products');
+				$list = config('buygood.new_release.products');
 				$configKeys = array_keys($list);
 			}
 			else
@@ -46,7 +46,7 @@ class InitializeNewReleaseDataToLocal extends Command
 			
 			foreach($configKeys as $configKey)
 			{
-				$productName = config("web.new_release.products.{$configKey}.name");
+				$productName = config("buygood.new_release.products.{$configKey}.name");
 				Log::channel('commandLog')->info("Initialize Start : {$productName}", [ __class__, __function__, __line__]);
 			
 				$this->info("Initialize Start : {$productName} -----");
@@ -58,8 +58,8 @@ class InitializeNewReleaseDataToLocal extends Command
 				$params = $posService->getParams();
 				
 				#for testing
-				data_set($params, 'stDate', '2025-11-01');
-				data_set($params, 'endDate', '2025-12-22');
+				// data_set($params, 'stDate', '2025-11-01');
+				// data_set($params, 'endDate', '2025-12-22');
 				
 				$this->info(json_encode($params));
 							

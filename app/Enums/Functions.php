@@ -11,6 +11,9 @@ enum Functions : string
 	case BG_TOMATOBEEF 	= 'bg-tomatoBeef';
 	case BG_EGGTOFU 	= 'bg-eggTofu';
 	case BG_PORKGRAVY	= 'bg-porkGravy';
+	case BG_PURCHASE	= 'bg-purchase';
+	case BG_SALES		= 'bg-sales';
+	
 	
 	public function label() : string
     {
@@ -23,6 +26,8 @@ enum Functions : string
 			self::BG_TOMATOBEEF => '蕃茄牛三寶',
 			self::BG_EGGTOFU 	=> '老皮嫩肉',
 			self::BG_PORKGRAVY 	=> '滷肉飯加滷汁',
+			self::BG_PURCHASE 	=> '進貨統計',
+			self::BG_SALES 		=> '銷售統計',
         };
     }
 	
@@ -37,6 +42,8 @@ enum Functions : string
 			self::BG_TOMATOBEEF->value	=> self::BG_TOMATOBEEF,
 			self::BG_EGGTOFU->value		=> self::BG_EGGTOFU,
 			self::BG_PORKGRAVY->value	=> self::BG_PORKGRAVY,
+			self::BG_PURCHASE->value	=> self::BG_PURCHASE,
+			self::BG_SALES->value		=> self::BG_SALES,
         };
 	}
 }

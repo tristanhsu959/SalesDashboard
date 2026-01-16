@@ -42,24 +42,7 @@ return [
 	
 	#Function
 	'functions' => [
-		/* 進銷存報表 */
-		'bg-purchase' => [
-			#'code'		=> 'bg-purchase', #判別用
-			'name'		=> '御廚-進貨',
-			'url' 		=> 'bg/purchase', 
-			'operation'	=> [
-				Operation::READ
-			],
-		],
-		'bg-sales' => [
-			#'code'		=> 'sales', #判別用
-			'name'		=> '御廚-銷售',
-			'url' 		=> 'bg/sales', 
-			'operation'	=> [
-				Operation::READ
-			],
-		],
-		/* 新品銷售 */
+		/*============ 新品銷售 ============*/
 		'bg-porkRibs' => [
 			#'code'		=> 'porkRibs', #判別用
 			'name'		=> '御廚-橙汁排骨',
@@ -117,7 +100,27 @@ return [
 				Operation::READ
 			],
 		],
-		/* 權限管理 */
+		
+		/*============ 進銷存報表 ============*/
+		'bg-purchase' => [
+			#'code'		=> 'bg-purchase', #判別用
+			'name'		=> '御廚-進貨統計',
+			'url' 		=> 'bg/purchase', 
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		'bg-sales' => [
+			#'code'		=> 'sales', #判別用
+			'name'		=> '御廚-銷售統計',
+			'url' 		=> 'bg/sales', 
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		
+		
+		/*============ 權限管理 ============*/
 		'user' => [
 			#'code'		=> 'users',
 			'name' 		=> '帳號管理',

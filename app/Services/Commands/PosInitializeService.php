@@ -51,7 +51,7 @@ class PosInitializeService
 		
 		try
 		{
-			$config = config("web.new_release.products.{$this->_configKey}");
+			$config = config("buygood.new_release.products.{$this->_configKey}");
 			
 			$brand = data_get($config, 'brand');
 						
@@ -115,7 +115,7 @@ class PosInitializeService
 			if (! empty($params['bfIds'])) #梁社漢新品時會有值
 			{
 				#取複合店Shop id
-				$shopIdMapping 	= config('web.new_release.multiBrandShopidMapping');
+				$shopIdMapping 	= config('buygood.new_release.multiBrandShopidMapping');
 				$shopIds 		= array_keys($shopIdMapping);
 			
 				$mappingData = $this->_repository->getBfSaleData($stDateTime, $endDateTime, $params['bfIds'], $params['valueAdded'], $shopIds);

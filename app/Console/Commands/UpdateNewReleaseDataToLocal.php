@@ -31,7 +31,7 @@ class UpdateNewReleaseDataToLocal extends Command
 		{
 			#只執行指定table的參數
 			$configKey 	= $this->argument('configKey');
-			$productName = config("web.new_release.products.{$configKey}.name");
+			$productName = config("buygood.new_release.products.{$configKey}.name");
 			
 			$this->info("Update Start : {$productName} -----");
 			Log::channel('commandLog')->info("Update Start : {$productName}", [ __class__, __function__, __line__]);

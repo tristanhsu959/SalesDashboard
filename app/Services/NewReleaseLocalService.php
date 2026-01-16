@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Exception;
 
+#Service BF | BG 共用
 #This service will fetch data from local db
 class NewReleaseLocalService
 {
@@ -20,6 +21,7 @@ class NewReleaseLocalService
 	
 	#private $_groupKey		= 'newRelease';
 	private $_configKey 	= '';
+	private $_config		= [];
 	private $_statistics	= [];
     
 	public function __construct(protected NewReleaseLocalRepository $_repository)
@@ -51,12 +53,13 @@ class NewReleaseLocalService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($configKey, $searchStDate, $searchEndDate)
+	public function getBgStatistics($configKey, $searchStDate, $searchEndDate)
 	{
 		try
 		{
 			#20251216 : 之後要改存至Local DB
-			$this->_configKey = $configKey;
+			$this->_configKey 	= $configKey; #外部也會用到
+			$this->_config 		= config("buygood.new_release.products.{$this->_configKey}"); 
 			
 			#1. Get params
 			list($stDate, $endDate) = $this->_getParams($searchStDate, $searchEndDate);
@@ -77,6 +80,7 @@ class NewReleaseLocalService
 			$userAreaIds = $currentUser->roleArea;
 			
 			#這裏取到的是collection array, 先不用toArray
+			#DB就會濾Area了
 			$srcData = [];
 			$srcData = $this->_repository->getBgDataFromDB($configKey, $stDate, $endDate, $userAreaIds);
 			
@@ -99,10 +103,8 @@ class NewReleaseLocalService
 	{
 		try
 		{
-			$config = config("buygood.new_release.products.{$this->_configKey}");
-			
-			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
-			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日
+			$saleDate		= new Carbon(data_get($this->_config, 'saleDate')); #開賣日
+			$saleEndDate	= new Carbon(data_get($this->_config, 'saleEndDate')); #停售日
 			$today 			= Carbon::now();
 			
 			#開始時間 | 先new Carbon, empty時不會是TRUE

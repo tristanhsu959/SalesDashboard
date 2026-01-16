@@ -66,7 +66,7 @@ class NewReleaseController extends Controller
 		$this->_viewModel->initialize(FormAction::LIST, $configKey, $functionKey);
 		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
 	
-		$response = $this->_service->getStatistics($configKey, $searchStDate, $searchEndDate);
+		$response = $this->_service->getBgStatistics($configKey, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

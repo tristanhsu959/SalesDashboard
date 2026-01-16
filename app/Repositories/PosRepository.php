@@ -100,7 +100,7 @@ class PosRepository extends Repository
 		]
 		*/
 		#Initialize前要先清空
-		$table = $config = config("web.new_release.DbMapping.{$configKey}");
+		$table = $config = config("buygood.new_release.DbMapping.{$configKey}");
 		
 		$db = $this->connectSalesDashboard();
 		$db->table($table)->truncate();
@@ -137,7 +137,7 @@ class PosRepository extends Repository
 		]
 		*/
 		#Initialize前要先清空
-		$table = $config = config("web.new_release.DbMapping.{$configKey}");
+		$table = $config = config("buygood.new_release.DbMapping.{$configKey}");
 		
 		$db = $this->connectSalesDashboard();
 		$db->table($table)

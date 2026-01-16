@@ -93,7 +93,7 @@ class NewReleaseService
 	{
 		try
 		{
-			$config = config("web.new_release.products.{$this->_configKey}");
+			$config = config("buygood.new_release.products.{$this->_configKey}");
 			
 			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
 			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日
@@ -145,7 +145,7 @@ class NewReleaseService
 			if (! empty($bfProductIds)) #梁社漢新品時會有值
 			{
 				#取複合店Shop id
-				$shopIdMapping 	= config('web.new_release.multiBrandShopidMapping');
+				$shopIdMapping 	= config('buygood.new_release.multiBrandShopidMapping');
 				$bfShopIds 		= array_keys($shopIdMapping);
 				
 				$bfData	= $this->_repository->getBfSaleData($startDateTime, $endDateTime, $bfProductIds, $bfShopIds);

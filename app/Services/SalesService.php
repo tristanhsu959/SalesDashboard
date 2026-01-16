@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\PurchaseRepository;
+use App\Repositories\SalesRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthTrait;
@@ -16,13 +16,13 @@ use Illuminate\Support\Carbon;
 use Exception;
 
 #Service BF | BG 共用
-class PurchaseService
+class SalesService
 {
 	use AuthTrait;
 	
 	private $_statistics	= [];
     
-	public function __construct(protected PurchaseRepository $_repository)
+	public function __construct(protected SalesRepository $_repository)
 	{
 		$this->_statistics = [
 			'header'	=> [],
@@ -54,11 +54,8 @@ class PurchaseService
 			else*/
 			$srcData = $this->_getBaseDataByBg($searchStDate, $searchEndDate);
 			
-			#3. Rebuild data format
-			$baseData = $this->_rebuildBaseData($srcData);
-			
-			#4. Build report
-			$statistics = $this->_outputReport($baseData);
+			#3. Build report
+			$statistics = $this->_outputReport($srcData);
 			
 			return $statistics;
 		}
@@ -80,21 +77,20 @@ class PurchaseService
 		{
 			/* Return format */
 			/*
-			array:8 [
-			  "OrderDate" => "2026-01-08 00:00:00.000"
-			  "AccNo" => "330U005"
-			  "AccName" => "御廚桃園桃鶯直營店"
-			  "ProductNo" => "2052"
-			  "ProductName" => "紅蘿蔔絲(御)"
-			  "Unit" => "包"
-			  "Amount" => "1.00"
-			  "Money" => "36.00"
+			array:9 [
+			  "SHOP_ID" => "100002"
+			  "PROD_ID" => "UC06100003"
+			  "QTY" => "1.0000"
+			  "SALE_PRICE" => "125.0000"
+			  "ITEM_DISC" => ".0000"
+			  "TASTE_MEMO" => ""
+			  "SALE_DATE" => "2026-01-15 08:29:54.000"
+			  "SHOP_NAME" => "御廚中正濟南店"
+			  "PROD_NAME1" => "滷排骨飯"
 			]
 			*/
 			
-			$tsData = $this->_repository->getDataFromTS($searchStDate, $searchEndDate);
-			$rlData = $this->_repository->getDataFromRL($searchStDate, $searchEndDate);	
-			$result = array_merge($tsData, $rlData);
+			$result = $this->_repository->getBgSaleData($searchStDate, $searchEndDate);
 			
 			return $result;
 		}
@@ -105,71 +101,31 @@ class PurchaseService
 		}
 	}
 	
-	/* Rebuild data format
-	 * @params: array
-	 * @return: array
-	 */
-	private function _rebuildBaseData($srcData)
-	{
-		/* 重整資料格式/命名/區域
-		[
-			"orderData" => "2026-01-08"
-			"shopId" => "106004"
-			"shopName" => "御廚大安一直營店"
-			"productNo" => "4402"
-			"productName" => "八方御露油膏"
-			"unit" => "罐"
-			"quantity" => "1.00"
-			"amount" => "170.00"
-			"areaId" => 1
-			"area" => "大台北區"
-		]
-		*/
-		
-		$baseData = [];
-		
-		foreach($srcData as $row)
-		{
-			$item = [];
-			$item['orderDate']	= Str::before($row['OrderDate'], ' ');
-			$item['shopId']		= Str::replace('U', '', $row['AccNo']);;
-			$item['shopName'] 	= $row['AccName'];
-			$item['productNo'] 	= $row['ProductNo'];
-			$item['productName']= $row['ProductName'];
-			$item['unit'] 		= $row['Unit'];
-			$item['quantity'] 	= $row['Amount'];
-			$item['amount'] 	= $row['Money'];
-			$item['areaId']		= ShopLib::getAreaIdByShopId($item['shopId']); #過濾用
-			$item['area']		= ShopLib::getAreaByShopId($item['shopId']);
-			
-			$baseData[] = $item;
-		}
-		
-		return $baseData;
-	}
-	
 	/* 取使用者可讀取區域資料(原主邏輯不動)
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($baseData)
+	private function _outputReport($srcData)
 	{
 		try
 		{
-			#1.Filter by area (By User Permission)
+			#1.refactor source data format
+			$baseData = $this->_rebuildBaseData($srcData);
+			
+			#2.Filter by area (By User Permission)
 			$baseData = $this->_filterByAreaPermission($baseData);
 			
-			#2.Filter by product : 排除不統計的項目
-			$baseData = $this->_filterByProduct($baseData);
+			#3.Filter by product : 排除不統計的項目
+			#$baseData = $this->_filterByProduct($baseData);
 			
 			/* Statistics Start */
-			#3.建共用Header, by product
+			#4.建共用Header, by product
 			$this->_statistics['header'] = $this->_buildListHeader($baseData);
 			
-			#4.By店別
+			#5.By店別
 			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
 			
-			#5.區域彙總
+			#6.區域彙總
 			$this->_statistics['area'] = $this->_parsingByArea($baseData);
 				
 			return ResponseLib::initialize($this->_statistics)->success();
@@ -179,6 +135,51 @@ class PurchaseService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize($this->_statistics)->fail('解析報表資料發生錯誤');
 		}
+	}
+	
+	/* Rebuild data format
+	 * @params: array
+	 * @return: array
+	 */
+	private function _rebuildBaseData($srcData)
+	{
+		/* 重整資料格式/命名/區域
+		array:11 [
+			"orderDate" => "2026-01-16"
+			"shopId" => "328001"
+			"shopName" => "御廚桃園新坡店"
+			"productNo" => "UC06000031"
+			"productName" => "椒麻雞飯"
+			"price" => 138
+			"quantity" => 3
+			"discount" => 0
+			"taste" => ""
+			"areaId" => 3
+			"area" => "桃竹苗區"
+		]
+		*/
+		
+		$baseData = [];
+		
+		foreach($srcData as $key=>$row)
+		{
+			$item = [];
+			$item['orderDate']	= Str::before($row['SALE_DATE'], ' '); #Y-m-d
+			$item['shopId']		= $row['SHOP_ID'];
+			$item['shopName'] 	= $row['SHOP_NAME'];
+			$item['productNo'] 	= $row['PROD_ID'];
+			$item['productName']= $row['PROD_NAME1'];
+			$item['price'] 		= intval($row['SALE_PRICE']);
+			$item['quantity'] 	= intval($row['QTY']);
+			$item['discount'] 	= intval($row['ITEM_DISC']); #折扣
+			$item['hasGravy'] 	= Str::contains($row['TASTE_MEMO'], '秘製滷肉汁'); 
+			$item['areaId']		= ShopLib::getAreaIdByShopId($item['shopId']); #過濾用
+			$item['area']		= ShopLib::getAreaByShopId($item['shopId']);
+			
+			$baseData[] = $item;
+		}
+		
+		return $baseData;
 	}
 	
 	/* 區域權限過濾
@@ -197,20 +198,20 @@ class PurchaseService
 		return $baseData;
 	}
 	
-	/* Product過濾
+	/* 銷售過濾-暫保留還沒用到
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _filterByProduct($baseData)
+	/*private function _filterByProduct($srcData)
 	{
 		#過濾物品類(目前不確定規則)
-		$baseData = Arr::reject($baseData, function ($item, $key) {
+		$baseData = Arr::reject($srcData, function ($item, $key) {
 			$productNo = intval($item['productNo']);
 			return ($productNo >= 6000 && $productNo <= 9999);
 		});
 		
 		return $baseData;
-	}
+	}*/
 	
 	/* List header
 	 * @params: collection
@@ -218,18 +219,24 @@ class PurchaseService
 	 */
 	private function _buildListHeader($baseData)
 	{
+		/*
+		"UC00000001" => array:3 [▼
+			"productName" => "炸排骨(單點)"
+			"totalQty" => 6
+			"totalAmount" => 560
+		]
+		*/
+		
 		$collection = collect($baseData);
 		$header = $collection->mapToGroups(function (array $item, int $key){
 			$temp['productName']= $item['productName'];
-			$temp['unit']		= $item['unit'];
 			$temp['quantity'] 	= $item['quantity'];
-			$temp['amount'] 	= $item['amount'];
+			$temp['amount'] 	= $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
 			return [$item['productNo'] => $temp];
 			
-		})->map(function($item, int $key){
+		})->map(function($item, $key){
 			$data = collect($item);
 			$temp['productName']= $data->pluck('productName')->first();
-			$temp['unit']		= $data->pluck('unit')->first();
 			$temp['totalQty'] 	= $data->pluck('quantity')->sum();
 			$temp['totalAmount']= $data->pluck('amount')->sum();
 			return $temp;
@@ -237,6 +244,7 @@ class PurchaseService
 		
 		return $header;
 	}
+	
 	/* By店別進貨統計
 	 * @params: collection
 	 * @return: array
@@ -244,22 +252,20 @@ class PurchaseService
 	private function _parsingByShop($baseData)
 	{
 		/* 重整資料格式
-		[
-			"orderDate" => "2026-01-08"
-			"shopId" => "330005"
-			"shopName" => "御廚桃園桃鶯直營店"
-			"areaId" => 1
+		array:6 [
+			"orderDate" => "2026-01-16"
+			"shopId" => "328001"
+			"shopName" => "御廚桃園新坡店"
+			"areaId" => 3
 			"area" => "桃竹苗區"
-			"totalAmount" => 123
-			"products" => array:43 [
-				2052 => array:5 [
-					"productNo" => "2052"
-					"productName" => "紅蘿蔔絲(御)"
-					"unit" => "包"
-					"quantity" => 2.0
-					"amount" => 72.0
-				], ...
-			]
+			"products" => array:34 [▼
+				"UC00000001" => array:4 [▼
+					"productNo" => "UC00000001"
+					"productName" => "炸排骨(單點)"
+					"quantity" => 1
+					"amount" => 95
+				]
+			]...
 		]
 		*/
 		$collection = collect($baseData);
@@ -270,15 +276,16 @@ class PurchaseService
 				$temp['shopName'] 	= $item->pluck('shopName')->get(0);
 				$temp['areaId'] 	= $item->pluck('areaId')->get(0);
 				$temp['area'] 		= $item->pluck('area')->get(0);
-				$temp['totalAmount']= $item->pluck('amount')->sum();
 				
 				$temp['products'] 	= $item->groupBy('productNo')
 					->map(function($item, $key){
 						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
 						$temp['productName'] 	= $item->pluck('productName')->get(0);
-						$temp['unit'] 			= $item->pluck('unit')->get(0);
 						$temp['quantity'] 		= $item->sum('quantity');
-						$temp['amount'] 		= $item->sum('amount');
+						$temp['amount'] 		= $item->sum(function($item){
+							return $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
+						});
+						
 						$item = $temp;
 						return $item;
 					})->sortKeys()->toArray();
@@ -322,19 +329,33 @@ class PurchaseService
 		if (empty($baseData))
 			return [];
 		
+		/* 重整資料格式/命名/區域
+		array:11 [
+			"orderDate" => "2026-01-16"
+			"shopId" => "328001"
+			"shopName" => "御廚桃園新坡店"
+			"productNo" => "UC06000031"
+			"productName" => "椒麻雞飯"
+			"price" => 138
+			"quantity" => 3
+			"discount" => 0
+			"taste" => ""
+			"areaId" => 3
+			"area" => "桃竹苗區"
+		]
+		*/
+		
 		$collection = collect($baseData);
 		$data = $collection->groupBy('areaId')
 			->map(function($item, $key) {
-				$temp['totalAmount']	= $item->pluck('amount')->sum();
-				$temp['totalQuantity']	= $item->pluck('quantity')->sum();
-				
 				$temp['products'] 	= $item->groupBy('productNo')
-					->map(function($item, $key){ 
+					->map(function($item, $key){
 						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
 						$temp['productName'] 	= $item->pluck('productName')->get(0);
-						$temp['unit'] 			= $item->pluck('unit')->get(0);
 						$temp['quantity'] 		= $item->sum('quantity');
-						$temp['amount'] 		= $item->sum('amount');
+						$temp['amount'] 		= $item->sum(function($item){
+							return $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
+						});
 						
 						$item = $temp;
 						return $item;

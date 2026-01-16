@@ -166,6 +166,27 @@ class NewReleaseViewModel
 		return $dateList;
 	}
 	
+	/* 時間Header, 顯示方式不同
+	 * @params: boolean #default desc
+	 * @return: array
+	 */
+	public function renderDateHeader($orderAsc = FALSE)
+	{
+		$dateList = $this->getDateRange($orderAsc);
+		#不重複Year顯示處理
+		$year = '';
+		$header = [];
+		
+		foreach ($dateList as $date) 
+		{
+			$thisYear 	= Str::before($date, '-');
+			$header[]	= Str::replaceFirst($year, '', $date); #-01-11, no year
+			$year = $thisYear;
+		}
+		
+		return $header;
+	}
+	
 	/* Form Style */
 	public function getSaleDate()
     {

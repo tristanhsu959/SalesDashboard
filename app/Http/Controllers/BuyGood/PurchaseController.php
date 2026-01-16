@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BuyGood;
 
 use App\Http\Controllers\Controller;
 use App\Services\PurchaseService;
-use App\ViewModels\PurchaseViewModel;
+use App\ViewModels\BuyGood\PurchaseViewModel as BfPurchaseViewModel;
 use App\Enums\FormAction;
 use App\Enums\Brand;
 use Illuminate\Http\Request;
@@ -13,16 +13,16 @@ use Illuminate\Support\Str;
 #目前只先提供梁社漢
 class PurchaseController extends Controller
 {
-	public function __construct(protected PurchaseService $_service, protected PurchaseViewModel $_viewModel)
+	public function __construct(protected PurchaseService $_service, protected BfPurchaseViewModel $_viewModel)
 	{
 	}
 	
 	public function showSearch(Request $request)
 	{
-		$this->_viewModel->initialize(FormAction::List, Brand::BUYGOOD->value);
+		$this->_viewModel->initialize(FormAction::LIST);
 		
 		#Status is NULL
-		return view('purchase.list')->with('viewModel', $this->_viewModel);
+		return view('purchase.bg_list')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -31,15 +31,13 @@ class PurchaseController extends Controller
 	 */
 	public function search(Request $request)
 	{
-		#query params
-		$searchBrand 	= $request->input('searchBrand');
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		
-		$this->_viewModel->initialize(FormAction::List);
-		$this->_viewModel->keepSearchData($searchBrand, $searchStDate, $searchEndDate);
+		$this->_viewModel->initialize(FormAction::LIST);
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
 	
-		$response = $this->_service->search($searchBrand, $searchStDate, $searchEndDate);
+		$response = $this->_service->search(Brand::BUYGOOD, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -48,6 +46,6 @@ class PurchaseController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('purchase.list')->with('viewModel', $this->_viewModel);
+		return view('purchase.bg_list')->with('viewModel', $this->_viewModel);
 	}
 }
