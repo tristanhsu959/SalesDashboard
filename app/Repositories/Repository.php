@@ -45,7 +45,14 @@ class Repository
 			return DB::connection('OrderRL')->table($table)->lock('WITH(NOLOCK)'); 
 	}
 	
-	
+	#norder database(新訂貨系統)
+	protected function connectNewOrder($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('NewOrder');
+		else
+			return DB::connection('NewOrder')->table($table)->lock('WITH(NOLOCK)'); 
+	}
 	
 	/* 原測試機已改為Local MySql */
 	/*protected function connectSaleDashboard($table = NULL)
