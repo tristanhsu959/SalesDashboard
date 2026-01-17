@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Commands;
 
+use App\Repositories\Repository;
 use App\Libraries\ShopLib;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;

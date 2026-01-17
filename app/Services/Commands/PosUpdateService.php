@@ -2,7 +2,7 @@
 #Command Service
 namespace App\Services\Commands;
 
-use App\Repositories\PosRepository;
+use App\Repositories\Commands\PosRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -14,16 +14,14 @@ class PosUpdateService
 {
 	private $_configKey 	= '';
 	private $_data			= [];
-    private $_repository;
-	private $_diffDays		= 7;
+    private $_diffDays		= 7;
 	
 	/* Update locay by lastest days
 	 * @params: class
 	 * @return: 
 	 */
-	public function __construct(PosRepository $posRepository)
+	public function __construct(protected PosRepository $_repository)
 	{
-		$this->_repository = $posRepository;
 	}
 	
 	/* Set Config

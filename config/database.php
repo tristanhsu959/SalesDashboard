@@ -113,6 +113,19 @@ return [
             'encrypt' => env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
+		'NewOrder' => [
+            'driver' => 'sqlsrv',
+            'host' => env('NO_DB_HOST', 'bafang-prod-failover.database.windows.net'),
+            'port' => env('NO_DB_PORT', '1433'),
+            'database' => env('NO_DB_DATABASE', '8way-order-system-prod'),
+            'username' => env('NO_DB_USERNAME', 'baway-usertristan'),
+            'password' => env('NO_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+        ],
 		
         'sqlite' => [
             'driver' => 'sqlite',

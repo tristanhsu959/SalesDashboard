@@ -2,7 +2,7 @@
 #Command Service
 namespace App\Services\Commands;
 
-use App\Repositories\PosRepository;
+use App\Repositories\Commands\PosRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -14,15 +14,13 @@ class PosInitializeService
 {
 	private $_configKey 	= '';
 	private $_data			= [];
-    private $_repository;
-	
+    
 	/* Initialize once
 	 * @params: class
 	 * @return: 
 	 */
-	public function __construct(PosRepository $posRepository)
+	public function __construct(protected PosRepository $_repository)
 	{
-		$this->_repository = $posRepository;
 	}
 	
 	/* Set Config
