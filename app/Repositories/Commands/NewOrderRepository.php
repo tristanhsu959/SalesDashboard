@@ -48,84 +48,54 @@ class NewOrderRepository extends Repository
 				->where('a.ExpectedDate', '>=', $startDateTime)
 				->where('a.ExpectedDate', '<=', $endDateTime)
 				->where(function ($db) {
-					$db->where('a.OperationCenterId', '=', 1);
+					$db->where('a.OperationCenterId', '=', 1)
 						->orWhere('a.OperationCenterId', '=', 2);
 				})
-				->where('a.Money', '>', 0)
+				->where('a.Money', '>', 0);
 				
 		Log::channel('commandLog')->info($query->toRawSql(), [ __class__, __function__, __line__]);
 		
 		return $query->get();
 	}
 	
-	/* Insert order data to mariadb
-	 * @params: string
-	 * @params: array
-	 * @return: boolean
-	 */
-	public function insertOrderToLocal($data)
-	{
-		/* 每筆訂單的資料格式
-		["SHOP_ID" => "235001"
-		  "QTY" => "1.0000"
-		  "SALE_DATE" => "2025-12-19 17:13:11.000"
-		  "SHOP_NAME" => "御廚中和直營店"
-		]
-		*/
-		#Initialize前要先清空
-		$table = $config = config("buygood.new_release.DbMapping.{$configKey}");
-		
-		$db = $this->connectSalesDashboard();
-		$db->table($table)->truncate();
-		
-		foreach($posData as $row) #$data重覆了
-		{
-			$data['shopId']		= $row['SHOP_ID'];
-			$data['shopName']	= $row['SHOP_NAME'];
-			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
-			$data['qty']		= floatval($row['QTY']);
-			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d');
-			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
-				
-			$db->table($table)->insert($data);
-		}
-		
-		return TRUE;
-	}
-	
-	/* Insert pos data to mariadb by initialize
+	/* Insert data to mariadb
 	 * @params: string
 	 * @params: array
 	 * @params: date
 	 * @params: date
 	 * @return: boolean
 	 */
-	public function updatePosToLocal($configKey, $posData, $stDate, $endDate)
+	public function updateOrderToLocal($srcData, $stDate, $endDate)
 	{
-		/* 每筆訂單的資料格式
-		["SHOP_ID" => "235001"
-		  "QTY" => "1.0000"
-		  "SALE_DATE" => "2025-12-19 17:13:11.000"
-		  "SHOP_NAME" => "御廚中和直營店"
-		]
-		*/
 		#Initialize前要先清空
-		$table = $config = config("buygood.new_release.DbMapping.{$configKey}");
-		
 		$db = $this->connectSalesDashboard();
 		$db->table($table)
-			->where('saleDate', '>=', $stDate)
-			->where('saleDate', '<=', $endDate)
+			->where('ExpectedDate', '>=', $stDate)
+			->where('ExpectedDate', '<=', $endDate)
 			->delete();
 		
-		foreach($posData as $row)
+		foreach($srcData as $row)
 		{
-			$data['shopId']		= $row['SHOP_ID'];
-			$data['shopName']	= $row['SHOP_NAME'];
-			$data['areaId']		= ShopLib::getAreaIdByShopId($row['SHOP_ID']);
-			$data['qty']		= intval($row['QTY']);
-			$data['saleDate']	= (new Carbon($row['SALE_DATE']))->format('Y-m-d'); #只存至Date
-			$data['updateAt'] 	= now()->format('Y-m-d H:i:s');
+			$data['orderNo']		= $row['orderNo'];
+			$data['expectedDate']	= $row['ExpectedDate'];
+			$data['orderAmount']	= $row['orderAmount'];
+			$data['productNo']		= $row['productNo'];
+			$data['productName']	= $row['productName'];
+			$data['productType']	= $row['productType'];
+			$data['productUnit']	= $row['productUnit'];
+			$data['productPrice']	= $row['productPrice'];
+			$data['productQuantity']= $row['productQuantity'];
+			$data['productAmount']	= $row['productAmount'];
+			
+			$data['storeName']		= $row['storeName'];
+			$data['storeNo']		= $row['storeNo'];
+			$data['storeType']		= $row['storeType'];
+			$data['area']			= $row['area'];
+			$data['areaId']			= ShopLib::getAreaIdByShopId($row['storeNo']);
+			$data['brand']			= $row['brand'];
+			$data['brandNo']		= $row['brandNo'];
+			
+			$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
 				
 			$db->table($table)->insert($data);
 		}
