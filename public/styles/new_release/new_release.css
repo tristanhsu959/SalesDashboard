@@ -49,9 +49,11 @@ body {
 		.nav-link {
 			background-color: transparent;
 			border-radius: 2rem;
+			border: 2px solid transparent;
 			color: var(--tab-color);
 			
 			&.active {
+				border: 2px solid rgba(255, 255, 255, .7);
 				background-color: var(--tab-color);
 				color: rgba(255, 255, 255, .87);
 			}

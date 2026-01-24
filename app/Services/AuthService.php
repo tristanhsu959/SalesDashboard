@@ -46,10 +46,13 @@ class AuthService
 			#4. Save to session
 			$this->saveCurrentUser($adInfo, $userInfo);
 			
+			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
+			Log::channel('webSysLog')->info("使用者[{$account}]登入失敗", [ __class__, __function__, __line__]);
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
@@ -108,6 +111,8 @@ class AuthService
 			$adInfo['name'] 		= Str::remove(' ', data_get($result, 'name.0', '')); #=>CNName
 			$adInfo['mail'] 		= data_get($result, 'mail.0', '');
 			
+			Log::channel('webSysLog')->info("使用者[{$account}]AD驗證成功", [ __class__, __function__, __line__]);
+			
 			return $adInfo;
 		} 
 		catch (\LdapRecord\Auth\BindException $e) 
@@ -138,15 +143,18 @@ class AuthService
 			$userInfo = $this->_repository->getUserByAccount($account);
 			
 			if (empty($userInfo))
-				return FALSE;
+				throw new Exception('驗證帳號註冊狀態失敗');
 			
 			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value) # OR $userInfo['roleGroup'] == RoleGroup::SUPERUSER->value)
 				$userInfo['roleArea'] = Area::getAll();
+			
+			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態成功", [ __class__, __function__, __line__]);
 			
 			return $userInfo;
 		}
 		catch(Exception $e)
 		{
+			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態，發生錯誤", [ __class__, __function__, __line__]);
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('驗證帳號註冊狀態，發生錯誤');
 		}
@@ -160,9 +168,10 @@ class AuthService
 	{
 		$currentUser = $this->getCurrentUser(); 
 		$this->removeCurrentUser();
-		$logUser = data_get($currentUser, 'userAd', '');
+		$user = $currentUser->userAd;
 		
-		Log::channel('appServiceLog')->info("{$logUser} 使用者登出系統", [ __class__, __function__, __line__]);
+		#使用者驗證/登入/登出, 統一寫在syslog
+		Log::channel('webSysLog')->info("使用者[{$user}]登出系統", [ __class__, __function__, __line__]);
 			
 		return TRUE;
 	}

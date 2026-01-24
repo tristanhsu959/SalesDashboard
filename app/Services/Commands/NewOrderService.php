@@ -24,11 +24,11 @@ class NewOrderService
 	}
 	
 	/* 取查詢時間區間參數:目前每次只更新1天
-	 * @params: int 天數
-	 * @params: int offset
+	 * @params: int 	讀取資料天數
+	 * @params: string	開始日期YYYY-MM-DD
 	 * @return: array
 	 */
-	public function getParams($limitDays)
+	public function getParams($limitDays, $stDate = NULL)
 	{
 		$params = [ 
 			'stDateTime' 	=> '',
@@ -37,9 +37,14 @@ class NewOrderService
 		
 		try
 		{
+			$fetchSt = empty($stDate) ? Carbon::now() : Carbon::parse($stDate);
+			
 			#Order DB是UTC | limit = 1, 表只取當天
-			$params['stDateTime']	= Carbon::now()->subDay($limitDays - 1)->startOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
-			$params['endDateTime']	= Carbon::now()->endOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
+			$params['stDateTime']	= $fetchSt->copy()->startOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
+			$params['endDateTime']	= $fetchSt->copy()->addDays($limitDays - 1)->endOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
+			
+			#$params['stDateTime']	= $fetchSt->subDay($limitDays - 1)->startOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
+			#$params['endDateTime']	= Carbon::now()->endOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s'); 
 			
 			return $params;
 		}

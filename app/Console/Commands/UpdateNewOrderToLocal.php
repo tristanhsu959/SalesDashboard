@@ -14,7 +14,7 @@ class UpdateNewOrderToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'new-order:update-to-local {limitDays=1}';
+    protected $signature = 'new-order:update-to-local {limitDays=1} {startDate?}';
 
     /**
      * The console command description.
@@ -36,7 +36,7 @@ class UpdateNewOrderToLocal extends Command
 			#1. Get params fetch date
 			$this->info('Get Params-----');
 			
-			$params = $_service->getParams($this->argument('limitDays'));
+			$params = $_service->getParams($this->argument('limitDays'), $this->argument('startDate')); 
 			
 			$this->info(json_encode($params));
 			Log::channel('commandLog')->info("Get Params : " .  json_encode($params), [ __class__, __function__, __line__]);
@@ -47,7 +47,7 @@ class UpdateNewOrderToLocal extends Command
 			$data = [];
 			$data = $_service->getDataFromNewOrderDB($params);
 			$count = count($data);
-			
+			dd($data);
 			$this->info("Data count : {$count} -----");
 			Log::channel('commandLog')->info("Data count : {$count}", [ __class__, __function__, __line__]);
 			
