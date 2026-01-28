@@ -49,6 +49,21 @@
 			background-color: hsl(8, 100%, 60%);
 		}
 	}
+	
+	&.btn-export {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		/* border-radius: 2rem; */
+		background-color: hsl(36, 100%, 50%);
+		
+		&:hover {
+			background-color: hsl(36, 100%, 54%);
+		}
+	}
+	
 	/* List button */
 	&.btn-list-create {
 		display: flex;

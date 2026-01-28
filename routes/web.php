@@ -38,8 +38,10 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 		/* 進銷存報表 */
 		Route::get('purchase', [BgPurchaseController::class, 'showSearch']);
 		Route::post('purchase/search', [BgPurchaseController::class, 'search'])->name('bg.purchase.search');
+		Route::post('purchase/export', [BgPurchaseController::class, 'export'])->name('bg.purchase.export');
 		Route::get('sales', [BgSalesController::class, 'showSearch']);
 		Route::post('sales/search', [BgSalesController::class, 'search'])->name('bg.sales.search');
+		Route::get('sales/export', [BgSalesController::class, 'export'])->name('bg.sales.export');
 	});
 	
 	

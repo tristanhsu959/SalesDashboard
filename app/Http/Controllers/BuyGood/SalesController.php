@@ -7,6 +7,8 @@ use App\Services\SalesService;
 use App\ViewModels\BuyGood\SalesViewModel as BfSalesViewModel;
 use App\Enums\FormAction;
 use App\Enums\Brand;
+use App\Exports\SalesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -47,5 +49,15 @@ class SalesController extends Controller
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
 		return view('sales.bg_list')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* Export
+	 * @params: request
+	 * @return: view
+	 */
+	public function export(Excel $excel, SalesExport $export)
+	{
+		return Excel::download(new SalesExport, 'invoices.xlsx');
+		//return $excel->download($export, 'invoices.xlsx');
 	}
 }

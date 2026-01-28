@@ -22,6 +22,19 @@ body {
 		}
 		.btn {
 			margin-right: .5rem;
+			&:last-of-type {
+				margin-right: 0;
+			}
+		}
+		
+		.page-action {
+			display: flex;
+			
+			&:before {
+				content: '';
+				border-left: 2px solid #777;
+				margin: 0 1rem;
+			}
 		}
 	}
 	

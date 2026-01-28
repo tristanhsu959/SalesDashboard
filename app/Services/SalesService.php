@@ -25,10 +25,39 @@ class SalesService
 	public function __construct(protected SalesRepository $_repository)
 	{
 		$this->_statistics = [
-			'header'	=> [],
-			'shop' 		=> [],
-			'area' 		=> [],
+			'exportToken'	=> '',
+			'header'		=> [],
+			'shop' 			=> [],
+			'area' 			=> [],
 		];
+	}
+	
+	/* Search data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function search($searchBrand, $searchStDate, $searchEndDate)
+	{
+		#Check cache
+		$cacheKey = implode(':', [$searchBrand->value, $searchStDate, $searchEndDate]);
+		session()->put((string)Str::uuid7(), $cacheKey);
+		
+		if (Cache::has($cacheKey))
+		{
+			Log::channel('appServiceLog')->info('Get sales data from cache');
+			return Cache::get($cacheKey);
+		}
+		else
+		{
+			Log::channel('appServiceLog')->info('Get sales data from db');
+			$statistics = $this->_processSalesData($searchBrand, $searchStDate, $searchEndDate);
+			$statistics['exportToken'] = (string)Str::uuid();
+			Cache::put($statistics['exportToken'], $statistics, now()->addMinutes(60));
+			
+			return $statistics;
+		}
 	}
 	
 	/* 取新品銷售統計-入口
@@ -37,7 +66,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	public function search($searchBrand, $searchStDate, $searchEndDate)
+	private function _processSalesData($searchBrand, $searchStDate, $searchEndDate)
 	{
 		try
 		{

@@ -35,6 +35,11 @@
 	<button class="btn btn-search-reset" type="button">
 		<span class="material-symbols-outlined filled-icon">backspace</span>
 	</button>
+	<div class="page-action">
+		<a href="{{ route('bg.sales.export') }}" class="btn btn-export" type="button">
+			<span class="material-symbols-outlined filled-icon">download_2</span>
+		</a>
+	</div>
 </section>
 </form>
 	
