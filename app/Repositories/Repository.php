@@ -27,6 +27,15 @@ class Repository
 			return DB::connection('SalesDashboard')->table($table); #無法用nolock
 	}
 	
+	#台北(北區)
+	protected function connectOrderTP($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('OrderTP');
+		else
+			return DB::connection('OrderTP')->table($table)->lock('WITH(NOLOCK)'); 
+	}
+	
 	#屯山(北區)
 	protected function connectOrderTS($table = NULL)
 	{
@@ -36,6 +45,14 @@ class Repository
 			return DB::connection('OrderTS')->table($table)->lock('WITH(NOLOCK)'); 
 	}
 	
+	#高雄(南區)
+	protected function connectOrderKH($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('OrderKH');
+		else
+			return DB::connection('OrderKH')->table($table)->lock('WITH(NOLOCK)'); 
+	}
 	#二崙(南區)
 	protected function connectOrderRL($table = NULL)
 	{
