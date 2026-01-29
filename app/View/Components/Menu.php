@@ -14,14 +14,11 @@ class Menu extends Component
 {
 	use AuthTrait;
 	
-	public $menu;
-	
-    /**
+	/**
      * Create a new component instance.
      */
     public function __construct()
     {
-        $this->menu = $this->getAuthMenu();
     }
 	
 	/**
