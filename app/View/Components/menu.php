@@ -14,14 +14,14 @@ class menu extends Component
 {
 	use AuthTrait;
 	
-	private $_menu;
+	public $menu;
 	
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        $this->_menu = $this->getAuthMenu();
+        $this->menu = $this->getAuthMenu();
     }
 	
 	/**
@@ -29,7 +29,7 @@ class menu extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.menu', ['menu' => $this->_menu]);
+        return view('components.menu');
     }
 	
 	public function isActive(string $url): string

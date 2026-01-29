@@ -13,12 +13,13 @@ class profile extends Component
 {
 	use AuthTrait;
 	
+	public $currentUser;
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        //
+        $this->currentUser = $this->getCurrentUser(); 
     }
 
     /**
@@ -26,8 +27,7 @@ class profile extends Component
      */
     public function render(): View|Closure|string
     {
-		$currentUser = $this->getCurrentUser(); 
-        return view('components.profile', ['currentUser' => $currentUser]);
+		return view('components.profile');
     }
 	
 }
