@@ -22,6 +22,7 @@ class menu extends Component
     public function __construct()
     {
         $this->menu = $this->getAuthMenu();
+		dump($this->menu);
     }
 	
 	/**
@@ -29,7 +30,7 @@ class menu extends Component
      */
     public function render()
     {
-        return view('components.menu');
+        return view('components.menu', ['menu'=>$this->_menu]);
     }
 	
 	public function isActive(string $url): string
