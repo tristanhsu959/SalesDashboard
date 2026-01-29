@@ -22,7 +22,6 @@ class menu extends Component
     public function __construct()
     {
         $this->menu = $this->getAuthMenu();
-		dump($this->menu);
     }
 	
 	/**
