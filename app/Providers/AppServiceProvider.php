@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\View;
 use PDO;
 use App\ViewModels\MenuViewModel;
 use Illuminate\Support\Facades\Blade;
-use App\View\Components\menu; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-		Blade::component('menu', menu::class);
 		
         #20251128 Tristan: DB Collection to Assoc Array
 		Event::listen(StatementPrepared::class, function ($event) {
