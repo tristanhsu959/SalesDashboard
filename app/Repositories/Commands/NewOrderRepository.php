@@ -67,7 +67,7 @@ class NewOrderRepository extends Repository
 	{
 		#Initialize前要先清空
 		$db = $this->connectSalesDashboard();
-		$db->table($table)
+		$db->table('new_order')
 			->where('ExpectedDate', '>=', $stDate)
 			->where('ExpectedDate', '<=', $endDate)
 			->delete();
@@ -95,7 +95,7 @@ class NewOrderRepository extends Repository
 			
 			$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
 				
-			$db->table($table)->insert($data);
+			$db->table('new_order')->insert($data);
 		}
 		
 		return TRUE;

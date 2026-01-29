@@ -55,7 +55,7 @@ class UpdateNewOrderToLocal extends Command
 			$this->info('Save Data to Local -----');
 			Log::channel('commandLog')->info('Save Data to Local', [ __class__, __function__, __line__]);
 			
-			$posService->saveToLocalDB($data, $params);
+			$_service->saveToLocalDB($data, $params);
 			
 			$this->info("Update New Order Data completed -----");
 			Log::channel('commandLog')->info("Update New Order Data completed", [ __class__, __function__, __line__]);
