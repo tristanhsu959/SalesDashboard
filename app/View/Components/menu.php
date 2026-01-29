@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class menu extends Component
+class Menu extends Component
 {
 	use AuthTrait;
 	
@@ -29,7 +29,7 @@ class menu extends Component
      */
     public function render()
     {
-        return view('components.menu', ['menu'=>$this->_menu]);
+        return view('components.menu');
     }
 	
 	public function isActive(string $url): string
