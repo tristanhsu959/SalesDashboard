@@ -15,6 +15,7 @@ body {
 	}
 	
 	.lunar-warpper {
+		height: 100%;
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
@@ -70,10 +71,17 @@ body {
 						}
 					}
 					&.btn-restore {
-						background-color: hsl(187,100%,42%); 
+						background-color: hsl(291,64%,42%); 
 					
 						&:hover {
-							background-color: hsl(187,100%,32%);
+							background-color: hsl(291,64%,32%);
+						}
+					}
+					&.btn-search {
+						background-color: hsl(186,100%,50%); 
+					
+						&:hover {
+							background-color: hsl(186,100%,40%);
 						}
 					}
 				}
@@ -85,7 +93,6 @@ body {
 		
 		.lunar-cars-result {
 			flex: 1;
-			height: auto;
 			padding: 0 .25rem;
 			
 			h6 {
@@ -94,10 +101,13 @@ body {
 				font-weight: bold;
 				color: #333;
 				height: 1.8rem;
+				.badge {
+					margin-left: .5rem;
+				}
 			}
 							
 			.list-group {
-				max-height: 80vh;
+				height: calc(100vh - 4rem - 40px);
 				overflow-y: auto;
 				
 				.list-group-item {

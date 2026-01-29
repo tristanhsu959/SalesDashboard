@@ -47,7 +47,7 @@ class UpdateNewOrderToLocal extends Command
 			$data = [];
 			$data = $_service->getDataFromNewOrderDB($params);
 			$count = count($data);
-			dd($data);
+			
 			$this->info("Data count : {$count} -----");
 			Log::channel('commandLog')->info("Data count : {$count}", [ __class__, __function__, __line__]);
 			

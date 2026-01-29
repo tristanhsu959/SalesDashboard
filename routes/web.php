@@ -16,6 +16,7 @@ use App\Http\Controllers\LunarController;
 if (Request::getPort() == 8888) 
 {
 	Route::get('/', [LunarController::class, 'index'])->name('lunar.index');
+	Route::get('lunar/search/{date}', [LunarController::class, 'search'])->name('lunar.search');
 	Route::get('lunar/assign/{date}', [LunarController::class, 'assign'])->name('lunar.assign');
 	Route::get('lunar/restore/{date}', [LunarController::class, 'restore'])->name('lunar.restore');
 	return;

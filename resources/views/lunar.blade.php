@@ -5,7 +5,6 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/lunar.js') }}" defer></script>
 @endpush
 
 <!-- 先用signin避免吃到共用layout -->
@@ -18,21 +17,25 @@
 			<div class="header"><span>除夕</span>2026-02-16</div>
 			<a href="{{ route('lunar.assign', ['date'=>'2026-02-16'])}}" class="btn btn-assign" data-bs-toggle="tooltip" data-bs-placement="top" title="設定新車次"><span class="material-symbols-outlined">settings</span></a>
 			<a href="{{ route('lunar.restore', ['2026-02-16'])}}" class="btn btn-restore" data-bs-toggle="tooltip" data-bs-placement="top" title="恢復原車次"><span class="material-symbols-outlined">reset_settings</span></a>
+			<a href="{{ route('lunar.search', ['2026-02-16'])}}" class="btn btn-search" data-bs-toggle="tooltip" data-bs-placement="top" title="查詢車次設定"><span class="material-symbols-outlined">search</span></a>
 		</div>
 		<div class="group">
 			<div class="header"><span>初二</span>2026-02-18</div>
 			<a href="{{ route('lunar.assign', ['2026-02-18'])}}" class="btn btn-assign" data-bs-toggle="tooltip" data-bs-placement="top" title="設定新車次"><span class="material-symbols-outlined">settings</span></a>
 			<a href="{{ route('lunar.restore', ['2026-02-18'])}}" class="btn btn-restore" data-bs-toggle="tooltip" data-bs-placement="top" title="恢復原車次"><span class="material-symbols-outlined">reset_settings</span></a>
+			<a href="{{ route('lunar.search', ['2026-02-18'])}}" class="btn btn-search" data-bs-toggle="tooltip" data-bs-placement="top" title="查詢車次設定"><span class="material-symbols-outlined">search</span></a>
 		</div>
 		<div class="group">
 			<div class="header"><span>初三</span>2026-02-19</div>
 			<a href="{{ route('lunar.assign', ['2026-02-19'])}}" class="btn btn-assign" data-bs-toggle="tooltip" data-bs-placement="top" title="設定新車次"><span class="material-symbols-outlined">settings</span></a>
 			<a href="{{ route('lunar.restore', ['2026-02-19'])}}" class="btn btn-restore" data-bs-toggle="tooltip" data-bs-placement="top" title="恢復原車次"><span class="material-symbols-outlined">reset_settings</span></a>
+			<a href="{{ route('lunar.search', ['2026-02-19'])}}" class="btn btn-search" data-bs-toggle="tooltip" data-bs-placement="top" title="查詢車次設定"><span class="material-symbols-outlined">search</span></a>
 		</div>
 		<div class="group">
 			<div class="header"><span>初四</span>2026-02-20</div>
 			<a href="{{ route('lunar.assign', ['2026-02-20'])}}" class="btn btn-assign" data-bs-toggle="tooltip" data-bs-placement="top" title="設定新車次"><span class="material-symbols-outlined">settings</span></a>
 			<a href="{{ route('lunar.restore', ['2026-02-20'])}}" class="btn btn-restore" data-bs-toggle="tooltip" data-bs-placement="top" title="恢復原車次"><span class="material-symbols-outlined">reset_settings</span></a>
+			<a href="{{ route('lunar.search', ['2026-02-20'])}}" class="btn btn-search" data-bs-toggle="tooltip" data-bs-placement="top" title="查詢車次設定"><span class="material-symbols-outlined">search</span></a>
 		</div>
 	</section>
 	@if($viewModel->status())

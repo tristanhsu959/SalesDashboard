@@ -24,6 +24,29 @@ class LunarService
 		];
 	}
 	
+	/* 查詢車次
+	 * @params: date
+	 * @return: array
+	 */
+	public function searchCarNo($searchDate)
+	{
+		try
+		{
+			list($tpSettings, $tsSettings) = $this->_getSetting($searchDate); #八方#御廚
+			
+			#2. Update to order system
+			$this->_result['tp'] = $this->_repository->getTpCarNo($tpSettings); #台北
+			$this->_result['ts'] = $this->_repository->getTsCarNo($tsSettings); #屯山
+			
+			return ResponseLib::initialize($this->_result)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize($this->_result)->fail($e->getMessage());
+		}
+	}
+	
 	/* 設定新車次
 	 * @params: date
 	 * @return: array
@@ -36,8 +59,8 @@ class LunarService
 			list($tpSettings, $tsSettings) = $this->_getSetting($assignDate); #八方#御廚
 			
 			#2. Update to order system
-			$this->_result['tp'] = $this->_updateTpCarNo($tpSettings); #台北
-			$this->_result['ts'] = $this->_updateTsCarNo($tsSettings); #屯山
+			$this->_updateTpCarNo($tpSettings); #台北
+			$this->_updateTsCarNo($tsSettings); #屯山
 			
 			return ResponseLib::initialize($this->_result)->success();
 		}
@@ -48,7 +71,7 @@ class LunarService
 		}
 	}
 	
-	/* 取車次設定
+	/* 取新車次設定
 	 * @params: date
 	 * @return: array
 	 */
@@ -69,7 +92,7 @@ class LunarService
 		}
 	}
 	
-	/* 更新車次設定
+	/* 更新台北車次設定
 	 * @params: date
 	 * @return: array
 	 */
@@ -79,8 +102,7 @@ class LunarService
 		{
 			#要注意測試時間
 			$this->_repository->updateTpCarNo($settings); 
-			$result = $this->_repository->getTpCarNo($settings); #取更新後的設定顯示
-			return $result;
+			return TRUE;
 			
 		}
 		catch(Exception $e)
@@ -90,7 +112,7 @@ class LunarService
 		}
 	}
 	
-	/* 更新車次設定
+	/* 更新屯山車次設定
 	 * @params: date
 	 * @return: array
 	 */
@@ -100,8 +122,7 @@ class LunarService
 		{
 			#要注意測試時間
 			$this->_repository->updateTsCarNo($settings); 
-			$result = $this->_repository->getTsCarNo($settings); #取更新後的設定顯示
-			return $result;
+			return TRUE;
 			
 		}
 		catch(Exception $e)
@@ -123,8 +144,8 @@ class LunarService
 			list($tpSettings, $tsSettings) = $this->_getOriSetting($restoreDate); #八方#御廚
 			
 			#2. Update to order system
-			$this->_result['tp'] = $this->_updateTpCarNo($tpSettings); #台北
-			$this->_result['ts'] = $this->_updateTsCarNo($tsSettings); #屯山
+			$this->_updateTpCarNo($tpSettings); #台北
+			$this->_updateTsCarNo($tsSettings); #屯山
 			
 			return ResponseLib::initialize($this->_result)->success();
 		}

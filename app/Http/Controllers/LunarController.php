@@ -24,21 +24,21 @@ class LunarController extends Controller
 		return view('lunar')->with('viewModel', $this->_viewModel);
 	}
 	
-	/* 登入驗證
+	/* Search car no
 	 * @params: request
 	 * @return: view
 	 */
-	public function assign(Request $request, $date)
+	public function search(Request $request, $date)
 	{
-		$assignDate = $date;
+		$searchDate = $date;
 		
-		if (empty($assignDate))
+		if (empty($searchDate))
  		{
-			$this->_viewModel->fail('設定失敗');
+			$this->_viewModel->fail('無時間參數');
 			return view('lunar')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->assignCarNo($assignDate);
+		$response = $this->_service->searchCarNo($searchDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -50,7 +50,28 @@ class LunarController extends Controller
 		return view('lunar')->with('viewModel', $this->_viewModel);
 	}
 	
-	/* Signout
+	/* Set car no
+	 * @params: request
+	 * @return: view
+	 */
+	public function assign(Request $request, $date)
+	{
+		$assignDate = $date;
+		
+		if (empty($assignDate))
+			return redirect()->route('lunar.index')->with('msg', '無時間參數');
+		
+		$response = $this->_service->assignCarNo($assignDate);
+		
+		if ($response->status === FALSE)
+			$msg = $response->msg;
+		else
+			$msg = '';
+		
+		return redirect()->route('lunar.search', ['date' => $date])->with('msg', $msg);
+	}
+	
+	/* Restore car no
 	 * @params: request
 	 * @return: view
 	 */
@@ -59,21 +80,16 @@ class LunarController extends Controller
 		$restoreDate = $date;
 		
 		if (empty($restoreDate))
- 		{
-			$this->_viewModel->fail('設定失敗');
-			return view('lunar')->with('viewModel', $this->_viewModel);
-		}
+			return redirect()->route('lunar.index')->with('msg', '無時間參數');
 		
 		$response = $this->_service->restoreCarNo($restoreDate);
 		
 		if ($response->status === FALSE)
-			$this->_viewModel->fail($response->msg);
+			$msg = $response->msg;
 		else
-		{	
-			$this->_viewModel->success();
-			$this->_viewModel->settings = $response->data;	
-		}
-		return view('lunar')->with('viewModel', $this->_viewModel);
+			$msg = '';
+		
+		return redirect()->route('lunar.search', ['date' => $date])->with('msg', $msg);
 	}
 	
 }

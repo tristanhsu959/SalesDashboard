@@ -35,10 +35,7 @@ class NewOrderRepository extends Repository
 				->addSelect('b.UnitName as productUnit', 'b.Price as productPrice', 'b.Quantity as productQuantity', 'b.Money as productAmount')
 				->addSelect('c.Name as storeName', 'c.No as storeNo', 'f.Name as storeType')
 				->addSelect('d.name as area', 'e.Name as brand', 'e.No as brandNo')
-				->join('OrderSub as b', function($join) {
-					$join->on('b.OrderId', '=', 'a.Id')
-							->on('b.Quantity', '>', 0);
-				})
+				->join('OrderSub as b', 'b.OrderId', '=', 'a.Id')
 				->join('Store as c', 'c.Id', '=', 'a.StoreId')
 				->join('Area as d', 'd.Id', '=', 'c.AreaId')
 				->join('Brand as e', 'e.Id', '=', 'c.BrandId')
@@ -51,7 +48,8 @@ class NewOrderRepository extends Repository
 					$db->where('a.OperationCenterId', '=', 1)
 						->orWhere('a.OperationCenterId', '=', 2);
 				})
-				->where('a.Money', '>', 0);
+				->where('a.Money', '>', 0)
+				->where('b.Quantity', '>', 0);
 				
 		Log::channel('commandLog')->info($query->toRawSql(), [ __class__, __function__, __line__]);
 		
