@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Exception;
 
 #Service BF | BG 共用
@@ -24,6 +25,7 @@ class SalesService
     
 	public function __construct(protected SalesRepository $_repository)
 	{
+		#default
 		$this->_statistics = [
 			'exportToken'	=> '',
 			'header'		=> [],
@@ -42,23 +44,49 @@ class SalesService
 	{
 		#Check cache
 		$cacheKey = implode(':', [$searchBrand->value, $searchStDate, $searchEndDate]);
-		session()->put((string)Str::uuid7(), $cacheKey);
 		
 		if (Cache::has($cacheKey))
 		{
 			Log::channel('appServiceLog')->info('Get sales data from cache');
-			return Cache::get($cacheKey);
+			return Cache::get($cacheKey); #cache data is response format
 		}
 		else
 		{
 			Log::channel('appServiceLog')->info('Get sales data from db');
-			$statistics = $this->_processSalesData($searchBrand, $searchStDate, $searchEndDate);
-			$statistics['exportToken'] = (string)Str::uuid();
-			Cache::put($statistics['exportToken'], $statistics, now()->addMinutes(60));
 			
-			return $statistics;
+			$this->_statistics['exportToken'] = Crypt::encryptString($cacheKey); #同字串會不同,匯出用
+			$response = $this->_analysisSalesData($searchBrand, $searchStDate, $searchEndDate);
+			
+			#成功才存
+			if ($response->status === TRUE)
+				Cache::put($cacheKey, $response, now()->addMinutes(60));
+			
+			return $response;
 		}
 	}
+	
+	/* Export data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function export($token)
+	{
+		#取資料邏輯共用
+		$cacheKey = Crypt::decryptString($token);
+		
+		if (Cache::has($cacheKey))
+		{
+			Log::channel('appServiceLog')->info('Export sales data from cache');
+			$response = Cache::get($cacheKey);
+			dd($response);
+			#Process export
+		}
+		else
+			return ResponseLib::initialize($this->_statistics)->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
+	}
+	
 	
 	/* 取新品銷售統計-入口
 	 * @params: enum
@@ -66,7 +94,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _processSalesData($searchBrand, $searchStDate, $searchEndDate)
+	private function _analysisSalesData($searchBrand, $searchStDate, $searchEndDate)
 	{
 		try
 		{
@@ -83,15 +111,31 @@ class SalesService
 			else*/
 			$srcData = $this->_getBaseDataByBg($searchStDate, $searchEndDate);
 			
-			#3. Build report
-			$statistics = $this->_outputReport($srcData);
+			#3.refactor source data format
+			$baseData = $this->_rebuildBaseData($srcData);
 			
-			return $statistics;
+			#4.Filter by area (By User Permission)
+			$baseData = $this->_filterByAreaPermission($baseData);
+			
+			#4-1.Filter by product : 排除不統計的項目
+			#$baseData = $this->_filterByProduct($baseData);
+			
+			/* Statistics Start */
+			#5.建共用Header, by product
+			$this->_statistics['header'] = $this->_buildListHeader($baseData);
+			
+			#6.By店別
+			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
+			
+			#7.區域彙總
+			$this->_statistics['area'] = $this->_parsingByArea($baseData);
+				
+			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail($e->getMessage());
+			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}
 	
@@ -138,26 +182,7 @@ class SalesService
 	{
 		try
 		{
-			#1.refactor source data format
-			$baseData = $this->_rebuildBaseData($srcData);
 			
-			#2.Filter by area (By User Permission)
-			$baseData = $this->_filterByAreaPermission($baseData);
-			
-			#3.Filter by product : 排除不統計的項目
-			#$baseData = $this->_filterByProduct($baseData);
-			
-			/* Statistics Start */
-			#4.建共用Header, by product
-			$this->_statistics['header'] = $this->_buildListHeader($baseData);
-			
-			#5.By店別
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
-			
-			#6.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData);
-				
-			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
 		{

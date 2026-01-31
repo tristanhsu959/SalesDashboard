@@ -94,6 +94,14 @@ class SalesViewModel
 			return FALSE;
 	}
 	
+	public function hasExportData()
+	{
+		if (empty($this->_data['statistics']) OR empty($this->_data['statistics']['exportToken']))
+			return FALSE;
+		else
+			return TRUE;
+	}
+	
 	/* breadcrumb
 	 * @params: 
 	 * @return: array

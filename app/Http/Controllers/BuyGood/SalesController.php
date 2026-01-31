@@ -55,7 +55,7 @@ class SalesController extends Controller
 	 * @params: request
 	 * @return: view
 	 */
-	public function export(Excel $excel, SalesExport $export)
+	public function export(Request $request, $token)
 	{
 		return Excel::download(new SalesExport, 'invoices.xlsx');
 		//return $excel->download($export, 'invoices.xlsx');
