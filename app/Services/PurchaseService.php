@@ -13,7 +13,14 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use Exception;
+use OpenSpout\Writer\XLSX\Writer;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Row;
+
 
 #Service BF | BG 共用
 class PurchaseService
@@ -25,19 +32,51 @@ class PurchaseService
 	public function __construct(protected PurchaseRepository $_repository)
 	{
 		$this->_statistics = [
-			'header'	=> [],
-			'shop' 		=> [],
-			'area' 		=> [],
+			'exportToken'	=> '',
+			'header'		=> [],
+			'shop' 			=> [],
+			'area' 			=> [],
 		];
 	}
 	
-	/* 取新品銷售統計-入口
+	/* Search data
 	 * @params: enum
 	 * @params: date
 	 * @params: date
 	 * @return: array
 	 */
 	public function search($searchBrand, $searchStDate, $searchEndDate)
+	{
+		#Check cache
+		$cacheKey = implode(':', [$searchBrand->value, $searchStDate, $searchEndDate]);
+		
+		if (Cache::has($cacheKey))
+		{
+			Log::channel('appServiceLog')->info('Get sales data from cache');
+			return Cache::get($cacheKey); #cache data is response format
+		}
+		else
+		{
+			Log::channel('appServiceLog')->info('Get sales data from db');
+			
+			$this->_statistics['exportToken'] = Crypt::encryptString($cacheKey); #同字串會不同,匯出用
+			$response = $this->_analysisSalesData($searchBrand, $searchStDate, $searchEndDate);
+			
+			#成功才存
+			if ($response->status === TRUE)
+				Cache::put($cacheKey, $response, now()->addMinutes(60));
+			
+			return $response;
+		}
+	}
+	
+	/* Get search data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	private function _analysisSalesData($searchBrand, $searchStDate, $searchEndDate)
 	{
 		try
 		{
@@ -57,10 +96,23 @@ class PurchaseService
 			#3. Rebuild data format
 			$baseData = $this->_rebuildBaseData($srcData);
 			
-			#4. Build report
-			$statistics = $this->_outputReport($baseData);
+			#4.Filter by area (By User Permission)
+			$baseData = $this->_filterByAreaPermission($baseData);
 			
-			return $statistics;
+			#5.Filter by product : 排除不統計的項目
+			$baseData = $this->_filterByProduct($baseData);
+			
+			/* Statistics Start */
+			#6.建共用Header, by product
+			$this->_statistics['header'] = $this->_buildListHeader($baseData);
+			
+			#7.By店別
+			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
+			
+			#8.區域彙總
+			$this->_statistics['area'] = $this->_parsingByArea($baseData);
+				
+			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
 		{
@@ -156,23 +208,7 @@ class PurchaseService
 	{
 		try
 		{
-			#1.Filter by area (By User Permission)
-			$baseData = $this->_filterByAreaPermission($baseData);
 			
-			#2.Filter by product : 排除不統計的項目
-			$baseData = $this->_filterByProduct($baseData);
-			
-			/* Statistics Start */
-			#3.建共用Header, by product
-			$this->_statistics['header'] = $this->_buildListHeader($baseData);
-			
-			#4.By店別
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
-			
-			#5.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData);
-				
-			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
 		{
@@ -354,5 +390,174 @@ class PurchaseService
 		$result[Area::KAOHSIUNG->label()] 	= data_get($data, Area::KAOHSIUNG->value, []);
 		
 		return $result;
+	}
+	
+	/* Export data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function export($token)
+	{
+		#取資料邏輯共用
+		$cacheKey = Crypt::decryptString($token);
+		
+		if (! Cache::has($cacheKey))
+			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
+		
+		Log::channel('appServiceLog')->info('Export sales data');
+		
+		try
+		{
+			$response = Cache::get($cacheKey);
+			$sourceData = $response->data;
+			
+			#Build export data
+			$area = $this->_buildExportArea($sourceData['header'], $sourceData['area']);
+			$shop = $this->_buildExportShop($sourceData['header'], $sourceData['shop']);
+			$export = array_merge($area, $shop);
+			
+			#Write export to file
+			$fileName = Str::replace(':', '_', $cacheKey); 
+			$fileName = "出貨_{$fileName}.xlsx";
+			$filePath = Storage::disk('export')->path($fileName);
+			
+			$writer = new Writer();
+			$writer->openToFile($filePath);
+			
+			#目前需求不顯示金額
+			foreach($export as $key => $data)
+			{
+				$sheetName = $this->_getSheetName($key);
+				$sheet = ($key == 'areaQty') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
+				$sheet->setName($sheetName);
+				$writer->addRows($data);
+			}
+			$writer->close();
+
+			return ResponseLib::initialize($fileName)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
+		}
+	}
+	
+	/* Build data for export
+	 * @params: string
+	 * @return: string
+	 */
+	private function _getSheetName($key)
+	{
+		return match($key)
+		{
+			'areaAmount'	=> '區域-金額',
+			'areaQty'		=> '區域-數量',
+			'shopAmount'	=> '門店-金額',
+			'shopQty'		=> '門店-數量',
+			default 		=> '統計',
+		};
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @params: boolean
+	 * @return: array
+	 */
+	private function _buildExportArea($header, $areaData)
+	{
+		#金額及數量要分開
+		#$export['areaAmount'] 	= [];
+		$export['areaQty'] 		= [];
+		
+		#Add header
+		$headerKeys	= array_keys($header);
+		$headerName	= Arr::pluck($header, 'productName');
+		$headerName	= Row::fromValues(array_merge(['區域'], $headerName));
+		
+		#Header相同
+		#$export['areaAmount'][] = $headerName;
+		$export['areaQty'][]	= $headerName;
+		
+		foreach($areaData as $areaName => $data)
+		{
+			#$rowAmount 	= [];
+			$rowQty		= [];
+			
+			#$rowAmount[] = $areaName;
+			$rowQty[]	 = $areaName;
+			
+			foreach($headerKeys as $no)
+			{
+				#$rowAmount[]= Number::currency(intval(data_get($data, "products.{$no}.amount")), precision: 0);
+				$rowQty[]	= intval(data_get($data, "products.{$no}.quantity"));
+			}
+			
+			#$export['areaAmount'][] = Row::fromValues($rowAmount);
+			$export['areaQty'][]	= Row::fromValues($rowQty);
+		}
+		
+		#Total
+		/* $row = [];
+		foreach($header as $no => $product)
+		{
+			$rowData = intval(data_get($data, "products.{$no}.{$totalKey}"));
+			$row[] 	= ($isCurrency) ? Number::currency($rowData, precision: 0) : $rowData;
+		}
+		
+		$export[] = Row::fromValues($row); */
+		
+		return $export;
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @params: boolean
+	 * @return: array
+	 */
+	private function _buildExportShop($header, $shopData)
+	{
+		#金額及數量要分開
+		#$export['shopAmount'] 	= [];
+		$export['shopQty'] 		= [];
+		
+		#Add header
+		$headerKeys = array_keys($header);
+		$headerName = Arr::pluck($header, 'productName');
+		$headerName = Row::fromValues(array_merge(['區域', '門店代號', '門店名稱'], $headerName));
+		
+		#Header相同
+		#$export['shopAmount'][] = $headerName;
+		$export['shopQty'][]	= $headerName;
+		
+		foreach($shopData as $data)
+		{
+			#$rowAmount 	= [];
+			$rowQty		= [];
+			
+			#$rowAmount[]= $data['area'];
+			#$rowAmount[]= $data['shopId'];
+			#$rowAmount[]= $data['shopName'];
+			$rowQty[]	= $data['area'];
+			$rowQty[]	= $data['shopId'];
+			$rowQty[]	= $data['shopName'];
+				
+			foreach($headerKeys as $no)
+			{
+				#$rowAmount[]= Number::currency(intval(data_get($data, "products.{$no}.amount")), precision: 0);
+				$rowQty[]	= intval(data_get($data, "products.{$no}.quantity"));
+			}
+			
+			#$export['shopAmount'][]	= Row::fromValues($rowAmount);
+			$export['shopQty'][]	= Row::fromValues($rowQty);
+		}
+		
+		return $export;
 	}
 }

@@ -10,7 +10,9 @@ use App\Enums\Brand;
 use App\Exports\SalesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 #目前只先提供梁社漢
 class SalesController extends Controller
@@ -57,7 +59,20 @@ class SalesController extends Controller
 	 */
 	public function export(Request $request, $token)
 	{
-		return Excel::download(new SalesExport, 'invoices.xlsx');
-		//return $excel->download($export, 'invoices.xlsx');
+		$this->_viewModel->initialize(FormAction::LIST);
+		
+		$response = $this->_service->export($token);
+		
+		if ($response->status === FALSE)
+		{
+			$this->_viewModel->fail($response->msg);
+			return view('sales.bg_list')->with('viewModel', $this->_viewModel);
+		}
+		else
+		{
+			$fileName = $response->data; 
+			return Storage::disk('export')->download($fileName);
+			#return response()->download($fileName);
+		}
 	}
 }

@@ -96,7 +96,7 @@ class SalesViewModel
 	
 	public function hasExportData()
 	{
-		if (empty($this->_data['statistics']) OR empty($this->_data['statistics']['exportToken']))
+		if ($this->isDataEmpty() OR empty($this->_data['statistics']['exportToken']))
 			return FALSE;
 		else
 			return TRUE;

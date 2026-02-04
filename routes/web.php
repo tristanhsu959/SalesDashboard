@@ -48,13 +48,15 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 		#Route::get('new_releases/braised_pork', [BgNewReleaseController::class, 'index']);
 		#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);
 		
-		/* 進銷存報表 */
+		/* 出貨報表 */
 		Route::get('purchase', [BgPurchaseController::class, 'showSearch']);
 		Route::post('purchase/search', [BgPurchaseController::class, 'search'])->name('bg.purchase.search');
-		Route::post('purchase/export', [BgPurchaseController::class, 'export'])->name('bg.purchase.export');
+		Route::get('purchase/export/{token}', [BgPurchaseController::class, 'export'])->name('bg.purchase.export');
+		
+		/* 銷售報表 */
 		Route::get('sales', [BgSalesController::class, 'showSearch']);
 		Route::post('sales/search', [BgSalesController::class, 'search'])->name('bg.sales.search');
-		Route::get('sales/export', [BgSalesController::class, 'export'])->name('bg.sales.export');
+		Route::get('sales/export/{token}', [BgSalesController::class, 'export'])->name('bg.sales.export');
 	});
 	
 	
