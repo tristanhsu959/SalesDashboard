@@ -43,7 +43,7 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            'encrypt' => 'no', #env('DB_ENCRYPT', 'yes'),
+            'encrypt' => 'yes', #env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => TRUE, #env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 		#梁社漢
@@ -58,7 +58,7 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            'encrypt' => 'no', #env('DB_ENCRYPT', 'yes'),
+            'encrypt' => 'optional', #env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => TRUE, #env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 		
