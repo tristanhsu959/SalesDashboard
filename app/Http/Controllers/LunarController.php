@@ -21,6 +21,8 @@ class LunarController extends Controller
 	 */
 	public function index()
 	{
+		$a = DB::connection('BGPosErp')->table($table)->lock('WITH(NOLOCK)');
+		dd($a);
 		return view('lunar')->with('viewModel', $this->_viewModel);
 	}
 	
