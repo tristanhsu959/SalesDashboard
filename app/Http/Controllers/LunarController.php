@@ -8,7 +8,7 @@ use App\Services\LunarService;
 use App\ViewModels\LunarViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\DB;
 class LunarController extends Controller
 {
 	public function __construct(protected LunarService $_service, protected LunarViewModel $_viewModel)
