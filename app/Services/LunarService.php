@@ -30,6 +30,8 @@ class LunarService
 	 */
 	public function searchCarNo($searchDate)
 	{
+DB::connection('BFPosErp')->table($table)->lock('WITH(NOLOCK)');
+DB::connection('BGPosErp')->table($table)->lock('WITH(NOLOCK)');
 		try
 		{
 			list($tpSettings, $tsSettings) = $this->_getSetting($searchDate); #八方#御廚
