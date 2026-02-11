@@ -88,7 +88,7 @@ return [
 		'OrderTP' => [
             'driver' => 'sqlsrv',
             #'url' => env('DATABASE_URL'),
-            'host' => env('OTP_DB_HOST', '65.52.163.96'),
+            'host' => env('OTP_DB_HOST', '34.80.39.82'),
             'port' => env('OTP_DB_PORT', '1433'),
             'database' => env('OTP_DB_DATABASE', 'OrderTP'),
             'username' => env('OTP_DB_USERNAME', 'OrderSystem'),
@@ -102,7 +102,7 @@ return [
 		'OrderKH' => [
             'driver' => 'sqlsrv',
             #'url' => env('DATABASE_URL'),
-            'host' => env('OKH_DB_HOST', '65.52.163.96'),
+            'host' => env('OKH_DB_HOST', '34.80.39.82'),
             'port' => env('OKH_DB_PORT', '1433'),
             'database' => env('OKH_DB_DATABASE', 'OrderKH'),
             'username' => env('OKH_DB_USERNAME', 'OrderSystem'),
@@ -116,7 +116,7 @@ return [
 		'OrderTS' => [
             'driver' => 'sqlsrv',
             #'url' => env('DATABASE_URL'),
-            'host' => env('OTS_DB_HOST', '65.52.163.96'),
+            'host' => env('OTS_DB_HOST', '34.80.39.82'),
             'port' => env('OTS_DB_PORT', '1433'),
             'database' => env('OTS_DB_DATABASE', 'OrderTS'),
             'username' => env('OTS_DB_USERNAME', 'OrderSystem'),
@@ -130,7 +130,7 @@ return [
 		'OrderRL' => [
             'driver' => 'sqlsrv',
             #'url' => env('DATABASE_URL'),
-            'host' => env('ORL_DB_HOST', '65.52.163.96'),
+            'host' => env('ORL_DB_HOST', '34.80.39.82'),
             'port' => env('ORL_DB_PORT', '1433'),
             'database' => env('ORL_DB_DATABASE', 'OrderRL'),
             'username' => env('ORL_DB_USERNAME', 'OrderSystem'),
