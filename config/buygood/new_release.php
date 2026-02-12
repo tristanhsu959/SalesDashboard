@@ -82,6 +82,18 @@ return [
 			'valueAdded' => '秘製滷肉汁', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
 		],
+		'beefShortRibs' => [
+			'saleDate' => '2026-03-02',
+			'saleEndDate' => NULL, #停售日
+			'name' => '牛小排飯',
+			#ids, valueAdded條件不影響, 因排程是抓原來的config
+			'ids' => [ 
+				'main' => ['UC06100109', 'UC06100110'], #梁社漢
+				'mapping' => ['', ''], #八方(複合店)
+			],
+			'valueAdded' => '', #加值判別
+			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品
+		],
     ],
 	
 	#複合店=> 八方:梁社漢 / 梁社漢的訂單銷售會存至poserp(只有梁社漢有此狀況)
@@ -90,7 +102,7 @@ return [
 		#shop id 八方=>梁社漢
 		'0001' => '106003', 
 		'0966' => '112004',
-
+		'0983' => '306001',
     ],
 	
 	#Pos DB mapping to local DB 
@@ -101,6 +113,7 @@ return [
 		'eggTofu' 		=> 'egg_tofu',
 		'braisedGravy' 	=> 'braised_gravy' ,
 		'porkGravy'		=> ['braised_pork', 'braised_gravy'],
+		'beefShortRibs' => 'bg_beef_short_ribs',
 	],
 ];
 

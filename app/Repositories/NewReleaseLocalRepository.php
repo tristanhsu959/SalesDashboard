@@ -13,6 +13,41 @@ class NewReleaseLocalRepository extends Repository
 		
 	}
 	
+	/* Build query string | 新品:八方
+	 * @params: string
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getBfDataFromDB($configKey, $stDate, $endDate, $userAreaIds)
+	{
+		/* 每筆訂單的資料格式
+		["SHOP_ID" => "235001"
+		  "QTY" => "1.0000"
+		  "SALE_DATE" => "2025-12-19 17:13:11.000"
+		  "SHOP_NAME" => "御廚中和直營店"
+		]
+		*/
+		
+		$tables = config("bafang.new_release.DbMapping.{$configKey}");
+		
+		#目前有取兩個table data的狀況
+		if (is_array($tables))
+		{
+			$data = collect([]);
+			
+			foreach($tables as $table)
+			{
+				$temp = $this->_getData($table, $stDate, $endDate, $userAreaIds);
+				$data = $data->merge($temp);
+			}
+			
+			return $data;
+		}
+		else
+			return $this->_getData($tables, $stDate, $endDate, $userAreaIds);
+	}
+	
 	/* Build query string | 新品:梁社漢
 	 * @params: string
 	 * @params: datetime

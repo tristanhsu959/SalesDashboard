@@ -5,11 +5,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BaFang\NewReleaseController as BfNewReleaseController;
+
 use App\Http\Controllers\BuyGood\NewReleaseController as BgNewReleaseController;
 use App\Http\Controllers\BuyGood\PurchaseController as BgPurchaseController;
 use App\Http\Controllers\BuyGood\SalesController as BgSalesController;
-use App\Http\Middleware\AccessPermissionMiddleware;
 
+use App\Http\Middleware\AccessPermissionMiddleware;
 use App\Http\Controllers\LunarController;
 
 /* 春節預購(暫時性)*/
@@ -35,6 +37,8 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 	
 	/* 八方 */
 	Route::namespace('App\Http\Controllers\BaFang')->prefix('bf')->group(function () {
+		Route::get('new_releases/beef_short_ribs', [BfNewReleaseController::class, 'beefShortRibs']);
+		Route::post('new_releases/{segment}/search', [BfNewReleaseController::class, 'search'])->name('bf.new_releases.search');
 	});
 	
 	/* 梁社漢 */
@@ -44,6 +48,7 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 		Route::get('new_releases/tomato_beef', [BgNewReleaseController::class, 'tomatoBeef']);
 		Route::get('new_releases/egg_tofu', [BgNewReleaseController::class, 'eggTofu']);
 		Route::get('new_releases/pork_gravy', [BgNewReleaseController::class, 'porkGravy']);
+		Route::get('new_releases/beef_short_ribs', [BgNewReleaseController::class, 'beefShortRibs']);
 		Route::post('new_releases/{segment}/search', [BgNewReleaseController::class, 'search'])->name('bg.new_releases.search');
 		#Route::get('new_releases/braised_pork', [BgNewReleaseController::class, 'index']);
 		#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);

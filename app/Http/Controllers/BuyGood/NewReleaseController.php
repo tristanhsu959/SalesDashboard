@@ -34,6 +34,10 @@ class NewReleaseController extends Controller
 	{
 		return $this->_showIndex($request, Functions::BG_PORKGRAVY);
 	}
+	public function beefShortRibs(Request $request)
+	{
+		return $this->_showIndex($request, Functions::BG_BEEFSHORTRIBS);
+	}
 	
 	private function _showIndex(Request $request, $functionKey)
 	{

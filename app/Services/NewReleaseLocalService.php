@@ -47,7 +47,54 @@ class NewReleaseLocalService
 		return $this->_configKey;
 	}
 	
-	/* 取新品銷售統計-入口
+	/* 八方-取新品銷售統計-入口
+	 * @params: string
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function getBfStatistics($configKey, $searchStDate, $searchEndDate)
+	{
+		try
+		{
+			#20251216 : 之後要改存至Local DB
+			$this->_configKey 	= $configKey; #外部也會用到
+			$this->_config 		= config("bafang.new_release.products.{$this->_configKey}"); 
+			
+			#1. Get params
+			list($stDate, $endDate) = $this->_getParams($searchStDate, $searchEndDate);
+			
+			#頁面計算天數須用, 因查詢時間跟實際計算後的查詢時間不一定會相同
+			$this->_statistics['startDate'] = $stDate; #這裏只存日期
+			$this->_statistics['endDate'] 	= $endDate;
+			
+			#2. Get DB data
+			/* 每筆訂單的資料格式
+			["SHOP_ID" => "235001"
+			  "QTY" => "1.0000"
+			  "SALE_DATE" => "2025-12-19 17:13:11.000"
+			  "SHOP_NAME" => "御廚中和直營店"
+			]
+			*/
+			$currentUser = $this->getCurrentUser(); 
+			$userAreaIds = $currentUser->roleArea;
+			
+			#這裏取到的是collection array, 先不用toArray
+			#DB就會濾Area了
+			$srcData = [];
+			$srcData = $this->_repository->getBfDataFromDB($configKey, $stDate, $endDate, $userAreaIds);
+			
+			return $this->_outputReport($srcData);
+			
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
+	}
+	
+	/* 御廚-取新品銷售統計-入口
 	 * @params: string
 	 * @params: date
 	 * @params: date
@@ -93,6 +140,8 @@ class NewReleaseLocalService
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
+	
+	
 	
 	/* 取Config設定及查詢時間區間參數
 	 * @params: date

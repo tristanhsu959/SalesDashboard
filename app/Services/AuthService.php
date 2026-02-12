@@ -167,8 +167,8 @@ class AuthService
 	public function signout()
 	{
 		$currentUser = $this->getCurrentUser(); 
-		$this->removeCurrentUser();
 		$user = $currentUser->userAd;
+		$this->removeCurrentUser();
 		
 		#使用者驗證/登入/登出, 統一寫在syslog
 		Log::channel('webSysLog')->info("使用者[{$user}]登出系統", [ __class__, __function__, __line__]);

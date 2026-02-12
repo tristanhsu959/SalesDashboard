@@ -5,19 +5,19 @@ use App\Enums\Operation;
 
 #Menu Config (key與route要相同)
 return [
-	#Group (不直接與function關聯)
+	#Group (Enable List)
 	'groups' => [
 		[
 			'name' 	=> '新品銷售',
 			'style' => ['icon' => 'chart_data', 'color' => 'purple'], #filled-icon 
 			'type'	=> [RoleGroup::USER->name],
 			'items' => [ 		#Function code or key => use Str::camel to check segment
+				'bf-beefShortRibs',
 				'bg-porkRibs',  
 				'bg-tomatoBeef',
 				'bg-eggTofu',
-				'bg-porkGravy'#滷肉飯要加滷汁一起算
-				#'braisedPork',
-				#'braisedGravy',
+				'bg-porkGravy',	#滷肉飯要加滷汁一起算
+				'bg-beefShortRibs',
 			],
 		],
 		[
@@ -43,8 +43,19 @@ return [
 	#Function
 	'functions' => [
 		/*============ 新品銷售 ============*/
+		##### 八方
+		'bf-beefShortRibs' => [
+			'brand'	=> 'bf', 
+			'name'		=> '八方-牛小排麵',
+			'url' 		=> 'bf/new_releases/beef_short_ribs', 
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		
+		##### 御廚
 		'bg-porkRibs' => [
-			#'code'		=> 'porkRibs', #判別用
+			'brand'	=> 'bg', 
 			'name'		=> '御廚-橙汁排骨',
 			'url' 		=> 'bg/new_releases/pork_ribs', 
 			'operation'	=> [
@@ -52,7 +63,7 @@ return [
 			],
 		],
 		'bg-tomatoBeef' => [
-			#'code'		=> 'tomatoBeef',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-番茄牛三寶麵',
 			'url' 		=> 'bg/new_releases/tomato_beef',
 			'operation'	=> [
@@ -60,7 +71,7 @@ return [
 			],
 		],
 		'bg-eggTofu' => [
-			#'code'	=> 'eggTofu',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-老皮嫩肉',
 			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
@@ -68,7 +79,7 @@ return [
 			],
 		],
 		'bg-braisedPork'	=> [
-			#'code'		=> 'braisedPork',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-主廚秘製滷肉飯',
 			'url' 		=> 'bg/new_releases/braised_pork',
 			'operation'	=> [
@@ -76,7 +87,7 @@ return [
 			],
 		],
 		'bg-eggTofu' => [
-			#'code'	=> 'eggTofu',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-老皮嫩肉',
 			'url' 		=> 'bg/new_releases/egg_tofu',
 			'operation'	=> [
@@ -84,7 +95,7 @@ return [
 			],
 		],
 		'bg-braisedGravy' => [
-			#'code'		=> 'braisedGravy',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-秘製滷肉汁',
 			'url' 		=> 'bg/new_releases/braised_gravy',
 			'operation'	=> [
@@ -93,9 +104,17 @@ return [
 		],
 		#滷肉飯加滷汁 = braisedPork + braisedGravy
 		'bg-porkGravy' => [
-			#'code'		=> 'porkGravy',
+			'brand'	=> 'bg', 
 			'name' 		=> '御廚-滷肉飯加滷汁',
 			'url' 		=> 'bg/new_releases/pork_gravy',
+			'operation'	=> [
+				Operation::READ
+			],
+		],
+		'bg-beefShortRibs' => [
+			'brand'		=> 'bg', 
+			'name'		=> '御廚-牛小排飯',
+			'url' 		=> 'bg/new_releases/beef_short_ribs', 
 			'operation'	=> [
 				Operation::READ
 			],
@@ -103,7 +122,7 @@ return [
 		
 		/*============ 進銷存報表 ============*/
 		'bg-purchase' => [
-			#'code'		=> 'bg-purchase', #判別用
+			'brand'	=> 'bg', 
 			'name'		=> '御廚-進貨統計',
 			'url' 		=> 'bg/purchase', 
 			'operation'	=> [
@@ -111,7 +130,7 @@ return [
 			],
 		],
 		'bg-sales' => [
-			#'code'		=> 'sales', #判別用
+			'brand'	=> 'bg', 
 			'name'		=> '御廚-銷售統計',
 			'url' 		=> 'bg/sales', 
 			'operation'	=> [
@@ -122,7 +141,7 @@ return [
 		
 		/*============ 權限管理 ============*/
 		'user' => [
-			#'code'		=> 'users',
+			'brand'		=> '', 
 			'name' 		=> '帳號管理',
 			'url' 		=> 'user', 
 			'operation'	=> [
@@ -130,7 +149,7 @@ return [
 			],
 		],
 		'role' => [
-			#'code'		=> 'roles',
+			'brand'		=> '', 
 			'name' 		=> '身份管理',
 			'url' 		=> 'role',
 			'operation'	=> [
