@@ -21,9 +21,10 @@
 		<!-- Scripts -->
 		<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.js" defer></script>
 		<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js" defer></script>
-		<!--script src="{{ asset('scripts/util.js') }}" defer></script-->
+		<script src="{{ asset('scripts/util.js') }}" defer></script>
 		<script src="{{ asset('scripts/app.js') }}" defer></script>
 		@stack('scripts')
+		@vite(['resources/js/app.js'])
 	</head>
 
 	<body class="responsive">

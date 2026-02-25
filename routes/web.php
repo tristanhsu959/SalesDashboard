@@ -12,22 +12,10 @@ use App\Http\Controllers\BuyGood\PurchaseController as BgPurchaseController;
 use App\Http\Controllers\BuyGood\SalesController as BgSalesController;
 
 use App\Http\Middleware\AccessPermissionMiddleware;
-use App\Http\Controllers\LunarController;
-
-/* 春節預購(暫時性)*/
-if (Request::getPort() == 8888) 
-{
-	Route::get('/', [LunarController::class, 'index'])->name('lunar.index');
-	Route::get('lunar/search/{date}', [LunarController::class, 'search'])->name('lunar.search');
-	Route::get('lunar/assign/{date}', [LunarController::class, 'assign'])->name('lunar.assign');
-	Route::get('lunar/restore/{date}', [LunarController::class, 'restore'])->name('lunar.restore');
-	return;
-}
-
 
 /* Login */
-Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
 Route::get('signin', [AuthController::class, 'showSignin'])->name('signin');
+Route::redirect('/', '/signin'); 
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 

@@ -9,7 +9,7 @@ class AuthViewModel
 {
 	use attrStatus;
 	
-	private $_title 	= '登入';
+	private $_formData = [];
 	private $_data = [];
 	
 	public function __construct()
@@ -41,6 +41,6 @@ class AuthViewModel
 	 */
 	public function keepFormData($account)
     {
-		data_set($this->_data, 'account', $account);
+		data_set($this->_data, 'formData.account', $account);
 	}
 }

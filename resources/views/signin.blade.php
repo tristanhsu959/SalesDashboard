@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @push('scripts')
-    <!--script src="{{ asset('scripts/signin/signin.js') }}" defer></script-->
+    <script src="{{ asset('scripts/signin.js') }}" defer></script>
 @endpush
 
 @section('content')
 
-<form x-data action="{{ route('signin.post') }}" method="post" class="row" novalidate @submit.prevent="submit" >
+<form x-data='login(@json($viewModel->formData))' action="{{ route('signin.post') }}" method="post" class="row" novalidate @submit.prevent="validate()" >
 	@csrf
 	
 	<div class="content-left">
@@ -22,20 +22,20 @@
 			<span class="title">Sign In</span>
 			<h6>使用AD帳號登入至系統</h6>
 		</div>
-		<div class="field label border">
-			<input type="text" name="adAccount" value="{{ $viewModel->adAccount }}" maxlength="20">
+		<div class="field label border" :class="Helper.hasError(errors, 'adAccount')">
+			<input x-model="adAccount" type="text" name="adAccount" value="{{ $viewModel->adAccount }}" maxlength="20" @input="errors.delete('adAccount')">
 			<label>Account</label>
 			<span class="domain">@8way.com.tw</span>
 		</div>
-		<div class="field label border">
-			<input type="text" name="adPassword" maxlength="20">
+		<div class="field label border" :class="Helper.hasError(errors, 'adPassword')">
+			<input x-model="adPassword" type="text" name="adPassword" maxlength="20" @input="errors.delete('adPassword')">
 			<label>Password</label>
 		</div>
 		<nav class="group split">
 			<button type="submit" class="btn-signin left-round max">
 				<span>Sign In</span>
 			</button>
-			<button type="button" class="right-round square btn-cancel">
+			<button type="button" class="right-round square btn-cancel" @click="reset()">
 				<i>close</i>
 			</button>
 		</nav>
