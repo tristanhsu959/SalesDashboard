@@ -17,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // 綁定單例
+		$this->app->singleton(\App\Services\AppManager::class, function ($app) {
+			return new \App\Services\AppManager();
+		});
     }
 
     /**

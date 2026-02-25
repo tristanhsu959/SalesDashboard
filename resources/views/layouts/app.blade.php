@@ -1,3 +1,5 @@
+@use('App\Facades\AppManager')
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -22,41 +24,30 @@
 		<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.js" defer></script>
 		<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js" defer></script>
 		<script src="{{ asset('scripts/util.js') }}" defer></script>
+		<script src="{{ asset('scripts/helper.js') }}" defer></script>
 		<script src="{{ asset('scripts/app.js') }}" defer></script>
 		@stack('scripts')
 		@vite(['resources/js/app.js'])
 	</head>
 
 	<body class="responsive">
-		@if(! Route::is('signin'))
+		@if(AppManager::hasAuth())
 			<x-menu />
 		@endif
 		
-		<main x-data="{'isLogin':{{Route::is('signin')}}}" :class="isLogin ? 'signin':'app'" class="responsive">
-			@if(! Route::is('signin'))
+		<main x-data="{'hasAuth': {{ AppManager::hasAuth() ? 'true' : 'false' }}}" :class="hasAuth ? 'app':'signin'" class="responsive">
+			@if(AppManager::hasAuth())
 				<x-action-bar :isHome="$viewModel->isHome()" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
 			@endif
 			
 			@yield('content')
 		</main>
 		
-		@if(! Route::is('signin'))
+		@if(AppManager::hasAuth())
 			<x-profile />
 		@endif
 		
-		@if(! empty($viewModel->msg()))
-		<div class="toast msg align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-			<div class="d-flex">
-				<div class="toast-body">
-				{{ $viewModel->msg() }}
-				</div>
-				<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-			</div>
-		</div>
-		@endif
-		
-		@if(! Route::is('signin'))
-			@include('layouts.master_dialog')
-		@endif
+		@include('layouts._dialog')
+		@include('layouts._toast')
 	</body>
 </html>

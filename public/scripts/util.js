@@ -1,25 +1,32 @@
-/* Helper JS */
+/* Util JS */
 /* V3寫法與V2不同 */
 
-const Helper = {
-    isValidPassword(password) {
-        const pattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-        return pattern.test(password);
-    },
-
-    isValidEmail(mail) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
-    },
-	
-	isEmpty(value) {
-        return value === null || value === undefined || value.trim() === '';
-    },
-	
-	hasError(errors, key) {
-        return errors.has(key) ? 'invalid' : '';
-    },
-	
-	removeError(errors, key) {
-        return errors.delete(key);
-    },
-};
+document.addEventListener('alpine:init', () => {
+    /* Alpine.data('toast11', (formData) => ({
+		adAccount: formData.account,
+		adPassword: formData.password,
+		errors: new Set(),
+		isLoading: false,
+		
+        validate() {
+			this.errors.clear();
+			
+			if (Helper.isEmpty(this.adAccount))
+				this.errors.add('adAccount');
+			if (Helper.isEmpty(this.adPassword))
+				this.errors.add('adPassword');
+			
+			if (this.errors.size == 0)
+				this.$el.submit();
+			else
+				return false;
+		},
+		
+		reset() {
+			this.adAccount = '';
+			this.adPassword = '';
+			this.errors.clear();
+			this.isLoading = false;
+		}
+    })); */
+});

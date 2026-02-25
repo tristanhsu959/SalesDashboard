@@ -23,16 +23,16 @@
 			<h6>使用AD帳號登入至系統</h6>
 		</div>
 		<div class="field label border" :class="Helper.hasError(errors, 'adAccount')">
-			<input x-model="adAccount" type="text" name="adAccount" value="{{ $viewModel->adAccount }}" maxlength="20" @input="errors.delete('adAccount')">
+			<input x-model="adAccount" type="text" name="adAccount" maxlength="20" @input="errors.delete('adAccount')">
 			<label>Account</label>
 			<span class="domain">@8way.com.tw</span>
 		</div>
 		<div class="field label border" :class="Helper.hasError(errors, 'adPassword')">
-			<input x-model="adPassword" type="text" name="adPassword" maxlength="20" @input="errors.delete('adPassword')">
+			<input x-model="adPassword" type="password" name="adPassword" maxlength="20" @input="errors.delete('adPassword')">
 			<label>Password</label>
 		</div>
 		<nav class="group split">
-			<button type="submit" class="btn-signin left-round max">
+			<button type="submit" class="btn-red left-round max">
 				<span>Sign In</span>
 			</button>
 			<button type="button" class="right-round square btn-cancel" @click="reset()">

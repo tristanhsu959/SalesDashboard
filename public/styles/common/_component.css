@@ -4,7 +4,7 @@ button, a {
 	&.btn-primary {
 		width: 120px;
 	}
-	/* Custom */
+	/* Search */
 	&.btn-show-search {
 		--primary: #81d4fa;
 	}
@@ -32,6 +32,11 @@ button, a {
 	}
 	&.btn-cancel {
 		--primary: #212121;
+	}
+	
+	/* Other */
+	&.btn-red {
+		--primary: #f44336;
 	}
 }
 

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Facades\AppManager;
 use App\Repositories\AuthRepository;
 use App\Libraries\ResponseLib;
-use App\Traits\AuthTrait;
 use App\Enums\RoleGroup;
 use App\Enums\Area;
 use Illuminate\Support\Facades\App;
@@ -18,8 +18,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
-	use AuthTrait;
-	
 	public function __construct(protected AuthRepository $_repository)
 	{
 	}
@@ -35,7 +33,7 @@ class AuthService
 		try
 		{
 			#1. Clear old auth session : CurrentUserTrait
-			$this->removeCurrentUser();
+			AppManager::removeCurrentUser();
 			
 			#2. auth by AD
 			$adInfo = $this->_authenticationByAD($account, $password);
@@ -44,7 +42,7 @@ class AuthService
 			$userInfo = $this->_authAccountRegister($account);
 			
 			#4. Save to session
-			$this->saveCurrentUser($adInfo, $userInfo);
+			AppManager::saveCurrentUser($adInfo, $userInfo);
 			
 			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
 			

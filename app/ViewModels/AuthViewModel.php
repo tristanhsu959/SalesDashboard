@@ -15,7 +15,8 @@ class AuthViewModel
 	public function __construct()
 	{
 		#Default data
-		$this->_data['action'] 	= FormAction::SIGNIN; 
+		$this->_data['action'] 	= FormAction::SIGNIN;
+		$this->keepFormData();
 		$this->success();	
 	}
 	
@@ -39,8 +40,9 @@ class AuthViewModel
 	 * @params: string
 	 * @return: void
 	 */
-	public function keepFormData($account)
+	public function keepFormData($account = '', $password = '')
     {
 		data_set($this->_data, 'formData.account', $account);
+		data_set($this->_data, 'formData.password', $password);
 	}
 }

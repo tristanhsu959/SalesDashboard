@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.app')
 
 @push('styles')
     <link href="{{ asset('styles/home/purchase_board.css') }}" rel="stylesheet">

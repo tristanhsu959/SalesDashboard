@@ -2,8 +2,8 @@
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('login', (formData) => ({
-		adAccount: formData.account || '',
-		adPassword: '',
+		adAccount: formData.account,
+		adPassword: formData.password,
 		errors: new Set(),
 		isLoading: false,
 		
