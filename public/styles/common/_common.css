@@ -1,0 +1,22 @@
+/* Web Common Style */
+
+/* Toast Message */
+#notifyMsg {
+	--error: #f44336;
+	width: 35%;
+	display: flex;
+	justify-content: space-between;
+	a i {
+		color: #fff;
+	}
+}
+
+/* Dialog */
+#alertModal, #confirmModal {
+	h5 {
+		display: flex;
+		align-items: center;
+		color: #f44336;
+		margin-bottom: 1rem;
+	}
+}

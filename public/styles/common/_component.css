@@ -1,0 +1,115 @@
+/* Component Style */
+
+button, a {
+	&.btn-primary {
+		width: 120px;
+	}
+	/* Custom */
+	&.btn-show-search {
+		--primary: #81d4fa;
+	}
+	&.btn-search {
+		--primary: #81d4fa;
+	}
+	&.btn-search-reset {
+		--primary: #212121;
+	}
+	
+	/* List button */
+	&.btn-create {
+		--primary: #4caf50;
+	}
+	&.btn-edit {
+		--primary: #673ab7;
+	}
+	&.btn-delete {
+		--primary: #f44336;
+	}
+	/* List button */
+	
+	&.btn-save {
+		--primary: #388e3c;
+	}
+	&.btn-cancel {
+		--primary: #212121;
+	}
+}
+
+
+/* Table, Grid Define */
+/* Defatul table */
+.d-table {
+	--table-head-bg: #03a9f4; 
+	--table-head-color: rgba(255 255 255 / .87); 
+	--table-row-border-color: var(--theme-divider-color);
+	--table-row-color: rgba(0 0 0 / .7);
+	--table-row-even-bg: hsla(37, 100%, 94%, .12);
+	--table-row-odd-bg: hsla(37, 100%, 94%, .38);
+	display: table;
+	width: 100%;
+	
+	.d-table-row {
+		display: table-row;
+		border-width: 0;
+		
+		&.head  {
+			background-color: var(--table-head-bg);
+			color: var(--table-head-color);
+			font-weight: 500;
+		}
+		
+		&:not(.head) {
+			color: var(--table-row-color);
+			background-color: var(--table-row-even-bg);
+			font-size: .925rem;
+			
+			&:nth-child(odd) {
+				background-color: var(--table-row-odd-bg);
+			}
+		}
+		
+		.d-table-cell {
+			display: table-cell;
+			border-width: 0;
+			padding: .5rem;
+			white-space: nowrap;
+			vertical-align: middle; 
+			
+			&.cell-status {
+				&.active:before {
+					content: '\e86c';
+					font-family: 'Material Symbols Outlined';
+					/* font-variation-settings: 'FILL' 1; */
+					font-size: 1.25rem;
+					color: #4caf50;
+				}
+				&.inactive:before {
+					content: '\e5c9';
+					font-family: 'Material Symbols Outlined';
+					/* font-variation-settings: 'FILL' 1; */
+					font-size: 1.25rem;
+					color: #f44336;
+				}
+			}
+			/* toolbar */
+			&.cell-action {
+				display: flex !important;
+				justify-content: flex-end;
+				
+				.button {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					margin-left: .5rem;
+					
+					i {
+						font-size: 1.25rem;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+

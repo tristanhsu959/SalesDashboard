@@ -1,0 +1,73 @@
+/* User Profile */
+
+#profile {
+	.dialog-body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0 0 1rem;
+		
+		.section {
+			width: 100%;
+			padding: 1rem;
+		}
+		
+		.info-head {
+			position: relative;
+			min-height: 168px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			background-color: #0288d1;
+			border-radius: 0;
+			
+			i.fill {
+				--_size: 4rem;
+				color: var(--primary);
+			}
+			
+			p {
+				margin: 0;
+				color: rgba(255, 255, 255, .6);
+				font-size: 1rem;
+				font-weight: 400;
+				
+				&.name {
+					font-size: 1.2rem;
+					font-weight: 500;
+					color: rgba(255, 255, 255, .87);
+				}
+				&.mail {
+					font-family: 'Roboto';
+					font-size: .875rem;
+					font-weight: 500;
+				}
+			}
+			
+			.btn-chg-password {
+				position: absolute;
+				top: 0;
+				right: 0;
+			}
+		}
+		/* Info list */
+		.info-body {
+			padding-top: 2rem;
+			
+			p {
+				display: flex;
+				justify-content: space-between;
+			}
+		}
+	}
+	
+	a.btn-logout {
+		position: absolute;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background-color: hsl(8, 100%, 56%);
+		color: #fff;
+	}
+}

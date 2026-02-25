@@ -1,0 +1,65 @@
+/* Input Field Style */
+
+
+/* Input field color setting */
+/* Define */ 
+.field-purple {
+	--primary: #7b1fa2;		/* 邊框與 Label 聚焦時的顏色 */
+	--outline: #7b1fa2;		/* 未聚焦時的邊框顏色 */
+	--on-surface: #333333;  /* 文字顏色 */
+	--surface: #f3e5f5;     /* 下拉清單的背景顏色 */
+}
+.field-light-blue {
+	--primary: #03a9f4;
+	--outline: #03a9f4;
+	--on-surface: #333333;  
+	--surface: #e1f5fe;
+}
+.field-dark-blue {
+	--primary: #01579b;
+	--outline: #01579b;
+	--on-surface: #333333;  
+	--surface: #e1f5fe;
+}
+.field-cyan {
+	--primary: #00bcd4;
+	--outline: #00bcd4;
+	--on-surface: #333333;  
+	--surface: #e1f5fe;
+}
+.field-red {
+	--primary: #f44336;
+	--outline: #f44336;
+	--on-surface: #333333;  
+	--surface: #ffebee;
+}
+.field-light-green {
+	--primary: #8bc34a;
+	--outline: #8bc34a;
+	--on-surface: #333333;  
+	--surface: #f1f8e9;
+}
+.field-orange {
+	--primary: #ff9800;
+	--outline: #ff9800;
+	--on-surface: #333333;  
+	--surface: #fff3e0;
+}
+/* Define End */
+
+.field, .switch {
+	i { color: var(--primary); }
+	
+	&:has(input:not(:placeholder-shown)) label,
+	&:has(textarea:not(:placeholder-shown)) label,
+	&:has(select:not(:invalid)) label {
+		color: var(--primary);
+	}
+}
+
+.fieldset {
+	border-color: var(--primary);
+	legend {
+		color: var(--primary);
+	}
+}

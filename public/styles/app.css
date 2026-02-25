@@ -1,0 +1,126 @@
+/* App Common Style */
+/* 不與Login共用 */
+
+body {
+	--scrollbar-width: calc(100vw - 100%);
+	
+	font-family: 'Roboto', 'Orbitron', sans-serif;
+	font-size: 16px;
+	margin: 0;
+	padding: 0;
+	overflow-y: visible !important;
+	overflow-x: hidden;
+	
+	main.app {
+		max-width: 100vw;
+		min-height: 100vh;
+		padding: 0;
+		margin: 0;
+		overflow-y: visible !important;
+		overflow-x: hidden;
+		
+		/* content-wrapper */
+		.content-wrapper {
+			position: relative;
+			width: calc(100vw - var(--scrollbar-width)); /* 避免scrollbar寬度影響 */
+			height: 100vh; 
+			overflow-y: visible !important;
+			overflow-x: hidden;
+			
+			/* Default style */
+			.page-nav {
+				--search-bg: #01579b;
+				position: sticky;
+				top: 0;
+				z-index: 20;
+				width: 100%;
+				height: 64px;
+				padding-left: 1rem;
+				padding-right: 1rem;
+				background-color: var(--search-bg);
+				border-bottom: 1px solid rgba(0 0 0 / .20);
+			}
+		}
+	}
+	
+	main.signin {
+		min-height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-grow: 1;
+		
+		.divider {
+			width: 0;
+			height: 25%;
+			border-left: 1px solid #ddd;
+			margin-left: 2rem;
+			margin-right: 2rem;
+		}
+		
+		/* Logo */
+		.content-left {
+			width: 320px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			
+			img {
+				position: relative;
+				width: 100%;
+				height: auto;
+			}
+			
+			.copyright {
+				font-family: 'Orbitron';
+				font-size: .75rem;
+				font-weight: bold;
+				
+				i {
+					font-family: 'Roboto';
+					font-style: normal;
+					font-size: .875rem;
+					color: #f44336;
+				}
+			}
+		}
+		
+		.content-right {
+			width: 400px;
+			padding: 4rem 2rem;
+			
+			.head {
+				padding: 0;
+				margin-block-end: 1rem;
+				
+				img {
+					width: 32px;
+					height: auto;
+				}
+				.title {
+					font-family: 'Orbitron';
+					font-size: 1.4rem;
+				}
+				h6 {
+					color: var(--on-surface-variant); 
+					font-weight: normal;
+					font-size: .875rem;
+				}
+			}
+			
+			.field .domain {
+				position: absolute;
+				top: 50%;
+				right: .5rem;
+				color: var(--on-surface-variant);
+				opacity: .6;
+				transform: translateY(-50%);
+			}
+			
+			nav.group {
+				margin-block-start: 2rem !important;
+			}
+		}
+	}
+}

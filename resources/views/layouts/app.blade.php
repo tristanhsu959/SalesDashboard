@@ -13,42 +13,35 @@
 		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="{{ asset('styles/master.css') }}" rel="stylesheet" />
-		@sectionMissing('signin')
-		<link href="{{ asset('styles/_app.css') }}" rel="stylesheet" />
-		@endif
-		
+		<link href="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.css" rel="stylesheet">
+		<link href="{{ asset('styles/include.css') }}" rel="stylesheet" />
+		<link href="{{ asset('styles/app.css') }}" rel="stylesheet" />
 		@stack('styles')
 		
 		<!-- Scripts -->
-		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous" defer></script>
-		<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js" integrity="sha256-Fb0zP4jE3JHqu+IBB9YktLcSjI1Zc6J2b6gTjB0LpoM=" crossorigin="anonymous" defer></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous" defer></script>
-		<script src="{{ asset('scripts/master.js') }}" defer></script>
+		<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.js" defer></script>
+		<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js" defer></script>
+		<!--script src="{{ asset('scripts/util.js') }}" defer></script-->
+		<script src="{{ asset('scripts/app.js') }}" defer></script>
 		@stack('scripts')
 	</head>
 
-	<body>
-		<main>
-		@hasSection('signin')
-			<div class='content-wrapper'>
-				@yield('signin')
-			</div>
-		@else
+	<body class="responsive">
+		@if(! Route::is('signin'))
 			<x-menu />
+		@endif
 		
-			<div class='content-wrapper'>
+		<main x-data="{'isLogin':{{Route::is('signin')}}}" :class="isLogin ? 'signin':'app'" class="responsive">
+			@if(! Route::is('signin'))
 				<x-action-bar :isHome="$viewModel->isHome()" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
-				
-				@hasSection('content')
-					@yield('content')
-				@endif
-			</div>
+			@endif
 			
+			@yield('content')
+		</main>
+		
+		@if(! Route::is('signin'))
 			<x-profile />
 		@endif
-		</main>
 		
 		@if(! empty($viewModel->msg()))
 		<div class="toast msg align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
@@ -61,7 +54,7 @@
 		</div>
 		@endif
 		
-		@sectionMissing('signin')
+		@if(! Route::is('signin'))
 			@include('layouts.master_dialog')
 		@endif
 	</body>

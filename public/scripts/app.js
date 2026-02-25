@@ -1,11 +1,11 @@
 /* Common JS */
 
-$(function(){
+/* $(function(){
 	$(document).on('contextmenu', function(e){
 		e.preventDefault();
 	});
 	
-	/* Menu */
+	Menu
 	$('.menu .menu-group').each(function($item, $key){
 		$(this).find('a.list-title').removeClass('active');
 		
@@ -22,7 +22,7 @@ $(function(){
 		$('#loading').addClass('active');
 	});
 	
-	/* Remove invalid style */
+	Remove invalid style
 	$('.form-control').on('keypress', function(event){
 		$(this).removeClass('is-invalid');
 	});
@@ -38,10 +38,10 @@ $(function(){
 	})
 });
 
-/* valid or invalid */
+valid or invalid
 function validateForm(fields, invalidStyle)
 {
-	//el: id/class/ or ....
+	el: id/class/ or ....
 	if ($.isArray(fields))
 	{
 		let result = true;
@@ -73,7 +73,7 @@ function validateInput(el, invalidStyle)
 		return true;
 }
 
-/* Dialog */
+Dialog
 function showAlertDialog(desc)
 {
 	$('#alert_modal .description').text(desc);
@@ -83,7 +83,7 @@ function showAlertDialog(desc)
 function showConfirmDialog(desc, callback)
 {
 	$('#confirm_modal .description').text(desc);
-	/* 須用on event模式 */
+	須用on event模式
 	$('#confirm_modal .btn-major').on('click', callback);
 	$('#confirm_modal').modal('show');
-}
+} */
