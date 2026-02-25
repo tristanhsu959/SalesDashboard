@@ -44,7 +44,7 @@
 		</main>
 		
 		@if(AppManager::hasAuth())
-			<x-profile />
+		{{--<x-profile />--}}
 		@endif
 		
 		@include('layouts._dialog')

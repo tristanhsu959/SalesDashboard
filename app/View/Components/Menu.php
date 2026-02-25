@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Traits\AuthTrait;
+use App\Facades\AppManager;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -12,8 +12,6 @@ use Illuminate\Support\Str;
 
 class Menu extends Component
 {
-	use AuthTrait;
-	
 	/**
      * Create a new component instance.
      */
@@ -26,7 +24,7 @@ class Menu extends Component
      */
     public function render()
     {
-        return view('components.menu')->with('menu', $this->getAuthMenu());
+		return view('components.menu')->with('menu', AppManager::getAuthMenu());
     }
 	
 	public function isActive(string $url): string

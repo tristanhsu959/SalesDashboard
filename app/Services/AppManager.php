@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\CurrentUser;
+use App\Enums\Brand;
+use Illuminate\Support\Str;
 
 class AppManager
 {
@@ -79,13 +81,14 @@ class AppManager
 			return $authMenu;
 		
 		#3.取功能選單設定檔
-		$menuConfig = config('web.menu.groups');
+		$menuConfig = config('web.menu');
 		
 		#4.驗證使用者有權限的選單, 只要驗證到功能即可
-		foreach($menuConfig as $group)
+		foreach($menuConfig as $brand => $groups)
 		{
 			$items 	= [];
 			
+			dd($this->_getMenuGroup($currentUser, $brand, $groups));
 			foreach($group['items'] as $functionKey)
 			{
 				if ($currentUser->hasFunctionPermission($functionKey))
@@ -102,5 +105,35 @@ class AppManager
 		session()->put(self::SESS_AUTH_MENU, $authMenu);
 		
 		return $authMenu;
+	}
+	
+	/* 取已授權的Menu (登入驗後)
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getMenuGroup($currentUser, $brand, $groups)
+	{
+		$authGroups = [];
+		
+		foreach($groups as $group)
+		{
+			$items 	= [];
+			
+			foreach($group['items'] as $functionKey)
+			{
+				$authKey = Str::contains($brand, [Brand::BAFANG->value, Brand::BUYGOOD->value]) ? "{$brand}-{$functionKey}" : $functionKey;
+				
+				if ($currentUser->hasFunctionPermission($authKey))
+					$items[] = config("web.menu.item.{$functionKey}");
+			}
+			
+			if (! empty($items))
+			{
+				$group['items'] = $items;
+				$authGroups[] = $group;
+			}
+		}
+		
+		return $authGroups;
 	}
 }

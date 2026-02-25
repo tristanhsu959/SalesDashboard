@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum Brand : string
 {
-	case BAFANG		= 'BF';
-	case BUYGOOD 	= 'BG';
+	case BAFANG		= 'bafang';
+	case BUYGOOD 	= 'buygood';
     
 	public function label() : string
     {
