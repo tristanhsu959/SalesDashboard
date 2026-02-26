@@ -44,7 +44,7 @@
 		</main>
 		
 		@if(AppManager::hasAuth())
-		{{--<x-profile />--}}
+			<x-profile :profile="AppManager::getCurrentUser()" :signoutRoute="route('signout')"/>
 		@endif
 		
 		@include('layouts._dialog')

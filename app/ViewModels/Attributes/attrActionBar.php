@@ -7,7 +7,7 @@ use App\Enums\FormAction;
 #Breadcrumb | backurl
 trait attrActionBar
 {
-	public function isHome()
+	/* public function isHome()
 	{
 		$action = data_get($this->_data, 'action', NULL);
 		
@@ -15,7 +15,7 @@ trait attrActionBar
 			return FALSE;
 		else
 			return ($action == FormAction::HOME);
-	}
+	} */
 	
 	/* Get breadcrumb use default logic
 	 * @params: 

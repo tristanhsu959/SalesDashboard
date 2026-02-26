@@ -8,8 +8,8 @@
 		<a href="{{ route('home') }}" x-show="!isHome" class="button circle transparent">
 			<i>home</i>
 		</a>
-		<a href="{{ route('home') }}" class="button circle transparent">
+		<button class="circle transparent" data-ui="#profile">
 			<i>person</i>
-		</a>
+		</button>
 	</nav>
 </header>

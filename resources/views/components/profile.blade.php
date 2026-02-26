@@ -1,38 +1,39 @@
 @use(App\Enums\Area)
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="popup-profile" aria-labelledby="popup-profile">
-	<div class="offcanvas-header">
-		<h5 class="offcanvas-title">Profile</h5>
-		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-	</div>
-	<div class="offcanvas-body">
+<dialog x-data='{profile:@json($profile), signoutRoute:@json($signoutRoute)}' class="left" id="profile">
+	<header>
+		<nav>
+			<h6 class="max">Profile</h6>
+			<button class="transparent circle large" data-ui="#profile"><i>close</i></button>
+		</nav>
+	</header>
+	<div class="space"></div>
+	<div class="dialog-body">
 		<div class="section info-head">
-			<span class="material-symbols-outlined filled-icon">assignment_ind</span>
-			<p>{{ $currentUser->employeeId }}</p>
-			<p class="name">{{ $currentUser->displayName }}</p>
-			<p class="mail">{{ $currentUser->mail }}</p>
+			<i class="fill">person_pin</i>
+			<p x-text="employeeId"></p>
+			<p class="name" x-text="displayName"></p>
+			<p class="mail" x-text="mail"></p>
 		</div>
 		<div class="section info-body">
 			<p>
-				<span>{{ $currentUser->department }}</span>
-				<span>{{ $currentUser->title }}</span>
+				<span x-text="department"></span>
+				<span x-text="title"></span>
 			</p>
 			<p>
 				<span>管理區域</span>
-				@if(empty($currentUser->roleArea))
-					<span class="text-danger">未設定</span>
-				@else
-					<div class="user-area">
-					@foreach($currentUser->roleArea as $area)
-						<span class="badge">{{ Area::getLabelByValue($area) }}</span>
-					@endforeach
-					</div>
-				@endif
+				<span x-show="!roleArea" class="text-danger">未設定</span>
+				<div class="user-area">
+					<template x-for="area in roleArea">
+						<span class="badge" x-text="Area::getLabelByValue(area)"></span>
+					</template>
+				</div>
 			</p>
-			<p>{{ $currentUser->company }}</p>
+			<p x-text="company"></p>
 		</div>
-		<a href="{{ route('signout') }}" class="btn btn-signout" type="button">
-			<span class="material-symbols-outlined filled-icon">logout</span>
-		</a>
 	</div>
-</div>
+	<a :href="signoutRoute" class="btn-logout button extend circle">
+		<i>logout</i>
+		<span>登出</span>
+	</a>
+</dialog>
