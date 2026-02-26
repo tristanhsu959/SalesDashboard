@@ -32,12 +32,12 @@
 
 	<body class="responsive">
 		@if(AppManager::hasAuth())
-			<x-menu />
+			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->path()"/>
 		@endif
 		
 		<main x-data="{'hasAuth': {{ AppManager::hasAuth() ? 'true' : 'false' }}}" :class="hasAuth ? 'app':'signin'" class="responsive">
 			@if(AppManager::hasAuth())
-				<x-action-bar :isHome="$viewModel->isHome()" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
+				<x-action-bar :isHome="1" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
 			@endif
 			
 			@yield('content')

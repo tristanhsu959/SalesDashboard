@@ -1,23 +1,23 @@
 <!-- Menu component -->
 
-<div class="aside menu dp-8">
+<nav x-data='{menus:@json($menus), currentPath:@json($currentPath)}' class="menu drawer left active">
 	<div class="logo">
 		<div class="logo-wrapper">
 			<img src="{{ asset('images/logo.png') }}" />
 		</div>
 	</div>
-	<div class="container-fluid">
-		@foreach($menu as $key => $group) 
-		<div class="menu-group">
-			<a href="#collapse-{{ $key }}" class="list-title {{ $group['style']['color'] }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-{{ $key }}">
-				<span class="material-symbols-outlined {{ $group['style']['color'] }}">{{ $group['style']['icon'] }}</span>{{ $group['name'] }}
-			</a>
-			<ul id="collapse-{{ $key }}" class="list-group collapse">
-				@foreach($group['items'] as $item) 
-				<li class="list-group-item"><a href="{{ url($item['url']) }}" class="{{ $isActive($item['url']) }}">{{ $item['name'] }}</a></li>
-				@endforeach
-			</ul>
-		</div>
-		@endforeach
-	</div>
-</div>
+	
+	<template x-for="(groups, key) in menus">
+		<details :open="groups.some(item => currentPath.startsWith(item.url))">
+			<summary>
+				<i>folder</i>
+				<span x-text="key"></span>
+				<i class="none">arrow_drop_down</i>
+			</summary>
+			
+			<template x-for="item in groups">
+				<a :href="item.url" x-text="item.name" :class="currentPath.includes(item.url) ? 'active' : '' " class="responsive"></a>
+			</template>
+		</details>
+	</template>
+</nav>

@@ -164,7 +164,11 @@ class AuthService
 	 */
 	public function signout()
 	{
-		$currentUser = AppManager::getCurrentUser(); 
+		$currentUser = AppManager::getCurrentUser();
+		
+		if (empty($currentUser)) #已登出
+			return TRUE;
+			
 		$user = $currentUser->userAd;
 		AppManager::removeCurrentUser();
 		

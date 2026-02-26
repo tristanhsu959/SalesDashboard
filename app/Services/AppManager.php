@@ -84,21 +84,15 @@ class AppManager
 		$menuConfig = config('web.menu');
 		
 		#4.驗證使用者有權限的選單, 只要驗證到功能即可
-		foreach($menuConfig as $brand => $groups)
+		foreach($menuConfig as $key => $groups)
 		{
-			$items 	= [];
+			$keyName = $this->_getGroupName($key);
+			$authMenu[$keyName] = [];
 			
-			dd($this->_getMenuGroup($currentUser, $brand, $groups));
-			foreach($group['items'] as $functionKey)
+			foreach($groups as $item)
 			{
-				if ($currentUser->hasFunctionPermission($functionKey))
-					$items[] = config("web.menu.functions.{$functionKey}");
-			}
-			
-			if (! empty($items))
-			{
-				$group['items'] = $items;
-				$authMenu[] = $group;
+				if ($currentUser->hasFunctionPermission($item['code']))
+					$authMenu[$keyName][] = $item;
 			}
 		}
 		
@@ -107,33 +101,16 @@ class AppManager
 		return $authMenu;
 	}
 	
-	/* 取已授權的Menu (登入驗後)
+	/* 取Group name
 	 * @params: 
 	 * @return: array
 	 */
-	private function _getMenuGroup($currentUser, $brand, $groups)
+	private function _getGroupName($key)
 	{
-		$authGroups = [];
+		if ($key == 'manage')
+			return '權限管理';
 		
-		foreach($groups as $group)
-		{
-			$items 	= [];
-			
-			foreach($group['items'] as $functionKey)
-			{
-				$authKey = Str::contains($brand, [Brand::BAFANG->value, Brand::BUYGOOD->value]) ? "{$brand}-{$functionKey}" : $functionKey;
-				
-				if ($currentUser->hasFunctionPermission($authKey))
-					$items[] = config("web.menu.item.{$functionKey}");
-			}
-			
-			if (! empty($items))
-			{
-				$group['items'] = $items;
-				$authGroups[] = $group;
-			}
-		}
-		
-		return $authGroups;
+		$brade = Brand::getByValue($key);
+		return $brade->label();
 	}
 }

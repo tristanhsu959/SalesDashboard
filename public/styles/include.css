@@ -5,5 +5,5 @@
 @import "common/_input.css";
 @import "common/_component.css"; 
 /* @import "common/_actionbar.css"; */
-/* @import "common/_menu.css"; */
+@import "common/_menu.css";
 /* @import "common/_profile.css"; */

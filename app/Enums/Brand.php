@@ -12,7 +12,16 @@ enum Brand : string
         return match ($this) 
 		{
 			self::BAFANG	=> '八方',
-			self::BUYGOOD	=> '梁社漢',
+			self::BUYGOOD	=> '御廚',
 		};
     }
+	
+	public static function getByValue($value)
+	{
+		return match ($value) 
+		{
+			self::BAFANG->value		=> self::BAFANG,
+			self::BUYGOOD->value	=> self::BUYGOOD,
+        };
+	}
 }

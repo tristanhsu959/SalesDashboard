@@ -2,6 +2,12 @@
 
 document.addEventListener('alpine:init', () => {
 	
+	Alpine.store('menu', {
+		menus: [],
+		currentPath: '',
+		
+	});
+	
 	Alpine.store('toast', {
 		initialize(msg = '') {
             if (msg != '') {

@@ -22,7 +22,10 @@ class AuthController extends Controller
 	 */
 	public function showSignin()
 	{
+		#自動登出,避免view載入錯誤
+		$this->_service->signout();
 		$this->_viewModel->action = FormAction::SIGNIN;
+		
 		return view('signin')->with('viewModel', $this->_viewModel);
 	}
 	
