@@ -24,14 +24,20 @@ trait attrActionBar
 	public function breadcrumb()
 	{
 		$except = [FormAction::SIGNIN->value];
-		
 		$breadcrumb 	= [];
+		
+		$brand 			= data_get($this->_data, 'brand', NULL);
 		$function		= $this->_function;
-		$action 		= data_get($this->_data, 'action', '');
+		$action 		= data_get($this->_data, 'action', NULL);
+		
+		if ($brand)
+			$breadcrumb[] = $brand->label();
 		
 		$breadcrumb[] 	= $function->label();
-		$breadcrumb[] 	= $action->label();
 		
+		if ($brand)
+			$breadcrumb[] = $action->label();
+				
 		return $breadcrumb;
 	}
 	

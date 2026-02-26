@@ -18,7 +18,7 @@ class HomeViewModel
 	public function __construct()
 	{
 		#Base data
-		$this->_data['action'] = FormAction::HOME; #enum form action
+		$this->_data['action'] = NULL; #enum form action
 		$this->success();	#default
 	}
 	
