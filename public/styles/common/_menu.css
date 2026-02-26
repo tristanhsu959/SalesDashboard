@@ -1,5 +1,8 @@
 /* Aside Menu */
 nav.menu {
+	--menu-width: 304px;
+	--menu-bg: var(--inverse-surface);
+	
 	position: sticky;
 	top: 0;
 	bottom: 0;
@@ -10,71 +13,48 @@ nav.menu {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+	color: #fafafa;
 	
-	.header {
+	header {
+		position: relative;
 		width: 100%;
+		height: 64px;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 64px;
 		font-family: 'Audiowide';
-		color: #fafafa;
-		font-size: 1.8rem;
-		font-weight: bold;
 		border-bottom: 1px solid rgba(0 0 0 / .20);
 		margin: 0;
+		background-color: hsl(8, 100%, 56%) !important;
+		
+		img {
+			height: 80%;
+		}
 	}
 	
-	.responsive {
-		/*#00bcd4*/
-		--menu-color: rgba(0, 188, 212, .87); 
-		--menu-group-color: rgba(0, 188, 212, 1);  
-		--menu-hover-color: #80deea; /*200*/
-		
+	details {
 		width: 100%;
-		padding: 0;
-		margin: 0;
+		padding: 0 1rem;
 		
-		ul {
-			--gap: calc( (var(--menu-width) - (64px * 4) - 2rem) / 3 );
-			
+		summary {
 			display: flex;
-			flex-wrap: wrap;
-			justify-content: flex-start;
-			gap: calc(var(--gap) * 2) var(--gap);
-			padding: 0 1rem;
+			justify-content: space-between;
+		}
+		
+		.item {
+			margin-block-start: .5rem;
 			
-			li {
-				width: 64px;
-				height: 64px;
-				list-style-type: none;
+			a {
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				gap: .5rem;
+				padding: .5rem 1rem;
+				border-radius: 2rem;
+				transition: background-color 0.2s;
 				
-				&.w2 {
-					width: calc(64px * 2 + var(--gap));
-					height: 64px;;
-				}
-				
-				a {
-					display: flex;
-					flex-direction: column;
-					justify-content: center;
-					align-items: center;
-					width: 100%;
-					height: 100%;
-					background-color: hsla(206, 99%, 21%, .85);
-					text-decoration: none;
-					color: #01579b;
-					font-size: .75rem;
-					
-					&:hover {
-						background-color: hsl(206, 99%, 41%);
-						color: #fafafa;
-					}
-					&.active {
-						background-color: #ff3b1e;
-						color: #fafafa;
-						
-					}
+				&:hover {
+					background-color: #455a64;
 				}
 			}
 		}

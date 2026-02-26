@@ -39,12 +39,13 @@
 	--surface-container-highest:#e6e1e6;
 	
 	/* My defined */
-	--menu-width: 304px;
-	--menu-bg: #01579b;
+	
 	/* 官網主色紅 */
 	/* --brand-red-bg: #ff3b1e;
 	--brand-secondary-red-bg: #cb1a19;
-	--brand-orange-bg: #f5ac2d;  */
+	--brand-orange-bg: #f5ac2d;  
+	 hsl(8, 100%, 56%);
+	*/
 	
 	
 	/* Theme Color Define */
