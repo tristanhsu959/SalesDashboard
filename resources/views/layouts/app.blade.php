@@ -35,9 +35,9 @@
 			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->path()"/>
 		@endif
 		
-		<main x-data="{'hasAuth': {{ AppManager::hasAuth() ? 'true' : 'false' }}}" :class="hasAuth ? 'app':'signin'" class="responsive">
+		<main x-data="{'hasAuth': @json(AppManager::hasAuth())}" :class="hasAuth ? 'app':'signin'" class="responsive">
 			@if(AppManager::hasAuth())
-				<x-action-bar :isHome="1" :breadcrumb="$viewModel->breadcrumb()" :routeName="$viewModel->backRoute()"/>
+				<x-action-bar :isHome="Route::Is('home')" :breadcrumb="$viewModel->breadcrumb()" :backRoute="$viewModel->backRoute()"/>
 			@endif
 			
 			@yield('content')
@@ -48,6 +48,6 @@
 		@endif
 		
 		@include('layouts._dialog')
-		@include('layouts._toast')
+		<x-toast :msg="$viewModel->msg()"/>
 	</body>
 </html>

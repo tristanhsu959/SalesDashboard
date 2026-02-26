@@ -1,34 +1,15 @@
 
-<nav class="page navbar">
-	@if($isHome())
-	<div class="navbar-home">
-		<span class="sales">sales</span><span class="dashboard">Dashboard</span>
-	</div>
-	@else
-	<span class="navbar-head">
-		@if(! empty($getRoute()))
-		<a href="{{ $getRoute() }}" class="btn btn-return {{ $active() }}">
-			<span class="material-symbols-outlined filled-icon">arrow_back</span>
-			<span class="title">回列表</span>
+<header x-data='{breadcrumb:@json($breadcrumb), backRoute:@json($backRoute), isHome:@json($isHome)}' class="tertiary-container">
+	<nav>
+		<a :href="backRoute" x-show="backRoute ? true : false" class="button circle transparent">
+			<i>arrow_back</i>
 		</a>
-		@endif
-		
-		{!! $renderBreadcrumb !!}
-	</span>
-	@endif
-	
-	<span class="navbar-action">
-		@if(! $isHome())
-		<a class="btn btn-home" href="{{ route('home') }}" role="button">
-			<span class="material-symbols-outlined">home</span>
+		<h6 class="max">Headline</h6>
+		<a href="{{ route('home') }}" x-show="!isHome" class="button circle transparent">
+			<i>home</i>
 		</a>
-		@endif
-		
-		<a class="btn btn-profile" data-bs-toggle="offcanvas" href="#popup-profile" role="button" aria-controls="popup-profile">
-			<span class="material-symbols-outlined">person</span>
+		<a :href="{{ route('home') }}" class="button circle transparent">
+			<i>person</i>
 		</a>
-	</span>
-</nav>
-<div id="loading" class="loading-wrapper">
-	<div class="loading-bar"></div>
-</div>
+	</nav>
+</header>

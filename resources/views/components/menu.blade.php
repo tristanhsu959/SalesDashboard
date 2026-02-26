@@ -1,30 +1,7 @@
 <!-- Menu component -->
-{{--
-<nav x-data='{menus:@json($menus), currentPath:@json($currentPath)}' class="m l max left menu">
-	<header>
-		<img src="{{ asset('images/logo.png') }}" />
-	</header>
-	
-	<template x-for="(groups, key) in menus" :key="key">
-	<div class="responsive">
-		<span x-text="key"></span>
-		<ul class="list">
-			<template x-for="(item, index) in groups" :key="index">
-			<li>
-				<a :href="item.url" :class="currentPath.includes(item.url) ? 'active' : '' " class="responsive round">
-					<i x-text="item.style.icon"></i>
-					<span x-text="item.name"></span>
-				</a>
-			</li>
-			</template>
-		</ul>
-	</div>
-  	</template>
-</nav>
---}}
 
-<nav x-data='{menus:@json($menus), currentPath:@json($currentPath)}'  class="menu drawer1 left active">
-	<header>
+<nav x-data='{menus:@json($menus), currentPath:@json($currentPath)}'  class="menu drawer1 left active blue-grey10">
+	<header class="red">
 		<img src="{{ asset('images/logo.png') }}" />
 	</header>
 	
