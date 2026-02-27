@@ -1,4 +1,5 @@
 @use('App\Facades\AppManager')
+@use('App\Enums\Area')
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,14 +38,14 @@
 		
 		<main x-data="{'hasAuth': @json(AppManager::hasAuth())}" :class="hasAuth ? 'app':'signin'" class="responsive">
 			@if(AppManager::hasAuth())
-				<x-action-bar :isHome="Route::Is('home')" :breadcrumb="$viewModel->breadcrumb()" :backRoute="$viewModel->backRoute()"/>
+				<x-action-bar :initData="$viewModel->actionBarData()" />
 			@endif
 			
 			@yield('content')
 		</main>
 		
 		@if(AppManager::hasAuth())
-			<x-profile :profile="AppManager::getCurrentUser()" :signoutRoute="route('signout')"/>
+			<x-profile :profile="AppManager::getCurrentUser()->toArray()" :areaOptions="Area::options()" :signoutRoute="route('signout')"/>
 		@endif
 		
 		@include('layouts._dialog')

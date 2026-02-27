@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use App\Enums\RoleGroup;
+use Illuminate\Support\Fluent;
 
-class CurrentUser
+class CurrentUser extends Fluent
 {
-	private $_data = [];
-	
 	/*
 	[
 		"company" => "八方雲集國際股份有限公司"
@@ -29,23 +28,7 @@ class CurrentUser
 	public function __construct($adInfo, $userInfo)
 	{
 		$info = array_merge($adInfo, $userInfo);
-		$this->_data = $info;
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
+		$this->fill($info);
 	}
 	
 	/* 內建Supervisor (RoleGroup)
@@ -54,7 +37,7 @@ class CurrentUser
 	 */
 	public function isSupervisor()
 	{
-		$roleGroup = data_get($this->_data, 'roleGroup', 0);
+		$roleGroup = $this->get('roleGroup', 0);
 		
 		return ($roleGroup == RoleGroup::SUPERVISOR->value);
 	}
@@ -68,12 +51,13 @@ class CurrentUser
 		if ($this->isSupervisor())
 			return TRUE;
 		
-		$permissions	= data_get($this->_data, 'rolePermission', []);
+		$permissions	= $this->get('rolePermission', []);
 		$allowFunctions	= array_keys($permissions); #Key same as code
 		
 		return in_array($functionKey, $allowFunctions);
 	}
 	
+	#新版會廢除,權限只控一層
 	/* Auth permission of CRUD by current user
 	 * @params: string
 	 * @params: string
@@ -84,7 +68,7 @@ class CurrentUser
 		if ($this->isSupervisor())
 			return TRUE;
 		
-		$permissions	= data_get($this->_data, 'rolePermission', []);
+		$permissions	= $this->get('rolePermission', []);
 		$allowActions	= data_get($permissions, $functionKey, []); #array
 		
 		return in_array($actionKey, $allowActions);

@@ -1,7 +1,7 @@
 <!-- Menu component -->
 
 <nav x-data='{menus:@json($menus), currentPath:@json($currentPath)}'  class="menu drawer1 left active blue-grey10">
-	<header class="red">
+	<header class="orange">
 		<img src="{{ asset('images/logo.png') }}" />
 	</header>
 	

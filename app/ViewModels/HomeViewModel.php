@@ -6,35 +6,17 @@ use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
+use Illuminate\Support\Fluent;
 
-class HomeViewModel
+class HomeViewModel extends Fluent
 {
 	use attrStatus, attrActionBar;
 	
-	private $_function 	= Functions::HOME;
-	private $_backRoute	= 'home'; #set by route name
-	private $_data 		= [];
-	
 	public function __construct()
 	{
-		#Base data
-		$this->_data['action'] = NULL; #enum form action
+		$this->function = Functions::HOME;
+		$this->action	= NULL; #enum form action
+		$this->backRoute= FALSE;
 		$this->success();	#default
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
 	}
 }

@@ -4,36 +4,18 @@ namespace App\ViewModels;
 
 use App\Enums\FormAction;
 use App\ViewModels\Attributes\attrStatus;
+use Illuminate\Support\Fluent;
 
-class AuthViewModel
+class AuthViewModel extends Fluent
 {
 	use attrStatus;
-	
-	private $_formData = [];
-	private $_data = [];
 	
 	public function __construct()
 	{
 		#Default data
-		$this->_data['action'] 	= FormAction::SIGNIN;
+		$this->action 	= FormAction::SIGNIN;
 		$this->keepFormData();
 		$this->success();	
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
 	}
 	
 	/* Keep signin form data : account only, 以防會使用到
@@ -42,7 +24,7 @@ class AuthViewModel
 	 */
 	public function keepFormData($account = '', $password = '')
     {
-		data_set($this->_data, 'formData.account', $account);
-		data_set($this->_data, 'formData.password', $password);
+		$this->set('formData.account', $account);
+		$this->set('formData.password', $password);
 	}
 }

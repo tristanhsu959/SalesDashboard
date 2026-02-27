@@ -7,57 +7,50 @@
 		align-items: center;
 		padding: 0 0 1rem;
 		
-		.section {
-			width: 100%;
-			padding: 1rem;
-		}
-		
 		.info-head {
-			position: relative;
+			width: 100%;
 			min-height: 168px;
+			position: relative;
 			display: flex;
 			flex-direction: column;
-			justify-content: center;
+			justify-content: flex-start;
 			align-items: center;
 			background-color: #0288d1;
 			border-radius: 0;
+			padding: 1rem;
 			
 			i.fill {
 				--_size: 4rem;
-				color: var(--primary);
+				color: hsl(8, 100%, 56%);
 			}
 			
 			p {
 				margin: 0;
-				color: rgba(255, 255, 255, .6);
-				font-size: 1rem;
-				font-weight: 400;
+				font-size: .875rem;
+				color: #f3e5f5;
 				
 				&.name {
 					font-size: 1.2rem;
-					font-weight: 500;
-					color: rgba(255, 255, 255, .87);
+					color: #fff;
 				}
-				&.mail {
-					font-family: 'Roboto';
-					font-size: .875rem;
-					font-weight: 500;
-				}
-			}
-			
-			.btn-chg-password {
-				position: absolute;
-				top: 0;
-				right: 0;
 			}
 		}
 		/* Info list */
 		.info-body {
+			width: 100%;
 			padding-top: 2rem;
 			
 			p {
 				display: flex;
 				justify-content: space-between;
+			}
+			
+			.auth-area {
+				.chip {
+					min-width: 80px;
+					border-radius: 1rem;
+					background-color: #e1bee7;
+				}
 			}
 		}
 	}

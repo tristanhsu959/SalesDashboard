@@ -54,4 +54,11 @@ enum Area : int
 		
 		return $list;
 	}
+	
+	public static function options(): array
+	{
+		return collect(self::cases())->mapWithKeys(function ($case) {
+			return [$case->value => $case->label()];
+		})->toArray();
+	}
 }
