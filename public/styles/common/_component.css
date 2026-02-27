@@ -42,6 +42,7 @@ button, a {
 
 
 /* Table, Grid Define */
+
 /* Defatul table */
 .d-table {
 	--table-head-bg: #03a9f4; 
@@ -79,6 +80,7 @@ button, a {
 			padding: .5rem;
 			white-space: nowrap;
 			vertical-align: middle; 
+			border-radius: 0;
 			
 			&.cell-status {
 				&.active:before {

@@ -13,47 +13,60 @@
 @section('content')
 <!-- Content -->
 @if($viewModel->status() === TRUE && $viewModel->hasPermission())
+
 	<header class="page-nav">
 		<nav>
 			<a href="{{ route('role.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
 	</header>
 	
-	<form action="" method="post" id="roleForm" class="no-margin">
+	<form action="" method="post" x-ref="roleListForm">
 		@csrf
-		<section class="role-list">
+		<div class="role-list">
 			@if(empty(($viewModel->list)))
-			<div class="alert alert-danger" role="alert">
-				查無符合資料
-			</div>
+			<article class="error-container border">
+				<div class="row">
+					<i>info</i><div class="max">查無符合資料</div>
+				</div>
+			</article>
 			@else
-			<div class="d-table">
-				<div class="d-table-row head">
-					<div class="d-table-cell">#</div>
-					<div class="d-table-cell">身份</div>
-					<div class="d-table-cell">權限群組</div>
-					<div class="d-table-cell">更新時間</div>
-					<div class="d-table-cell cell-action">操作</div>
-				</div>
+			<table class="stripes border" x-data="roleList">
+				<thead>
+					<tr>
+						<th class="min">#</th>
+						<th>身份</th>
+						<th>權限群組</th>
+						<th>管理區域</th>
+						<th>更新時間</th>
+						<th class="right-align">操作</th>
+					</tr>
+				</thead>
+				<tbody>
 				@foreach($viewModel->list as $idx => $role)
-				<div class="d-table-row list">
-					<div class="d-table-cell">{{ $idx + 1 }}</div>
-					<div class="d-table-cell">{{ $role['roleName'] }}</div>
-					<div class="d-table-cell">{{ RoleGroup::getLabelByValue($role['roleGroup']) }}</div>
-					<div class="d-table-cell">{{ $role['updateAt'] }}</div>
-					<div class="d-table-cell cell-action">
-						<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canEditThisRole($role['roleGroup']))>
-							<i>edit</i>
-						</a>
-						<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisRole($role['roleGroup']))>
-							<i>delete</i>
-						</a>
-					</div>
-				</div>
+					<tr>
+						<td>{{ $idx + 1 }}</td>
+						<td>{{ $role['roleName'] }}</td>
+						<td>{{ RoleGroup::getLabelByValue($role['roleGroup']) }}</td>
+						<td>
+							@foreach($role['roleArea'] as $area)
+							<div class="chip round primary-container">{{ Area::getLabelByValue($area) }}</div>
+							@endforeach
+						</td>
+						<td>{{ $role['updateAt'] }}</td>
+						<td class="right-align">
+							<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canUpdateThisRole($role['roleGroup']))>
+								<i class="small">edit</i>
+							</a>
+							<a @click.prevent="confirmDelete($el.href)" href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisRole($role['roleGroup']))>
+								<i class="small">delete</i>
+							</a>
+						</td>
+					</tr>
 				@endforeach
-			</div>
+				</tbody>
+			</table>
 			@endif
-		</section>
+		</div>
 	</form>
 @endif
 

@@ -1,10 +1,7 @@
 /* Role list */
 
-body {
-	--theme-surface-bg : var(--theme-surface-l1);
-}
 
-.role-list.section-wrapper {
+.role-list {
 	position: relative;
 	padding: 1rem;
 	/* margin-left: 1rem;
