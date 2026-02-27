@@ -86,7 +86,7 @@ class AppManager
 		#4.驗證使用者有權限的選單, 只要驗證到功能即可
 		foreach($menuConfig as $key => $groups)
 		{
-			$keyName = $this->_getGroupName($key);
+			$keyName = $this->getMenuGroupName($key);
 			$authMenu[$keyName] = [];
 			
 			foreach($groups as $item)
@@ -105,7 +105,7 @@ class AppManager
 	 * @params: 
 	 * @return: array
 	 */
-	private function _getGroupName($key)
+	public function getMenuGroupName($key)
 	{
 		if ($key == 'manage')
 			return '權限管理';

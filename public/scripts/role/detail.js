@@ -1,6 +1,35 @@
 /* Role Create JS */
 
-$(function(){
+document.addEventListener('alpine:init', () => {
+    Alpine.data('roleForm', (formData) => ({
+		formData: formData,
+		errors: new Set(),
+		
+        validate() {
+			this.errors.clear();
+			
+			if (Helper.isEmpty(this.formData.name))
+				this.errors.add('name');
+			
+			if (this.errors.size == 0)
+			{
+				this.$dispatch('show-loading');
+				this.$el.submit();
+			}
+			else
+				return false;
+		},
+		
+		reset() {
+			this.formData.name = '';
+			this.formData.permission = [];
+			this.formData.area = [];
+			this.errors.clear();
+		}
+    }));
+});
+
+/* $(function(){
 	$('.btn-reset').click(function(){
 		$('#roleForm')[0].reset();
 	});
@@ -51,4 +80,4 @@ function submitForm()
 	}
 	else
 		showAlertDialog('身份及權限群組為必填');
-}
+} */

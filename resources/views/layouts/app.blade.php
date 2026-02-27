@@ -32,11 +32,13 @@
 	</head>
 
 	<body class="responsive">
+		<progress class="light-blue-text" x-data="{ show: false }" x-show="show" x-cloak @showLoading.window="show = true"></progress>
+		
 		@if(AppManager::hasAuth())
-			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->path()"/>
+			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->url()"/>
 		@endif
 		
-		<main x-data="{'hasAuth': @json(AppManager::hasAuth())}" :class="hasAuth ? 'app':'signin'" class="responsive">
+		<main x-data="{hasAuth: @json(AppManager::hasAuth()), isTop: true}" :class="hasAuth ? 'app':'signin'" class="responsive" @scroll.capture.window="isTop = $event.target.scrollTop <= 10">
 			@if(AppManager::hasAuth())
 				<x-action-bar :initData="$viewModel->actionBarData()" />
 			@endif

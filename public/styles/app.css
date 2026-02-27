@@ -11,12 +11,19 @@ body {
 	overflow-y: hidden !important;
 	overflow-x: hidden;
 	
+	progress {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 999;
+	}
+	
 	main.app {
 		max-width: 100vw;
-		max-height: 100vh;
+		height: 100vh;
 		padding: 0;
 		margin: 0;
-		overflow-y: visible !important;
+		overflow-y: auto !important;
 		overflow-x: hidden;
 		
 		/* Default style */
@@ -31,6 +38,8 @@ body {
 				padding-right: 1rem;
 				background-color: var(--search-bg);
 				border-bottom: 1px solid rgba(0 0 0 / .20);
+				transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+				box-shadow 0.4s ease;
 			}
 			
 		/* content-wrapper */

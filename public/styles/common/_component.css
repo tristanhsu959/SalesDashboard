@@ -28,7 +28,7 @@ button, a {
 	/* List button */
 	
 	&.btn-save {
-		--primary: #388e3c;
+		--primary: #00c853;
 	}
 	&.btn-cancel {
 		--primary: #212121;
@@ -42,7 +42,13 @@ button, a {
 
 
 /* Table, Grid Define */
-
+table {
+	tbody {
+		tr td.action {
+			width: 100px;
+		}
+	}
+}
 /* Defatul table */
 .d-table {
 	--table-head-bg: #03a9f4; 

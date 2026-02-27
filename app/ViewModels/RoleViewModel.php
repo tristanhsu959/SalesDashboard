@@ -2,10 +2,10 @@
 
 namespace App\ViewModels;
 
-use App\Libraries\MenuLib;
+use App\Facades\AppManager;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
-use App\Enums\Operation;
+#use App\Enums\Operation;
 use App\Enums\Area;
 use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
@@ -45,9 +45,8 @@ class RoleViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->_data['option']['roleGroupList'] = RoleGroup::getEnabledList();
-		$this->_data['option']['functionList']	= MenuLib::all();
-		$this->_data['option']['areaList'] 		= Area::cases(); #enum
+		$this->set('options.functions', config('web.menu'));
+		$this->set('options.areas', Area::cases()); 
 	}
 	
 	/* Form submit action for edit
@@ -71,43 +70,13 @@ class RoleViewModel extends Fluent
 	 * @params: array
 	 * @return: void
 	 */
-	public function keepFormData($roldId = 0, $name = '', $group = 0, $permission = [], $area = [])
+	public function keepFormData($roleId = 0, $name = '', $permission = [], $area = [], $group = RoleGroup::USER->value)
     {
-		#todo area
-		data_set($this->_data, 'id', $roldId);
-		data_set($this->_data, 'name', $name);
-		data_set($this->_data, 'group', $group);
-		data_set($this->_data, 'permission', $permission);
-		data_set($this->_data, 'area', $area);
-	}
-	
-	/* Selected option */
-	public function selectedRoleGroup($group)
-	{
-		$group = intval($group);
-		
-		return ($group == $this->_data['group']);
-	}
-	
-	/* Area checked prop
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function checkedArea($area)
-	{
-		return in_array($area, $this->_data['area']);
-	}
-	
-	/* Form permission => 是依據新增或編輯的Role
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function checkedOperation($functionKey, $operation)
-	{
-		$permissions	= $this->_data['permission']; 
-		$operations		= data_get($permissions, $functionKey, []);
-		
-		return in_array($operation, $operations);
+		$this->set('formData.id', $roleId);
+		$this->set('formData.name', $name);
+		$this->set('formData.permission', $permission);
+		$this->set('formData.area', $area);
+		$this->set('formData.group', $group);
 	}
 	
 	/* 判別列表Role是否可編或可刪
@@ -123,13 +92,4 @@ class RoleViewModel extends Fluent
 	{
 		return (RoleGroup::SUPERVISOR->value == $roleGroup) ? FALSE : TRUE; #super visor can not edit
 	}
-	
-	/* breadcrumb
-	 * @params: 
-	 * @return: array
-	 */
-	/* public function breadcrumb()
-	{
-		return $this->getBreadcrumbByDefault();
-	} */
 }

@@ -1,8 +1,8 @@
-@extends('layouts.master')
+@extends('layouts.app')
+@use('App\Facades\AppManager')
 @use('App\Enums\Area')
 @use('App\Enums\RoleGroup')
-@use('App\Enums\Operation')
-
+@use('App\Enums\Brand')
 
 @push('styles')
 	<link href="{{ asset('styles/role/detail.css') }}" rel="stylesheet">
@@ -13,77 +13,56 @@
 @endpush
 
 @section('content')
-<form action="{{ $viewModel->getFormAction() }}" method="post" id="roleForm" data-admin="{{ RoleGroup::ADMIN->value }}" data-supervisor="{{ RoleGroup::SUPERVISOR->value }}">
-	<input type="hidden" value="{{ $viewModel->id }}" name="id">
+<form x-data='roleForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
+	<input type="hidden" name="group" value="{{$viewModel->formData['group']}}">
 	@csrf
-
-<section class="section-wrapper dp-2">
 	
-	<div class="section role-data">
-		<div class="input-field field-purple field required">
-			<input type="text" class="form-control" id="name" name="name" value="{{  $viewModel->name }}" maxlength="10" placeholder=" " required>
-			<label for="name" class="form-label">身份</label>
+	<section class="role-data">
+		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
+		
+		<div class="row">
+			<div class="field label border field-purple" :class="Helper.hasError(errors, 'name')">
+				<input type="text" name="name" maxlength="10" required x-model="formData.name" @input="errors.delete('name')">
+				<label>身份名稱</label>
+			</div>
 		</div>
-		<div class="input-select field-purple field required">
-			<select class="form-select" id="group" name="group">
-				<option value="">請選擇</option>
-				@foreach($viewModel->option['roleGroupList'] as $role)
-				<option value="{{ $role->value }}" @selected($viewModel->selectedRoleGroup($role->value)) >
-				{{ $role->label() }}
-				</option>
-				@endforeach
-			</select>
-			<label for="group" class="form-label">權限群組</label>
-		</div>
-	</div>
-	
-	<div class="section role-permission field-group">
-		@foreach($viewModel->option['functionList'] as $groupKey => $group)
-		<ul class="list-group {{ Str::lower(Arr::toCssClasses($group['type'])) }}">
-			<div class="divider"></div>
-			<label class="title">
-				<span class="material-symbols-outlined filled-icon">{{ $group['style']['icon'] }}</span>
-				{{ $group['name'] }}
-			</label>
-			
-			@foreach($group['items'] as $itemKey => $item)
-			<li class="list-group-item">
-				<div class="form-check form-switch permission-group">
-					<input class="form-check-input" type="checkbox" id="item-{{$groupKey}}-{{$itemKey}}">
-					<label class="form-check-label" for="item-{{$groupKey}}-{{$itemKey}}">{{ $item['name'] }}</label>
-				</div>
-				<div class="permission-group-items">
-					@foreach($item['operation'] as $opKey => $operation)
-					<label class="form-check-label" for="permission-{{$groupKey}}-{{$itemKey}}-{{$opKey}}">
-						<input class="form-check-input" type="checkbox" value="{{ $operation->value }}" 
-							id="permission-{{$groupKey}}-{{$itemKey}}-{{$opKey}}" 
-							name="{{ Str::replaceArray('?', [$itemKey], 'permission[?][]') }}"
-							@checked($viewModel->checkedOperation($itemKey, $operation->value))
-							>
-						{{ $operation->label() }}
+		
+		@foreach($viewModel->options['functions'] as $key => $groups)
+		<fieldset class="role-permission field-purple fieldset required">
+			<legend>{{AppManager::getMenuGroupName($key)}}</legend>
+			<ul class="list border">
+				@foreach($groups as $item)
+				<li class="">
+					<div class="max">
+						<h6 class="small"></h6>
+						<div>{{$item['name']}}</div>
+					</div>
+					<label class="switch field-dark-blue">
+						<input x-model="formData.permission" type="checkbox" name="permission[]" value="{{$item['code']}}" @checked(in_array($item['code'], $viewModel->formData['permission']))>
+						<span></span>
 					</label>
-					@endforeach
-				</div>
-			</li>
+				</li>
+				@endforeach
+			</ul>
+		</fieldset>
+		@endforeach
+		
+		<fieldset class="role-area field-blue fieldset required">
+			<legend>管理區域</legend>
+			@foreach($viewModel->options['areas'] as $idx => $area)
+			<label class="form-check-label" for="area-{{$idx}}">
+				<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" id="area-{{$idx}}" value="{{ $area->value }}"  @checked(in_array($area->value, $viewModel->formData['area']))>
+				{{ $area->label() }}
+			</label>
 			@endforeach
-		</ul>
-		@endforeach
-	</div>
+		</fieldset>
 	
-	<div class="section role-area">
-		<!--label class="title">管理區域</label-->
-		@foreach($viewModel->option['areaList'] as $idx => $area)
-		<label class="form-check-label" for="area{{$idx}}">
-			<input class="form-check-input" type="checkbox" name="area[]" id="area{{$idx}}" value="{{ $area->value }}"  @checked($viewModel->checkedArea($area->value))>
-			{{ $area->label() }}
-		</label>
-		@endforeach
-	</div>
-	<div class="toolbar">
-		<button type="button" class="btn btn-primary btn-major btn-save">儲存</button>
-		<button type="button" class="btn btn-red btn-reset">重設</button>
-	</div>
-</section>
+		<nav class="toolbar">
+			<button type="submit" class="button btn-save btn-primary">{{ $viewModel->action->label()}}</button>
+			<button @click="reset() "type="button" class="button btn-cancel border" id="btnReset">重置</button>
+		</nav>
+	</section>
 </form>
 
 @endsection()

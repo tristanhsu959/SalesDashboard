@@ -1,33 +1,12 @@
 /* Role list */
 
-
 .role-list {
-	position: relative;
-	padding: 1rem;
-	/* margin-left: 1rem;
-	margin-right: 1rem; */
-	border-radius: .5rem;
-	background: var(--theme-surface-l1);
+	padding-left: 1rem;
+	padding-right: 1rem;
 	
-	/* Area */
-	.list-data
-		.row {
-			.col {
-				display: flex;
-				align-items: center;
-				flex-wrap: wrap;
-				border-width: 0;
-				padding: .5rem;
-				
-				&.col-area .badge {
-					margin-right: .25rem;
-					border-radius: 2px;
-					background-color: #76ff03;
-					color: rgba(0, 0, 0, .87);
-					font-weight: 400;
-				}
-				
-			}
+	table tbody {
+		tr td.col-area .chip {
+			font-size: .75rem;
 		}
 	}
 }

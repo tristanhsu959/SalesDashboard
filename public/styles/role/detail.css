@@ -1,201 +1,32 @@
 /* list */
-
-body {
-	--theme-surface-bg : var(--theme-surface-l1);
-}
-
-.section-wrapper {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	padding: 1rem;
-	/* 	padding-top: 1rem; */ /* for input field */
-	/* margin-left: 1rem;
-	margin-right: 1rem; */
-	border-radius: .5rem;
-	background: var(--theme-surface-bg);
-	
-	.section {
-		height: 100%;
-		margin-bottom: 1rem;
-	}
-	
-	.role-data {
-		flex: 1;
-		display: inline-flex;
-		
-		.input-field {
-			margin-right: 1rem;
-			
-			&:last-child {
-				margin-right: 0;
-			}
-		}
-	}
-	
-	.role-permission {
-		position: relative;
-		flex: 2;
-		padding: 1rem;
-		border-radius: .5rem;
-		border: 1px solid #ce93d8; 
-		margin-top: 1rem;
-		background-color: rgba(38, 50, 56, .38);
-		
-		&:before {
-			content: '權限設定';
-			position: absolute;
-			top: 0;
-			padding: 0 .25rem;
-			color: #ce93d8; 
-			background: linear-gradient(to bottom, var(--theme-surface-bg) 50%, transparent 50% 100%); 
-			display: flex;
-			transform: translate(-0.25rem, -50%);
-		}
-		
-		.list-group {
-			border-radius: 0;
-			
-			&:first-child {
-				margin-top: .5rem;
-				
-				.divider {
-					display: none;
-				}
-			}
-				
-			/* 功能群組 */
-			.title {
-				display: flex;
-				align-items: center;
-				color: #ff9100;
-			}
-			
-			.list-group-item {
-				display: flex;
-				justify-content: space-between;
-				background-color: transparent;
-				border-width: 0;
-				
-				.form-check-label, .form-check-input {
-					cursor: pointer;
-				}
-				
-				/* CRUD */
-				.permission-group {
-					margin-top: .25rem;
-					
-					/* Switch */
-					label {
-						color: #bcaaa4;
-					}
-					.form-check-input {
-						background-color: #cfd8dc;
-						&:checked {
-							background-color: #ffd180;
-							border-color: #ffab40;
-							background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ff9100'/%3e%3c/svg%3e");
-						}
-					}
-					input:checked {
-						background-position: right center;
-					}
-
-				}
-				
-				/* Checkbox */
-				.permission-group-items {
-					display: flex;
-					justify-content: flex-end;
-					align-items: center;
-					flex-wrap: wrap;
-					width: 50%;
-					
-					.form-check-label {
-						display: flex;
-						align-items: center;
-						width: auto;
-						height: 2rem;
-						margin: .25rem;
-						color: rgba(236, 239, 241, .20);
-						border: 1px solid rgba(236, 239, 241, .20);
-						background-color: rgba(38, 50, 56, 1); /* #212121; */
-						padding: .175rem 1rem;
-						border-radius: 1rem;
-						
-						&:last-child {
-							margin-right: 0;
-						}
-						
-						.form-check-input {
-							display: none;
-						}
-						
-						&:has(input:checked) {
-							border-color: #e1bee7;
-							color: #e1bee7;
-							background-color: #ab47bc; //rgba(234, 128, 252, .6);
-							transition-property: color, border-color, background-color;
-							transition-duration: .3s;
-							transition-delay: .15s;
-							
-							&:before {
-								content: '\e5ca';
-								font-family: 'Material Symbols Outlined';
-								/* font-variation-settings: 'FILL' 1; */
-							}
-						}
-					}
-					
-				}
-			}
-		}
-	}
+section.role-data {
+	padding: 0 1rem 1rem;
 	
 	/* 區域 */
 	.role-area {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		/* border: 1px solid #ce93d8;
-		border-radius: .5rem; 
-		padding: 1rem;
-		margin-top: 1rem;*/
 		position: relative;
-		
-		/* &.required label.title:before {
-			content: '\e1eb';
-			font-family: 'Material Symbols Outlined';
-			color: rgba(244, 67, 54, .87);
-		} */
-		
-		/* label.title {
-			position: absolute;
-			top: 0;
-			padding: 0 .25rem;
-			color: #ce93d8;
-			background-color: var(--theme-surface-bg);
-			display: flex;
-			align-items: center;
-			transform: translate(-0.25rem, -50%);
-		} */
+		gap: 1rem;
 		
 		.form-check-label {
+			width: 160px;
+			height: 48px;
 			position: relative;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			width: 160px;
 			background-color: hsla(200, 19%, 18%, .87);
-			border: 1px solid #546e7a;
+			/* border: 1px solid #546e7a; */
 			border-radius: 8px;
-			color: #546e7a;
-			margin: .5rem;
+			color: rgba(255, 255, 255, .18);
+			font-size: 1rem;
 			padding: 1rem;
 			box-sizing: border-box;
 			transition: border-color, color 0.2s ease-in-out 0.1s;
 			cursor: pointer;
-			
+						
 			input {
 				display: none;
 			}
@@ -208,22 +39,13 @@ body {
 			}
 			
 			&:has(input:checked) {
-				border-color: #76ff03;
-				color: #76ff03;
-				background-color: hsla(200, 19%, 18%, 1);
+				/* border-color: #76ff03; */
+				color: #fafafa;
+				background-color: #aa00ff;
 				
 				&:before {
 					content: '\e2e6';
 				}
-			}
-		}
-	}
-	
-	.toolbar {
-		.btn {
-			margin-right: .5rem;
-			&:last-child {
-				margin-right: 0;
 			}
 		}
 	}

@@ -6,7 +6,7 @@
 	</header>
 	
 	<template x-for="(groups, key) in menus">
-		<details x-data="{ isOpen: groups.some(item => currentPath.startsWith(item.url)) }" :open="isOpen" @toggle="isOpen = $el.open">
+		<details x-data="{ isOpen: groups.some(item => currentPath.includes(item.url)) }" :open="isOpen" @toggle="isOpen = $el.open">
 			<summary>
 				<span x-text="key"></span>
 				<i class="none" x-text="isOpen ? 'stat_minus_1':'chevron_forward'"></i>
@@ -14,7 +14,7 @@
 			
 			<template x-for="item in groups">
 			<div class="item">
-				<a :href="item.url" :class="[currentPath.includes(item.url) ? 'active' : '', item.style.color]" class="responsive">
+				<a :href="item.url" :class="[currentPath.includes(item.url) ? 'active' : '', item.style.color]" class="responsive" @click="$dispatch('showLoading').window">
 					<i x-text="item.style.icon"></i>
 					<span x-text="item.name" ></span>
 				</a>

@@ -52,7 +52,7 @@ return [
 			'name' 		=> '身份管理',
 			'code'		=> 'role',
 			'style' 	=> ['icon' => 'admin_panel_settings', 'color' => 'red-text'],
-			'url' 		=> 'role', 
+			'url' 		=> '/role', 
 			'type'		=> 'function',
 		],
 	],

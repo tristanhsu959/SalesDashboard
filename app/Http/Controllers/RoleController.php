@@ -66,12 +66,11 @@ class RoleController extends Controller
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
+		$this->_viewModel->keepFormData($id, $name, $permission, $area);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
             'name' => 'required|max:10',
-			'group' => 'required|min:1',
         ]);
  
         if ($validator->fails()) 
@@ -110,7 +109,7 @@ class RoleController extends Controller
 			return redirect()->route('role.list')->with('msg', $response->msg);
 		
 		$data = $response->data;
-		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['roleGroup'], $data['rolePermission'], $data['roleArea']);
+		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['rolePermission'], $data['roleArea'], $data['roleGroup']);
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);
@@ -129,14 +128,13 @@ class RoleController extends Controller
 		$permission	= $request->array('permission');
 		$area		= $request->array('area');
 		
-		$this->_viewModel->keepFormData($id, $name, $group, $permission, $area);
+		$this->_viewModel->keepFormData($id, $name, $permission, $area, $group);
 		
 		if (empty($id))
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
 		
 		$validator = Validator::make($request->all(), [
             'name' => 'required|max:10',
-			'group' => 'required|min:1',
         ]);
  
         if ($validator->fails()) 
@@ -164,7 +162,7 @@ class RoleController extends Controller
 	public function delete(Request $request, $id)
 	{
 		#initialize
-		$this->_viewModel->initialize(FormAction::DELETE, $id);
+		$this->_viewModel->initialize(FormAction::DELETE);
 		
 		/*跟validator整併即可*/
 		if (empty($id))

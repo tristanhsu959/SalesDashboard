@@ -14,7 +14,7 @@
 <!-- Content -->
 @if($viewModel->status() === TRUE && $viewModel->hasPermission())
 
-	<header class="page-nav">
+	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
 		<nav>
 			<a href="{{ route('role.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
@@ -47,13 +47,13 @@
 						<td>{{ $idx + 1 }}</td>
 						<td>{{ $role['roleName'] }}</td>
 						<td>{{ RoleGroup::getLabelByValue($role['roleGroup']) }}</td>
-						<td>
+						<td class="col-area">
 							@foreach($role['roleArea'] as $area)
 							<div class="chip round primary-container">{{ Area::getLabelByValue($area) }}</div>
 							@endforeach
 						</td>
 						<td>{{ $role['updateAt'] }}</td>
-						<td class="right-align">
+						<td class="right-align action">
 							<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canUpdateThisRole($role['roleGroup']))>
 								<i class="small">edit</i>
 							</a>

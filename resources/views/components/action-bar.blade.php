@@ -1,5 +1,5 @@
 
-<header x-data='@json($initData)' class="orange">
+<header x-data='@json($initData)' class="orange top-nav">
 	<nav>
 		<a :href="backUrl" x-show="backUrl" class="button circle transparent">
 			<i>arrow_back</i>

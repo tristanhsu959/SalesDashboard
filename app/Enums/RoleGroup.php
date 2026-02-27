@@ -5,8 +5,7 @@ namespace App\Enums;
 enum RoleGroup : int
 {
 	case SUPERVISOR	= 1;
-    #case SUPERUSER	= 2; #for董總(無帳號管理)
-	case ADMIN 		= 2;
+    case ADMIN 		= 2;
 	case USER 		= 3;
 	
 	public function label() : string
@@ -14,7 +13,6 @@ enum RoleGroup : int
         return match ($this) 
 		{
 			self::SUPERVISOR	=> 'SuperVisor',
-			#self::SUPERUSER		=> 'SuperUser',
 			self::ADMIN 		=> '帳號管理員',
 			self::USER 			=> '使用者',
         };
