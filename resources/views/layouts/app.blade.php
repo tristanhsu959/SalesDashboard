@@ -48,7 +48,7 @@
 			<x-profile :profile="AppManager::getCurrentUser()->toArray()" :areaOptions="Area::options()" :signoutRoute="route('signout')"/>
 		@endif
 		
-		@include('layouts._dialog')
+		<x-dialog />
 		<x-toast :msg="$viewModel->msg()"/>
 	</body>
 </html>
