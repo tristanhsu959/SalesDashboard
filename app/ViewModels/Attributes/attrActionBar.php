@@ -26,7 +26,7 @@ trait attrActionBar
 		
 		$breadcrumb[] 	= $function->label();
 		
-		if ($brand)
+		if ($action)
 			$breadcrumb[] = $action->label();
 				
 		return $breadcrumb;
@@ -36,14 +36,14 @@ trait attrActionBar
 	 * @params: 
 	 * @return: array
 	 */
-	public function backRoute()
+	public function backUrl()
 	{
 		$except = [FormAction::SIGNIN->value, FormAction::HOME->value, FormAction::LIST->value];
 		
-		if (in_array($this->action->value, $except))
+		if (in_array($this->action->value, $except) OR $this->backRoute === FALSE)
 			return '';
 		else
-			return $this->backRoute;
+			return route($this->backRoute);
 	}
 	
 	/* Get all data for action bar
@@ -54,7 +54,7 @@ trait attrActionBar
 	{
 		$data['isHome'] 	= request()->routeIs('home');
 		$data['breadcrumb'] = $this->breadcrumb();
-		$data['backRoute'] 	= $this->get('backRoute', FALSE);
+		$data['backUrl'] 	= $this->backUrl();
 		$data['homeRoute'] 	= route('home');
 		
 		return $data;

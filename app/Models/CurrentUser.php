@@ -42,6 +42,43 @@ class CurrentUser extends Fluent
 		return ($roleGroup == RoleGroup::SUPERVISOR->value);
 	}
 	
+	#改為只有判別功能,無CRUD
+	/* Auth permission of function by current user
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasPermissionTo($functionKey)
+	{
+		if ($this->isSupervisor())
+			return TRUE;
+		
+		$permissions = $this->get('rolePermission', []);
+		
+		return in_array($functionKey, $permissions);
+	}
+	
+	/* Get permission
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getPermissions()
+	{
+		if ($this->isSupervisor())
+			return config('web.menu.enabled');
+		
+		return $this->get('rolePermission', []);
+	}
+	
+	/* Show available name
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function showAvailableName()
+	{
+		return empty($this->_data['displayName']) ? $this->_data['userAd'] : $this->_data['displayName'];
+	}
+	
+	#deprecated
 	/* Auth permission of function by current user
 	 * @params: string
 	 * @return: boolean

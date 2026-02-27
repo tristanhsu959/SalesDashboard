@@ -1,7 +1,7 @@
 
 <header x-data='@json($initData)' class="orange">
 	<nav>
-		<a :href="backRoute" x-show="backRoute" class="button circle transparent">
+		<a :href="backUrl" x-show="backUrl" class="button circle transparent">
 			<i>arrow_back</i>
 		</a>
 		<h6 class="max small" x-html="breadcrumb.join('<i>chevron_right</i>')"></h6>

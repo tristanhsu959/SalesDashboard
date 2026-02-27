@@ -11,40 +11,18 @@ use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use Illuminate\Support\Fluent;
 
-class RoleViewModel
+class RoleViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	private $_function 	= Functions::ROLE;
-	private $_backRoute	= 'role.list';
-	private $_data 		= [];
-	
 	public function __construct()
 	{
-		#initialize
-		$this->_data['action'] 	= NULL; #enum form action
+		$this->function		= Functions::ROLE;
+		$this->action 		= FormAction::LIST; 
+		$this->backRoute 	= 'role.list';
 		$this->success();
-		
-		#form data
-		$this->_data['list'] 	= []; #For list view
-		$this->_data['option']	= [];
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
 	}
 	
 	/* initialize
@@ -54,7 +32,7 @@ class RoleViewModel
 	public function initialize($action)
 	{
 		#初始化各參數及Form Options
-		$this->_data['action']	= $action;
+		$this->action	= $action;
 		$this->success();
 		
 		if ($action != FormAction::LIST)
@@ -150,8 +128,8 @@ class RoleViewModel
 	 * @params: 
 	 * @return: array
 	 */
-	public function breadcrumb()
+	/* public function breadcrumb()
 	{
 		return $this->getBreadcrumbByDefault();
-	}
+	} */
 }

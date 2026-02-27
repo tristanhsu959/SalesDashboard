@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.app')
 @use('App\Enums\RoleGroup')
 @use('App\Enums\Area')
 
@@ -12,6 +12,52 @@
 
 @section('content')
 <!-- Content -->
+@if($viewModel->status() === TRUE && $viewModel->hasPermission())
+	<header class="page-nav">
+		<nav>
+			<a href="{{ route('role.create') }}" class="btn-create button circle"><i>add</i></a>
+		</nav>
+	</header>
+	
+	<form action="" method="post" id="roleForm" class="no-margin">
+		@csrf
+		<section class="role-list">
+			@if(empty(($viewModel->list)))
+			<div class="alert alert-danger" role="alert">
+				查無符合資料
+			</div>
+			@else
+			<div class="d-table">
+				<div class="d-table-row head">
+					<div class="d-table-cell">#</div>
+					<div class="d-table-cell">身份</div>
+					<div class="d-table-cell">權限群組</div>
+					<div class="d-table-cell">更新時間</div>
+					<div class="d-table-cell cell-action">操作</div>
+				</div>
+				@foreach($viewModel->list as $idx => $role)
+				<div class="d-table-row list">
+					<div class="d-table-cell">{{ $idx + 1 }}</div>
+					<div class="d-table-cell">{{ $role['roleName'] }}</div>
+					<div class="d-table-cell">{{ RoleGroup::getLabelByValue($role['roleGroup']) }}</div>
+					<div class="d-table-cell">{{ $role['updateAt'] }}</div>
+					<div class="d-table-cell cell-action">
+						<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canEditThisRole($role['roleGroup']))>
+							<i>edit</i>
+						</a>
+						<a href="{{ route('role.delete.post', [$role['roleId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisRole($role['roleGroup']))>
+							<i>delete</i>
+						</a>
+					</div>
+				</div>
+				@endforeach
+			</div>
+			@endif
+		</section>
+	</form>
+@endif
+
+{{--
 @if($viewModel->status() === TRUE)
 	<form action="" method="post" id="roleListForm">
 	@csrf
@@ -75,5 +121,6 @@
 	</div>
 	@endif
 @endif
+--}}
 <!-- Content -->
 @endsection()
