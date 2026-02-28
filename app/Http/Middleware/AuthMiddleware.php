@@ -8,22 +8,19 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Facades\AppManager;
 use App\Models\CurrentUser;
 
-class AccessPermissionMiddleware
+class AuthMiddleware
 {
 	/**
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $code): Response
+    public function handle(Request $request, Closure $next): Response
     {
 		$currentUser = AppManager::getCurrentUser();
 		
-		if (empty($currentUser->rolePermission) && ! $currentUser->isSupervisor())
-			return redirect()->route('signin')->with('msg', '使用者尚無系統授權');
-		
-		if (! in_array($code, $currentUser->rolePermission) && ! $currentUser->isSupervisor())
-			abort(403);
+		if (empty($currentUser))
+			return redirect()->route('signin')->with('msg', '認證已過期，請重新登入');
 		
         return $next($request);
     }

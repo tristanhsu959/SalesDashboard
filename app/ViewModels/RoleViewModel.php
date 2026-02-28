@@ -21,7 +21,7 @@ class RoleViewModel extends Fluent
 	{
 		$this->function		= Functions::ROLE;
 		$this->action 		= FormAction::LIST; 
-		$this->backRoute 	= 'role.list';
+		$this->backRoute 	= 'roles';
 		$this->success();
 	}
 	
@@ -45,7 +45,7 @@ class RoleViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.functions', config('web.menu'));
+		$this->set('options.functions', AppManager::getMenu());
 		$this->set('options.areas', Area::cases()); 
 	}
 	

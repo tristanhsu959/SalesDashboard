@@ -24,7 +24,7 @@ enum Area : int
         };
     }
 	
-	public static function getLabelByValue($value) : string
+	/* public static function getLabelByValue($value) : string
 	{
 		#型別要一樣
 		$value = intval($value);
@@ -39,7 +39,7 @@ enum Area : int
 			self::KAOHSIUNG->value	=> self::KAOHSIUNG->label(),
 			default => 'UNKNOW',
 		};
-	}
+	} */
 	
 	public static function getAll() : array
 	{

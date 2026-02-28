@@ -3,8 +3,9 @@
 namespace App\Services;
 
 use App\Models\CurrentUser;
-use App\Enums\Brand;
+use App\Enums\MenuGroup;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class AppManager
 {
@@ -86,13 +87,19 @@ class AppManager
 		#4.驗證使用者有權限的選單, 只要驗證到功能即可
 		foreach($menuConfig as $key => $groups)
 		{
-			$keyName = $this->getMenuGroupName($key);
+			$menuGroup = MenuGroup::tryFrom($key);
+			$keyName = $menuGroup->label();
 			$authMenu[$keyName] = [];
 			
 			foreach($groups as $item)
 			{
 				if ($currentUser->hasFunctionPermission($item['code']))
+				{
+					#只取必要欄位
+					Arr::forget($item, 'code');
+					$item['url'] = route($item['url']);
 					$authMenu[$keyName][] = $item;
+				}
 			}
 		}
 		
@@ -101,16 +108,29 @@ class AppManager
 		return $authMenu;
 	}
 	
-	/* 取Group name
+	/* 取All Menu:權限設定
 	 * @params: 
 	 * @return: array
 	 */
-	public function getMenuGroupName($key)
+	public function getMenu()
 	{
-		if ($key == 'manage')
-			return '權限管理';
+		$menu = [];
+		$menuConfig = config('web.menu');
 		
-		$brade = Brand::getByValue($key);
-		return $brade->label();
+		foreach($menuConfig as $key => $groups)
+		{
+			$menuGroup = MenuGroup::tryFrom($key);
+			$keyName = $menuGroup->label();
+			$menu[$keyName] = [];
+			
+			foreach($groups as $item)
+			{
+				#只取必要欄位
+				Arr::forget($item, ['style', 'url']);
+				$menu[$keyName][] = $item;
+			}
+		}
+		
+		return $menu;
 	}
 }

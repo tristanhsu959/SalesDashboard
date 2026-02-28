@@ -18,7 +18,7 @@ enum RoleGroup : int
         };
     }
 	
-	public static function getLabelByValue($value) : string
+	/* public static function getLabelByValue($value) : string
 	{
 		#型別要一樣
 		$value = intval($value);
@@ -31,7 +31,7 @@ enum RoleGroup : int
 			self::USER->value 		=> self::USER->label(),
 			default => 'UNKNOW',
 		};
-	}
+	} */
 	
 	#Supervisor排除
 	public static function getEnabledList() : array

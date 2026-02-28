@@ -28,9 +28,9 @@
 			</div>
 		</div>
 		
-		@foreach($viewModel->options['functions'] as $key => $groups)
+		@foreach($viewModel->options['functions'] as $title => $groups)
 		<fieldset class="role-permission field-purple fieldset required">
-			<legend>{{AppManager::getMenuGroupName($key)}}</legend>
+			<legend>{{$title}}</legend>
 			<ul class="list border">
 				@foreach($groups as $item)
 				<li class="">

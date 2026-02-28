@@ -16,12 +16,12 @@ enum Brand : string
 		};
     }
 	
-	public static function getByValue($value)
+	/* public static function getByValue($value)
 	{
 		return match ($value) 
 		{
 			self::BAFANG->value		=> self::BAFANG,
 			self::BUYGOOD->value	=> self::BUYGOOD,
         };
-	}
+	} */
 }

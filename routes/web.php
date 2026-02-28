@@ -11,6 +11,7 @@ use App\Http\Controllers\BuyGood\NewReleaseController as BgNewReleaseController;
 use App\Http\Controllers\BuyGood\PurchaseController as BgPurchaseController;
 use App\Http\Controllers\BuyGood\SalesController as BgSalesController;
 
+use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
 
 /* Login */
@@ -19,20 +20,20 @@ Route::redirect('/', '/signin');
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 
-Route::middleware([AccessPermissionMiddleware::class])->group(function(){
+Route::middleware([AuthMiddleware::class])->group(function(){
 	/* Home */
 	Route::get('home', [HomeController::class, 'index'])->name('home');
 	
 	/* 八方 */
 	Route::namespace('App\Http\Controllers\BaFang')->prefix('bf')->group(function () {
-		Route::get('new_releases/beef_short_ribs', [BfNewReleaseController::class, 'beefShortRibs']);
+		Route::get('new_releases/beef_short_ribs', [BfNewReleaseController::class, 'beefShortRibs'])->name('bafang.new_releases');
 		Route::post('new_releases/{segment}/search', [BfNewReleaseController::class, 'search'])->name('bf.new_releases.search');
 	});
 	
 	/* 梁社漢 */
 	Route::namespace('App\Http\Controllers\BuyGood')->prefix('bg')->group(function () {
 		/* 新品 */
-		Route::get('new_releases/pork_ribs', [BgNewReleaseController::class, 'porkRibs']);
+		Route::get('new_releases/pork_ribs', [BgNewReleaseController::class, 'porkRibs'])->name('buygood.new_releases');
 		Route::get('new_releases/tomato_beef', [BgNewReleaseController::class, 'tomatoBeef']);
 		Route::get('new_releases/egg_tofu', [BgNewReleaseController::class, 'eggTofu']);
 		Route::get('new_releases/pork_gravy', [BgNewReleaseController::class, 'porkGravy']);
@@ -42,35 +43,38 @@ Route::middleware([AccessPermissionMiddleware::class])->group(function(){
 		#Route::get('new_releases/braised_gravy', [BgNewReleaseController::class, 'index']);
 		
 		/* 出貨報表 */
-		Route::get('purchase', [BgPurchaseController::class, 'showSearch']);
+		Route::get('purchase', [BgPurchaseController::class, 'showSearch'])->name('buygood.purchase');
 		Route::post('purchase/search', [BgPurchaseController::class, 'search'])->name('bg.purchase.search');
 		Route::get('purchase/export/{token}', [BgPurchaseController::class, 'export'])->name('bg.purchase.export');
 		
 		/* 銷售報表 */
-		Route::get('sales', [BgSalesController::class, 'showSearch']);
+		Route::get('sales', [BgSalesController::class, 'showSearch'])->name('buygood.sales');
 		Route::post('sales/search', [BgSalesController::class, 'search'])->name('bg.sales.search');
 		Route::get('sales/export/{token}', [BgSalesController::class, 'export'])->name('bg.sales.export');
 	});
 	
+	Route::middleware([AccessPermissionMiddleware::class . ':user'])->group(function(){
+		/* 身份管理 */
+		Route::get('role', [RoleController::class, 'list'])->name('roles');
+		Route::get('role/list', [RoleController::class, 'list'])->name('role.list');
+		Route::get('role/create', [RoleController::class, 'showCreate'])->name('role.create');
+		Route::post('role/create', [RoleController::class, 'create'])->name('role.create.post');
+		Route::get('role/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
+		Route::post('role/update', [RoleController::class, 'update'])->name('role.update.post');
+		Route::post('role/delete/{id}', [RoleController::class, 'delete'])->name('role.delete');
+	});
 	
-	/* 身份管理 */
-	Route::get('role', [RoleController::class, 'list'])->name('role.list');
-	Route::get('role/list', [RoleController::class, 'list']);
-	Route::get('role/create', [RoleController::class, 'showCreate'])->name('role.create');
-	Route::post('role/create', [RoleController::class, 'create'])->name('role.create.post');
-	Route::get('role/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
-	Route::post('role/update', [RoleController::class, 'update'])->name('role.update.post');
-	Route::post('role/delete/{id}', [RoleController::class, 'delete'])->name('role.delete.post');
-
-	/* 帳號管理 */
-	Route::get('user', [UserController::class, 'list'])->name('user.list');
-	Route::get('user/list', [UserController::class, 'list']);
-	Route::post('user/search', [UserController::class, 'search'])->name('user.search');
-	Route::get('user/create', [UserController::class, 'showCreate'])->name('user.create');
-	Route::post('user/create', [UserController::class, 'create'])->name('user.create.post');
-	Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
-	Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
-	Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete.post');
+	Route::middleware([AccessPermissionMiddleware::class . ':role'])->group(function(){
+		/* 帳號管理 */
+		Route::get('user', [UserController::class, 'list'])->name('users');
+		Route::get('user/list', [UserController::class, 'list'])->name('user.list');
+		Route::post('user/search', [UserController::class, 'search'])->name('user.search');
+		Route::get('user/create', [UserController::class, 'showCreate'])->name('user.create');
+		Route::post('user/create', [UserController::class, 'create'])->name('user.create.post');
+		Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
+		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
+		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+	});
 });
 
 
