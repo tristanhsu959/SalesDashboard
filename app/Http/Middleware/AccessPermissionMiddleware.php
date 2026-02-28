@@ -22,7 +22,7 @@ class AccessPermissionMiddleware
 		if (empty($currentUser->rolePermission) && ! $currentUser->isSupervisor())
 			return redirect()->route('signin')->with('msg', '使用者尚無系統授權');
 		
-		if (! in_array($code, $currentUser->rolePermission) && ! $currentUser->isSupervisor())
+		if (! $currentUser->hasPermissionTo($code) && ! $currentUser->isSupervisor())
 			abort(403);
 		
         return $next($request);

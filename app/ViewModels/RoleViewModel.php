@@ -5,7 +5,6 @@ namespace App\ViewModels;
 use App\Facades\AppManager;
 use App\Enums\FormAction;
 use App\Enums\RoleGroup;
-#use App\Enums\Operation;
 use App\Enums\Area;
 use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
@@ -49,19 +48,6 @@ class RoleViewModel extends Fluent
 		$this->set('options.areas', Area::cases()); 
 	}
 	
-	/* Form submit action for edit
-	 * @params: 
-	 * @return: string
-	 */
-	public function getFormAction() : string
-    {
-		return match($this->action)
-		{
-			FormAction::CREATE => route('role.create.post'),
-			FormAction::UPDATE => route('role.update.post'),
-		};
-	}
-	
 	/* Keep user form data
 	 * @params: int
 	 * @params: string
@@ -77,6 +63,19 @@ class RoleViewModel extends Fluent
 		$this->set('formData.permission', $permission);
 		$this->set('formData.area', $area);
 		$this->set('formData.group', $group);
+	}
+	
+	/* Form submit action for edit
+	 * @params: 
+	 * @return: string
+	 */
+	public function getFormAction() : string
+    {
+		return match($this->action)
+		{
+			FormAction::CREATE => route('role.create.post'),
+			FormAction::UPDATE => route('role.update.post'),
+		};
 	}
 	
 	/* 判別列表Role是否可編或可刪

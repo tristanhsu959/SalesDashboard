@@ -5,47 +5,23 @@ namespace App\ViewModels;
 use App\Services\UserService;
 use App\Enums\FormAction;
 use App\Enums\Area;
-use App\Enums\Operation;
 use App\Enums\RoleGroup;
 use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use Illuminate\Support\Fluent;
 
-class UserViewModel
+class UserViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	private $_function 	= Functions::USER;
-	private $_backRoute	= 'user.list';
-	private $_data = [];
-	
 	public function __construct(protected UserService $_service)
 	{
-		#initialize
-		$this->_data['action'] 		= NULL; #enum form action
+		$this->function		= Functions::USER;
+		$this->action 		= FormAction::LIST; 
+		$this->backRoute 	= 'users';
 		$this->success();
-		
-		#Form Data
-		$this->_data['list'] 		= []; #DB data
-		$this->_data['search']		= [];
-		$this->_data['option']		= [];
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
 	}
 	
 	/* initialize
@@ -55,7 +31,7 @@ class UserViewModel
 	public function initialize($action)
 	{
 		#初始化各參數及Form Options
-		$this->_data['action']	= $action;
+		$this->action	= $action;
 		$this->success();
 		
 		$this->_setOptions();
@@ -67,8 +43,21 @@ class UserViewModel
 	 */
 	private function _setOptions()
 	{
-		$this->_data['option']['area'] 		= Area::cases(); #enum
-		$this->_data['option']['roleList']	= $this->_service->getRoleOptions();
+		$this->set('options.roleList', $this->_service->getRoleOptions());
+		$this->set('options.areas', Area::cases()); 
+	}
+	
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: string
+	 */
+	public function keepSearchData($adAccount = '', $displayName = '', $roleId = 0)
+    {
+		$this->set('search.ad', $adAccount);
+		$this->set('search.name', $displayName);
+		$this->set('search.roleId', $roleId);
 	}
 	
 	/* Form submit action
@@ -82,19 +71,6 @@ class UserViewModel
 			FormAction::CREATE => route('user.create.post'),
 			FormAction::UPDATE => route('user.update.post'),
 		};
-	}
-	
-	/* Keep search data of form
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: string
-	 */
-	public function keepSearchData($adAccount, $displayName, $area)
-    {
-		data_set($this->_data, 'search.userAd', $adAccount);
-		data_set($this->_data, 'search.userDisplayName', $displayName);
-		data_set($this->_data, 'search.userAreaId', $area);
 	}
 	
 	/* Get search data
@@ -125,12 +101,12 @@ class UserViewModel
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $role = 0)
+	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $roleId = 0)
     {
-		data_set($this->_data, 'id', $id);
-		data_set($this->_data, 'ad', $adAccount);
-		data_set($this->_data, 'displayName', $displayName);
-		data_set($this->_data, 'roleId', $role);
+		$this->set('formData.id', $id);
+		$this->set('formData.ad', $adAccount);
+		$this->set('formData.displayName', $displayName);
+		$this->set('formData.roleId', $roleId);
 	}
 	/* User Data End */
 	
@@ -178,12 +154,4 @@ class UserViewModel
 		return ! ($thisRoleGroup == RoleGroup::SUPERVISOR->value);
 	}
 	
-	/* breadcrumb
-	 * @params: 
-	 * @return: array
-	 */
-	public function breadcrumb()
-	{
-		return $this->getBreadcrumbByDefault();
-	}
 }

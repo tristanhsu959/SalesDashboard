@@ -24,6 +24,7 @@ trait attrAllowAction
 	public function hasPermission()
 	{
 		#改為只有判別function
+		#Middleware已有過濾, 可不用
 		$currentUser = AppManager::getCurrentUser();
 		return $currentUser->hasPermissionTo($this->function->value);
 	}
@@ -32,7 +33,7 @@ trait attrAllowAction
 	 * @params: string
 	 * @return: void
 	 */
-	public function canQuery()
+	/* public function canQuery()
 	{
 		$currentUser = AppManager::getCurrentUser();
 		return $currentUser->hasActionPermission($this->function->value, Operation::READ->value);
@@ -54,5 +55,5 @@ trait attrAllowAction
 	{
 		$currentUser = AppManager::getCurrentUser();
 		return $currentUser->hasActionPermission($this->function->value, Operation::DELETE->value);
-	}
+	} */
 }

@@ -25,7 +25,7 @@ class UserRepository extends Repository
 		$db = $this->connectSalesDashboard('role');
 			
 		$result = $db
-			->select('roleId', 'roleName', 'roleGroup')
+			->select('roleId', 'roleName')
 			->get()
 			->toArray();
 				
@@ -38,11 +38,11 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getList($searchAd = NULL, $searchName = NULL, $searchArea = NULL)
+	public function getList($searchAd = NULL, $searchName = NULL, $searchRoleId = NULL)
 	{
 		$db = $this->connectSalesDashboard('user as a');
 			
-		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleGroup', 'b.roleArea')
+		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'b.roleArea')
 			->join('role as b', 'b.roleId', '=', 'a.userRoleId');
 		
 		#query conditions
@@ -50,8 +50,8 @@ class UserRepository extends Repository
 			$db->where('a.userAd', 'like', "%{$searchAd}%");
 		if (! is_null($searchName))
 			$db->where('a.userDisplayName', 'like', "%{$searchName}%");
-		if (! is_null($searchArea))
-			$db->whereJsonContains('b.roleArea', $searchArea);
+		if (! is_null($searchRoleId))
+			$db->where('a.userRoleId', $searchRoleId);
 		
 		$result = $db->get()->toArray();
 		

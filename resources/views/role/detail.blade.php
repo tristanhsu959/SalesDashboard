@@ -22,7 +22,8 @@
 		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
 		
 		<div class="row">
-			<div class="field label border field-purple" :class="Helper.hasError(errors, 'name')">
+			<div class="field label border field-purple w25 prefix" :class="Helper.hasError(errors, 'name')">
+				<i class="small red-text">asterisk</i>
 				<input type="text" name="name" maxlength="10" required x-model="formData.name" @input="errors.delete('name')">
 				<label>身份名稱</label>
 			</div>

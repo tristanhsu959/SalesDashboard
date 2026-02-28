@@ -13,6 +13,7 @@ use App\Http\Controllers\BuyGood\SalesController as BgSalesController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
+use App\Enums\Functions;
 
 /* Login */
 Route::get('signin', [AuthController::class, 'showSignin'])->name('signin');
@@ -53,7 +54,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('sales/export/{token}', [BgSalesController::class, 'export'])->name('bg.sales.export');
 	});
 	
-	Route::middleware([AccessPermissionMiddleware::class . ':user'])->group(function(){
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::ROLE->value, ':')])->group(function(){
 		/* 身份管理 */
 		Route::get('role', [RoleController::class, 'list'])->name('roles');
 		Route::get('role/list', [RoleController::class, 'list'])->name('role.list');
@@ -64,7 +65,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('role/delete/{id}', [RoleController::class, 'delete'])->name('role.delete');
 	});
 	
-	Route::middleware([AccessPermissionMiddleware::class . ':role'])->group(function(){
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::USER->value, ':')])->group(function(){
 		/* 帳號管理 */
 		Route::get('user', [UserController::class, 'list'])->name('users');
 		Route::get('user/list', [UserController::class, 'list'])->name('user.list');

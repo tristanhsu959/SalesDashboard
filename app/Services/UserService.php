@@ -47,11 +47,11 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function searchList($searchAd, $searchName, $searchArea)
+	public function searchList($searchAd, $searchName, $searchRoleId)
 	{
 		try
 		{
-			$list = $this->_repository->getList($searchAd, $searchName, $searchArea);
+			$list = $this->_repository->getList($searchAd, $searchName, $searchRoleId);
 			
 			$list = Arr::map($list, function ($item, string $key) {
 				$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
@@ -155,9 +155,6 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getRoleList();
-			$list = Arr::where($list, function ($item, int $key) {
-				return ($item['roleGroup'] != RoleGroup::SUPERVISOR->value);
-			});
 			
 			$list = Arr::mapWithKeys($list, function (array $item, int $key) {
 				return [$item['roleId'] => $item['roleName']];

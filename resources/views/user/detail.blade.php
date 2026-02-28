@@ -28,7 +28,7 @@
 	</div>
 	<div class="section user-role required">
 		<label class="title">所屬身份</label>
-		@foreach($viewModel->option['roleList'] as $id => $name)
+		@foreach($viewModel->options['roleList'] as $id => $name)
 		<label class="form-check-label" for="role-{{$id}}">
 			<input class="form-check-input" type="radio" name="role" id="role-{{$id}}" value="{{ $id }}" @checked($viewModel->checkedRole($id)) >
 			{{ $name }}

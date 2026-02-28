@@ -25,6 +25,7 @@ class UserController extends Controller
 	public function list(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
+		$this->_viewModel->keepSearchData();
 		
 		$response = $this->_service->getList();
 		
@@ -48,13 +49,13 @@ class UserController extends Controller
 		$this->_viewModel->initialize(FormAction::LIST);
 		
 		#query params
-		$searchAd	= $request->input('searchAd');
-		$searchName	= $request->input('searchName');
-		$searchArea	= $request->input('searchArea');
+		$searchAd		= $request->input('searchAd');
+		$searchName		= $request->input('searchName');
+		$searchRoleId	= $request->input('searchRoleId');
 		
-		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchArea);
+		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchRoleId);
 		
-		$response = $this->_service->searchList($searchAd, $searchName, $searchArea);
+		$response = $this->_service->searchList($searchAd, $searchName, $searchRoleId);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

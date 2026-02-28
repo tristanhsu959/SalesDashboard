@@ -10,6 +10,7 @@ button, a {
 	}
 	&.btn-search {
 		--primary: #81d4fa;
+		font-size: 1rem;
 	}
 	&.btn-search-reset {
 		--primary: #212121;

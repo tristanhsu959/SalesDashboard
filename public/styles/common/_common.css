@@ -20,3 +20,17 @@
 		margin-bottom: 1rem;
 	}
 }
+
+/* Width control */
+.w25 {
+	width: 25%;
+}
+.w50 {
+	width: 50%;
+}
+.w75 {
+	width: 75%;
+}
+.w100 {
+	width: 100%;
+}

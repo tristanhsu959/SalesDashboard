@@ -9,5 +9,9 @@
 			font-size: .75rem;
 		}
 	}
+	
+	table.stripes tbody tr:nth-child(odd) {
+		background-color: #f3e5f5;
+	}
 }
 

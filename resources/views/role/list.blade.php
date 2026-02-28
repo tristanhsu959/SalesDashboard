@@ -12,7 +12,7 @@
 
 @section('content')
 <!-- Content -->
-@if($viewModel->status() === TRUE && $viewModel->hasPermission())
+@if($viewModel->status() === TRUE)
 
 	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
 		<nav>
@@ -49,7 +49,7 @@
 						<td>{{ RoleGroup::tryFrom($role['roleGroup'])->label() }}</td>
 						<td class="col-area">
 							@foreach($role['roleArea'] as $area)
-							<div class="chip round primary-container">{{ Area::tryFrom($area)->label() }}</div>
+							<div class="chip round pink4 white-text">{{ Area::tryFrom($area)->label() }}</div>
 							@endforeach
 						</td>
 						<td>{{ $role['updateAt'] }}</td>
