@@ -20,7 +20,7 @@
 		</nav>
 	</header>
 	
-	<form action="" method="post" x-ref="roleListForm">
+	<form x-data="roleList" action="" method="post" x-ref="roleListForm">
 		@csrf
 		<div class="role-list">
 			@if(empty(($viewModel->list)))
@@ -30,7 +30,7 @@
 				</div>
 			</article>
 			@else
-			<table class="stripes border" x-data="roleList">
+			<table class="stripes border">
 				<thead>
 					<tr>
 						<th class="min">#</th>
@@ -70,4 +70,4 @@
 	</form>
 @endif
 <!-- Content -->
-@endsection()
+@endsection

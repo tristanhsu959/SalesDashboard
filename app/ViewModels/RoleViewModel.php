@@ -56,13 +56,14 @@ class RoleViewModel extends Fluent
 	 * @params: array
 	 * @return: void
 	 */
-	public function keepFormData($roleId = 0, $name = '', $permission = [], $area = [], $group = RoleGroup::USER->value)
+	public function keepFormData($roleId = 0, $name = '', $permission = [], $area = [], $group = RoleGroup::USER->value, $updateAt = '')
     {
 		$this->set('formData.id', $roleId);
 		$this->set('formData.name', $name);
 		$this->set('formData.permission', $permission);
 		$this->set('formData.area', $area);
 		$this->set('formData.group', $group);
+		$this->set('formData.updateAt', $updateAt);
 	}
 	
 	/* Form submit action for edit

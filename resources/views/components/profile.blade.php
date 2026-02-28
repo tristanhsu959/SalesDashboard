@@ -26,7 +26,7 @@
 			</p>
 			<p x-show="profile.roleArea" class="row wrap auth-area">
 				<template x-for="area in profile.roleArea">
-					<a class="chip border" x-text="areaOptions[area]"></a>
+					<a class="chip border orange white-text" x-text="areaOptions[area]"></a>
 				</template>
 			</p>
 			<p x-text="profile.company"></p>

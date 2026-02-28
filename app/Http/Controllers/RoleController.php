@@ -109,7 +109,7 @@ class RoleController extends Controller
 			return redirect()->route('role.list')->with('msg', $response->msg);
 		
 		$data = $response->data;
-		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['rolePermission'], $data['roleArea'], $data['roleGroup']);
+		$this->_viewModel->keepFormData($data['roleId'], $data['roleName'], $data['rolePermission'], $data['roleArea'], $data['roleGroup'], $data['updateAt']);
 		$this->_viewModel->success();
 		
 		return view('role/detail')->with('viewModel', $this->_viewModel);

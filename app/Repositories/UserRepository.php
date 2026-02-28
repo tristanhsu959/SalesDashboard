@@ -86,7 +86,7 @@ class UserRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('user');
 			
-		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId')
+		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId', 'updateAt')
 					->where('userId', '=', $id)
 					->get()->first();
 		

@@ -92,16 +92,16 @@ class UserController extends Controller
 		$id			= $request->input('id');
 		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$role		= $request->input('role');
+		$roleId		= $request->input('roleId');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $role);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
             'adAccount' => 'required|max:20',
-			'role' => 'required|integer',
+			'roleId' => 'required|integer',
         ]);
  
         if ($validator->fails()) 
@@ -110,7 +110,7 @@ class UserController extends Controller
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createUser($adAccount, $displayName, $role);
+		$response = $this->_service->createUser($adAccount, $displayName, $roleId);
 		
 		if ($response->status === FALSE)
 		{
@@ -140,7 +140,7 @@ class UserController extends Controller
 			return redirect()->route('user.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['userId'], $data['userAd'], $data['userDisplayName'], $data['userRoleId']);
+		$this->_viewModel->keepFormData($data['userId'], $data['userAd'], $data['userDisplayName'], $data['userRoleId'], $data['updateAt']);
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);
@@ -156,27 +156,27 @@ class UserController extends Controller
 		$id 		= $request->input('id');
 		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$role		= $request->input('role');
+		$roleId		= $request->input('roleId');
 		
 		#initialize
-		$this->_viewModel->initialize(FormAction::UPDATE, $id);
-		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $role);
+		$this->_viewModel->initialize(FormAction::UPDATE);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
 		
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
 		$validator = Validator::make($request->all(), [
             'adAccount' => 'required|max:20',
-			'role' => 'required|integer',
+			'roleId' => 'required|integer',
         ]);
  
-        if ($validator->fails()) 
+        if (!$validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateUser($id, $adAccount, $displayName, $role);
+		$response = $this->_service->updateUser($id, $adAccount, $displayName, $roleId);
 		
 		if ($response->status === FALSE)
 		{

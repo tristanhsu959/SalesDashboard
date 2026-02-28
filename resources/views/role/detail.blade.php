@@ -66,4 +66,4 @@
 	</section>
 </form>
 
-@endsection()
+@endsection

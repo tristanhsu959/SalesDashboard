@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.app')
 
 @push('styles')
 	<link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet">
@@ -9,37 +9,46 @@
 @endpush
 
 @section('content')
-		
-<form action="{{ $viewModel->getFormAction() }}" method="post" id="userForm">
-<input type="hidden" value="{{ $viewModel->id }}" name="id">
-@csrf
 
-<section class="section-wrapper">
-	<div class="section user-data">
-		<div class="input-field field-cyan field required">
-			<input type="text" class="form-control" id="adAccount" name="adAccount" value="{{  $viewModel->ad }}" maxlength="15" placeholder=" ">
-			<label for="adAccount" class="form-label">AD帳號</label>
-			<div class="input-hint">@8way.com.tw</div>
-		</div>
-		<div class="input-field field-cyan field">
-			<input type="text" class="form-control" id="displayName" name="displayName" value="{{  $viewModel->displayName }}" maxlength="15" placeholder=" ">
-			<label for="displayName" class="form-label">顯示名稱</label>
-		</div>
-	</div>
-	<div class="section user-role required">
-		<label class="title">所屬身份</label>
-		@foreach($viewModel->options['roleList'] as $id => $name)
-		<label class="form-check-label" for="role-{{$id}}">
-			<input class="form-check-input" type="radio" name="role" id="role-{{$id}}" value="{{ $id }}" @checked($viewModel->checkedRole($id)) >
-			{{ $name }}
-		</label>
-		@endforeach
-	</div>
+<form x-data='userForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
+	@csrf
 	
-	<div class="toolbar">
-		<button type="button" class="btn btn-major btn-save">儲存</button>
-		<button type="button" class="btn btn-red btn-reset">取消</button>
-	</div>
-</section>
+	<section class="user-data">
+		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
+		
+		<div class="row">
+			<div class="field label border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'ad')">
+				<i class="small red-text">asterisk</i>
+				<input type="text" name="adAccount" maxlength="15" required x-model="formData.ad" @input="errors.delete('ad')">
+				<label>AD帳號</label>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="field label border field-dark-blue w25">
+				<input type="text" name="displayName" maxlength="15" x-model="formData.name">
+				<label>顯示名稱</label>
+			</div>
+		</div>
+		
+		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'roleId')">
+			<i class="small red-text">asterisk</i>
+			<select x-model="formData.roleId" name="roleId"  @change="errors.delete('roleId')">
+				<option value="">請選擇</option>
+				@foreach($viewModel->options['roleList'] as $id => $name)
+					<option value="{{ $id }}">{{ $name }}</option>
+				@endforeach
+			</select>
+			<label>身份</label>
+			<i>arrow_drop_down</i>
+		</div>
+	
+		<nav class="toolbar">
+			<button type="submit" class="button btn-save btn-primary">{{ $viewModel->action->label()}}</button>
+			<button @click="reset() "type="button" class="button btn-cancel border">重置</button>
+		</nav>
+	</section>
 </form>
-@endsection()
+
+@endsection

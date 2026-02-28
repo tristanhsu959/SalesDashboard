@@ -1,23 +1,32 @@
 /* Role Create JS */
 
-$(function(){
-	$('.btn-reset').click(function(){
-		$('#userForm')[0].reset();
-	});
-	
-	$('.btn-save').click(function(e){
-		e.preventDefault();
-		submitForm();
-	});
+document.addEventListener('alpine:init', () => {
+	Alpine.data('userForm', (formData) => ({
+		formData: formData,
+		errors: new Set(),
+		
+		validate() {
+			this.errors.clear();
+			
+			if (Helper.isEmpty(this.formData.ad))
+				this.errors.add('ad');
+			if (this.formData.roleId == 0)
+				this.errors.add('roleId');
+			
+			if (this.errors.size == 0)
+			{
+				this.$dispatch('show-loading');
+				this.$el.submit();
+			}
+			else
+				return false;
+		},
+		
+		reset() {
+			this.formData.ad = '';
+			this.formData.name = '';
+			this.formData.roleId = 0;
+		}
+    }));
 });
 
-function submitForm()
-{
-	if (validateForm(['#adAccount', 'input[name=role]:checked']))
-	{
-		$('#loading').addClass('active');
-		$('#userForm').submit();
-	}
-	else
-		showAlertDialog('AD帳號，所屬身份為必填');
-}

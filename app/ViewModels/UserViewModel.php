@@ -73,27 +73,6 @@ class UserViewModel extends Fluent
 		};
 	}
 	
-	/* Get search data
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: string
-	 */
-	public function getSearchAd()
-	{
-		return data_get($this->_data, 'search.userAd', '');
-	}
-	
-	public function getSearchName()
-	{
-		return data_get($this->_data, 'search.userDisplayName', '');
-	}
-	
-	public function getSearchArea()
-	{
-		return data_get($this->_data, 'search.userAreaId', 0);
-	}
-	
 	/* Keep user form data
 	 * @params: int
 	 * @params: string
@@ -101,44 +80,15 @@ class UserViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $roleId = 0)
+	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $roleId = 0, $updateAt = '')
     {
 		$this->set('formData.id', $id);
 		$this->set('formData.ad', $adAccount);
-		$this->set('formData.displayName', $displayName);
+		$this->set('formData.name', $displayName);
 		$this->set('formData.roleId', $roleId);
+		$this->set('formData.updateAt', $updateAt);
 	}
 	/* User Data End */
-	
-	/* Get role name of list
-	 * @params: int
-	 * @return: string
-	 */
-	public function getRoleById($roleId)
-	{
-		$list = $this->_data['option']['roleList'];
-		return data_get($list, $roleId, '');
-	}
-	
-	/* Search form */
-	public function selectedSearchArea($areaId)
-	{
-		return ($areaId == $this->getSearchArea());
-	}
-	
-	/* User form */
-	public function checkedArea($areaId)
-	{
-		$userAreaIds = $this->getUserAreaId();
-		
-		return in_array($areaId, $userAreaIds);
-	}
-	
-	public function checkedRole($roleId)
-	{
-		return ($roleId == $this->_data['roleId']);
-	}
-	
 	
 	/* 判別列表Role是否可編或可刪
 	 * @params: 
