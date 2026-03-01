@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\RoleRepository;
+use App\Repositories\ProductRepository;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -10,10 +10,10 @@ use Illuminate\Support\Carbon;
 use Exception;
 use Log;
 
-class RoleService
+class ProductService
 {
 	
-	public function __construct(protected RoleRepository $_repository)
+	public function __construct(protected ProductRepository $_repository)
 	{
 	}
 	
@@ -54,14 +54,15 @@ class RoleService
 	 * @params: array
 	 * @return: array
 	 */
-	public function createRole($name, $group, $permission, $area)
+	public function createProduct($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
 	{
 		try
 		{
-			$permission = json_encode($permission); 
-			$area = json_encode($area);
+			$primaryNo = Str::of($primaryNo)->explode("\r\n")->toArray(); #會過濾空值
+			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")->toArray();
+			$tasteNo = Str::of($tasteNo)->explode("\r\n")->toJson();
 			
-			$this->_repository->insert($name, $group, $permission, $area);
+			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -80,7 +81,7 @@ class RoleService
 	{
 		try
 		{
-			$result = $this->_repository->getById($id);
+			$result = $this->_repository->getRoleById($id);
 			
 			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
 			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
@@ -109,7 +110,7 @@ class RoleService
 			$permission = json_encode($permission); 
 			$area = json_encode($area);
 			
-			$this->_repository->update($id, $name, $group, $permission, $area);
+			$this->_repository->updateRole($id, $name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -128,7 +129,7 @@ class RoleService
 	{
 		try
 		{
-			$this->_repository->remove($roleId);
+			$this->_repository->removeRole($roleId);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)

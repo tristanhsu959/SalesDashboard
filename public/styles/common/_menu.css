@@ -18,6 +18,7 @@ nav.menu {
 	header {
 		position: relative;
 		width: 100%;
+		min-height: 64px;
 		height: 64px;
 		display: flex;
 		justify-content: center;

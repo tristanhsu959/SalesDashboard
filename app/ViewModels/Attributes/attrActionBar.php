@@ -14,7 +14,7 @@ trait attrActionBar
 	 */
 	public function breadcrumb()
 	{
-		$except = [FormAction::SIGNIN->value];
+		$except = [FormAction::SIGNIN->value, FormAction::HOME->value];
 		$breadcrumb	= [];
 		
 		$brand 		= $this->get('brand', NULL);
@@ -26,7 +26,7 @@ trait attrActionBar
 		
 		$breadcrumb[] 	= $function->label();
 		
-		if ($action)
+		if ($action && ! in_array($action->value, $except))
 			$breadcrumb[] = $action->label();
 				
 		return $breadcrumb;

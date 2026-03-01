@@ -37,7 +37,7 @@ class RoleRepository extends Repository
 	 * @params: json string
 	 * @return: boolean
 	 */
-	public function insertRole($name, $group, $permission, $area)
+	public function insert($name, $group, $permission, $area)
 	{
 		$roleData['roleName']		= $name;
 		$roleData['roleGroup'] 		= $group;
@@ -56,7 +56,7 @@ class RoleRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getRoleById($id)
+	public function getById($id)
 	{
 		$db = $this->connectSalesDashboard('role');
 			
@@ -75,7 +75,7 @@ class RoleRepository extends Repository
 	 * @params: json string
 	 * @return: boolean
 	 */
-	public function updateRole($id, $name, $group, $permission, $area)
+	public function update($id, $name, $group, $permission, $area)
 	{
 		#只能用facade
 		
@@ -95,7 +95,7 @@ class RoleRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function RemoveRole($roleId)
+	public function remove($roleId)
 	{
 		$db = $this->connectSalesDashboard('role');
 		$db->where('roleId', '=', $roleId)->delete();

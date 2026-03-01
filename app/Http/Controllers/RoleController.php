@@ -70,7 +70,7 @@ class RoleController extends Controller
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:10',
+            'name' => 'required|max:20',
         ]);
  
         if ($validator->fails()) 
@@ -134,7 +134,7 @@ class RoleController extends Controller
 			return redirect()->route('role.list')->with('msg', '身份識別ID為空值');
 		
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:10',
+            'name' => 'required|max:20',
         ]);
  
         if ($validator->fails()) 

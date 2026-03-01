@@ -1,6 +1,9 @@
 /* User list */
 
 .user-list {
+	padding-left: 1rem;
+	padding-right: 1rem;
+	
 	table tbody {
 		tr td.col-area .tooltip {
 			width: max-content !important;

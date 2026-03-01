@@ -22,7 +22,7 @@
 	
 	<form x-data="roleList" action="" method="post" x-ref="roleListForm">
 		@csrf
-		<div class="role-list">
+		<section class="role-list container">
 			@if(empty(($viewModel->list)))
 			<article class="error-container border">
 				<div class="row">
@@ -66,7 +66,7 @@
 				</tbody>
 			</table>
 			@endif
-		</div>
+		</section>
 	</form>
 @endif
 <!-- Content -->

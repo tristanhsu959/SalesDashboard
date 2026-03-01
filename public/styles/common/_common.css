@@ -23,14 +23,17 @@
 
 /* Width control */
 .w25 {
-	width: 25%;
+	width: calc((100% - 3rem) / 4);
 }
 .w50 {
-	width: 50%;
+	width: calc((100% - 1rem) / 2);
 }
 .w75 {
-	width: 75%;
+	width: calc((100% - 1rem) / 4 * 3);
 }
 .w100 {
 	width: 100%;
+}
+.w30 {
+	width: calc((100% - 2rem) / 3);
 }

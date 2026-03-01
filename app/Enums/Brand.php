@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-enum Brand : string
+enum Brand : int
 {
-	case BAFANG		= 'bafang';
-	case BUYGOOD 	= 'buygood';
+	case BAFANG		= 1;
+	case BUYGOOD 	= 2;
     
 	public function label() : string
     {
@@ -16,12 +16,12 @@ enum Brand : string
 		};
     }
 	
-	/* public static function getByValue($value)
+	public function code()
 	{
-		return match ($value) 
+		return match ($this) 
 		{
-			self::BAFANG->value		=> self::BAFANG,
-			self::BUYGOOD->value	=> self::BUYGOOD,
+			self::BAFANG	=> 'bafang',
+			self::BUYGOOD	=> 'buygood',
         };
-	} */
+	}
 }

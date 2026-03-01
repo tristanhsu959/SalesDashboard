@@ -3,18 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\UserService;
-use App\ViewModels\UserViewModel;
+use App\Services\ProductService;
+use App\ViewModels\ProductViewModel;
 use App\Enums\FormAction;
-use App\Enums\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
-class UserController extends Controller
+class ProductController extends Controller
 {
 	
-	public function __construct(protected UserService $_service, protected UserViewModel $_viewModel)
+	public function __construct(protected ProductService $_service, protected ProductViewModel $_viewModel)
 	{
 	}
 	
@@ -25,48 +24,22 @@ class UserController extends Controller
 	public function list(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
-		$this->_viewModel->keepSearchData();
+		#$this->_viewModel->keepSearchData();
 		
-		$response = $this->_service->getList();
+		#$response = $this->_service->getList();
 		
-		if ($response->status === FALSE)
+		/* if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
 		else
 		{
 			$this->_viewModel->success();
 			$this->_viewModel->list = $response->data;
-		}
+		} */
 		
-		return view('user/list')->with('viewModel', $this->_viewModel);
+		return view('product/list')->with('viewModel', $this->_viewModel);
 	}
 	
-	/* Search
-	 * @params: request
-	 * @return: view
-	 */
-	public function search(Request $request)
-	{
-		$this->_viewModel->initialize(FormAction::LIST);
-		
-		#query params
-		$searchAd		= $request->input('searchAd');
-		$searchName		= $request->input('searchName');
-		$searchRoleId	= $request->input('searchRoleId');
-		
-		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchRoleId);
-		
-		$response = $this->_service->searchList($searchAd, $searchName, $searchRoleId);
-		
-		if ($response->status === FALSE)
-			$this->_viewModel->fail($response->msg);
-		else
-		{
-			$this->_viewModel->success();
-			$this->_viewModel->list = $response->data;
-		}
-		
-		return view('user/list')->with('viewModel', $this->_viewModel);
-	}
+	
 	
 	/* 新增Form
 	 * @params: request
@@ -79,7 +52,7 @@ class UserController extends Controller
 		$this->_viewModel->keepFormData(); #init
 		$this->_viewModel->success();
 		
-		return view('user/detail')->with('viewModel', $this->_viewModel);
+		return view('product/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增 POST
@@ -90,35 +63,39 @@ class UserController extends Controller
 	{
 		#fetch form data
 		$id			= $request->input('id');
-		$adAccount	= $request->input('adAccount');
-		$displayName= $request->input('displayName');
-		$roleId		= $request->input('roleId');
+		$brand		= $request->integer('brand', 0);
+		$name		= $request->input('name');
+		$primaryNo	= $request->input('primaryNo');
+		$secondaryNo= $request->input('secondaryNo');
+		$tasteNo	= $request->input('tasteNo');
+		$status		= $request->boolean('status', FALSE);
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
+		$this->_viewModel->keepFormData($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-            'adAccount' => 'required|max:20',
-			'roleId' => 'required|integer',
+			'brand' => 'required|integer',
+            'name' => 'required|max:15',
+			'primaryNo' => 'required',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('user/detail')->with('viewModel', $this->_viewModel);
+			return view('product/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createUser($adAccount, $displayName, $roleId);
+		$response = $this->_service->createProduct($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('user/detail')->with('viewModel', $this->_viewModel);
+			return view('product/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('user.list')->with('msg', '新增帳號完成');
+			return redirect()->route('product.list')->with('msg', '產品設定完成');
 	}
 	
 	/* 編輯Form
@@ -170,7 +147,7 @@ class UserController extends Controller
 			'roleId' => 'required|integer',
         ]);
  
-        if ($validator->fails()) 
+        if (!$validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
 			return view('user/detail')->with('viewModel', $this->_viewModel);

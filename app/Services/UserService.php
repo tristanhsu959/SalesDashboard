@@ -78,7 +78,7 @@ class UserService
 		try
 		{
 			#Create data
-			$this->_repository->insertUser($adAccount, $displayName, $roleId);
+			$this->_repository->insert($adAccount, $displayName, $roleId);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -97,7 +97,7 @@ class UserService
 	{
 		try
 		{
-			$result = $this->_repository->getUserById($id); 
+			$result = $this->_repository->getById($id); 
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -118,7 +118,7 @@ class UserService
 	{
 		try
 		{
-			$this->_repository->updateUser($userId, $adAccount, $displayName, $roleId);
+			$this->_repository->update($userId, $adAccount, $displayName, $roleId);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
@@ -136,7 +136,7 @@ class UserService
 	{
 		try
 		{
-			$this->_repository->removeUser($userId);
+			$this->_repository->remove($userId);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)

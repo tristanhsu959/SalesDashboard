@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-	<link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet">
+	<!--link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet"-->
 @endpush
 
 @push('scripts')
@@ -14,7 +14,7 @@
 	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
 	@csrf
 	
-	<section class="user-data">
+	<section class="user-data container">
 		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
 		
 		<div class="row">

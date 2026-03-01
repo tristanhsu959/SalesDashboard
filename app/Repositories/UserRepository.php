@@ -64,7 +64,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function insertUser($adAccount, $displayName, $roleId)
+	public function insert($adAccount, $displayName, $roleId)
 	{
 		$db = $this->connectSalesDashboard('user');
 		
@@ -82,7 +82,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getUserById($id)
+	public function getById($id)
 	{
 		$db = $this->connectSalesDashboard('user');
 			
@@ -100,7 +100,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function updateUser($userId, $adAccount, $displayName, $roleId)
+	public function update($userId, $adAccount, $displayName, $roleId)
 	{
 		$db = $this->connectSalesDashboard('user');
 		
@@ -117,7 +117,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function RemoveUser($userId)
+	public function remove($userId)
 	{
 		$db = $this->connectSalesDashboard('user');
 		$db->where('userId', '=', $userId)->delete();
