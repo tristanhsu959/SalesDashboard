@@ -54,7 +54,7 @@
 		</div>
 		<div class="row">
 			<label class="switch field-light-green">
-				<input x-model="formData.status" type="checkbox" name="status" value="1">
+				<input :checked="formData.status" @change="status = $el.checked ? 1 : 0" type="checkbox" name="status" value="1">
 				<span></span>
 				<i class="output" >啟用</i>
 			</label>

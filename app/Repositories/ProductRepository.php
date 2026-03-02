@@ -62,8 +62,6 @@ class ProductRepository extends Repository
 			throw new Exception($e->getMessage());
 		}
 	
-		
-		
 		return TRUE;
 	}
 	
@@ -133,18 +131,51 @@ class ProductRepository extends Repository
 	 * @params: json string
 	 * @return: boolean
 	 */
-	public function updateRole($id, $name, $group, $permission, $area)
+	public function update($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
 	{
-		#只能用facade
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
 		
-		$roleData['roleName']		= $name;
-		$roleData['roleGroup'] 		= $group;
-		$roleData['rolePermission']	= $permission;
-		$roleData['roleArea'] 		= $area;
-		$roleData['updateAt'] 		= now()->format('Y-m-d H:i:s');
+		try 
+		{
+			$this->_updateProduct($id, $brand, $name, $tasteNo, $status);
+			
+			$this->_removeProductNo($id);
+			
+			$isPrimary = TRUE;
+			$this->_insertProductNo($id, $primaryNo, $isPrimary);
+			
+			$isPrimary = FALSE;
+			$this->_insertProductNo($id, $secondaryNo, $isPrimary);
+			
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+	
+		return TRUE;
+	}
+	
+	/* Create product
+	 * @params: int
+	 * @return: array
+	 */
+	private function _updateProduct($id, $brand, $name, $tasteNo, $status)
+	{
+		$data['productBrand']		= $brand;
+		$data['productName'] 		= $name;
+		$data['productTaste'] 		= json_encode($tasteNo);
+		$data['productStatus'] 		= $status;
 		
-		$db = $this->connectSalesDashboard('role');
-		$db->where('roleId', '=', $id)->update($roleData);
+		$db = $this->connectSalesDashboard();
+		$db->table('product')
+			->where('productId', '=', $id)
+			->update($data);
 		
 		return TRUE;
 	}
@@ -153,10 +184,52 @@ class ProductRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function RemoveRole($roleId)
+	public function remove($id)
 	{
-		$db = $this->connectSalesDashboard('role');
-		$db->where('roleId', '=', $roleId)->delete();
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
+		
+		try 
+		{
+			$this->_removeProduct($id);
+			$this->_removeProductNo($id);
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+	
+		return TRUE;
+	}
+	
+	/* Create product no
+	 * @params: int
+	 * @return: array
+	 */
+	private function _removeProduct($id)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->table('product')
+			->where('productId', '=', $id)
+			->delete();
+		
+		return TRUE;
+	}
+	
+	/* Create product no
+	 * @params: int
+	 * @return: array
+	 */
+	private function _removeProductNo($id)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->table('product_no')
+			->where('parentId', '=', $id)
+			->delete();
 		
 		return TRUE;
 	}

@@ -38,7 +38,9 @@ document.addEventListener('alpine:init', () => {
 			this.formData.name = '';
 			this.formData.brand = 0;
 			this.formData.primaryNo = '';
-			this.formData.secondaryNo = ''
+			this.formData.secondaryNo = '';
+			this.formData.tasteNo = '';
+			this.formData.status = 1;
 		}
     }));
 });

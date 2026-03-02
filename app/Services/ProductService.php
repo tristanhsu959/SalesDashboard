@@ -115,21 +115,33 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateRole($id, $name, $group, $permission, $area)
+	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
 	{
 		try
 		{
-			$permission = json_encode($permission); 
-			$area = json_encode($area);
+			$primaryNo = Str::of($primaryNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
 			
-			$this->_repository->updateRole($id, $name, $group, $permission, $area);
-		
+			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
+			
+			$tasteNo = Str::of($tasteNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
+			
+			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯身份失敗');
+			return ResponseLib::initialize()->fail('編輯產品失敗');
 		}
 	}
 	
@@ -137,17 +149,17 @@ class ProductService
 	 * @params: int
 	 * @return: array
 	 */
-	public function deleteRole($roleId)
+	public function deleteProduct($id)
 	{
 		try
 		{
-			$this->_repository->removeRole($roleId);
+			$this->_repository->remove($id);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('刪除身份失敗');
+			return ResponseLib::initialize()->fail('刪除產品失敗');
 		}
 	}
 	
