@@ -42,18 +42,18 @@ class UserRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('user as a');
 			
-		$db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'b.roleArea')
-			->join('role as b', 'b.roleId', '=', 'a.userRoleId');
-		
-		#query conditions
-		if (! is_null($searchAd))
-			$db->where('a.userAd', 'like', "%{$searchAd}%");
-		if (! is_null($searchName))
-			$db->where('a.userDisplayName', 'like', "%{$searchName}%");
-		if (! is_null($searchRoleId))
-			$db->where('a.userRoleId', $searchRoleId);
-		
-		$result = $db->get()->toArray();
+		$result = $db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'b.roleArea')
+			->join('role as b', 'b.roleId', '=', 'a.userRoleId')
+			->when($searchAd, function ($query, $searchAd) {
+				return $query->where('a.userAd', 'like', "%{$searchAd}%");
+			})
+			->when($searchName, function ($query, $searchName) {
+				return $query->where('a.userDisplayName', 'like', "%{$searchName}%");
+			})
+			->when($searchRoleId, function ($query, $searchRoleId) {
+				return $query->where('a.userRoleId', $searchRoleId);
+			})
+			->get()->toArray();
 		
 		$result = Arr::map($result, function ($item, string $key) {
 			$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
