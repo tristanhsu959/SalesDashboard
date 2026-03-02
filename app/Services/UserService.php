@@ -27,11 +27,6 @@ class UserService
 		{
 			$list = $this->_repository->getList();
 			
-			$list = Arr::map($list, function ($item, string $key) {
-				$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
-				return $item;
-			});
-			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
@@ -52,11 +47,6 @@ class UserService
 		try
 		{
 			$list = $this->_repository->getList($searchAd, $searchName, $searchRoleId);
-			
-			$list = Arr::map($list, function ($item, string $key) {
-				$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
-				return $item;
-			});
 			
 			return ResponseLib::initialize($list)->success();
 		}

@@ -1,7 +1,8 @@
 @extends('layouts.app')
+@use('App\Enums\Brand')
 
 @push('styles')
-    <link href="{{ asset('styles/product/list.css') }}" rel="stylesheet">
+    <!--link href="{{ asset('styles/product/list.css') }}" rel="stylesheet"-->
 @endpush
 
 @push('scripts')
@@ -17,10 +18,10 @@
 			<a href="{{ route('product.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
 	</header>
-{{--	
-	<form x-data="userList" action="" method="post" x-ref="userListForm">
+	
+	<form x-data="productList" action="" method="post" x-ref="productListForm">
 		@csrf
-		<div class="user-list">
+		<section class="product-list container">
 			@if(empty(($viewModel->list)))
 			<article class="error-container border">
 				<div class="row">
@@ -28,43 +29,28 @@
 				</div>
 			</article>
 			@else
-			<table class="stripes border">
+			<table class="stripes border odd-blue">
 				<thead>
 					<tr>
 						<th class="min">#</th>
-						<th>AD帳號</th>
-						<th>顯示名稱</th>
-						<th>身份</th>
-						<th>管理區域</th>
-						<th>更新時間</th>
+						<th>品牌</th>
+						<th>產品名稱</th>
+						<th>狀態</th>
 						<th class="right-align">操作</th>
 					</tr>
 				</thead>
 				<tbody>
-				@foreach($viewModel->list as $idx => $user)
+				@foreach($viewModel->list as $idx => $product)
 					<tr>
 						<td>{{ $idx + 1 }}</td>
-						<td>{{ $user['userAd'] }}</td>
-						<td>{{ $user['userDisplayName'] }}</td>
-						<td>{{ $user['roleName'] }}</td>
-						<td class="col-area relative">
-							<span>查看</span>
-							<div class="tooltip max white border shadow">
-							@if (empty($user['roleArea']))
-								<div class="chip round red white-text">未設定</div>
-							@endif
-							
-							@foreach($user['roleArea'] as $area)
-								<div class="chip round cyan white-text">{{ Area::tryFrom($area)->label() }}</div>
-							@endforeach
-							</div>
-						</td>
-						<td class="min">{{ $user['updateAt'] }}</td>
+						<td>{{ Brand::tryFrom($product['productBrand'])->label() }}</td>
+						<td>{{ $product['productName'] }}</td>
+						<td><i x-data="{status: @json($product['productStatus'])}" x-text="status ? 'check_circle':'x_circle'" :class="status ? 'green-text fill':'red-text fill'"></i></td>
 						<td class="right-align action">
-							<a href="{{ route('user.update', [$user['userId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canUpdateThisUser($user['roleGroup'])) >
+							<a href="{{ route('product.update', [$product['productId']]) }}" class="btn-edit button circle small">
 								<i class="small">edit</i>
 							</a>
-							<a @click.prevent="confirmDelete($el.href)" href="{{ route('user.delete', [$user['userId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisUser($user['roleGroup'])) >
+							<a @click.prevent="confirmDelete($el.href)" href="{{ route('product.delete', [$product['productId']]) }}" class="btn-delete button circle small">
 								<i class="small">delete</i>
 							</a>
 						</td>
@@ -73,9 +59,9 @@
 				</tbody>
 			</table>
 			@endif
-		</div>
+		</section>
 	</form>
-	--}}
+
 @endif
 <!-- Content -->
 @endsection

@@ -1,21 +1,7 @@
-/* User list */
+/* Product list */
 
-.user-list {
-	padding-left: 1rem;
-	padding-right: 1rem;
-	
-	table tbody {
-		tr td.col-area .tooltip {
-			width: max-content !important;
-			max-width: none !important;
-			
-			.chip {
-				font-size: .75rem;
-			}
-		}
-	}
-	
+/* .product-list {
 	table.stripes tbody tr:nth-child(odd) {
 		background-color: #e0f7fa;
 	}
-}
+} */

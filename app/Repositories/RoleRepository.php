@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Arr;
 use Exception;
 
 class RoleRepository extends Repository
@@ -26,7 +27,18 @@ class RoleRepository extends Repository
 			->select('roleId', 'roleName', 'roleGroup', 'roleArea', 'updateAt')
 			->get()
 			->toArray();
-				
+		
+		#處理Json type
+		foreach($result as $key => $item)
+		{
+			$result[$key] = Arr::map($item, function ($value, string $key) {
+				if ($key == 'roleArea')
+					return empty($value) ? [] : json_decode($value, TRUE);
+				else
+					return $value;
+			});
+		}
+			
 		return $result;
 	}
 	
@@ -41,8 +53,8 @@ class RoleRepository extends Repository
 	{
 		$roleData['roleName']		= $name;
 		$roleData['roleGroup'] 		= $group;
-		$roleData['rolePermission'] = $permission;
-		$roleData['roleArea'] 		= $area;
+		$roleData['rolePermission'] = json_encode($permission);
+		$roleData['roleArea'] 		= json_encode($area);
 		$roleData['createAt'] 		= now()->format('Y-m-d H:i:s');
 		$roleData['updateAt'] 		= $roleData['createAt'];
 		
@@ -64,6 +76,10 @@ class RoleRepository extends Repository
 					->where('roleId', '=', $id)
 					->get()->first();
 		
+		
+		$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
+		$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+			
 		return $result;
 	}
 	
@@ -78,11 +94,10 @@ class RoleRepository extends Repository
 	public function update($id, $name, $group, $permission, $area)
 	{
 		#只能用facade
-		
 		$roleData['roleName']		= $name;
 		$roleData['roleGroup'] 		= $group;
-		$roleData['rolePermission']	= $permission;
-		$roleData['roleArea'] 		= $area;
+		$roleData['rolePermission']	= json_encode($permission);
+		$roleData['roleArea'] 		= json_encode($area);
 		$roleData['updateAt'] 		= now()->format('Y-m-d H:i:s');
 		
 		$db = $this->connectSalesDashboard('role');

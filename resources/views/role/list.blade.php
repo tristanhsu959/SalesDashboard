@@ -30,7 +30,7 @@
 				</div>
 			</article>
 			@else
-			<table class="stripes border">
+			<table class="stripes border odd-purple">
 				<thead>
 					<tr>
 						<th class="min">#</th>

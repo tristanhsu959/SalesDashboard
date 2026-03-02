@@ -49,7 +49,20 @@ table {
 			width: 100px;
 		}
 	}
+	
+	&.stripes.odd-cyan tbody tr:nth-child(odd) {
+		background-color: #e0f7fa;
+	}
+	
+	&.stripes.odd-purple tbody tr:nth-child(odd) {
+		background-color: #f3e5f5;
+	}
+	
+	&.stripes.odd-blue tbody tr:nth-child(odd) {
+		background-color: #e3f2fd;
+	}
 }
+
 /* Defatul table */
 .d-table {
 	--table-head-bg: #03a9f4; 

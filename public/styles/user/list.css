@@ -11,8 +11,4 @@
 			}
 		}
 	}
-	
-	table.stripes tbody tr:nth-child(odd) {
-		background-color: #e0f7fa;
-	}
 }

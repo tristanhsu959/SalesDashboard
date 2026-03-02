@@ -27,17 +27,6 @@ class ProductService
 		{
 			$list = $this->_repository->getList();
 			
-			#處理Json type
-			foreach($list as $key => $item)
-			{
-				$list[$key] = Arr::map($item, function ($value, string $key) {
-					if ($key == 'roleArea')
-						return empty($value) ? [] : json_decode($value, TRUE);
-					else
-						return $value;
-				});
-			}
-			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
@@ -58,33 +47,56 @@ class ProductService
 	{
 		try
 		{
-			$primaryNo = Str::of($primaryNo)->explode("\r\n")->toArray(); #會過濾空值
-			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")->toArray();
-			$tasteNo = Str::of($tasteNo)->explode("\r\n")->toJson();
+			$primaryNo = Str::of($primaryNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
+			
+			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
+			
+			$tasteNo = Str::of($tasteNo)->explode("\r\n")
+				->reject(function ($value, $key) {
+					return empty($value);
+			})->toArray();
 			
 			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
-		
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新增身份失敗');
+			return ResponseLib::initialize()->fail('新增產品失敗');
 		}
 	}
 	
-	/* Get role by id
+	/* Get product by id
 	 * @params: int
 	 * @return: array
 	 */
-	public function getRoleById($id)
+	public function getProductById($id)
 	{
 		try
 		{
-			$result = $this->_repository->getRoleById($id);
+			$data = $this->_repository->getById($id);
 			
-			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
-			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+			$result = [];
+			#重整資料
+			if (! empty($data))
+			{
+				$collection = collect($data);
+				
+				$result['productId'] 	= $collection->pluck('productId')->first();
+				$result['productBrand'] = $collection->pluck('productBrand')->first();
+				$result['productName'] 	= $collection->pluck('productName')->first();
+				$result['primaryNo'] 	= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
+				$result['secondaryNo'] 	= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
+				$result['tasteNo'] 		= json_decode($collection->pluck('productTaste')->first(), TRUE);
+				$result['productStatus']= $collection->pluck('productStatus')->first();
+			}
 			
 			return ResponseLib::initialize($result)->success();
 		}

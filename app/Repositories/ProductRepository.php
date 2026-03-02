@@ -14,23 +14,23 @@ class ProductRepository extends Repository
 		
 	}
 	/* Case-sensitive in ubuntu */
-	/* Get role list from DB 
+	/* Get product list from DB 
 	 * @params: 
 	 * @return: array
 	 */
 	public function getList()
 	{
-		$db = $this->connectSalesDashboard('role');
+		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db
-			->select('roleId', 'roleName', 'roleGroup', 'roleArea', 'updateAt')
+			->select('productId', 'productName', 'productBrand', 'productStatus')
 			->get()
 			->toArray();
-				
+			
 		return $result;
 	}
 	
-	/* Create Role
+	/* Create product
 	 * @params: string
 	 * @params: string
 	 * @params: json string
@@ -44,24 +44,22 @@ class ProductRepository extends Repository
 		
 		try 
 		{
-			$this->_insertProduct($brand, $name, $tasteNo, $status);
+			$insertId = $this->_insertProduct($brand, $name, $tasteNo, $status);
+			
+			$isPrimary = TRUE;
+			$this->_insertProductNo($insertId, $primaryNo, $isPrimary);
+			
+			$isPrimary = FALSE;
+			$this->_insertProductNo($insertId, $secondaryNo, $isPrimary);
+			
+			$db->commit();
 
-			DB::connection('mysql_log')
-				->table('system_status')
-				->where('id', 1)
-				->update(['last_sync' => now()]);
-
-			// 3. 全部成功則提交
-			DB::connection('mysql_log')->commit();
-
-			return "Transaction Successful";
-
-		} catch (Exception $e) {
-			// 4. 發生錯誤則回滾
-			DB::connection('mysql_log')->rollBack();
-
-			// 依需求處理錯誤或拋出
-			return "Transaction Failed: " . $e->getMessage();
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
 		}
 	
 		
@@ -69,7 +67,7 @@ class ProductRepository extends Repository
 		return TRUE;
 	}
 	
-	/* Get Role Data
+	/* Create product
 	 * @params: int
 	 * @return: array
 	 */
@@ -77,7 +75,7 @@ class ProductRepository extends Repository
 	{
 		$data['productBrand']		= $brand;
 		$data['productName'] 		= $name;
-		$data['productTaste'] 		= $tasteNo;
+		$data['productTaste'] 		= json_encode($tasteNo);
 		$data['productStatus'] 		= $status;
 		
 		$db = $this->connectSalesDashboard();
@@ -87,35 +85,42 @@ class ProductRepository extends Repository
 		return $insertId;
 	}
 	
-	/* Get Role Data
+	/* Create product no
 	 * @params: int
 	 * @return: array
 	 */
-	private function _insertProductNo($primaryNo, $secondaryNo)
+	private function _insertProductNo($parentId, $erpNos, $isPrimary)
 	{
-		$data['productBrand']		= $brand;
-		$data['productName'] 		= $name;
-		$data['productTaste'] 		= $tasteNo;
-		$data['productStatus'] 		= $status;
+		$items = [];
 		
-		$db = $this->connectSalesDashboard();
-		$insertId = $db->table('product')
-			->insertGetId($data);
-		
-		return $insertId;
-	}
-	
-	/* Get Role Data
-	 * @params: int
-	 * @return: array
-	 */
-	public function getRoleById($id)
-	{
-		$db = $this->connectSalesDashboard('role');
+		foreach($erpNos as $no)
+		{
+			$data['parentId']	= $parentId;
+			$data['erpNo'] 		= $no;
+			$data['isPrimary'] 	= $isPrimary;
 			
-		$result = $db->select('roleId', 'roleName', 'roleGroup', 'rolePermission', 'roleArea', 'updateAt')
-					->where('roleId', '=', $id)
-					->get()->first();
+			$items[] = $data;
+		}
+		
+		$db = $this->connectSalesDashboard();
+		$db->table('product_no')->insert($items);
+		
+		return TRUE;
+	}
+	
+	/* Get product by id
+	 * @params: int
+	 * @return: array
+	 */
+	public function getById($id)
+	{
+		$db = $this->connectSalesDashboard('product');
+			
+		$result = $db->select('productId', 'productBrand', 'productName', 'productTaste', 'productStatus')
+					->addSelect('erpNo', 'isPrimary')
+					->leftJoin('product_no', 'parentId', '=', 'productId')
+					->where('productId', '=', $id)
+					->get();
 		
 		return $result;
 	}

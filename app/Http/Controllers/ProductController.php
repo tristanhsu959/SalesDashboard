@@ -24,17 +24,16 @@ class ProductController extends Controller
 	public function list(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
-		#$this->_viewModel->keepSearchData();
 		
-		#$response = $this->_service->getList();
+		$response = $this->_service->getList();
 		
-		/* if ($response->status === FALSE)
+		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
 		else
 		{
 			$this->_viewModel->success();
 			$this->_viewModel->list = $response->data;
-		} */
+		}
 		
 		return view('product/list')->with('viewModel', $this->_viewModel);
 	}
@@ -109,18 +108,18 @@ class ProductController extends Controller
 		$this->_viewModel->initialize(FormAction::UPDATE);
 		
 		if (empty($id))
-			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
+			return redirect()->route('product.list')->with('msg', '產品識別ID為空值');
 		
-		$response = $this->_service->getUserById($id);
+		$response = $this->_service->getProductById($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('user.list')->with('msg', $response->msg);
+			return redirect()->route('product.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['userId'], $data['userAd'], $data['userDisplayName'], $data['userRoleId'], $data['updateAt']);
+		$this->_viewModel->keepFormData($data['productId'], $data['productBrand'], $data['productName'], $data['primaryNo'], $data['secondaryNo'],  $data['tasteNo'], $data['productStatus']);
 		$this->_viewModel->success();
 		
-		return view('user/detail')->with('viewModel', $this->_viewModel);
+		return view('product/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form

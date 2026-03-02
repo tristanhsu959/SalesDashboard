@@ -55,6 +55,11 @@ class UserRepository extends Repository
 		
 		$result = $db->get()->toArray();
 		
+		$result = Arr::map($result, function ($item, string $key) {
+			$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
+			return $item;
+		});
+			
 		return $result;
 	}
 	

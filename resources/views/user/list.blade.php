@@ -62,7 +62,7 @@
 				</div>
 			</article>
 			@else
-			<table class="stripes border">
+			<table class="stripes border odd-cyan">
 				<thead>
 					<tr>
 						<th class="min">#</th>

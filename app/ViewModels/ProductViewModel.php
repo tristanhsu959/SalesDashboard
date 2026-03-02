@@ -8,6 +8,7 @@ use App\Enums\Brand;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Fluent;
 
 class ProductViewModel extends Fluent
@@ -66,6 +67,10 @@ class ProductViewModel extends Fluent
 	 */
 	public function keepFormData($id = 0, $brand = 0, $name = '', $primaryNo = '', $secondaryNo = '', $tasteNo = '', $status = TRUE)
     {
+		$primaryNo	= is_array($primaryNo) ? Arr::join($primaryNo, "\r\n") : $primaryNo;
+		$secondaryNo= is_array($secondaryNo) ? Arr::join($secondaryNo, "\r\n") : $secondaryNo;
+		$tasteNo 	= is_array($tasteNo) ? Arr::join($tasteNo, "\r\n") : $tasteNo;
+		
 		$this->set('formData.id', $id);
 		$this->set('formData.brand', $brand);
 		$this->set('formData.name', $name);

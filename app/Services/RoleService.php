@@ -27,17 +27,6 @@ class RoleService
 		{
 			$list = $this->_repository->getList();
 			
-			#處理Json type
-			foreach($list as $key => $item)
-			{
-				$list[$key] = Arr::map($item, function ($value, string $key) {
-					if ($key == 'roleArea')
-						return empty($value) ? [] : json_decode($value, TRUE);
-					else
-						return $value;
-				});
-			}
-			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
@@ -58,9 +47,6 @@ class RoleService
 	{
 		try
 		{
-			$permission = json_encode($permission); 
-			$area = json_encode($area);
-			
 			$this->_repository->insert($name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
@@ -81,9 +67,6 @@ class RoleService
 		try
 		{
 			$result = $this->_repository->getById($id);
-			
-			$result['rolePermission'] 	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
-			$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
 			
 			return ResponseLib::initialize($result)->success();
 		}
@@ -106,9 +89,6 @@ class RoleService
 	{
 		try
 		{
-			$permission = json_encode($permission); 
-			$area = json_encode($area);
-			
 			$this->_repository->update($id, $name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
