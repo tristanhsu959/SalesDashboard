@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\NewItemController;
 
 use App\Http\Controllers\BaFang\NewReleaseController as BfNewReleaseController;
 
@@ -68,14 +69,14 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	});
 	
 	/***** 新品設定 *****/
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
-		Route::get('product', [ProductController::class, 'list'])->name('products');
-		Route::get('product/list', [ProductController::class, 'list'])->name('product.list');
-		Route::get('product/create', [ProductController::class, 'showCreate'])->name('product.create');
-		Route::post('product/create', [ProductController::class, 'create'])->name('product.create.post');
-		Route::get('product/update/{id}', [ProductController::class, 'showUpdate'])->name('product.update');
-		Route::post('product/update', [ProductController::class, 'update'])->name('product.update.post');
-		Route::post('product/delete/{id}', [ProductController::class, 'delete'])->name('product.delete');
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::NEW_ITEM->value, ':')])->group(function(){
+		Route::get('new_item', [NewItemController::class, 'list'])->name('new_items');
+		Route::get('new_item/list', [NewItemController::class, 'list'])->name('new_item.list');
+		Route::get('new_item/create', [NewItemController::class, 'showCreate'])->name('new_item.create');
+		Route::post('new_item/create', [NewItemController::class, 'create'])->name('new_item.create.post');
+		Route::get('new_item/update/{id}', [NewItemController::class, 'showUpdate'])->name('new_item.update');
+		Route::post('new_item/update', [NewItemController::class, 'update'])->name('new_item.update.post');
+		Route::post('new_item/delete/{id}', [NewItemController::class, 'delete'])->name('new_item.delete');
 	});
 	
 	/***** 身份管理 *****/

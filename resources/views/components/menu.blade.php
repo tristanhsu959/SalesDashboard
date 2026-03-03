@@ -5,6 +5,7 @@
 		<img src="{{ asset('images/logo.png') }}" />
 	</header>
 	
+	<div class="container responsive">
 	<template x-for="(groups, key) in menus">
 		<details x-data="{ isOpen: groups.some(item => currentPath.includes(item.url)) }" :open="isOpen" @toggle="isOpen = $el.open">
 			<summary>
@@ -22,4 +23,5 @@
 			</template>
 		</details>
 	</template>
+	</div>
 </nav>

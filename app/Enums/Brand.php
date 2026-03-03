@@ -24,4 +24,11 @@ enum Brand : int
 			self::BUYGOOD	=> 'buygood',
         };
 	}
+	
+	public static function toArray(): array 
+	{
+        return collect(self::cases())->mapWithKeys(function ($case) {
+            return [$case->value => $case->label()];
+        })->all();
+    }
 }
