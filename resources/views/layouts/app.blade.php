@@ -31,8 +31,10 @@
 		@vite(['resources/js/app.js'])
 	</head>
 
-	<body class="responsive">
-		<progress class="light-blue-text" x-data="{ show: false }" x-show="show" x-cloak @showLoading.window="show = true"></progress>
+	<body class="responsive" x-cloak>
+		<div x-data x-cloak x-show="$store.app.isLoading">
+			<progress class="light-blue-text"></progress>
+		</div>
 		
 		@if(AppManager::hasAuth())
 			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->url()"/>

@@ -14,7 +14,7 @@
 			
 			<template x-for="item in groups">
 			<div class="item">
-				<a :href="item.url" :class="[currentPath.includes(item.url) ? 'active' : '', item.style.color]" class="responsive" @click="$dispatch('showLoading').window">
+				<a :href="item.url" :class="[currentPath.includes(item.url) ? 'active' : '', item.style.color]" class="responsive" @click="Alpine.store('app').isLoading = true">
 					<i x-text="item.style.icon"></i>
 					<span x-text="item.name" ></span>
 				</a>

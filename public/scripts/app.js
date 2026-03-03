@@ -55,4 +55,6 @@ document.addEventListener('alpine:init', () => {
 			ui('#modal-dialog');
 		}
 	});
+	
+	Alpine.store('app', { isLoading: false });
 });
