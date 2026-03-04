@@ -18,28 +18,12 @@ class NewItemRepository extends Repository
 	 * @params: 
 	 * @return: array
 	 */
-	public function getProucts()
-	{
-		$db = $this->connectSalesDashboard('product');
-			
-		$result = $db
-			->select('productId', 'productName', 'productBrand')
-			->get()
-			->toArray();
-			
-		return $result;
-	}
-	
-	/* Get product list from DB 
-	 * @params: 
-	 * @return: array
-	 */
-	public function getSettings()
+	public function getList()
 	{
 		$db = $this->connectSalesDashboard('new_item');
 			
 		$result = $db
-			->select('newItemProductId', 'saleDate', 'saleEndDate')
+			->select('newItemId', 'newItemProductId', 'newItemName', 'newItemSaleDate', 'checkTaste', 'updateAt')
 			->get()
 			->toArray();
 			

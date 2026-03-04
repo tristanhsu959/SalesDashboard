@@ -25,7 +25,7 @@ enum Functions : string
 			self::HOME				=> '首頁',
 			self::USER				=> '帳號管理',
 			self::ROLE 				=> '身份管理',
-			self::PRODUCT 			=> '產品基本資料',
+			self::PRODUCT 			=> '產品料號設定',
 			self::NEW_ITEM 			=> '新品設定',
 			#八方
 			self::BF_NEW_RELEASE	=> '新品銷售',

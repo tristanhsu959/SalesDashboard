@@ -48,8 +48,8 @@
   			</div>
 			<div class="field label border field-dark-blue w30">
 				<textarea x-model="formData.tasteNo" name="tasteNo" rows="10" placeholder=" "></textarea>
-				<label>加值序號</label>
-				<output class="red-text">POS SALE011欄位，格式：TasteId:TasteSno<br/>每個序號以換行分隔</output>
+				<label>加值關鍵字</label>
+				<output class="red-text">每個關鍵字以換行分隔</output>
   			</div>
 		</div>
 		<div class="row">

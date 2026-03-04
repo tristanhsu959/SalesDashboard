@@ -12,11 +12,16 @@
 @section('content')
 <!-- Content -->
 @if($viewModel->status() === TRUE)
+	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+		<nav>
+			<a href="{{ route('new_item.create') }}" class="btn-create button circle"><i>add</i></a>
+		</nav>
+	</header>
 
 	<form x-data='newItemList(@json($viewModel->list), @json($viewModel->options))' action="" method="post" x-ref="newItemListForm">
 		@csrf
 		<section class="product-list container">
-			@if(empty(($viewModel->list['products'])))
+			@if(empty(($viewModel->list)))
 			<article class="error-container border">
 				<div class="row">
 					<i>info</i><div class="max">無新品設定資料</div>
@@ -40,12 +45,12 @@
 								<h6 class="small" x-text="item.productName">Headline</h6>
 							</div>
 							<div>
-  <button>
-    <i>today</i>
-    <span>Date</span>
-  </button>
-  <input type="date">
-</div>
+							  <button>
+								<i>today</i>
+								<span>Date</span>
+							  </button>
+							  <input type="date">
+							</div>
 						</li>
 						</template>
 					</ul>

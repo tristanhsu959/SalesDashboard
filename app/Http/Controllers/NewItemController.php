@@ -51,7 +51,7 @@ class NewItemController extends Controller
 		$this->_viewModel->keepFormData(); #init
 		$this->_viewModel->success();
 		
-		return view('product/detail')->with('viewModel', $this->_viewModel);
+		return view('new_item/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增 POST

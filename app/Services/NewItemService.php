@@ -25,10 +25,7 @@ class NewItemService
 	{
 		try
 		{
-			$products = $this->_repository->getProucts();
-			$list['products'] = collect($products)->groupBy('productBrand')->toArray();
-			$list['settings'] = $this->_repository->getSettings();
-			
+			$list = $this->_repository->getList();
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)

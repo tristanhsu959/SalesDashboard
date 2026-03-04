@@ -5,12 +5,12 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/product/detail.js') }}" defer></script>
+    <script src="{{ asset('scripts/new_item/detail.js') }}" defer></script>
 @endpush
 
 @section('content')
 
-<form x-data='productForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+<form x-data='newItemForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
 	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
 	@csrf
 	

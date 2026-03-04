@@ -65,19 +65,13 @@ class NewItemViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brand = 0, $name = '', $primaryNo = '', $secondaryNo = '', $tasteNo = '', $status = TRUE)
+	public function keepFormData($id = 0, $productId = 0, $name = '', $saleDate = '', $checkTaste = FALSE, $updateAt = '')
     {
-		$primaryNo	= is_array($primaryNo) ? Arr::join($primaryNo, "\r\n") : $primaryNo;
-		$secondaryNo= is_array($secondaryNo) ? Arr::join($secondaryNo, "\r\n") : $secondaryNo;
-		$tasteNo 	= is_array($tasteNo) ? Arr::join($tasteNo, "\r\n") : $tasteNo;
-		
 		$this->set('formData.id', $id);
-		$this->set('formData.brand', $brand);
+		$this->set('formData.productId', $productId);
 		$this->set('formData.name', $name);
-		$this->set('formData.primaryNo', $primaryNo);
-		$this->set('formData.secondaryNo', $secondaryNo);
-		$this->set('formData.tasteNo', $tasteNo);
-		$this->set('formData.status', $status);
-		$this->set('formData.buygoodId', Brand::BUYGOOD->value); #給js用
+		$this->set('formData.saleDate', $saleDate);
+		$this->set('formData.checkTaste', $checkTaste);
+		$this->set('formData.updateAt', $updateAt);
 	}
 }
