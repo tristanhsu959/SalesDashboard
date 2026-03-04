@@ -30,6 +30,22 @@ class NewItemRepository extends Repository
 		return $result;
 	}
 	
+	/* Get product settings
+	 * @params: 
+	 * @return: array
+	 */
+	public function getProductSettings()
+	{
+		$db = $this->connectSalesDashboard('product');
+			
+		$result = $db
+			->select('productId', 'productName', 'productBrand')
+			->get()
+			->toArray();
+			
+		return $result;
+	}
+	
 	/* Create product
 	 * @params: string
 	 * @params: string

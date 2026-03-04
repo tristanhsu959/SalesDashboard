@@ -1,18 +1,20 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('productForm', (formData) => ({
+	Alpine.data('newItemForm', (formData, options) => ({
 		formData: formData,
-		hasSecondaryNo: false,
+		options: options,
 		errors: new Set(),
 		
 		init() {
-			this.initErpNoInput();
+			//formData.brand = Number(formData.brand);
+			const selectEl = document.querySelector('select[name=productId]');
+			selectEl.value = "5"; // 設定目標值
+			selectEl.dispatchEvent(new Event('input', { bubbles: true })); 
 		},
 		
-		initErpNoInput() {
-			this.errors.delete('brand');
-			this.hasSecondaryNo = (this.formData.brand == formData.buygoodId);
+		get productSettings() {
+			return this.formData.brand ? this.options.products[this.formData.brand] : [];
 		},
 		
 		validate() {

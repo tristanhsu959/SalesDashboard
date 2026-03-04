@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Services\NewItemService;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\Enums\Brand;
@@ -15,7 +16,7 @@ class NewItemViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct()
+	public function __construct(protected NewItemService $_service)
 	{
 		$this->function		= Functions::PRODUCT;
 		$this->action 		= FormAction::LIST; 
@@ -43,6 +44,9 @@ class NewItemViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
+		
+		if ($this->action != FormAction::LIST)
+			$this->set('options.products', $this->_service->getProductOptions()); 
 	}
 	
 	/* Form submit action
@@ -53,8 +57,8 @@ class NewItemViewModel extends Fluent
     {
 		return match($this->action)
 		{
-			FormAction::CREATE => route('product.create.post'),
-			FormAction::UPDATE => route('product.update.post'),
+			FormAction::CREATE => route('new_item.create.post'),
+			FormAction::UPDATE => route('new_item.update.post'),
 		};
 	}
 	
@@ -65,9 +69,10 @@ class NewItemViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $productId = 0, $name = '', $saleDate = '', $checkTaste = FALSE, $updateAt = '')
+	public function keepFormData($id = 0, $brand = Brand::BAFANG->value, $productId = 6, $name = '', $saleDate = '', $checkTaste = FALSE, $updateAt = '')
     {
 		$this->set('formData.id', $id);
+		$this->set('formData.brand', 2);
 		$this->set('formData.productId', $productId);
 		$this->set('formData.name', $name);
 		$this->set('formData.saleDate', $saleDate);

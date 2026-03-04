@@ -35,6 +35,32 @@ class NewItemService
 		}
 	}
 	
+	/* Get product for options
+	 * @params: int
+	 * @return: array
+	 */
+	public function getProductOptions()
+	{
+		try
+		{
+			$list = $this->_repository->getProductSettings();
+			
+			$list = collect($list)->groupBy('productBrand')->map(function ($item, $key){
+				$item = $item->map(function ($item, $key){
+					return ['id' => $item['productId'], 'name' => $item['productName']];
+				});
+				return $item;
+			})->toArray();
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return [];
+		}
+	}
+	
 	/* Create role
 	 * @params: string
 	 * @params: int

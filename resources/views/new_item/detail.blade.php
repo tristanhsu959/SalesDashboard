@@ -10,7 +10,9 @@
 
 @section('content')
 
-<form x-data='newItemForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+<form x-data='newItemForm(@json($viewModel->formData), @json($viewModel->options))' 
+	x-effect="productSettings;"
+	action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
 	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
 	@csrf
 	
@@ -18,40 +20,35 @@
 		
 		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brand')">
 			<i class="small red-text">asterisk</i>
-			<select x-model="formData.brand" name="brand" @change="initErpNoInput">
+			<select x-model="formData.brand" name="brand" @change="errors.delete('brand'); productSettings; $nextTick(() => ui())">
 				<option value="">請選擇</option>
-				@foreach($viewModel->options['brands'] as $brand)
-					<option value="{{ $brand->value }}">{{ $brand->label() }}</option>
+				@foreach($viewModel->options['brands'] as $value => $brand)
+					<option value="{{$value}}">{{$brand}}</option>
 				@endforeach
 			</select>
 			<label>品牌</label>
 			<i>arrow_drop_down</i>
 		</div>
 		
+		<div class="field label suffix border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'brand')">
+			<i class="small red-text">asterisk</i>
+			<select x-model="formData.productId" x-init="$watch('productSettings', () => $nextTick(() => ui()))" name="productId" @change="errors.delete('productId');">
+				<option value="">請選擇</option>
+				<template x-for="item in productSettings">
+					<option x-text="item.name" :value="item.id"></option>
+				</template>
+			</select>
+			<label>產品料號</label>
+			<i>arrow_drop_down</i>
+		</div>
+		
 		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'name')">
 			<i class="small red-text">asterisk</i>
 			<input type="text" name="name" maxlength="15" x-model="formData.name" @input="errors.delete('name')">
-			<label>產品名稱</label>
+			<label>新品名稱</label>
 		</div>
+		
 		 
-		<div class="row top-align">
-			<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'primaryNo')">
-				<i class="small red-text">asterisk</i>
-				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="10" placeholder=" "></textarea>
-				<label>主要ERP No</label>
-				<output class="red-text">每個序號以換行分隔</output>
-  			</div>
-			<div x-show="hasSecondaryNo" class="field label border field-dark-blue w30">
-				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="10" placeholder=" "></textarea>
-				<label>複合店ERP No</label>
-				<output class="red-text">每個序號以換行分隔</output>
-  			</div>
-			<div class="field label border field-dark-blue w30">
-				<textarea x-model="formData.tasteNo" name="tasteNo" rows="10" placeholder=" "></textarea>
-				<label>加值序號</label>
-				<output class="red-text">POS SALE011欄位，格式：TasteId:TasteSno<br/>每個序號以換行分隔</output>
-  			</div>
-		</div>
 		<div class="row">
 			<label class="switch field-light-green">
 				<input :checked="formData.status" @change="status = $el.checked ? 1 : 0" type="checkbox" name="status" value="1">
