@@ -1,0 +1,12 @@
+/* Product list */
+
+.new-item-list {
+	ul.list li {
+		i.extra {
+			--_size: 2.5rem;
+		}
+		.sale-date {
+			color: rgba(0, 0, 0, .61);
+		}
+	}
+}

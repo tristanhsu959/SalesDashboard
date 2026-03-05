@@ -61,40 +61,40 @@ class NewItemController extends Controller
 	public function create(Request $request)
 	{
 		#fetch form data
-		$id			= $request->input('id');
-		$brand		= $request->integer('brand', 0);
-		$name		= $request->input('name');
-		$primaryNo	= $request->input('primaryNo');
-		$secondaryNo= $request->input('secondaryNo');
-		$tasteNo	= $request->input('tasteNo');
-		$status		= $request->boolean('status', FALSE);
+		$id				= $request->integer('id');
+		$brand			= $request->integer('brand', 0);
+		$productId		= $request->integer('productId', 0);
+		$name			= $request->input('name');
+		$saleDate		= $request->input('saleDate');
+		$tasteKeyWord	= $request->input('tasteKeyWord');
+		$status			= $request->boolean('status', FALSE);
 		
-		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+		$this->_viewModel->keepFormData($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-			'brand' => 'required|integer',
-            'name' => 'required|max:15',
-			'primaryNo' => 'required',
+			'brand' 	=> 'required|integer',
+			'productId' => 'required|integer',
+            'name' 		=> 'required|max:30',
+			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('product/detail')->with('viewModel', $this->_viewModel);
+			return view('new_item/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createProduct($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+		$response = $this->_service->createNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('product/detail')->with('viewModel', $this->_viewModel);
+			return view('new_item/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('product.list')->with('msg', '產品設定完成');
+			return redirect()->route('new_item.list')->with('msg', '新品設定完成');
 	}
 	
 	/* 編輯Form
@@ -108,18 +108,18 @@ class NewItemController extends Controller
 		$this->_viewModel->initialize(FormAction::UPDATE);
 		
 		if (empty($id))
-			return redirect()->route('product.list')->with('msg', '產品識別ID為空值');
+			return redirect()->route('new_item.list')->with('msg', '新品識別ID為空值');
 		
-		$response = $this->_service->getProductById($id);
+		$response = $this->_service->getNewItemById($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('product.list')->with('msg', $response->msg);
+			return redirect()->route('new_item.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['productId'], $data['productBrand'], $data['productName'], $data['primaryNo'], $data['secondaryNo'],  $data['tasteNo'], $data['productStatus']);
+		$this->_viewModel->keepFormData($data['newItemId'], $data['newItemBrand'], $data['newItemProductId'], $data['newItemName'], $data['newItemSaleDate'], $data['newItemTaste'],  $data['newItemStatus'], $data['updateAt']);
 		$this->_viewModel->success();
 		
-		return view('product/detail')->with('viewModel', $this->_viewModel);
+		return view('new_item/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form
@@ -128,43 +128,44 @@ class NewItemController extends Controller
 	 */
 	public function update(Request $request)
 	{
-		$id			= $request->input('id');
-		$brand		= $request->integer('brand', 0);
-		$name		= $request->input('name');
-		$primaryNo	= $request->input('primaryNo');
-		$secondaryNo= $request->input('secondaryNo');
-		$tasteNo	= $request->input('tasteNo');
-		$status		= $request->boolean('status', FALSE);
+		$id				= $request->integer('id');
+		$brand			= $request->integer('brand', 0);
+		$productId		= $request->integer('productId', 0);
+		$name			= $request->input('name');
+		$saleDate		= $request->input('saleDate');
+		$tasteKeyWord	= $request->input('tasteKeyWord');
+		$status			= $request->boolean('status', FALSE);
 		
-		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+		$this->_viewModel->keepFormData($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if (empty($id))
-			return redirect()->route('product.list')->with('msg', '產品識別ID為空值');
+			return redirect()->route('new_item.list')->with('msg', '新品識別ID為空值');
 		
+		#validate input
 		$validator = Validator::make($request->all(), [
 			'id' => 'required|integer',
-            'brand' => 'required|integer',
-            'name' => 'required|max:15',
-			'primaryNo' => 'required',
+			'brand' 	=> 'required|integer',
+			'productId' => 'required|integer',
+            'name' 		=> 'required|max:30',
+			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
- 
-        if ($validator->fails()) 
+		
+		if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('product/detail')->with('viewModel', $this->_viewModel);
+			return view('new_item/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+		$response = $this->_service->updateNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('product/detail')->with('viewModel', $this->_viewModel);
+			return view('new_item/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('product.list')->with('msg', '產品編輯完成');
+			return redirect()->route('new_item.list')->with('msg', '新品編輯完成');
 	}
 	
 	/* 刪除

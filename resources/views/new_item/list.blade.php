@@ -2,7 +2,7 @@
 @use('App\Enums\Brand')
 
 @push('styles')
-    <!--link href="{{ asset('styles/product/list.css') }}" rel="stylesheet"-->
+    <link href="{{ asset('styles/new_item/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -18,9 +18,9 @@
 		</nav>
 	</header>
 
-	<form x-data='newItemList(@json($viewModel->list), @json($viewModel->options))' action="" method="post" x-ref="newItemListForm">
+	<form x-data='newItemList(@json($viewModel->list),@json($viewModel->options["brands"]) )' action="" method="post" x-ref="newItemListForm">
 		@csrf
-		<section class="product-list container">
+		<section class="new-item-list container">
 			@if(empty(($viewModel->list)))
 			<article class="error-container border">
 				<div class="row">
@@ -30,26 +30,28 @@
 			@else
 			<div>
 				<div class="tabs center-align">
-					<template x-for="(brand, value) in options.brands">
-						<a :data-ui="'#page-' + value" x-text="brand" :class="activeTab == value ? 'active':''"></a>
+					<template x-for="(brand, key) in brands" :key="key">
+						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''"></a>
 					</template>
 				</div>
 				
-				<template x-for="(brand, value) in options.brands">
-				<div class="page padding" :id="'page-' + value" :class="activeTab == value ? 'active':''">
+				<template x-for="(brand, key) in brands">
+				<div class="page padding" :id="'page-' + key" :class="activeTab == key ? 'active':''">
 					<ul class="list border">
-						<template x-for="item in products[value]">
+						<template x-for="item in newItems[key]">
 						<li>
-							<button class="circle">A</button>
+							<i class="fill extra" x-text="item.newItemStatus ? 'check_circle':'cancel'" :class="item.newItemStatus ? 'green-text':'red-text'"></i>
 							<div class="max">
-								<h6 class="small" x-text="item.productName">Headline</h6>
+								<h6 x-text="item.newItemName"></h6>
+								<div class="small sale-date" x-text="'發售日 ' + item.newItemSaleDate"></div>
 							</div>
 							<div>
-							  <button>
-								<i>today</i>
-								<span>Date</span>
-							  </button>
-							  <input type="date">
+								<a :href="'{{ route('new_item.update', ['_ID_']) }}'.replace('_ID_', item.newItemId)" class="btn-edit button circle small">
+									<i class="small">edit</i>
+								</a>
+								<a :href="'{{ route('user.delete', ['_ID_']) }}'.replace('_ID_', item.newItemId)" @click.prevent="confirmDelete($el.href)" class="btn-delete button circle small">
+									<i class="small">delete</i>
+								</a>
 							</div>
 						</li>
 						</template>

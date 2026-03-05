@@ -4,28 +4,30 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('newItemForm', (formData, options) => ({
 		formData: formData,
 		options: options,
+		products: [],
 		errors: new Set(),
 		
 		init() {
-			//formData.brand = Number(formData.brand);
-			const selectEl = document.querySelector('select[name=productId]');
-			selectEl.value = "5"; // 設定目標值
-			selectEl.dispatchEvent(new Event('input', { bubbles: true })); 
+			if (this.formData.brand)
+				this.updateProducts();
 		},
 		
-		get productSettings() {
-			return this.formData.brand ? this.options.products[this.formData.brand] : [];
+		updateProducts() {
+			const selectedBrand = this.formData.brand;
+			this.products = this.options.products[selectedBrand] || [];
 		},
 		
 		validate() {
 			this.errors.clear();
 			
-			if (Helper.isEmpty(this.formData.name))
-				this.errors.add('name');
 			if (this.formData.brand == 0)
 				this.errors.add('brand');
-			if (this.formData.primaryNo == '')
-				this.errors.add('primaryNo');
+			if (this.formData.productId == 0)
+				this.errors.add('productId');
+			if (Helper.isEmpty(this.formData.name))
+				this.errors.add('name');
+			if (Helper.isEmpty(this.formData.saleDate))
+				this.errors.add('saleDate');
 			
 			if (this.errors.size == 0)
 			{
@@ -37,11 +39,11 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		reset() {
+			this.formData.brand = 1;
+			this.formData.productId = 0;
 			this.formData.name = '';
-			this.formData.brand = 0;
-			this.formData.primaryNo = '';
-			this.formData.secondaryNo = '';
-			this.formData.tasteNo = '';
+			this.formData.saleDate = '';
+			this.formData.tasteKeyWord = '';
 			this.formData.status = 1;
 		}
     }));

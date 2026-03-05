@@ -23,14 +23,18 @@ class NewItemRepository extends Repository
 		$db = $this->connectSalesDashboard('new_item');
 			
 		$result = $db
-			->select('newItemId', 'newItemProductId', 'newItemName', 'newItemSaleDate', 'checkTaste', 'updateAt')
-			->get()
-			->toArray();
-			
+			->select('newItemId', 'newItemBrand', 'newItemProductId', 'newItemName', 'newItemSaleDate', 'newItemTaste', 'newItemStatus', 'updateAt')
+			->get();
+		
+		$result = $result->map(function($item, $key){
+			$item['newItemTaste'] = json_decode( $item['newItemTaste'], TRUE);
+			return $item;
+		})->toArray();
+		
 		return $result;
 	}
 	
-	/* Get product settings
+	/* Get product settings for options
 	 * @params: 
 	 * @return: array
 	 */
@@ -46,78 +50,28 @@ class NewItemRepository extends Repository
 		return $result;
 	}
 	
-	/* Create product
+	/* Create new item
+	 * @params: int
+	 * @params: int
 	 * @params: string
 	 * @params: string
-	 * @params: json string
-	 * @params: json string
-	 * @return: boolean
-	 */
-	public function insert($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
-	{
-		$db = $this->connectSalesDashboard();
-		$db->beginTransaction();
-		
-		try 
-		{
-			$insertId = $this->_insertProduct($brand, $name, $tasteNo, $status);
-			
-			$isPrimary = TRUE;
-			$this->_insertProductNo($insertId, $primaryNo, $isPrimary);
-			
-			$isPrimary = FALSE;
-			$this->_insertProductNo($insertId, $secondaryNo, $isPrimary);
-			
-			$db->commit();
-
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw new Exception($e->getMessage());
-		}
-	
-		return TRUE;
-	}
-	
-	/* Create product
-	 * @params: int
+	 * @params: array
+	 * @params: boolean
 	 * @return: array
 	 */
-	private function _insertProduct($brand, $name, $tasteNo, $status)
+	public function insert($brand, $productId, $name, $saleDate, $tastes, $status)
 	{
-		$data['productBrand']		= $brand;
-		$data['productName'] 		= $name;
-		$data['productTaste'] 		= json_encode($tasteNo);
-		$data['productStatus'] 		= $status;
+		$data['newItemBrand']		= $brand;
+		$data['newItemProductId'] 	= $productId;
+		$data['newItemName'] 		= $name;
+		$data['newItemSaleDate'] 	= (new Carbon($saleDate))->format('Y-m-d');
+		$data['newItemTaste'] 		= json_encode($tastes);
+		$data['newItemStatus'] 		= $status;
+		$data['createAt'] 			= now()->format('Y-m-d H:i:s');
+		$data['updateAt'] 			= $data['createAt'];
 		
 		$db = $this->connectSalesDashboard();
-		$insertId = $db->table('product')
-			->insertGetId($data);
-		
-		return $insertId;
-	}
-	
-	/* Create product no
-	 * @params: int
-	 * @return: array
-	 */
-	private function _insertProductNo($parentId, $erpNos, $isPrimary)
-	{
-		$items = [];
-		
-		foreach($erpNos as $no)
-		{
-			$data['parentId']	= $parentId;
-			$data['erpNo'] 		= $no;
-			$data['isPrimary'] 	= $isPrimary;
-			
-			$items[] = $data;
-		}
-		
-		$db = $this->connectSalesDashboard();
-		$db->table('product_no')->insert($items);
+		$db->table('new_item')->insert($data);
 		
 		return TRUE;
 	}
@@ -128,75 +82,46 @@ class NewItemRepository extends Repository
 	 */
 	public function getById($id)
 	{
-		$db = $this->connectSalesDashboard('product');
+		$db = $this->connectSalesDashboard('new_item');
 			
-		$result = $db->select('productId', 'productBrand', 'productName', 'productTaste', 'productStatus')
-					->addSelect('erpNo', 'isPrimary')
-					->leftJoin('product_no', 'parentId', '=', 'productId')
-					->where('productId', '=', $id)
-					->get();
+		$result = $db->select('newItemId', 'newItemBrand', 'newItemProductId', 'newItemName', 'newItemSaleDate', 'newItemTaste', 'newItemStatus', 'updateAt')
+					->where('newItemId', '=', $id)
+					->get()
+					->first();
+		$result['newItemTaste'] = json_decode($result['newItemTaste'], TRUE);
 		
 		return $result;
 	}
 	
-	/* Update Role
+	/* Update new item
+	 * @params: int
+	 * @params: int
 	 * @params: int
 	 * @params: string
-	 * @params: int
-	 * @params: json string
-	 * @params: json string
+	 * @params: string
+	 * @params: array
+	 * @params: boolean
 	 * @return: boolean
 	 */
-	public function update($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
+	public function update($id, $brand, $productId, $name, $saleDate, $tastes, $status)
 	{
-		$db = $this->connectSalesDashboard();
-		$db->beginTransaction();
-		
-		try 
-		{
-			$this->_updateProduct($id, $brand, $name, $tasteNo, $status);
-			
-			$this->_removeProductNo($id);
-			
-			$isPrimary = TRUE;
-			$this->_insertProductNo($id, $primaryNo, $isPrimary);
-			
-			$isPrimary = FALSE;
-			$this->_insertProductNo($id, $secondaryNo, $isPrimary);
-			
-			$db->commit();
-
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw new Exception($e->getMessage());
-		}
-	
-		return TRUE;
-	}
-	
-	/* Create product
-	 * @params: int
-	 * @return: array
-	 */
-	private function _updateProduct($id, $brand, $name, $tasteNo, $status)
-	{
-		$data['productBrand']		= $brand;
-		$data['productName'] 		= $name;
-		$data['productTaste'] 		= json_encode($tasteNo);
-		$data['productStatus'] 		= $status;
+		$data['newItemBrand']		= $brand;
+		$data['newItemProductId'] 	= $productId;
+		$data['newItemName'] 		= $name;
+		$data['newItemSaleDate'] 	= (new Carbon($saleDate))->format('Y-m-d');
+		$data['newItemTaste'] 		= json_encode($tastes);
+		$data['newItemStatus'] 		= $status;
+		$data['updateAt'] 			= now()->format('Y-m-d H:i:s');
 		
 		$db = $this->connectSalesDashboard();
-		$db->table('product')
-			->where('productId', '=', $id)
+		$db->table('new_item')
+			->where('newItemId', '=', $id)
 			->update($data);
 		
 		return TRUE;
 	}
 	
-	/* Remove Role
+	/* Remove new item
 	 * @params: int
 	 * @return: boolean
 	 */

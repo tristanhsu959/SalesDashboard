@@ -44,6 +44,10 @@ body {
 			
 		section.container {
 			padding: 0 1rem 1rem;
+			/* 
+			.row {
+				margin-block-start: 1.5rem !important;
+			} */
 		}
 	}
 	

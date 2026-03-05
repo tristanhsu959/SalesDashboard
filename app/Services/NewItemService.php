@@ -26,6 +26,8 @@ class NewItemService
 		try
 		{
 			$list = $this->_repository->getList();
+			$list = collect($list)->groupBy('newItemBrand')->toArray();
+			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
@@ -44,13 +46,7 @@ class NewItemService
 		try
 		{
 			$list = $this->_repository->getProductSettings();
-			
-			$list = collect($list)->groupBy('productBrand')->map(function ($item, $key){
-				$item = $item->map(function ($item, $key){
-					return ['id' => $item['productId'], 'name' => $item['productName']];
-				});
-				return $item;
-			})->toArray();
+			$list = collect($list)->groupBy('productBrand')->toArray();
 			
 			return $list;
 		}
@@ -61,40 +57,30 @@ class NewItemService
 		}
 	}
 	
-	/* Create role
+	/* Create new item
 	 * @params: string
 	 * @params: int
 	 * @params: array
 	 * @params: array
 	 * @return: array
 	 */
-	public function createProduct($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
+	public function createNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status)
 	{
 		try
 		{
-			$primaryNo = Str::of($primaryNo)->explode("\r\n")
+			$tastes = Str::of($tasteKeyWord)->explode("\r\n")
 				->reject(function ($value, $key) {
 					return empty($value);
 			})->toArray();
 			
-			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$tasteNo = Str::of($tasteNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+			$this->_repository->insert($brand, $productId, $name, $saleDate, $tastes, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新增產品失敗');
+			return ResponseLib::initialize()->fail('新品新增失敗');
 		}
 	}
 	
@@ -102,33 +88,18 @@ class NewItemService
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductById($id)
+	public function getNewItemById($id)
 	{
 		try
 		{
 			$data = $this->_repository->getById($id);
 			
-			$result = [];
-			#重整資料
-			if (! empty($data))
-			{
-				$collection = collect($data);
-				
-				$result['productId'] 	= $collection->pluck('productId')->first();
-				$result['productBrand'] = $collection->pluck('productBrand')->first();
-				$result['productName'] 	= $collection->pluck('productName')->first();
-				$result['primaryNo'] 	= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
-				$result['secondaryNo'] 	= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
-				$result['tasteNo'] 		= json_decode($collection->pluck('productTaste')->first(), TRUE);
-				$result['productStatus']= $collection->pluck('productStatus')->first();
-			}
-			
-			return ResponseLib::initialize($result)->success();
+			return ResponseLib::initialize($data)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取身份設定資料發生錯誤');
+			return ResponseLib::initialize()->fail('讀取新品設定時資料發生錯誤');
 		}
 	}
 	
@@ -140,33 +111,23 @@ class NewItemService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
+	public function updateNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status)
 	{
 		try
 		{
-			$primaryNo = Str::of($primaryNo)->explode("\r\n")
+			$tastes = Str::of($tasteKeyWord)->explode("\r\n")
 				->reject(function ($value, $key) {
 					return empty($value);
 			})->toArray();
 			
-			$secondaryNo = Str::of($secondaryNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$tasteNo = Str::of($tasteNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+			$this->_repository->update($id, $brand, $productId, $name, $saleDate, $tastes, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯產品失敗');
+			return ResponseLib::initialize()->fail('編輯新品失敗');
 		}
 	}
 	

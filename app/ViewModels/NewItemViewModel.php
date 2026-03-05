@@ -33,7 +33,6 @@ class NewItemViewModel extends Fluent
 		#初始化各參數及Form Options
 		$this->action	= $action;
 		$this->success();
-		
 		$this->_setOptions();
 	}
 	
@@ -69,14 +68,15 @@ class NewItemViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brand = Brand::BAFANG->value, $productId = 6, $name = '', $saleDate = '', $checkTaste = FALSE, $updateAt = '')
+	public function keepFormData($id = 0, $brand = Brand::BAFANG->value, $productId = 0, $name = '', $saleDate = '', $tasteKeyWord = '', $status = TRUE, $updateAt = '')
     {
 		$this->set('formData.id', $id);
-		$this->set('formData.brand', 2);
+		$this->set('formData.brand', $brand);
 		$this->set('formData.productId', $productId);
 		$this->set('formData.name', $name);
 		$this->set('formData.saleDate', $saleDate);
-		$this->set('formData.checkTaste', $checkTaste);
+		$this->set('formData.tasteKeyWord', is_array($tasteKeyWord) ? implode("\r\n", $tasteKeyWord) : $tasteKeyWord);
+		$this->set('formData.status', $status);
 		$this->set('formData.updateAt', $updateAt);
 	}
 }

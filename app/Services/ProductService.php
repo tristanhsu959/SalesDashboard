@@ -43,7 +43,7 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function createProduct($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
+	public function createProduct($brand, $name, $primaryNo, $secondaryNo, $status)
 	{
 		try
 		{
@@ -57,12 +57,7 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$tasteNo = Str::of($tasteNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -94,7 +89,6 @@ class ProductService
 				$result['productName'] 	= $collection->pluck('productName')->first();
 				$result['primaryNo'] 	= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
 				$result['secondaryNo'] 	= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
-				$result['tasteNo'] 		= json_decode($collection->pluck('productTaste')->first(), TRUE);
 				$result['productStatus']= $collection->pluck('productStatus')->first();
 			}
 			
@@ -115,7 +109,7 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status)
+	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $status)
 	{
 		try
 		{
@@ -129,12 +123,7 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$tasteNo = Str::of($tasteNo)->explode("\r\n")
-				->reject(function ($value, $key) {
-					return empty($value);
-			})->toArray();
-			
-			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo, $tasteNo, $status);
+			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
