@@ -24,7 +24,7 @@ class ProductRepository extends Repository
 		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db
-			->select('productId', 'productName', 'productBrand', 'productStatus')
+			->select('productId', 'productName', 'productBrand')
 			->get()
 			->toArray();
 			
@@ -38,14 +38,14 @@ class ProductRepository extends Repository
 	 * @params: json string
 	 * @return: boolean
 	 */
-	public function insert($brand, $name, $primaryNo, $secondaryNo, $status)
+	public function insert($brand, $name, $primaryNo, $secondaryNo)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
 		
 		try 
 		{
-			$insertId = $this->_insertProduct($brand, $name, $status);
+			$insertId = $this->_insertProduct($brand, $name);
 			
 			$isPrimary = TRUE;
 			$this->_insertProductNo($insertId, $primaryNo, $isPrimary);
@@ -70,11 +70,10 @@ class ProductRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	private function _insertProduct($brand, $name, $status)
+	private function _insertProduct($brand, $name)
 	{
 		$data['productBrand']		= $brand;
 		$data['productName'] 		= $name;
-		$data['productStatus'] 		= $status;
 		
 		$db = $this->connectSalesDashboard();
 		$insertId = $db->table('product')
@@ -114,7 +113,7 @@ class ProductRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('product');
 			
-		$result = $db->select('productId', 'productBrand', 'productName', 'productStatus')
+		$result = $db->select('productId', 'productBrand', 'productName')
 					->addSelect('erpNo', 'isPrimary')
 					->leftJoin('product_no', 'parentId', '=', 'productId')
 					->where('productId', '=', $id)
@@ -123,22 +122,22 @@ class ProductRepository extends Repository
 		return $result;
 	}
 	
-	/* Update Role
+	/* Update product
 	 * @params: int
 	 * @params: string
 	 * @params: int
-	 * @params: json string
-	 * @params: json string
+	 * @params: string
+	 * @params: string
 	 * @return: boolean
 	 */
-	public function update($id, $brand, $name, $primaryNo, $secondaryNo, $status)
+	public function update($id, $brand, $name, $primaryNo, $secondaryNo)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
 		
 		try 
 		{
-			$this->_updateProduct($id, $brand, $name, $status);
+			$this->_updateProduct($id, $brand, $name);
 			
 			$this->_removeProductNo($id);
 			
@@ -165,11 +164,10 @@ class ProductRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	private function _updateProduct($id, $brand, $name, $status)
+	private function _updateProduct($id, $brand, $name)
 	{
 		$data['productBrand']		= $brand;
 		$data['productName'] 		= $name;
-		$data['productStatus'] 		= $status;
 		
 		$db = $this->connectSalesDashboard();
 		$db->table('product')
@@ -179,7 +177,7 @@ class ProductRepository extends Repository
 		return TRUE;
 	}
 	
-	/* Remove Role
+	/* Remove product
 	 * @params: int
 	 * @return: boolean
 	 */

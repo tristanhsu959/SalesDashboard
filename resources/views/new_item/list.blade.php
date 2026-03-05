@@ -21,17 +21,10 @@
 	<form x-data='newItemList(@json($viewModel->list),@json($viewModel->options["brands"]) )' action="" method="post" x-ref="newItemListForm">
 		@csrf
 		<section class="new-item-list container">
-			@if(empty(($viewModel->list)))
-			<article class="error-container border">
-				<div class="row">
-					<i>info</i><div class="max">無新品設定資料</div>
-				</div>
-			</article>
-			@else
 			<div>
 				<div class="tabs center-align">
 					<template x-for="(brand, key) in brands" :key="key">
-						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''"></a>
+						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.tabIndex.newItem = key"></a>
 					</template>
 				</div>
 				
@@ -58,7 +51,7 @@
 					</ul>
 				</div>
 				</template>
-			@endif
+			</div>
 		</section>
 	</form>
 

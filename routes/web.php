@@ -30,14 +30,14 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	/***** 八方 *****/
 	Route::namespace('App\Http\Controllers\BaFang')->prefix('bf')->group(function () {
-		Route::get('new_releases/beef_short_ribs', [BfNewReleaseController::class, 'beefShortRibs'])->name('bafang.new_releases');
+		Route::get('new_releases/beef_short_ribs', [BfNewReleaseController::class, 'beefShortRibs'])->name('bf.new_releases');
 		Route::post('new_releases/{segment}/search', [BfNewReleaseController::class, 'search'])->name('bf.new_releases.search');
 	});
 	
 	/***** 梁社漢 *****/
 	Route::namespace('App\Http\Controllers\BuyGood')->prefix('bg')->group(function () {
 		/* 新品 */
-		Route::get('new_releases/pork_ribs', [BgNewReleaseController::class, 'porkRibs'])->name('buygood.new_releases');
+		Route::get('new_releases/pork_ribs', [BgNewReleaseController::class, 'porkRibs'])->name('bg.new_releases');
 		Route::get('new_releases/tomato_beef', [BgNewReleaseController::class, 'tomatoBeef']);
 		Route::get('new_releases/egg_tofu', [BgNewReleaseController::class, 'eggTofu']);
 		Route::get('new_releases/pork_gravy', [BgNewReleaseController::class, 'porkGravy']);

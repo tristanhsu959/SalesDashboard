@@ -2,7 +2,7 @@
 @use('App\Enums\Brand')
 
 @push('styles')
-    <!--link href="{{ asset('styles/product/list.css') }}" rel="stylesheet"-->
+    <link href="{{ asset('styles/product/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -19,49 +19,41 @@
 		</nav>
 	</header>
 	
-	<form x-data="productList" action="" method="post" x-ref="productListForm">
+	<form x-data='productList(@json($viewModel->list),@json($viewModel->options["brands"]) )' action="" method="post" x-ref="productListForm">
 		@csrf
 		<section class="product-list container">
-			@if(empty(($viewModel->list)))
-			<article class="error-container border">
-				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
+			<div>
+				<div class="tabs center-align">
+					<template x-for="(brand, key) in brands" :key="key">
+						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.tabIndex.product = key" class="tab-pink"></a>
+					</template>
 				</div>
-			</article>
-			@else
-			<table class="stripes border odd-blue">
-				<thead>
-					<tr>
-						<th class="min">#</th>
-						<th>品牌</th>
-						<th>產品名稱</th>
-						<th>狀態</th>
-						<th class="right-align">操作</th>
-					</tr>
-				</thead>
-				<tbody>
-				@foreach($viewModel->list as $idx => $product)
-					<tr>
-						<td>{{ $idx + 1 }}</td>
-						<td>{{ Brand::tryFrom($product['productBrand'])->label() }}</td>
-						<td>{{ $product['productName'] }}</td>
-						<td><i x-data="{status: @json($product['productStatus'])}" x-text="status ? 'check_circle':'x_circle'" :class="status ? 'green-text fill':'red-text fill'"></i></td>
-						<td class="right-align action">
-							<a href="{{ route('product.update', [$product['productId']]) }}" class="btn-edit button circle small">
-								<i class="small">edit</i>
-							</a>
-							<a @click.prevent="confirmDelete($el.href)" href="{{ route('product.delete', [$product['productId']]) }}" class="btn-delete button circle small">
-								<i class="small">delete</i>
-							</a>
-						</td>
-					</tr>
-				@endforeach
-				</tbody>
-			</table>
-			@endif
+				
+				<template x-for="(brand, key) in brands">
+				<div class="page padding" :id="'page-' + key" :class="activeTab == key ? 'active':''">
+					<ul class="list border">
+						<template x-for="item in products[key]">
+						<li>
+							<span class="brand-label" x-text="item.productBrand == 1 ? '八':'御'" :class="item.productBrand == 1 ? 'bf':'bg'"></span>
+							<div class="max">
+								<h6 x-text="item.productName"></h6>
+							</div>
+							<div>
+								<a :href="'{{ route('product.update', ['_ID_']) }}'.replace('_ID_', item.productId)" class="btn-edit button circle small">
+									<i class="small">edit</i>
+								</a>
+								<a :href="'{{ route('product.delete', ['_ID_']) }}'.replace('_ID_', item.productId)" @click.prevent="confirmDelete($el.href)" class="btn-delete button circle small">
+									<i class="small">delete</i>
+								</a>
+							</div>
+						</li>
+						</template>
+					</ul>
+				</div>
+				</template>
+			</div>
 		</section>
 	</form>
-
 @endif
 <!-- Content -->
 @endsection

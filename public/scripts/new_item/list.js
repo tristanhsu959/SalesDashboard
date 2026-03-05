@@ -4,8 +4,14 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('newItemList', (list, brands) => ({
 		newItems: list,
 		brands: brands,
-		activeTab: 1,
+		activeTab: 0,
 		
+		init() {
+			this.activeTab = Alpine.store('tabIndex').newItem;
+			
+			if (! this.activeTab)
+				this.activeTab = 1;
+		},
 		confirmDelete(url) {
 			Alpine.store('dialog').show('確定要刪除此新品設定?', true, () => this.deleteNewItem(url));
 		},

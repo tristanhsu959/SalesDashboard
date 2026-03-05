@@ -26,13 +26,14 @@ class ProductService
 		try
 		{
 			$list = $this->_repository->getList();
+			$list = collect($list)->groupBy('productBrand')->toArray();
 			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取帳號清單時發生錯誤');
+			return ResponseLib::initialize()->fail('讀取產品料號設定時發生錯誤');
 		}
 	}
 	
@@ -43,7 +44,7 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function createProduct($brand, $name, $primaryNo, $secondaryNo, $status)
+	public function createProduct($brand, $name, $primaryNo, $secondaryNo)
 	{
 		try
 		{
@@ -57,14 +58,14 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo, $status);
+			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新增產品失敗');
+			return ResponseLib::initialize()->fail('新增產品料號失敗');
 		}
 	}
 	
@@ -89,7 +90,6 @@ class ProductService
 				$result['productName'] 	= $collection->pluck('productName')->first();
 				$result['primaryNo'] 	= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
 				$result['secondaryNo'] 	= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
-				$result['productStatus']= $collection->pluck('productStatus')->first();
 			}
 			
 			return ResponseLib::initialize($result)->success();
@@ -97,7 +97,7 @@ class ProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取身份設定資料發生錯誤');
+			return ResponseLib::initialize()->fail('讀取產品料號設定發生錯誤');
 		}
 	}
 	
@@ -109,7 +109,7 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo, $status)
+	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo)
 	{
 		try
 		{
@@ -123,14 +123,14 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo, $status);
+			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯產品失敗');
+			return ResponseLib::initialize()->fail('編輯產品料號失敗');
 		}
 	}
 	
@@ -148,7 +148,7 @@ class ProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('刪除產品失敗');
+			return ResponseLib::initialize()->fail('刪除產品料號失敗');
 		}
 	}
 	

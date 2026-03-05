@@ -10,19 +10,19 @@
 
 @section('content')
 
-<form x-data='productForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+<form x-data='productForm(@json($viewModel->formData), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
 	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
 	@csrf
 	
 	<section class="product-data container">
 		
-		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brand')">
+		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brand')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brand" name="brand" @change="initErpNoInput">
 				<option value="">請選擇</option>
-				@foreach($viewModel->options['brands'] as $brand)
-					<option value="{{ $brand->value }}">{{ $brand->label() }}</option>
-				@endforeach
+				<template x-for="(name, id) in options.brands" :key="id">
+					<option :value="id" x-text="name" :selected="formData.brand == id"></option>
+				</template>
 			</select>
 			<label>品牌</label>
 			<i>arrow_drop_down</i>
@@ -46,13 +46,6 @@
 				<label>複合店ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>
-		</div>
-		<div class="row">
-			<label class="switch field-light-green">
-				<input :checked="formData.status" @change="status = $el.checked ? 1 : 0" type="checkbox" name="status" value="1">
-				<span></span>
-				<i class="output" >啟用</i>
-			</label>
 		</div>
 		
 		<nav class="toolbar">

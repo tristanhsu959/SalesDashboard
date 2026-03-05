@@ -22,10 +22,16 @@
 	--surface: #e3f2fd;
 }
 .field-cyan {
-	--primary: #00bcd4;
-	--outline: #00bcd4;
+	--primary: #00838f;
+	--outline: #00838f;
 	--on-surface: #333333;  
 	--surface: #e0f7fa;
+}
+.field-teal {
+	--primary: #009688;
+	--outline: #009688;
+	--on-surface: #333333;  
+	--surface: #e0f2f1;
 }
 .field-red {
 	--primary: #f44336;
@@ -34,14 +40,14 @@
 	--surface: #ffebee;
 }
 .field-light-green {
-	--primary: #8bc34a;
-	--outline: #8bc34a;
+	--primary: #689f38;
+	--outline: #689f38;
 	--on-surface: #333333;  
 	--surface: #f1f8e9;
 }
 .field-orange {
-	--primary: #ff9800;
-	--outline: #ff9800;
+	--primary: #f57c00;
+	--outline: #f57c00;
 	--on-surface: #333333;  
 	--surface: #fff3e0;
 }

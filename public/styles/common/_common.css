@@ -22,8 +22,14 @@
 }
 
 /* Width control */
+.w20 {
+	width: calc((100% - 4rem) / 5);
+}
 .w25 {
 	width: calc((100% - 3rem) / 4);
+}
+.w30 {
+	width: calc((100% - 2rem) / 3);
 }
 .w50 {
 	width: calc((100% - 1rem) / 2);
@@ -34,6 +40,4 @@
 .w100 {
 	width: 100%;
 }
-.w30 {
-	width: calc((100% - 2rem) / 3);
-}
+

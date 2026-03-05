@@ -18,7 +18,7 @@
 	<section class="product-data container">
 		<label x-show="formData.id" class="large-text" x-text="'更新時間：' + formData.updateAt"></label>
 		
-		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brand')">
+		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brand')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brand" name="brand" @change="errors.delete('brand'); updateProducts();">
 				<template x-for="(name, id) in options.brands" :key="id">

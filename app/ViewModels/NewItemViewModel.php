@@ -18,7 +18,7 @@ class NewItemViewModel extends Fluent
 	
 	public function __construct(protected NewItemService $_service)
 	{
-		$this->function		= Functions::PRODUCT;
+		$this->function		= Functions::NEW_ITEM;
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= 'new_items';
 		$this->success();

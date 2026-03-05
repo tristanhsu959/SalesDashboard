@@ -42,7 +42,7 @@ class ProductViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.brands', Brand::cases());
+		$this->set('options.brands', Brand::toArray());
 	}
 	
 	/* Form submit action
@@ -65,19 +65,16 @@ class ProductViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brand = 0, $name = '', $primaryNo = '', $secondaryNo = '', $tasteNo = '', $status = TRUE)
+	public function keepFormData($id = 0, $brand = 0, $name = '', $primaryNo = '', $secondaryNo = '')
     {
 		$primaryNo	= is_array($primaryNo) ? Arr::join($primaryNo, "\r\n") : $primaryNo;
 		$secondaryNo= is_array($secondaryNo) ? Arr::join($secondaryNo, "\r\n") : $secondaryNo;
-		$tasteNo 	= is_array($tasteNo) ? Arr::join($tasteNo, "\r\n") : $tasteNo;
 		
 		$this->set('formData.id', $id);
 		$this->set('formData.brand', $brand);
 		$this->set('formData.name', $name);
 		$this->set('formData.primaryNo', $primaryNo);
 		$this->set('formData.secondaryNo', $secondaryNo);
-		$this->set('formData.tasteNo', $tasteNo);
-		$this->set('formData.status', $status);
 		$this->set('formData.buygoodId', Brand::BUYGOOD->value); #給js用
 	}
 }

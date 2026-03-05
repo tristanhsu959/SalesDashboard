@@ -1,7 +1,28 @@
 /* Product list */
 
-/* .product-list {
-	table.stripes tbody tr:nth-child(odd) {
-		background-color: #e0f7fa;
+.product-list {
+	.tabs a.tab-pink {
+		--primary: #03a9f4;
+		
+		font-size: 1.2rem; 
 	}
-} */
+	ul.list li {
+		.brand-label {
+			display: inline-flex;
+			justify-content: center;
+			align-items: center;
+			width: 40px;
+			height: 40px;
+			border-radius: 8px;
+			
+			&.bf {
+				background-color: #ffc107;
+				color: #212121;
+			}
+			&.bg {
+				background-color: #b71c1c;
+				color: #fafafa;
+			}
+		}
+	}
+}
