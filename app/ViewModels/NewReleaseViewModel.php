@@ -2,50 +2,29 @@
 
 namespace App\ViewModels;
 
+use App\Services\NewReleaseService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\Enums\FormAction;
+use App\Enums\Functions;
+use App\Enums\Brand;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Fluent;
 
-class NewReleaseViewModel
+class NewReleaseViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	private $_function 	= NULL;
-	private $_backRoute	= '';
-	private $_data = [];
-	
-	public function __construct()
+	public function __construct(protected NewReleaseService $_service)
 	{
-		#initialize
-		$this->_data['action'] 		= NULL; #enum form action
-		$this->_data['statistics']	= [];
-		$this->_data['configKey']	= '';
-		$this->_data['config']		= [];
-	}
-	
-	public function __set($name, $value)
-    {
-		$this->_data[$name] = $value;
-    }
-	
-	public function __get($name)
-    {
-		return data_get($this->_data, $name, '');
-	}
-	
-	/* 須有isset, 否則empty()會判別錯誤 */
-	public function __isset($name)
-    {
-		return array_key_exists($name, $this->_data);
-	}
-	
-	public function getFunctionKey()
-	{
-		return $this->_function->value; #view無法存enum
+		$this->function		= NULL;
+		$this->action 		= FormAction::LIST; 
+		$this->backRoute 	= '';
+		$this->success();
 	}
 	
 	/* initialize
@@ -54,83 +33,48 @@ class NewReleaseViewModel
 	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($action , $configKey, $functionKey)
+	public function initialize($brand , $function)
 	{
-		$this->_function 			= $functionKey;
-		#初始化各參數及Form Options
-		$this->_data['action']		= $action;
-		$this->fail(''); #因共用頁面, 故default false判別顯示用
-		$this->_data['configKey'] 	= $configKey;
-		
-		if (! empty($configKey))
-			$this->_data['config'] 	= config("buygood.new_release.products.{$configKey}");
+		$this->brand	= $brand;
+		$this->function = $function;
 		
 		$this->_setOptions();
 	}
 	
-	/* Search Form參數選項
-	 * @params: 
+	/* Form所屬的參數選項
+	 * @params:  
 	 * @return: void
 	 */
 	private function _setOptions()
 	{
-		if (empty($configKey))
-		{
-			data_set($this->_data, 'search.stMin', '');
-			data_set($this->_data, 'search.endMax', '');
-		}
-		else
-		{
-			data_set($this->_data, 'search.stMin', $this->_data['config']['saleDate']);
-			data_set($this->_data, 'search.endMax', $this->_data['config']['saleEndDate']);
-		}
-		
-		#Default search date
-		data_set($this->_data, 'search.stDate', $this->getDefaultSearchStDate());
-		data_set($this->_data, 'search.endDate', $this->getDefaultSearchEndDate());
+		$this->set('options.newItems', $this->_service->getNewItemOptions($this->brand->value));
 	}
 	
-	/* Keep form search data
-	 * @params: date
-	 * @params: date
-	 * @return: void
+	/* Form submit action
+	 * @params: 
+	 * @return: string
 	 */
-	public function keepSearchData($searchStDate, $searchEndDate)
+	public function getFormAction() : string
     {
-		data_set($this->_data, 'search.stDate', $searchStDate);
-		data_set($this->_data, 'search.endDate', $searchEndDate);
+		return match($this->brand)
+		{
+			Brand::BAFANG	=> route(Str::replace('?', Brand::BAFANG->code(), '?.new_releases.search')),
+			Brand::BUYGOOD	=> route(Str::replace('?', Brand::BUYGOOD->code(), '?.new_releases.search')),
+		};
 	}
 	
-	/* Get initial data of search form 
-	 * @params: date
-	 * @params: date
-	 * @return: void
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: string
 	 */
-	
-	public function getSearchStDate()
-	{
-		return data_get($this->_data, 'search.stDate', '');
-	}
-	
-	public function getSearchEndDate()
-	{
-		return data_get($this->_data, 'search.endDate', '');
-	}
-	
-	public function getDefaultSearchStDate()
+	public function keepSearchData($searchNewItemId = 0, $searchStDate = '', $searchEndDate = '')
     {
-		#一定會有
-		return data_get($this->_data, 'config.saleDate', '');
-	}
-	
-	public function getDefaultSearchEndDate()
-    {
-		return data_get($this->_data, 'config.saleEndDate', NULL) ?? Carbon::now()->format('Y-m-d'); #date picker必須為Y-m-d才能正常顯示
-	}
-	
-	public function getSegment()
-    {
-		return Str::snake(data_get($this->_data, 'configKey'), '_');
+		$this->set('search.newItemId', $searchNewItemId);
+		$this->set('search.stDate', $searchStDate);
+		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.today', Carbon::now()->format('Y-m-d'));
 	}
 	
 	public function isDataEmpty()
@@ -186,30 +130,4 @@ class NewReleaseViewModel
 		
 		return $header;
 	}
-	
-	/* Form Style */
-	public function getSaleDate()
-    {
-		return data_get($this->_data, 'config.saleDate', '');
-	}
-	
-	public function getSaleEndDate()
-    {
-		return data_get($this->_data, 'config.saleEndDate', '');
-	}
-	
-	/* breadcrumb
-	 * @params: 
-	 * @return: array
-	 */
-	public function breadcrumb()
-	{
-		#Custom
-		$breadcrumb 	= [];#wifi_1_bar
-		$breadcrumb[] 	= '御廚．新品銷售';
-		$breadcrumb[]	= $this->_function->label(); 
-		
-		return $breadcrumb;
-	}
-	
 }

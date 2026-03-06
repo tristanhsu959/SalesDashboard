@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\NewReleaseService;
-use App\ViewModels\Bafang\NewReleaseViewModel;
+use App\ViewModels\NewReleaseViewModel;
+use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use Illuminate\Support\Arr;
@@ -17,28 +18,18 @@ class NewReleaseController extends Controller
 	{
 	}
 	
-	public function index(Request $request)
+	public function showSearch(Request $request)
 	{
-		dd($request->segment(1));
-	}
-	public function beefShortRibs(Request $request)
-	{
-		return $this->_showIndex($request, Functions::BF_BEEFSHORTRIBS);
-	}
-	
-	private function _showIndex(Request $request, $functionKey)
-	{
-		#取新品config用, 要存到Form
-		$segment = Arr::last($request->segments());
-		$configKey = $this->_service->convertConfigKey($segment);
+		$brand 		= $this->_service->parsingBrand($request->segments());
+		$function 	= $this->_service->parsingFunction($brand);
 		
-		$this->_viewModel->initialize(FormAction::LIST, $configKey, $functionKey);
+		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData();
 		
-		if (empty($configKey))
-			$this->_viewModel->fail('無法識別產品ID');
+		if (empty($brand) OR empty($function))
+			$this->_viewModel->fail('無法識別ID');
 		
-		#Status is NULL
-		return view('new_release.bf_new_release')->with('viewModel', $this->_viewModel);
+		return view('new_release.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -47,17 +38,18 @@ class NewReleaseController extends Controller
 	 */
 	public function search(Request $request)
 	{
+		$brand 		= $this->_service->parsingBrand($request->segments());
+		$function 	= $this->_service->parsingFunction($brand);
+		
 		#query params
-		$functionValue	= $request->input('functionKey');
-		$configKey 		= $request->input('configKey');
+		$searchNewItemId= $request->integer('searchNewItemId');
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
-		$functionKey	= Functions::getByValue($functionValue);
 		
-		$this->_viewModel->initialize(FormAction::LIST, $configKey, $functionKey);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
+		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData($searchNewItemId, $searchStDate, $searchEndDate);
 	
-		$response = $this->_service->getBfStatistics($configKey, $searchStDate, $searchEndDate);
+		$response = $this->_service->getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -66,6 +58,6 @@ class NewReleaseController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('new_release.bf_new_release')->with('viewModel', $this->_viewModel);
+		return view('new_release.statistics')->with('viewModel', $this->_viewModel);
 	}
 }

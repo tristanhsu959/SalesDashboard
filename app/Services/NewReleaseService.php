@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Repositories\NewReleaseRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
-#use App\Traits\AuthorizationTrait;
-use App\Traits\MenuTrait;
+use App\Enums\Brand;
+use App\Enums\Functions;
 use App\Enums\Area;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -18,17 +18,10 @@ use Exception;
 
 class NewReleaseService
 {
-	#use AuthorizationTrait;
-	
-	#private $_groupKey		= 'newRelease';
-	private $_configKey 	= '';
 	private $_statistics	= [];
-    private $_repository;
-	
-	public function __construct(NewReleaseRepository $newReleaseRepository)
+   
+	public function __construct(protected NewReleaseRepository $_repository)
 	{
-		$this->_repository = $newReleaseRepository;
-		
 		$this->_statistics = [
 			'startDate'	=> '', #Y-m-d
             'endDate'   => '',
@@ -39,91 +32,99 @@ class NewReleaseService
 		];
 	}
 	
-	/* Transfer url segment to new releast config key
+	/* Parsing brand from url segment
 	 * @params: string
 	 * @return: string
 	 */
-	public function convertConfigKey($segment)
+	public function parsingBrand($segments)
 	{
-		#action key = config key | 因多個report共用故是動態傳進來的
-		$this->_configKey = Str::camel($segment);
-		return $this->_configKey;
+		$brand = $segments[0];
+		return Brand::tryFromCode($brand);
+	}
+	
+	/* Parsing function by brand
+	 * @params: string
+	 * @return: string
+	 */
+	public function parsingFunction($brand)
+	{
+		return match ($brand) 
+		{
+			Brand::BAFANG	=> Functions::BF_NEW_RELEASE, 
+			Brand::BUYGOOD	=> Functions::BG_NEW_RELEASE,
+        };
+	}
+	
+	/* 取新品設定by brand
+	 * @params: int
+	 * @return: string
+	 */
+	public function getNewItemOptions($brandId)
+	{
+		$result = $this->_repository->getNewItemOptions($brandId);
+		$result = collect($result)->keyBy('id')->all();
+		
+		return $result;
 	}
 	
 	/* 取新品銷售統計-入口
-	 * @params: string
+	 * @params: enums
+	 * @params: integer
 	 * @params: date
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($configKey, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate)
 	{
 		try
 		{
-			#20251216 : 之後要改存至Local DB
-			$this->_configKey = $configKey;
+			#1. Calc time
+			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
 			
-			#1. Get params
-			list($startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams($searchStDate, $searchEndDate);
+			#頁面計算天數
+			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); #這裏只存日期
+			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			
-			#頁面計算天數須用, 因查詢時間跟實際計算後的查詢時間不一定會相同
-			$this->_statistics['startDate'] = (new Carbon($startDateTime))->format('Y-m-d'); #這裏只存日期
-			$this->_statistics['endDate'] 	= (new Carbon($endDateTime))->format('Y-m-d');
-			
-			#2. Get DB data
+			#2. Get params
+			list($primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
+						
+			#3. Get POS data
 			$srcData = [];
-			$srcData = $this->_getDataFromDB($startDateTime, $endDateTime, $productIds, $bfProductIds);
+			$primaryData 	= $this->_getPrimaryPosData($stDate, $endDate, $primaryIds);
+			$secondaryData 	= $this->_getSecondaryPosData($stDate, $endDate, $secondaryIds);
 			
 			return $this->_outputReport($srcData);
-			
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
 	
-	/* 取Config設定及查詢時間區間參數
+	
+	/* 取ErpNo及條件
 	 * @params: date
 	 * @params: date
 	 * @return: array
 	 */
-	private function _getParams($searchStDate, $searchEndDate)
+	private function _getParams($searchNewItemId)
 	{
 		try
 		{
-			$config = config("buygood.new_release.products.{$this->_configKey}");
+			$tastes = $this->_repository->getTasteById($searchNewItemId);
+			$result = $this->_repository->getErpNoById($searchNewItemId);
 			
-			$saleDate		= new Carbon(data_get($config, 'saleDate')); #開賣日
-			$saleEndDate	= new Carbon(data_get($config, 'saleEndDate')); #停售日
-			$searchStDate	= new Carbon($searchStDate);
-			$searchEndDate	= new Carbon($searchEndDate);
-			$today 			= Carbon::now()->setTime(23, 59, 59, 0);
+			$result = collect($result)->groupBy('isPrimary');
+			$primaryIds		= $result[1]->pluck('erpNo')->toArray();
+			$secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
 			
-			#開始時間
-			$startDateTime 	= empty($searchStDate) ? $saleDate : $searchStDate;
-			$startDateTime	= $saleDate->greaterThan($startDateTime) ? $saleDate : $startDateTime;
-			$startDateTime 	= $startDateTime->format('Y-m-d 00:00:00');
-			
-			#結束時間
-			$endDateTime 	= empty($searchEndDate) ? $saleEndDate : $searchEndDate;
-			$endDateTime	= $endDateTime->greaterThan($today) ? $today : $endDateTime;
-			$endDateTime 	= $endDateTime->format('Y-m-d 23:59:59');
-			
-			#料號
-			$brandCode		= data_get($config, 'brand');
-			$productIds 	= data_get($config, 'ids.main');
-			$bfProductIds 	= [];
-			
-			if ($brandCode === 'BG') #梁社漢複合店取值用
-				$bfProductIds = data_get($config, 'ids.mapping');
-			
-			return [$startDateTime, $endDateTime, $productIds, $bfProductIds];
+			return [$primaryIds, $secondaryIds, $tastes];
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('解析查詢參數發生錯誤');
 		}
 	}
@@ -173,7 +174,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取POS DB資料失敗');
 		}
 	}
@@ -220,7 +221,7 @@ class NewReleaseService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize($this->_statistics)->fail('解析報表資料發生錯誤');
 		}
 	}

@@ -13,7 +13,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	#name不用加prefix
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_NEW_RELEASE->value, ':')])->group(function(){
-		Route::get('new_releases', [NewReleaseController::class, 'index'])->name('new_releases');
+		Route::get('new_releases', [NewReleaseController::class, 'showSearch'])->name('new_releases');
 		Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 	});
 });

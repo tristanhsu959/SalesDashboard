@@ -4,13 +4,62 @@ namespace App\Repositories;
 
 use Exception;
 
-#新品:橙汁排骨/番茄牛三寶麵 => 邏輯相同 : 20251217 Local另起repository替換
+
 class NewReleaseRepository extends Repository
 {
-	#MSSQL
 	public function __construct()
 	{
 		
+	}
+	
+	/* 取啟用的新品設定
+	 * @params: int
+	 * @return: array
+	 */
+	public function getNewItemOptions($brand)
+	{
+		$db = $this->connectSalesDashboard('new_item');
+		$result = $db
+			->select('newItemId as id', 'newItemName as name', 'newItemSaleDate as saleDate')
+			->where('newItemBrand', '=', $brand)
+			->where('newItemStatus', '=', TRUE)
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
+	/* 取新品設定相關條件
+	 * @params: int
+	 * @return: array
+	 */
+	public function getTasteById($id)
+	{
+		$db = $this->connectSalesDashboard('new_item');
+		$result = $db
+			->select('newItemTaste')
+			->where('newItemId', '=', $id)
+			->get()
+			->first();
+		
+		return json_decode($result['newItemTaste'], TRUE);
+	}
+	
+	/* 取新品設定相關條件
+	 * @params: int
+	 * @return: array
+	 */
+	public function getErpNoById($id)
+	{
+		$db = $this->connectSalesDashboard('new_item');
+		$result = $db
+			->select('erpNo', 'isPrimary')
+			->join('product_no', 'parentId', '=', 'newItemProductId')
+			->where('newItemId', '=', $id)
+			->get()
+			->toArray();
+		
+		return $result;
 	}
 	
 	/* 取主資料-BuyGood

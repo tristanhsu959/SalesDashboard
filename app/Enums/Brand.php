@@ -23,6 +23,15 @@ enum Brand : int
 			self::BAFANG	=> 'bafang',
 			self::BUYGOOD	=> 'buygood',
         };
+	} 
+	
+	public static function tryFromCode($code)
+	{
+		return match ($code) 
+		{
+			self::BAFANG->code()	=> self::BAFANG,
+			self::BUYGOOD->code()	=> self::BUYGOOD,
+        };
 	}
 	
 	public static function toArray(): array 
