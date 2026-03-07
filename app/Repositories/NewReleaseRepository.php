@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Enums\Brand;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 
@@ -92,14 +93,13 @@ class NewReleaseRepository extends Repository
 				$primaryQuery->when($dualBrandedQuery, function ($query, $dual) {
 					return $query->unionAll($dual);
 				}), 
-				'a'
+				'rawData'
 			)
-			->join('SHOP00 b WITH(NOLOCK)', 'b.SHOP_ID', '=', 'a.shopId')
-			->select('a.shopId', 'a.saleDate')
-			->selectRaw('SUM(a.qty) as totalQty')
-			->groupBy('a.shopId', 'a.saleDate')
-			->orderBy('a.saleDate', 'DESC')
-			->orderBy('a.shopId')
+			->select('shopId', 'saleDate')
+			->selectRaw('SUM(qty) as totalQty')
+			->groupBy('shopId', 'saleDate')
+			->orderBy('saleDate', 'DESC')
+			->orderByRaw('shopId ASC OPTION (FORCE ORDER, RECOMPILE)') 
 			->get();
 	
 		return $result;
@@ -116,25 +116,29 @@ class NewReleaseRepository extends Repository
 	 */
 	private function _getPrimaryQuery($db, $stDate, $endDate, $erpNos, $tastes)
 	{
+		$erpNos = collect($erpNos)
+			->map(fn($no) => "N'{$no}'")
+			->implode(',');
+	
 		#只回傳query builder
 		$query = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
-				->join('SALE01 as b WITH(NOLOCK)', function($join) {
+				->table('SALE00 as b')
+				->fromRaw('SALE00 as b WITH(NOLOCK, INDEX(IX_SALE00_SALE_DATE))')
+				->join(DB::raw('SALE01 as a WITH(NOLOCK)'), function($join) {
 					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
 							->on('a.SALE_ID', '=', 'b.SALE_ID');
 				})
 				
-				->select('b.SHOP_ID as shopId', 'b.QTY as qty')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
-				->whereBetween('a.SALE_DATE', [$stDate, $endDate])
+				->select('a.SHOP_ID as shopId', 'a.QTY as qty')
+				->selectRaw('CAST(b.SALE_DATE AS DATE) as saleDate')
+				->whereBetween('b.SALE_DATE', [$stDate, $endDate])
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
-					$db->whereIn('b.PROD_ID', $erpNos);
+					$db->whereRaw("a.PROD_ID in ({$erpNos})");
 					
 					$db->when($tastes, function ($q) use ($tastes) {
-						$tasteKeywords = array_map(fn($t) => "%{$t}%", $tastes);
-						$q->orWhereAny(['b.TASTE_MEMO'], 'like', $tasteKeywords);
+						$tasteKeywords = array_map(fn($t) => "N'%{$t}%'", $tastes);
+						$q->orWhereAny(['a.TASTE_MEMO'], 'like', $tasteKeywords);
 					});
 				});
 		

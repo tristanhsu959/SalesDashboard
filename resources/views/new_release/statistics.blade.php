@@ -16,8 +16,8 @@
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
 		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'newItemId')">
-			<select x-model="searchData.newItemId" name="searchNewItemId" @change="initSearchStDate($event.target.value);errors.delete('newItemId')">
-				<option value="">請選擇</option>
+			<select x-model="searchData.newItemId" name="searchNewItemId" @change="initSearchStDate($event.target.value);errors.delete('newItemId')" x-effect="$nextTick(() => $el.value = searchData.newItemId)">
+				<option value="0">請選擇</option>
 				<template x-for="(item, key) in options.newItems" :key="key">
 					<option x-text="item.name" :value="item.id"></option>
 				</template>
