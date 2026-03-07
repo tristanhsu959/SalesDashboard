@@ -37,6 +37,7 @@ class NewReleaseViewModel extends Fluent
 	{
 		$this->brand	= $brand;
 		$this->function = $function;
+		$this->statistics = [];
 		
 		$this->_setOptions();
 	}
@@ -79,8 +80,7 @@ class NewReleaseViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty($this->_data['statistics']) OR (empty($this->_data['statistics']['area']) && empty($this->_data['statistics']['shop']) 
-			&& empty($this->_data['statistics']['top']) && empty($this->_data['statistics']['last'])))
+		if (empty(Arr::collapse($this->statistics)))
 			return TRUE;
 		else
 			return FALSE;

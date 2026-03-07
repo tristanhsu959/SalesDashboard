@@ -91,8 +91,8 @@ class NewReleaseService
 						
 			#3. Get POS data
 			$srcData = [];
-			$primaryData 	= $this->_getPrimaryPosData($stDate, $endDate, $primaryIds);
-			$secondaryData 	= $this->_getSecondaryPosData($stDate, $endDate, $secondaryIds);
+			$srcData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+						
 			
 			return $this->_outputReport($srcData);
 		}
@@ -136,12 +136,15 @@ class NewReleaseService
 	 * @params: array => product ids of BF
 	 * @return: array
 	 */
-	private function _getDataFromDB($startDateTime, $endDateTime, $productIds, $bfProductIds)
+	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes)
 	{
 		try
 		{
+			
+			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+			
 			#Get main data first
-			$mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
+			/* $mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
 			
 			if (! empty($bfProductIds)) #梁社漢新品時會有值
 			{
@@ -161,7 +164,7 @@ class NewReleaseService
 					
 					$mainData = $mainData->merge($bfData);
 				}
-			}
+			} */
 			
 			/* 每筆訂單的資料格式
 			["SHOP_ID" => "235001"
@@ -170,7 +173,7 @@ class NewReleaseService
 			  "SHOP_NAME" => "御廚中和直營店"
 			]
 			*/
-			return $mainData;
+			#return $mainData;
 		}
 		catch(Exception $e)
 		{
@@ -179,6 +182,8 @@ class NewReleaseService
 		}
 	}
 	
+	/* ========================== 統計 ========================== */
+	/* ========================================================== */
 	/* 取使用者可讀取區域資料(原主邏輯不動)
 	 * @params: array
 	 * @return: array

@@ -11,14 +11,13 @@
 
 @section('content')
 <!-- Content -->
-@if($viewModel->status() === TRUE)
-
 	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
 		<nav>
 			<a href="{{ route('product.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
 	</header>
 	
+@if($viewModel->status() === TRUE)	
 	<form x-data='productList(@json($viewModel->list),@json($viewModel->options["brands"]) )' action="" method="post" x-ref="productListForm">
 		@csrf
 		<section class="product-list container">

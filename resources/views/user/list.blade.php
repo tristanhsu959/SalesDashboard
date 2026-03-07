@@ -11,8 +11,6 @@
 
 @section('content')
 <!-- Content -->
-@if($viewModel->status() === TRUE)
-	
 	<!-- Search panel -->
 	<form x-data='searchUser(@json($viewModel->search))' action="{{ route('user.search') }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
 		@csrf
@@ -52,6 +50,7 @@
 		</nav>
 	</header>
 	
+@if($viewModel->status() === TRUE)	
 	<form x-data="userList" action="" method="post" x-ref="userListForm">
 		@csrf
 		<section class="user-list container">

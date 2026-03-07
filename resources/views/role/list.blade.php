@@ -12,14 +12,13 @@
 
 @section('content')
 <!-- Content -->
-@if($viewModel->status() === TRUE)
-
 	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
 		<nav>
 			<a href="{{ route('role.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
 	</header>
 	
+@if($viewModel->status() === TRUE)	
 	<form x-data="roleList" action="" method="post" x-ref="roleListForm">
 		@csrf
 		<section class="role-list container">

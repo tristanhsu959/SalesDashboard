@@ -6,16 +6,22 @@ use Illuminate\Support\Facades\DB;
 
 class Repository
 {
-	protected function connectBFPosErp($table)
+	protected function connectBFPosErp($table = NULL)
 	{
 		#八方
-		return DB::connection('BFPosErp')->table($table)->lock('WITH(NOLOCK)');
+		if (empty($table))
+			return DB::connection('BFPosErp');
+		else
+			return DB::connection('BFPosErp')->table($table);
 	}
 	
-	protected function connectBGPosErp($table)
+	protected function connectBGPosErp($table = NULL)
 	{
 		#梁社漢
-		return DB::connection('BGPosErp')->table($table)->lock('WITH(NOLOCK)');
+		if (empty($table))
+			return DB::connection('BGPosErp');
+		else
+			return DB::connection('BGPosErp')->table($table);
 	}
 	
 	/* Local Sale[s]_Dashboard */
@@ -24,7 +30,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('SalesDashboard');
 		else
-			return DB::connection('SalesDashboard')->table($table); #無法用nolock
+			return DB::connection('SalesDashboard')->table($table);
 	}
 	
 	#台北(北區)
@@ -33,7 +39,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('OrderTP');
 		else
-			return DB::connection('OrderTP')->table($table)->lock('WITH(NOLOCK)'); 
+			return DB::connection('OrderTP')->table($table); 
 	}
 	
 	#屯山(北區)
@@ -42,7 +48,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('OrderTS');
 		else
-			return DB::connection('OrderTS')->table($table)->lock('WITH(NOLOCK)'); 
+			return DB::connection('OrderTS')->table($table); 
 	}
 	
 	#高雄(南區)
@@ -51,7 +57,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('OrderKH');
 		else
-			return DB::connection('OrderKH')->table($table)->lock('WITH(NOLOCK)'); 
+			return DB::connection('OrderKH')->table($table); 
 	}
 	#二崙(南區)
 	protected function connectOrderRL($table = NULL)
@@ -59,7 +65,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('OrderRL');
 		else
-			return DB::connection('OrderRL')->table($table)->lock('WITH(NOLOCK)'); 
+			return DB::connection('OrderRL')->table($table); 
 	}
 	
 	#norder database(新訂貨系統)
@@ -68,7 +74,7 @@ class Repository
 		if (empty($table))
 			return DB::connection('NewOrder');
 		else
-			return DB::connection('NewOrder')->table($table)->lock('WITH(NOLOCK)'); 
+			return DB::connection('NewOrder')->table($table); 
 	}
 	
 	/* 原測試機已改為Local MySql */
