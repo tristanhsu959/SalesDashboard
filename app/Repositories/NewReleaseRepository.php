@@ -91,12 +91,11 @@ class NewReleaseRepository extends Repository
 			->fromSub(
 				$primaryQuery->when($dualBrandedQuery, function ($query, $dual) {
 					return $query->unionAll($dual);
-				}), 
-				'a'
+				}), 'a'
 			)
 			->join('SHOP00 b WITH(NOLOCK)', 'b.SHOP_ID', '=', 'a.shopId')
 			->select('a.shopId', 'a.saleDate')
-			->selectRaw('SUM(a.qty) as totalQty')
+			->selectRaw('SUM(a.qty) as qty')
 			->groupBy('a.shopId', 'a.saleDate')
 			->orderBy('a.saleDate', 'DESC')
 			->orderBy('a.shopId')
@@ -118,23 +117,27 @@ class NewReleaseRepository extends Repository
 	{
 		#只回傳query builder
 		$query = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
-				->join('SALE01 as b WITH(NOLOCK)', function($join) {
+				->select('a.SHOP_ID as shopId', 'a.QTY as qty')
+				->selectRaw('CAST(b.SALE_DATE AS DATE) as saleDate')
+				->table('SALE01 as a')
+				->fromRaw('SALE01 as a WITH(NOLOCK)')
+				->join('SALE00 as b WITH(NOLOCK)', function($join) {
 					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
 							->on('a.SALE_ID', '=', 'b.SALE_ID');
 				})
-				
-				->select('b.SHOP_ID as shopId', 'b.QTY as qty')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
-				->whereBetween('a.SALE_DATE', [$stDate, $endDate])
+				->where('b.SALE_DATE', '>=', $stDate)
+				->where('b.SALE_DATE', '<=', $endDate])
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
-					$db->whereIn('b.PROD_ID', $erpNos);
-					
-					$db->when($tastes, function ($q) use ($tastes) {
+					$db->whereExists(function ($subQuery) use ($erpNos) {
+						$subQuery->select(DB::raw(1))
+							->from('PRODUCT00 as p')
+							->whereColumn('p.PROD_ID', 'a.PROD_ID')
+							->whereIn('p.PROD_ID', $erpNos);
+					})
+					->when($tastes, function ($q) use ($tastes) {
 						$tasteKeywords = array_map(fn($t) => "%{$t}%", $tastes);
-						$q->orWhereAny(['b.TASTE_MEMO'], 'like', $tasteKeywords);
+						$q->orWhereAny(['a.TASTE_MEMO'], 'like', $tasteKeywords);
 					});
 				});
 		
@@ -163,26 +166,30 @@ class NewReleaseRepository extends Repository
 		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
 
 		$db = $this->connectBFPosErp();
-		#只回傳query builder
+		
 		$query = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
-				->join('SALE01 as b WITH(NOLOCK)', function($join) {
+				->selectRaw($caseShopId)
+				->select('a.QTY as qty')
+				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
+				->table('SALE01 as a')
+				->fromRaw('SALE01 as a WITH(NOLOCK)')
+				->join('SALE00 as b WITH(NOLOCK)', function($join) {
 					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
 							->on('a.SALE_ID', '=', 'b.SALE_ID');
 				})
-				
-				->selectRaw($caseShopId)
-				->select('b.QTY as qty')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
-				->whereBetween('a.SALE_DATE', [$stDate, $endDate])
+				->where('b.SALE_DATE', '>=', $stDate)
+				->where('b.SALE_DATE', '<=', $endDate])
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
-					$db->whereIn('b.PROD_ID', $erpNos);
-					
-					$db->when($tastes, function ($q) use ($tastes) {
+					$db->whereExists(function ($subQuery) use ($erpNos) {
+						$subQuery->select(DB::raw(1))
+							->from('PRODUCT00 as p')
+							->whereColumn('p.PROD_ID', 'a.PROD_ID')
+							->whereIn('p.PROD_ID', $erpNos);
+					})
+					->when($tastes, function ($q) use ($tastes) {
 						$tasteKeywords = array_map(fn($t) => "%{$t}%", $tastes);
-						$q->orWhereAny(['b.TASTE_MEMO'], 'like', $tasteKeywords);
+						$q->orWhereAny(['a.TASTE_MEMO'], 'like', $tasteKeywords);
 					});
 				})
 				->whereIn('a.SHOP_ID', array_keys($dualBrandedShopIds));
