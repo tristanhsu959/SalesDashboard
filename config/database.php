@@ -45,6 +45,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+			'collation' => 'Chinese_PRC_CI_AS', 
         ],
 		#梁社漢
 		'BGPosErp' => [
@@ -60,6 +61,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+			'collation' => 'Chinese_PRC_CI_AS', 
         ],
 		
 		'SalesDashboard' => [

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Enums\Brand;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 
@@ -115,8 +116,13 @@ class NewReleaseRepository extends Repository
 	 */
 	private function _getPrimaryQuery($db, $stDate, $endDate, $erpNos, $tastes)
 	{
+		$erpNos = collect($erpNos)
+			->map(fn($no) => "N'{$no}'")
+			->implode(',');
+	
 		#只回傳query builder
 		$query = $db
+<<<<<<< HEAD
 				->select('a.SHOP_ID as shopId', 'a.QTY as qty')
 				->selectRaw('CAST(b.SALE_DATE AS DATE) as saleDate')
 				->table('SALE01 as a')

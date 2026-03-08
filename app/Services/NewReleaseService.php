@@ -140,9 +140,10 @@ class NewReleaseService
 	{
 		try
 		{
-			
+			$a = now()->format('Y-m-d H:i:s');
 			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
-			
+			$b = now()->format('Y-m-d H:i:s');
+			dd($a, $b, $saleData);
 			#Get main data first
 			/* $mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
 			
