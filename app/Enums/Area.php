@@ -24,23 +24,6 @@ enum Area : int
         };
     }
 	
-	/* public static function getLabelByValue($value) : string
-	{
-		#型別要一樣
-		$value = intval($value);
-		
-		return match($value)
-		{
-			self::TAIPEI->value		=> self::TAIPEI->label(),
-			self::YILAN->value 		=> self::YILAN->label(),
-			self::TCM->value		=> self::TCM->label(),
-			self::CCT->value 		=> self::CCT->label(),
-			self::YCN->value		=> self::YCN->label(),
-			self::KAOHSIUNG->value	=> self::KAOHSIUNG->label(),
-			default => 'UNKNOW',
-		};
-	} */
-	
 	public static function getAll() : array
 	{
 		$list = [];
@@ -59,6 +42,58 @@ enum Area : int
 	{
 		return collect(self::cases())->mapWithKeys(function ($case) {
 			return [$case->value => $case->label()];
+		})->toArray();
+	}
+	
+	#Bafang|Buygood shopgroup gid to brand id
+	public static function toId($srcId): int
+	{
+		return match ($srcId) 
+		{
+			'1'		=> 	self::TAIPEI->value,
+			'2'		=> 	self::TCM->value,
+			'3'		=> 	self::CCT->value,
+			'4'		=> 	self::YCN->value,
+			'5'		=> 	self::YILAN->value,
+			'6'	 	=> 	self::KAOHSIUNG->value,
+			'A01'	=>  self::TAIPEI->value,	
+			'A02'	=>  self::TCM->value,	
+			'A03'	=>  self::CCT->value,		
+			'A04'	=>  self::YCN->value,
+			'A05'	=>  self::KAOHSIUNG->value,
+			'A06'	=>  self::YILAN->value,
+		};
+	}
+	
+	#To Bafang shopgroup gid
+	public static function toBafangId($srcIds): array
+	{
+		return collect($srcIds)->map(function ($value, int $key) {
+			return match ($value) 
+			{
+				self::TAIPEI->value		=> '1',
+				self::TCM->value		=> '2',
+				self::CCT->value 		=> '3',
+				self::YCN->value		=> '4',
+				self::YILAN->value 		=> '5',
+				self::KAOHSIUNG->value 	=> '6',
+			};
+		})->toArray();
+	}
+	
+	#To Buygood shopgroup gid
+	public static function toBuygoodId($srcIds): array
+	{
+		return collect($srcIds)->map(function ($value, int $key) {
+			return match ($value) 
+			{
+				self::TAIPEI->value		=> 'A01',
+				self::TCM->value		=> 'A02',
+				self::CCT->value 		=> 'A03',
+				self::YCN->value		=> 'A04',
+				self::KAOHSIUNG->value 	=> 'A05',
+				self::YILAN->value 		=> 'A06',
+			};
 		})->toArray();
 	}
 }

@@ -64,7 +64,35 @@ class NewReleaseRepository extends Repository
 		return $result;
 	}
 	
-	/* 取主資料-BuyGood
+	/* 取門店資料
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @return: array
+	 */
+	public function getShopList($brand, $authAreaIds)
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.shop.except.{$configCode}");
+		
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else
+			$db = $this->connectBGPosErp();
+			
+		$result = $db->table('hptrans_shop as a')
+			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
+			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
+			->where('b.closedown', '=', 0)
+			->whereIn('b.gid', $authAreaIds)
+			->whereNotIn('b.SHOP_ID', $excepts)
+			->orderBy('b.SHOP_ID')
+			->get()->toArray();
+	
+		return $result;
+	}
+	
+	/* 取主資料
 	 * @params: datetime
 	 * @params: datetime
 	 * @params: array
@@ -99,7 +127,7 @@ class NewReleaseRepository extends Repository
 			->selectRaw('SUM(a.qty) as totalQty')
 			->groupBy('a.shopId', 'a.saleDate')
 			->orderBy('a.shopId')
-			->get();
+			->get()->toArray();
 	
 		return $result;
 	}

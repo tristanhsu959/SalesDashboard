@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Facades\AppManager;
 use App\Repositories\NewReleaseRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
@@ -25,6 +26,7 @@ class NewReleaseService
 		$this->_statistics = [
 			'startDate'	=> '', #Y-m-d
             'endDate'   => '',
+			'dayHeaer'	=> [],
 			'shop' 		=> [],
 			'area' 		=> [],
 			'top' 		=> [],
@@ -67,7 +69,8 @@ class NewReleaseService
 		return $result;
 	}
 	
-	/* 取新品銷售統計-入口
+	/* ====================== 主流程 ====================== */
+	/* 取新品銷售統計
 	 * @params: enums
 	 * @params: integer
 	 * @params: date
@@ -82,19 +85,23 @@ class NewReleaseService
 			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
 			
-			#頁面計算天數
+			#儲存頁面計算天數用日期
 			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); #這裏只存日期
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			
-			#2. Get params
+			#2. Get product params
 			list($primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
 						
-			#3. Get POS data
-			$srcData = [];
-			$srcData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
-						
+			#3. Get all shops with area permission
+			$shopList = $this->_getShopList($brand);
 			
-			return $this->_outputReport($srcData);
+			#4. Get POS data
+			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+			
+			#5. Build base data
+			$baseData = $this->_buildBaseData($shopList, $saleData);
+			
+			dd( $this->_outputReport($baseData));
 		}
 		catch(Exception $e)
 		{
@@ -102,6 +109,7 @@ class NewReleaseService
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
+	/* ====================== 主流程 End ====================== */
 	
 	
 	/* 取ErpNo及條件
@@ -140,41 +148,21 @@ class NewReleaseService
 	{
 		try
 		{
-			$a = now()->format('Y-m-d H:i:s');
-			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
-			$b = now()->format('Y-m-d H:i:s');
-			dd($a, $b, $saleData);
-			#Get main data first
-			/* $mainData = $this->_repository->getBgSaleData($startDateTime, $endDateTime, $productIds);
-			
-			if (! empty($bfProductIds)) #梁社漢新品時會有值
+			$cacheKey = implode(':', [$brand->code(), $stDate, $endDate]);
+		
+			if (Cache::has($cacheKey))
 			{
-				#取複合店Shop id
-				$shopIdMapping 	= config('buygood.new_release.multiBrandShopidMapping');
-				$bfShopIds 		= array_keys($shopIdMapping);
+				Log::channel('appServiceLog')->info('Get sales data from cache');
+				return Cache::get($cacheKey);
+			}
+			else
+			{
+				$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+				Cache::put($cacheKey, $saleData, now()->addMinutes(60));
+				Log::channel('appServiceLog')->info('Get sales data from DB');
 				
-				$bfData	= $this->_repository->getBfSaleData($startDateTime, $endDateTime, $bfProductIds, $bfShopIds);
-				
-				#避免未抓到資料的狀況
-				if (! empty($bfData))
-				{
-					$bfData = $bfData->map(function($item, $key) use ($shopIdMapping) {
-						$item['SHOP_ID'] = $shopIdMapping[$item['SHOP_ID']];
-						return $item;
-					});
-					
-					$mainData = $mainData->merge($bfData);
-				}
-			} */
-			
-			/* 每筆訂單的資料格式
-			["SHOP_ID" => "235001"
-			  "QTY" => "1.0000"
-			  "SALE_DATE" => "2025-12-19 17:13:11.000"
-			  "SHOP_NAME" => "御廚中和直營店"
-			]
-			*/
-			#return $mainData;
+				return $saleData;
+			}
 		}
 		catch(Exception $e)
 		{
@@ -183,30 +171,83 @@ class NewReleaseService
 		}
 	}
 	
+	/* 取店家並過濾區域權限
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getShopList($brand)
+	{
+		$currentUser = AppManager::getCurrentUser();
+		$userAreaIds = $currentUser['roleArea'];
+		$authAreaIds = ($brand == Brand::BAFANG) ? Area::toBafangId($userAreaIds) :  Area::toBuygoodId($userAreaIds);
+		
+		#Filter區域權限
+		$shopList = $this->_repository->getShopList($brand, $authAreaIds);
+		
+		return $shopList;
+	}
+	
+	/* 先分組成可共用的基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildBaseData($shopList, $saleData)
+	{
+		#要改成所有店家統計,以門店為基礎的資料
+		$groupSaleData = collect($saleData)->groupBy('shopId');
+		
+		$baseData = collect($shopList)->groupBy('shopId')->map(function($item, $key) use($groupSaleData) {
+			$temp['shopId']		= $item->pluck('shopId')->first();
+			$temp['shopName'] 	= $item->pluck('shopName')->first();
+			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
+			
+			$shopSalesData = data_get($groupSaleData, $temp['shopId'], FALSE);
+			
+			if ($shopSalesData)
+			{
+				$temp['dayQty'] = $shopSalesData->mapWithKeys(function($item, $key){
+					return [$item['saleDate'] => $item['totalQty']];
+				})->toArray();
+			}
+			else
+				$temp['dayQty'] = [];
+			
+			return $temp; 
+		})->toArray();
+		
+		return $baseData;
+		
+		/*
+		[
+		330002 => [
+		  "shopId" => "330002"
+		  "shopName" => "御廚桃園中山東店"
+		  "area" => 1
+		  "dayQty" =>  [
+			"2025-09-15" => 6.0
+			"2025-09-14" => 7.0
+			]
+		]
+		*/
+	}
+	
+	
+	
+	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
 	/* 取使用者可讀取區域資料(原主邏輯不動)
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($srcData)
+	private function _outputReport($baseData)
 	{
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$startDate = new Carbon($this->_statistics['startDate']);
-			$endDate = new Carbon($this->_statistics['endDate']);
-			$diffDays = $startDate->diffInDays($endDate) + 1; 
+			$this->_buildDayHeader();
 			
-			/*
-			413001 => array:4 [▼
-				"shopId" => "413001"
-				"shopName" => "御廚台中霧峰店"
-				"area" => 4
-				"dayQty" => array:91 [▶]
-			  ]
-			*/
-			
+			dd($this->_statistics);
 			#2.Build base data(所有資料By ShopId)
 			$baseData = $this->_buildBaseData($srcData);
 			
@@ -232,50 +273,17 @@ class NewReleaseService
 		}
 	}
 	
-	/* 先分組成可共用的基底資料
-	 * @params: collection
+	/* 計算日期天數
+	 * @params: 
 	 * @return: array
 	 */
-	private function _buildBaseData($sourceData)
+	private function _buildDayHeader()
 	{
-		$result = $sourceData->groupBy('SHOP_ID') #group by shop id
-			->map(function($item, $key){
-				
-				
-				$temp['shopId'] 	= $item->pluck('SHOP_ID')->get(0);
-				$temp['shopName'] 	= $item->pluck('SHOP_NAME')->get(0);
-				$temp['area'] 		= ShopLib::getAreaIdByShopId($temp['shopId']);
-				
-				$temp['dayQty'] = $item->mapToGroups(function($item, $key){ #group by date
-					$dateKey = Str::before($item['SALE_DATE'], ' ');
-					return [$dateKey => $item['QTY']];
-				})->map(function($item, $key){
-					return $item->sum();
-				})->toArray();
-				
-				$item = $temp; #use $temp避免source被改寫
-				return $item;
-			})->toArray();
-		
-		#全轉成array回傳
-		return $result;
+		$startDate 	= new Carbon($this->_statistics['startDate']);
+		$endDate 	= new Carbon($this->_statistics['endDate']);
+		$diffDays = $startDate->diffInDays($endDate) + 1; 
 	}
 	
-	/* 區域權限過濾
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _filterByAreaPermission($baseData)
-	{
-		$userInfo = $this->getSigninUserInfo();
-		$userAreaIds = $userInfo['area'];
-			
-		$baseData = Arr::reject($baseData, function ($item, $key) use($userAreaIds) {
-			return ! in_array($item['area'], $userAreaIds);
-		});
-		
-		return $baseData;
-	}
 	
 	
 	/* 店別每日銷售
@@ -285,7 +293,7 @@ class NewReleaseService
 	 */
 	private function _parsingByShop($baseData, $diffDays)
 	{
-		/* 
+		/* Output
 		[
 		330002 => [
 		  "shopId" => "330002"
