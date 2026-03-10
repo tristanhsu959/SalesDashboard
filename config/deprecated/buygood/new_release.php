@@ -89,7 +89,7 @@ return [
 			#ids, valueAdded條件不影響, 因排程是抓原來的config
 			'ids' => [ 
 				'main' => ['UC06100109', 'UC06100110'], #梁社漢
-				'mapping' => ['', ''], #八方(複合店)
+				'mapping' => ['PS02200049','PS02200050'], #八方(複合店)
 			],
 			'valueAdded' => '', #加值判別
 			'brand' => Brand::BUYGOOD->value, #表示屬梁社漢新品

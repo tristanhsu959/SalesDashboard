@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Carbon\CarbonPeriod;
 use Exception;
 
 
@@ -26,7 +27,7 @@ class NewReleaseService
 		$this->_statistics = [
 			'startDate'	=> '', #Y-m-d
             'endDate'   => '',
-			'dayHeaer'	=> [],
+			'dayHeader'	=> [],
 			'shop' 		=> [],
 			'area' 		=> [],
 			'top' 		=> [],
@@ -89,19 +90,24 @@ class NewReleaseService
 			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); #這裏只存日期
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			
-			#2. Get product params
+			#2. Get params
 			list($primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
-						
+			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser['roleArea']; #
+					
 			#3. Get all shops with area permission
-			$shopList = $this->_getShopList($brand);
+			$shopList = $this->_getShopList($brand, $userAreaIds);
 			
 			#4. Get POS data
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
 			
 			#5. Build base data
-			$baseData = $this->_buildBaseData($shopList, $saleData);
+			#會有false的無效array, 用array_filter去除
+			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
+			unset($saleData);
 			
-			dd( $this->_outputReport($baseData));
+			return $this->_outputReport($baseData);
 		}
 		catch(Exception $e)
 		{
@@ -137,6 +143,26 @@ class NewReleaseService
 		}
 	}
 	
+	/* 取店家並過濾區域權限
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getShopList($brand, $userAreaIds)
+	{
+		try
+		{
+			#會Filter區域權限
+			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
+		
+			return $shopList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料發生錯誤');
+		}
+	}
+	
 	/* Get main data & mapping data
 	 * @params: date
 	 * @params: date
@@ -144,7 +170,7 @@ class NewReleaseService
 	 * @params: array => product ids of BF
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes)
+	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds)
 	{
 		try
 		{
@@ -157,8 +183,9 @@ class NewReleaseService
 			}
 			else
 			{
-				$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
-				Cache::put($cacheKey, $saleData, now()->addMinutes(60));
+				$saleData = $this->_repository->getSaleRecords($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+				#$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
+				Cache::put($cacheKey, $saleData, now()->addMinutes(120));
 				Log::channel('appServiceLog')->info('Get sales data from DB');
 				
 				return $saleData;
@@ -171,21 +198,7 @@ class NewReleaseService
 		}
 	}
 	
-	/* 取店家並過濾區域權限
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _getShopList($brand)
-	{
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser['roleArea'];
-		$authAreaIds = ($brand == Brand::BAFANG) ? Area::toBafangId($userAreaIds) :  Area::toBuygoodId($userAreaIds);
-		
-		#Filter區域權限
-		$shopList = $this->_repository->getShopList($brand, $authAreaIds);
-		
-		return $shopList;
-	}
+	
 	
 	/* 先分組成可共用的基底資料
 	 * @params: collection
@@ -206,7 +219,7 @@ class NewReleaseService
 			if ($shopSalesData)
 			{
 				$temp['dayQty'] = $shopSalesData->mapWithKeys(function($item, $key){
-					return [$item['saleDate'] => $item['totalQty']];
+					return [$item['saleDate'] => $item['qty']];
 				})->toArray();
 			}
 			else
@@ -245,24 +258,20 @@ class NewReleaseService
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_buildDayHeader();
+			$this->_statistics['dayHeader'] = $this->_buildDayHeader();
+			$totalDays = count($this->_statistics['dayHeader']);
 			
-			dd($this->_statistics);
-			#2.Build base data(所有資料By ShopId)
-			$baseData = $this->_buildBaseData($srcData);
-			
-			#3.Filter By Area (By User Permission)
-			$baseData = $this->_filterByAreaPermission($baseData);
-			
-			/* Statistics Start */
-			#6.店別每日銷售
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData, $diffDays);
+			#2.店別每日銷售
+			$this->_statistics['shop'] = $this->_parsingByShop($baseData, $totalDays);
 				
-			#7.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData, $diffDays);
-				
-			#8.當日銷售前10名 | 當日銷售後10名
+			#3.區域彙總
+			$this->_statistics['area'] = $this->_parsingByArea($baseData, $totalDays);
+							
+			#4.當日銷售前10名
+			#5.當日銷售後10名
 			list($this->_statistics['top'], $this->_statistics['last']) = $this->_parsingByRanking($baseData, $this->_statistics['endDate']);
+			
+			/***** Statistics End *****/
 			
 			return ResponseLib::initialize($this->_statistics)->success();
 		}
@@ -279,9 +288,18 @@ class NewReleaseService
 	 */
 	private function _buildDayHeader()
 	{
-		$startDate 	= new Carbon($this->_statistics['startDate']);
-		$endDate 	= new Carbon($this->_statistics['endDate']);
-		$diffDays = $startDate->diffInDays($endDate) + 1; 
+		$st 		= Carbon::create($this->_statistics['startDate']);
+		$end 		= Carbon::create($this->_statistics['endDate']);
+		$period 	= CarbonPeriod::create($st, $end);
+		
+		$dateList = [];
+
+		foreach ($period as $date) 
+		{
+			$dateList[] = $date->format('Y-m-d');
+		}
+		
+		return $dateList;
 	}
 	
 	
@@ -291,7 +309,7 @@ class NewReleaseService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _parsingByShop($baseData, $diffDays)
+	private function _parsingByShop($baseData, $totalDays)
 	{
 		/* Output
 		[
@@ -313,11 +331,10 @@ class NewReleaseService
 			return [];
 		
 		#基本資料已有, 只要再計算=>銷售總量|平均銷售數量
-		$result = Arr::map($baseData, function($value, $key) use($diffDays) {
-			
-			$value['totalQty'] = array_sum($value['dayQty']); #所有日銷售量總和/店
-			$value['totalAvg'] = round($value['totalQty'] / $diffDays, 1); #銷售量總和
-			return $value;
+		$result = Arr::map($baseData, function($item, $key) use($totalDays) {
+			$item['totalQty'] = array_sum($item['dayQty']); #銷售量總和
+			$item['totalAvg'] = round($item['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
+			return $item;
 		});
 		
 		$result = Arr::sort($result);
@@ -330,10 +347,10 @@ class NewReleaseService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _parsingByArea($baseData, $diffDays)
+	private function _parsingByArea($baseData, $totalDays)
 	{
 		/*
-		"area" => [
+		"areaId" => [
 			"大台北區" => [
 				"shopCount" => 101
 				"totalQty" => 22208
@@ -353,27 +370,28 @@ class NewReleaseService
 			return [];
 		
 		$collection = collect($baseData);
-		$data = $collection->groupBy('area')->map(function($item, $key) use($diffDays) {
+		$result = $collection->groupBy('areaId')->map(function($item, $key) use($totalDays) {
 			$temp['shopCount']		= count($item); #店家數
 			$temp['totalQty'] 		= intval($item->pluck('dayQty')->flatten()->sum()); #區域銷售總量
-			$temp['avgDayQty'] 		= round($temp['totalQty'] / $diffDays, 1); #區域平均日銷售量: 區域銷售總量/天數
-			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
-			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $diffDays / $temp['shopCount'], 1); #區域每店平均日銷量: 區域銷售總量/店家數/天數
+			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
+			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); 		#區域每店平均銷量: 區域銷售總量/店家數
+			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $totalDays / $temp['shopCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數
 			
 			return $temp;
-		})->toArray();
+		})->sortKeys()->toArray();
 		
 		#重排區域的順序以保持顯示一致(系統跑會依抓到資料的順序)
-		$result['大台北區'] 	= data_get($data, Area::TAIPEI->value, []);
+		/* $result['大台北區'] 	= data_get($data, Area::TAIPEI->value, []);
 		$result['宜蘭區'] 	= data_get($data, Area::YILAN->value, []);
 		$result['桃竹苗區'] 	= data_get($data, Area::TCM->value, []);
 		$result['中彰投區'] 	= data_get($data, Area::CCT->value, []);
 		$result['雲嘉南區'] 	= data_get($data, Area::YCN->value, []);
 		$result['大高雄區'] 	= data_get($data, Area::KAOHSIUNG->value, []);
+		 */
 		
-		$result['total']['shopCount'] 	= collect($data)->pluck('shopCount')->sum(); 
-		$result['total']['totalQty'] 	= collect($data)->pluck('totalQty')->sum();
-		$result['total']['avgDayQty'] 	= collect($data)->pluck('avgDayQty')->sum();
+		$result['total']['shopCount'] 	= collect($result)->pluck('shopCount')->sum(); 
+		$result['total']['totalQty'] 	= collect($result)->pluck('totalQty')->sum();
+		$result['total']['avgDayQty'] 	= collect($result)->pluck('avgDayQty')->sum();
 		$result['total']['avgShopQty'] 	= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
 		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
 		
@@ -416,89 +434,4 @@ class NewReleaseService
 		
 		return [$top, $last];
 	}
-	
-	/* ===== 暫廢棄 ===== */
-	/* CRUD Permission Check for Page
-	 * @params: int
-	 * @return: boolean
-	 *
-	 public function getOperationPermission()
-	 {
-		try
-		{
-			return $this->allowOperationPermissionList($this->_groupKey, $this->_configKey);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__]);
-			return [];
-		}
-	 }*/
-	 
-	/* ===== 原Business Login, 流程已變更 - 暫廢棄 ===== */
-	/* 取新品銷售統計-主流程
-	 * @params: string
-	 * @params: string
-	 * @return: array
-	 */
-	/*public function processStatistics($cacheKey)
-	{
-		#initialize
-		$statistics = [
-			'productName' 	=> '',
-			'saleDate' 		=> '',
-			'saleEndDate' 	=> '',
-			'startDate' 	=> '',
-			'endDate' 		=> '',
-			'shop' 	=> [],
-			'area' 	=> [],
-			'top' 	=> [],
-			'last' 	=> [],
-		];
-			
-			
-		try 
-		{
-			#1.取新品參數 & Initialize 
-			list($productName, $saleDate, $saleEndDate, $startDateTime, $endDateTime, $productIds, $bfProductIds) = $this->_getParams();
-			
-			$statistics['productName']	= $productName;
-			$statistics['saleDate'] 	= (new Carbon($saleDate))->format('Y-m-d');
-			$statistics['saleEndDate'] 	= (new Carbon($saleEndDate))->format('Y-m-d');
-			$statistics['startDate'] 	= (new Carbon($startDateTime))->format('Y-m-d');
-			$statistics['endDate'] 		= (new Carbon($endDateTime))->format('Y-m-d');
-			
-			#取查詢範圍總天數
-			$startDate = new Carbon($startDateTime);
-			$endDate = new Carbon($endDateTime);
-			$diffDays = $startDate->diffInDays($endDate) + 1; 
-			
-			#2.Get data from DB(不同品牌DB不同)
-			$data = $this->_getData($startDateTime, $endDateTime, $productIds, $bfProductIds);
-			
-			#3.Parsing to base data(所有資料By ShopId)
-			$baseData = $this->_buildBaseData($data);
-			
-			/* Statistics Start *
-			#4.店別每日銷售
-			$statistics['shop'] = $this->_parsingByShop($baseData, $diffDays);
-			
-			#5.區域彙總
-			$statistics['area'] = $this->_parsingByArea($baseData, $diffDays);
-			
-			#6.當日銷售前10名 | 當日銷售後10名
-			list($statistics['top'], $statistics['last']) = $this->_parsingByRanking($baseData, $statistics['endDate']);
-			
-			#7.Save to Cache
-			Cache::put($cacheKey, $statistics, now()->addMinutes(30));
-			
-			return ResponseLib::initialize($statistics)->success();
-		}
-		catch(Exception $e)
-		{
-			return ResponseLib::initialize($statistics)->fail($e->getMessage());
-		}
-	}*/
-	/*==============================================================================*/
-
 }
