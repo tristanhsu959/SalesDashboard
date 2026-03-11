@@ -114,10 +114,7 @@ class SalesService
 			#2. Get data from DB
 			$srcData = [];
 			
-			/*if ($searchBrand = Brand::BAFANG)
-				$srcData = $this->_getBaseDataByBf($searchStDate, $searchEndDate);
-			else*/
-			$srcData = $this->_getBaseDataByBg($searchStDate, $searchEndDate);
+			$srcData = $this->_getDataFromDB($searchBrand, $searchStDate, $searchEndDate);
 			
 			#3.refactor source data format
 			$baseData = $this->_rebuildBaseData($srcData);
@@ -152,7 +149,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _getBaseDataByBg($searchStDate, $searchEndDate)
+	private function _getDataFromDB($searchBrand, $searchStDate, $searchEndDate)
 	{
 		try
 		{
@@ -170,8 +167,10 @@ class SalesService
 			  "PROD_NAME1" => "滷排骨飯"
 			]
 			*/
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser['roleArea']; 
 			
-			$result = $this->_repository->getBgSaleData($searchStDate, $searchEndDate);
+			$result = $this->_repository->getPosSaleData($searchBrand, $searchStDate, $searchEndDate, $userAreaIds);
 			
 			return $result;
 		}

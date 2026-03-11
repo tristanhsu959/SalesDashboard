@@ -42,7 +42,7 @@ class BafangPosOrderReplication extends Command
 			#複寫SALE01至z-sd-order
 			DB::connection('BFPosErp')->statement("
 				INSERT INTO zs_sd_order WITH (TABLOCK)
-				(saleId, saleSno, shopId, productId, price, qty, taste, saleDate)
+				(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate)
 				SELECT 
 					a.SALE_ID,
 					a.SALE_SNO,
@@ -50,6 +50,7 @@ class BafangPosOrderReplication extends Command
 					a.PROD_ID,
 					a.SALE_PRICE,
 					a.QTY,
+					a.ITEM_DISC,
 					a.TASTE_MEMO,
 					b.SALE_DATE
 				FROM SALE01 a WITH(NOLOCK)
