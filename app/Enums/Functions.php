@@ -12,6 +12,8 @@ enum Functions : string
 	case NEW_ITEM 			= 'new_item';
 	#Bafang
 	case BF_NEW_RELEASE		= 'bafang:new_releases';
+	case BF_PURCHASE		= 'bafang:purchase';
+	case BF_SALES			= 'bafang:sales';
 	#Buygood
 	case BG_NEW_RELEASE		= 'buygood:new_releases';
 	case BG_PURCHASE		= 'buygood:purchase';

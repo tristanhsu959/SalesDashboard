@@ -59,7 +59,122 @@
 			</div>
 		</article>
 		@else
-			<i></i>
+		<div class="statistics">
+			<div class="tabs cyan-text">
+				<a class="active" data-ui="#tab-area">區域彙總</a>
+				<a data-ui="#tab-shop">店別明細</a>
+				<a data-ui="#tab-ranking-asc">當日銷售前10名</a>
+				<a data-ui="#tab-ranking-desc">當日銷售後10名</a>
+			</div>
+			
+			<!-- 區域彙總 -->
+			<div class="page padding active" id="tab-area">
+				<section class="statistics-area">
+					<div class="grid header">
+						<div class="s1">區域</div>
+						<div class="s1">店家數</div>
+						<div class="s1">銷售總量</div>
+						<div class="s1">平均日銷售量</div>
+						<div class="s1">每店平均銷量</div>
+						<div class="s2">每店平均日銷量</div>
+					</div>
+					
+					@foreach($viewModel->statistics['area'] as $id => $area)
+					<div class="grid data">
+						<div class="s1">{{ $id == 'total' ? '全區合計' : $viewModel->getAreaName($id) }}</div>
+						<div class="s1">{{ data_get($area, 'shopCount', 0) }}</div>
+						<div class="s1">{{ data_get($area, 'totalQty', 0) }}</div>
+						<div class="s1">{{ data_get($area, 'avgDayQty', 0) }}</div>
+						<div class="s1">{{ data_get($area, 'avgShopQty', 0) }}</div>
+						<div class="s2">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
+					</div>
+					@endforeach
+				</section>
+			</div>
+			<div class="page padding" id="tab-shop">
+				<section class="statistics-shop scrollbar">
+					<table class="stripes odd-cyan">
+						<thead>
+							<tr>
+								<th>區域</th>
+								<th>門店代號</th>
+								<th>門店名稱</th>
+								@foreach($viewModel->statistics['dayHeader'] as $date)
+								<th class="col-date">
+									<span>{{ $viewModel->showHeaderYear(Str::before($date, '-')) }}</span>
+									<span>{{ Str::after($date, '-') }}</span>
+								</th>
+								@endforeach
+								<th>銷售總量</th>
+								<th>平均銷售數量</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach($viewModel->statistics['shop'] as $shop)
+							<tr>
+								<th>{{ $viewModel->getAreaName($shop['areaId']) }}</th>
+								<th>{{ $shop['shopId'] }}</th>
+								<th>{{ $shop['shopName'] }}</th>
+								
+								@foreach($viewModel->statistics['dayHeader'] as $date)
+								<td>
+									{{ data_get($shop, "dayQty.$date", 0) }}
+								</td>
+								@endforeach
+								
+								<td>{{ $shop['totalQty'] }}</td>
+								<td>{{ $shop['totalAvg'] }}</td>
+							</tr>
+							@endforeach
+						</tbody>
+					</table>
+				</section>
+			</div>
+			<div class="page padding" id="tab-ranking-asc">
+				<section class="statistics-ranking">
+					<article class="border ranking-top">
+						<ul class="list border">
+							<!--只顯示第一家,因數量太多-->
+							@foreach($viewModel->statistics['top'] as $ranking => $shopGroup)
+							<li>
+								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="info">
+									{{ $viewModel->getAreaName($shopGroup[0]['areaId']) }}
+									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
+									<span>{{ $shopGroup[0]['shopId'] }}</span>
+								</div>
+								<span class="badge none primary">{{ $shopGroup[0]['todayQty'] }}</span>
+								<div class="max"></div>
+								<label>共 {{ count($shopGroup) }} 店家</label>
+							</li>
+							@endforeach
+						</ul>
+					</article>
+				</section>
+			</div>
+			<div class="page padding" id="tab-ranking-desc">
+				<section class="statistics-ranking">
+					<article class="border ranking-last">
+						<ul class="list border">
+							<!--只顯示第一家,因數量太多-->
+							@foreach($viewModel->statistics['last'] as $ranking => $shopGroup)
+							<li>
+								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="info">
+									{{ $viewModel->getAreaName($shopGroup[0]['areaId']) }}
+									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
+									<span>{{ $shopGroup[0]['shopId'] }}</span>
+								</div>
+								<span class="badge none secondary">{{ $shopGroup[0]['todayQty'] }}</span>
+								<div class="max"></div>
+								<label>共 {{ count($shopGroup) }} 店家</label>
+							</li>
+							@endforeach
+						</ul>
+					</article>
+				</section>
+			</div>
+		</div>
 		@endif
 	</section>
 	@endif

@@ -1,9 +1,8 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('searchProduct', (searchData, options) => ({
+	Alpine.data('searchSales', (searchData) => ({
 		searchData: searchData,
-		options: options,
 		errors: new Set(),
 		
 		init() {
@@ -12,9 +11,6 @@ document.addEventListener('alpine:init', () => {
 		
 		search() {
 			this.errors.clear();
-			
-			if (this.searchData.newItemId == 0)
-				this.errors.add('newItemId');
 			
 			if (this.searchData.stDate == '')
 				this.errors.add('stDate');
@@ -38,17 +34,7 @@ document.addEventListener('alpine:init', () => {
 				return false;
 		},
 		
-		initSearchStDate(newItemId) {
-			const minDate = this.options.newItems[newItemId].saleDate;
-			this.$refs.searchStDate.min = minDate;
-			this.$refs.searchEndDate.min = minDate;
-			
-			this.searchData.stDate = minDate; //用$refs...value無法連動
-			this.errors.delete('stDate');
-		},
-		
 		resetSearch() {
-			this.searchData.newItemId = '';
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
 			this.errors.clear();

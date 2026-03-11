@@ -6,9 +6,10 @@ use App\Services\NewReleaseService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
-use App\Enums\FormAction;
-use App\Enums\Functions;
 use App\Enums\Brand;
+use App\Enums\Area;
+use App\Enums\Functions;
+use App\Enums\FormAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -86,48 +87,26 @@ class NewReleaseViewModel extends Fluent
 			return FALSE;
 	}
 	
-	/* 取時間序
-	 * @params: boolean #default desc
-	 * @return: array
-	 */
-	public function getDateRange($orderAsc = FALSE)
-    {
-		$order = $orderAsc ? 'ASC' : 'DESC';
-		$st = Carbon::create($this->_data['statistics']['startDate']);
-		$end = Carbon::create($this->_data['statistics']['endDate']);
-		$period = CarbonPeriod::create($st, $end);
-
-		$dateList = [];
-
-		foreach ($period as $date) 
-		{
-			$dateList[] = $date->format('Y-m-d');
-		}
-		
-		if ($order == 'DESC')
-			$dateList = Arr::sortDesc($dateList);
-		
-		return $dateList;
+	public function getAreaName($id)
+	{
+		return Area::tryFrom($id)->label();
 	}
 	
 	/* 時間Header, 顯示方式不同
 	 * @params: boolean #default desc
 	 * @return: array
 	 */
-	public function renderDateHeader($orderAsc = FALSE)
+	public function showHeaderYear($year)
 	{
-		$dateList = $this->getDateRange($orderAsc);
-		#不重複Year顯示處理
-		$year = '';
-		$header = [];
+		$lastYear = $this->get('lastYear', NULL);
 		
-		foreach ($dateList as $date) 
+		if ($lastYear == $year)
+			return '';
+		else
 		{
-			$thisYear 	= Str::before($date, '-');
-			$header[]	= Str::replaceFirst($year, '', $date); #-01-11, no year
-			$year = $thisYear;
+			$this->set('lastYear', $year);
+			return $year;
 		}
 		
-		return $header;
 	}
 }

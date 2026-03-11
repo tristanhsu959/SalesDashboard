@@ -299,39 +299,10 @@ class NewReleaseRepository extends Repository
 					#(product in (...) or taste_memo like ...)
 					$db->whereIn('a.productId', $erpNos)
 						->when(! empty($tastes), function ($db) use ($tastes) {
-							$db->orWhere('a.taste', '=', 1);
+							$db->orWhereAny(['a.taste'], 'like', $tastes);
 						});
 				})->get();
 		
-		/*
-		$query = $db
-				->table('SALE01 as a')
-				->fromRaw('SALE01 as a WITH(NOLOCK)')
-				->join('SALE00 as b', function($join) {
-					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
-							->on('a.SALE_ID', '=', 'b.SALE_ID');
-				})
-				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.SHOP_ID')
-				->select('a.SHOP_ID as shopId', 'a.QTY as qty')
-				->selectRaw('CAST(b.SALE_DATE AS DATE) as saleDate')
-				
-				->where('b.SALE_DATE', '>=', $stDate)
-				->where('b.SALE_DATE', '<=', $endDate)
-				->whereIn('c.gid', $authAreaIds)
-				->where(function ($db) use ($erpNos, $tastes){
-					#(product in (...) or taste_memo like ...)
-					$db->whereExists(function ($db) use ($erpNos) {
-						$db->select(DB::raw(1))
-							->fromRaw('PRODUCT00 as p')
-							->whereColumn('p.PROD_ID', 'a.PROD_ID')
-							->whereIn('p.PROD_ID', $erpNos);
-					})
-					->when(! empty($tastes), function ($db) use ($tastes) {
-						$tasteKeywords = array_map(fn($t) => "%{$t}%", $tastes);
-						$db->orWhereAny(['a.TASTE_MEMO'], 'like', $tasteKeywords);
-					});
-				})->get();
-		*/		
 		return $query;
 	}
 	
@@ -360,34 +331,24 @@ class NewReleaseRepository extends Repository
 			$caseShopId .= "WHEN a.SHOP_ID = '{$bfId}' THEN '{$bgId}' ";
 		}
 		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
-
+		
 		$query = $db
-				->table('SALE01 as a')
-				->fromRaw('SALE01 as a WITH(NOLOCK)')
-				->join('SALE00 as b WITH(NOLOCK)', function($join) {
-					$join->on('a.SHOP_ID', '=', 'b.SHOP_ID')
-							->on('a.SALE_ID', '=', 'b.SALE_ID');
-				})
-				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.SHOP_ID')
-				->selectRaw($caseShopId)
-				->select('a.QTY as qty')
-				->selectRaw('CAST(b.SALE_DATE AS DATE) as saleDate')
-				->where('b.SALE_DATE', '>=', $stDate)
-				->where('b.SALE_DATE', '<=', $endDate)
-				->whereIn('a.SHOP_ID', array_keys($dualBrandedShopIds))
+				->table('zs_sd_order as a')
+				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
+				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
+				->select('a.shopId', 'a.qty')
+				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<=', $endDate)
 				->whereIn('c.gid', $authAreaIds)
+				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
-					$db->whereExists(function ($subQuery) use ($erpNos) {
-						$subQuery->select(DB::raw(1))
-							->from('PRODUCT00 as p')
-							->whereColumn('p.PROD_ID', 'a.PROD_ID')
-							->whereIn('p.PROD_ID', $erpNos);
-					})
-					->when($tastes, function ($q) use ($tastes) {
-						$tasteKeywords = array_map(fn($t) => "%{$t}%", $tastes);
-						$q->orWhereAny(['a.TASTE_MEMO'], 'like', $tasteKeywords);
-					});
+					$db->whereIn('a.productId', $erpNos)
+						->when(! empty($tastes), function ($db) use ($tastes) {
+							$db->orWhereAny(['a.taste'], 'like', $tastes);
+						});
 				})->get();
 		
 		return $query;

@@ -98,7 +98,7 @@ class BafangPosOrderReplication extends Command
 			else
 				$stDate = now()->format('Y-m-d 00:00:00');
 			
-			$endDate = Carbon::parse($stDate)->addDay()->format('Y-m-d 23:59:59');
+			$endDate = Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
 		}
 		
 		return [$stDate, $endDate];
