@@ -286,8 +286,8 @@ class NewReleaseRepository extends Repository
 		
 		#只回傳query builder
 		$query = $db
-				->table('z_sd_order as a')
-				->fromRaw('z_sd_order as a WITH(NOLOCK)')
+				->table('zs_sd_order as a')
+				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
 				->select('a.shopId', 'a.qty')
 				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
