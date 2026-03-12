@@ -91,6 +91,7 @@ class NewReleaseService
 		{
 			#Check cache
 			$functions = $this->parsingFunction($brand);
+			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 			$cacheKey = implode(':', [$functions->value, $searchNewItemId, $searchStDate, $searchEndDate]);
 			
 			if (Cache::has($cacheKey))
