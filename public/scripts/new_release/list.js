@@ -39,11 +39,17 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		initSearchStDate(newItemId) {
-			const minDate = this.options.newItems[newItemId].saleDate;
+			let minDate = '';
+			
+			if (newItemId > 0)
+				minDate = this.options.newItems[newItemId].saleDate;
+
 			this.$refs.searchStDate.min = minDate;
 			this.$refs.searchEndDate.min = minDate;
-			
 			this.searchData.stDate = minDate; //用$refs...value無法連動
+			this.searchData.endDate = ''; //reset
+			
+			this.errors.delete('newItemId')
 			this.errors.delete('stDate');
 		},
 		

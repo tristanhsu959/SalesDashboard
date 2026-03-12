@@ -16,7 +16,7 @@
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
 		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'newItemId')">
-			<select x-model="searchData.newItemId" name="searchNewItemId" @change="initSearchStDate($event.target.value);errors.delete('newItemId')" x-effect="$nextTick(() => $el.value = searchData.newItemId)">
+			<select x-model="searchData.newItemId" name="searchNewItemId" @change="initSearchStDate($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.newItemId)">
 				<option value="0">請選擇</option>
 				<template x-for="(item, key) in options.newItems" :key="key">
 					<option x-text="item.name" :value="item.id"></option>
@@ -34,7 +34,6 @@
 			<label>結束日期</label>
 		</div>
 		
-		
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
 			<button @click="resetSearch()" type="button" class="btn-search-reset right-round square large"><i>backspace</i></button>
@@ -46,6 +45,12 @@
 <header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
 	<nav>
 		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
+	
+		@if ($viewModel->hasExportData())
+		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle red" type="button">
+			<span class="material-symbols-outlined filled-icon">download_2</span>
+		</a>
+		@endif
 	</nav>
 </header>
 	

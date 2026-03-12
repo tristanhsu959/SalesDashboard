@@ -10,6 +10,7 @@ enum FormAction : int
 	case CREATE	= 4;
 	case UPDATE = 5;
 	case DELETE = 6;
+	case EXPORT = 7;
 	
 	public function label() : string
     {
@@ -21,6 +22,7 @@ enum FormAction : int
 			self::CREATE	=> '新增',
 			self::UPDATE 	=> '編輯',
 			self::DELETE 	=> '刪除',
+			self::EXPORT 	=> '匯出',
 		};
     }
 }

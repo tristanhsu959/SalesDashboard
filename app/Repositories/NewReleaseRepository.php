@@ -36,6 +36,22 @@ class NewReleaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
+	public function getNameById($id)
+	{
+		$db = $this->connectSalesDashboard('new_item');
+		$result = $db
+			->select('newItemName')
+			->where('newItemId', '=', $id)
+			->get()
+			->first();
+		
+		return $result['newItemName'];
+	}
+	
+	/* 取新品設定相關條件
+	 * @params: int
+	 * @return: array
+	 */
 	public function getTasteById($id)
 	{
 		$db = $this->connectSalesDashboard('new_item');

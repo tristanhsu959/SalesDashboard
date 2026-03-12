@@ -18,6 +18,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		/* 新品 */
 		Route::get('new_releases', [NewReleaseController::class, 'showSearch'])->name('new_releases');
 		Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
+		Route::get('new_releases/export', [NewReleaseController::class, 'export'])->name('new_releases.export');
 		
 		/* 銷售報表 */
 		Route::get('sales', [SalesController::class, 'showSearch'])->name('sales');

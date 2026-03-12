@@ -13,10 +13,15 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Carbon\CarbonPeriod;
 use Exception;
-
+use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
+use OpenSpout\Writer\XLSX\Writer;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Row;
 
 class NewReleaseService
 {
@@ -25,13 +30,16 @@ class NewReleaseService
 	public function __construct(protected NewReleaseRepository $_repository)
 	{
 		$this->_statistics = [
-			'startDate'	=> '', #Y-m-d
-            'endDate'   => '',
-			'dayHeader'	=> [],
-			'shop' 		=> [],
-			'area' 		=> [],
-			'top' 		=> [],
-			'last' 		=> [],
+			'brandId'		=> '', #export
+			'productName'	=> '', #export
+			'exportToken'	=> '', #export
+			'startDate'		=> '', #Y-m-d
+            'endDate'   	=> '',
+			'dayHeader'		=> [],
+			'shop' 			=> [],
+			'area' 			=> [],
+			'top' 			=> [],
+			'last' 			=> [],
 		];
 	}
 	
@@ -71,6 +79,45 @@ class NewReleaseService
 	}
 	
 	/* ====================== 主流程 ====================== */
+	/* Search data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate)
+	{
+		try
+		{
+			#Check cache
+			$functions = $this->parsingFunction($brand);
+			$cacheKey = implode(':', [$functions->value, $searchNewItemId, $searchStDate, $searchEndDate]);
+			
+			if (Cache::has($cacheKey))
+			{
+				Log::channel('appServiceLog')->info('Get new release data from cache');
+				$statistics = Cache::get($cacheKey); #cache data is response format
+				return ResponseLib::initialize($statistics)->success();
+			}
+			else
+			{
+				Log::channel('appServiceLog')->info('Get new release data from db');
+				
+				$this->_statistics['brandId'] =	$brand->value; 
+				$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
+				$response = $this->_analysisStatisticsData($brand, $searchNewItemId, $searchStDate, $searchEndDate);
+				
+				#成功
+				Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
+				return ResponseLib::initialize($this->_statistics)->success();
+			}
+		}
+		catch(Exception $e)
+		{
+			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
+		}
+	}
+	
 	/* 取新品銷售統計
 	 * @params: enums
 	 * @params: integer
@@ -78,7 +125,7 @@ class NewReleaseService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate)
+	private function _analysisStatisticsData($brand, $searchNewItemId, $searchStDate, $searchEndDate)
 	{
 		try
 		{
@@ -91,7 +138,8 @@ class NewReleaseService
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			
 			#2. Get params
-			list($primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
+			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
+			$this->_statistics['productName'] = $productName;
 			
 			$currentUser = AppManager::getCurrentUser();
 			$userAreaIds = $currentUser['roleArea']; #
@@ -112,7 +160,7 @@ class NewReleaseService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail($e->getMessage());
+			throw new Exception($e->getMessage());
 		}
 	}
 	/* ====================== 主流程 End ====================== */
@@ -127,6 +175,7 @@ class NewReleaseService
 	{
 		try
 		{
+			$productName = $this->_repository->getNameById($searchNewItemId);
 			$tastes = $this->_repository->getTasteById($searchNewItemId);
 			$result = $this->_repository->getErpNoById($searchNewItemId);
 			
@@ -134,7 +183,7 @@ class NewReleaseService
 			$primaryIds		= $result[1]->pluck('erpNo')->toArray();
 			$secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
 			
-			return [$primaryIds, $secondaryIds, $tastes];
+			return [$productName, $primaryIds, $secondaryIds, $tastes];
 		}
 		catch(Exception $e)
 		{
@@ -272,13 +321,12 @@ class NewReleaseService
 			list($this->_statistics['top'], $this->_statistics['last']) = $this->_parsingByRanking($baseData, $this->_statistics['endDate']);
 			
 			/***** Statistics End *****/
-			
-			return ResponseLib::initialize($this->_statistics)->success();
+			return TRUE;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize($this->_statistics)->fail('解析報表資料發生錯誤');
+			throw new Exception('解析報表資料發生錯誤');
 		}
 	}
 	
@@ -433,5 +481,151 @@ class NewReleaseService
 		$last = $result->sortBy('todayQty')->groupBy('todayQty')->take(10)->values()->toArray();
 		
 		return [$top, $last];
+	}
+	
+	
+	/* Export data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function export($token)
+	{
+		#取資料邏輯共用
+		$cacheKey = hex2bin($token);
+		
+		if (! Cache::has($cacheKey))
+			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
+		
+		$currentUser = AppManager::getCurrentUser();
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
+		
+		try
+		{
+			$sourceData = Cache::get($cacheKey);
+			
+			#Build export data for sheets
+			$export['區域彙總'] 		= $this->_buildExportArea($sourceData['area']);
+			$export['店別明細'] 		= $this->_buildExportShop($sourceData['dayHeader'], $sourceData['shop']);
+			$export['當日銷售前10名'] = $this->_buildExportRanking($sourceData['endDate'], $sourceData['top']);
+			$export['當日銷售後10名']	= $this->_buildExportRanking($sourceData['endDate'], $sourceData['last']);
+			
+			#Write export to file
+#			$fileName = Str::replace(':', '_', $cacheKey); 
+			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['productName'], $sourceData['startDate'], $sourceData['endDate']], '?_新品_?_?_?.xlsx');
+			$filePath = Storage::disk('export')->path($fileName);
+			
+			$writer = new Writer();
+			#$writer->openToBrowser($fileName);
+			$writer->openToFile($filePath);
+			
+			foreach($export as $sheetName => $sheetData)
+			{
+				$sheet = ($sheetName == '區域彙總') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
+				$sheet->setName($sheetName);
+				
+				foreach($sheetData as $data)
+				{
+					$row =  Row::fromValues($data);
+					$writer->addRow($row);
+				}
+			}
+			
+			$writer->close();
+			return ResponseLib::initialize($fileName)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
+		}
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildExportArea($areaData)
+	{
+		$export[] = ['區域', '店家數', '銷售總量', '平均日銷售量', '每店平均銷量', '每店平均日銷量'];
+		
+		foreach($areaData as $areaId => $data)
+		{
+			$areaName = ($areaId == 'total') ? 'Total' : Area::tryFrom(intval($areaId))->label();
+			
+			$row = [];
+			$row[] = $areaName;
+			$row[] = $data['shopCount'];
+			$row[] = $data['totalQty'];
+			$row[] = $data['avgDayQty'];
+			$row[] = $data['avgShopQty'];
+			$row[] = $data['avgDayShopQty'];
+			
+			$export[]= $row;
+		}
+		
+		return $export;
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildExportShop($header, $shopData)
+	{
+		$export[] = array_merge(['區域', '門店代號', '門店名稱'], $header, ['銷售總量', '平均銷售數量']);
+		
+		foreach($shopData as $data)
+		{
+			$areaName = Area::tryFrom(intval($data['areaId']))->label();
+			
+			$row = [];
+			$row[] = $areaName;
+			$row[] = $data['shopId'];
+			$row[] = $data['shopName'];
+			
+			foreach($header as $date)
+			{
+				$row[] = data_get($data, "dayQty.{$date}", 0);
+			}
+			
+			$row[] = $data['totalQty'];
+			$row[] = $data['totalAvg'];
+			
+			$export[]= $row;
+		}
+		
+		return $export;
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildExportRanking($targeDate, $rankingData)
+	{
+		$export[] = array_merge(['區域', '門店代號', '門店名稱'], [$targeDate], ['排名']);
+		
+		foreach($rankingData as $ranking => $shopList)
+		{
+			#同一排名會有重複
+			foreach($shopList as $data)
+			{
+				$areaName = Area::tryFrom(intval($data['areaId']))->label();
+			
+				$row = [];
+				$row[] = $areaName;
+				$row[] = $data['shopId'];
+				$row[] = $data['shopName'];
+				$row[] = data_get($data, "dayQty.{$targeDate}", 0);
+				$row[] = $ranking;
+				
+				$export[]= $row;
+			}
+		}
+		
+		return $export;
 	}
 }

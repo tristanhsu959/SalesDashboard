@@ -8,6 +8,7 @@ use App\ViewModels\NewReleaseViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -59,5 +60,37 @@ class NewReleaseController extends Controller
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
 		return view('new_release.statistics')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* Export
+	 * @params: request
+	 * @return: view
+	 */
+	public function export(Request $request)
+	{
+		$brand 		= $this->_service->parsingBrand($request->segments());
+		$function 	= $this->_service->parsingFunction($brand);
+		$token 		= $request->query('token');
+		
+		$this->_viewModel->initialize($brand, $function);
+		
+		$response = $this->_service->export($token);
+		
+		if ($response->status === FALSE)
+		{
+			$this->_viewModel->fail($response->msg);
+			return view('new_release.statistics')->with('viewModel', $this->_viewModel);
+		}
+		else
+		{
+			$fileName = $response->data; 
+			$filePath = Storage::disk('export')->path($fileName);
+			
+			if (file_exists($filePath)) {
+				return response()->download($filePath)->deleteFileAfterSend();
+			}
+			#return Storage::disk('export')->download($fileName)->deleteFileAfterSend();
+			#return response()->download($fileName);
+		}
 	}
 }

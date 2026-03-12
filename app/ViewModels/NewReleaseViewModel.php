@@ -56,12 +56,16 @@ class NewReleaseViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction() : string
+	public function getFormAction($isExport = FALSE) : string
     {
-		return match($this->brand)
+		#因export不會有頁面
+		$action = ($isExport) ? FormAction::EXPORT : $this->action;
+		$brandCode = $this->brand->code();
+		
+		return match($action)
 		{
-			Brand::BAFANG	=> route(Str::replace('?', Brand::BAFANG->code(), '?.new_releases.search')),
-			Brand::BUYGOOD	=> route(Str::replace('?', Brand::BUYGOOD->code(), '?.new_releases.search')),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.new_releases.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.new_releases.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -108,5 +112,13 @@ class NewReleaseViewModel extends Fluent
 			return $year;
 		}
 		
+	}
+	
+	public function hasExportData()
+	{
+		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
+			return FALSE;
+		else
+			return TRUE;
 	}
 }

@@ -5,8 +5,16 @@ use Illuminate\Support\Facades\Artisan;
 
 use Illuminate\Support\Facades\Schedule;
 use App\Console\Commands\UpdateNewReleaseDataToLocal;
+use App\Console\Commands\BafangPosOrderReplication;
+use App\Console\Commands\BuygoodPosOrderReplication;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
+
+#Bafang zs_sd_order
+Schedule::command('bafang:pos-order-replication')->hourly()->between('10:00', '22:00');
+
+#Buygood zs_sd_order
+Schedule::command('buygood:pos-order-replication')->hourly()->between('10:00', '22:00');
 
 #Update data for current day
 #橙汁排骨
