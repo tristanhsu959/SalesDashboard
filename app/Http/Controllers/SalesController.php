@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
-#目前只先提供梁社漢
 class SalesController extends Controller
 {
 	public function __construct(protected SalesService $_service, protected SalesViewModel $_viewModel)
@@ -27,12 +26,13 @@ class SalesController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		$this->_viewModel->initialize($brand, $function, FormAction::LIST);
+		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData();
 		
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('sales.list')->with('viewModel', $this->_viewModel);
+		return view('sales.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -47,10 +47,10 @@ class SalesController extends Controller
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		
-		$this->_viewModel->initialize($brand, $function, FormAction::LIST);
+		$this->_viewModel->initialize($brand, $function);
 		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate);
 	
-		$response = $this->_service->getStatistics($brand , $searchStDate, $searchEndDate);
+		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -59,7 +59,7 @@ class SalesController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('sales.list')->with('viewModel', $this->_viewModel);
+		return view('sales.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Export
@@ -68,20 +68,26 @@ class SalesController extends Controller
 	 */
 	public function export(Request $request, $token)
 	{
-		$this->_viewModel->initialize(FormAction::LIST);
+		$brand 		= $this->_service->parsingBrand($request->segments());
+		$function 	= $this->_service->parsingFunction($brand);
+		
+		$this->_viewModel->initialize($brand, $function);
 		
 		$response = $this->_service->export($token);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('sales.bg_list')->with('viewModel', $this->_viewModel);
+			return view('sales.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{
 			$fileName = $response->data; 
-			return Storage::disk('export')->download($fileName);
-			#return response()->download($fileName);
+			$filePath = Storage::disk('export')->path($fileName);
+			
+			if (file_exists($filePath)) {
+				return response()->download($filePath)->deleteFileAfterSend();
+			}
 		}
 	}
 }

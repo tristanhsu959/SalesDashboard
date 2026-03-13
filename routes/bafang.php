@@ -15,6 +15,6 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_NEW_RELEASE->value, ':')])->group(function(){
 		Route::get('new_releases', [NewReleaseController::class, 'showSearch'])->name('new_releases');
 		Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
-		Route::get('new_releases/export', [NewReleaseController::class, 'export'])->name('new_releases.export');
+		Route::get('new_releases/export/{token}', [NewReleaseController::class, 'export'])->name('new_releases.export');
 	});
 });

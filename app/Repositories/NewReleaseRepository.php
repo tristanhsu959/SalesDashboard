@@ -114,7 +114,28 @@ class NewReleaseRepository extends Repository
 		return $result;
 	}
 	
-	/* 取主資料
+	/* 取主資料 By records 
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds)
+	{
+		$primaryData 		= $this->_getPrimaryData($brand, $stDate, $endDate, $primaryIds, $tastes, $userAreaIds);
+		$dualBrandedData	= $this->_getDualBrandedData($brand, $stDate, $endDate, $secondaryIds, $tastes, $userAreaIds);
+		
+		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
+		$result = $primaryData->merge($dualBrandedData)->toArray();
+	
+		return $result;
+	}
+	
+	/* Build query string | 八方,御廚
 	 * @params: enums
 	 * @params: datetime
 	 * @params: datetime
@@ -123,6 +144,102 @@ class NewReleaseRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
+	private function _getPrimaryData($brand, $stDate, $endDate, $erpNos, $tastes, $userAreaIds)
+	{
+		/* $erpNos = collect($erpNos)
+			->map(fn($no) => "N'{$no}'")
+			->implode(','); */
+		
+		if ($brand == Brand::BAFANG)
+		{
+			$db = $this->connectBFPosErp();
+			$authAreaIds = Area::toBafangId($userAreaIds);
+		}
+		else
+		{
+			$db = $this->connectBGPosErp();
+			$authAreaIds = Area::toBuygoodId($userAreaIds);
+		}
+		
+		$query = $db
+				->table('zs_sd_order as a')
+				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
+				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
+				->select('a.shopId', 'a.qty')
+				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<=', $endDate)
+				->whereIn('c.gid', $authAreaIds)
+				->where(function ($db) use ($erpNos, $tastes){
+					#(product in (...) or taste_memo like ...)
+					$db->whereIn('a.productId', $erpNos)
+						->when(! empty($tastes), function ($db) use ($tastes) {
+							$db->orWhereAny(['a.taste'], 'like', $tastes);
+						});
+				})->get();
+		
+		return $query;
+	}
+	
+	/* Build query string | 八方:只有複合店才有的情境
+	 * @params: connection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getDualBrandedData($brand, $stDate, $endDate, $erpNos, $tastes, $userAreaIds)
+	{
+		if ($brand == Brand::BAFANG)
+			return FALSE;
+		
+		
+		$db = $this->connectBGPosErp();
+		$authAreaIds = Area::toBuygoodId($userAreaIds);
+		$dualBrandedShopIds = config('web.shop.dualBrandedId');
+				
+		$caseShopId = "CASE ";
+		foreach ($dualBrandedShopIds as $bfId => $bgId) 
+		{
+			$caseShopId .= "WHEN a.SHOP_ID = '{$bfId}' THEN '{$bgId}' ";
+		}
+		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
+		
+		$query = $db
+				->table('zs_sd_order as a')
+				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
+				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
+				->select('a.shopId', 'a.qty')
+				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<=', $endDate)
+				->whereIn('c.gid', $authAreaIds)
+				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
+				->where(function ($db) use ($erpNos, $tastes){
+					#(product in (...) or taste_memo like ...)
+					$db->whereIn('a.productId', $erpNos)
+						->when(! empty($tastes), function ($db) use ($tastes) {
+							$db->orWhereAny(['a.taste'], 'like', $tastes);
+						});
+				})->get();
+		
+		return $query;
+	}
+	
+	/* Deprecated */
+	/* 取主資料
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 *
 	public function getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes)
 	{
 		if ($brand == Brand::BAFANG)
@@ -164,12 +281,12 @@ class NewReleaseRepository extends Repository
 	 * @params: array
 	 * @params: array
 	 * @return: query builder
-	 */
+	 *
 	private function _getPrimaryQuery($db, $stDate, $endDate, $erpNos, $tastes)
 	{
 		/* $erpNos = collect($erpNos)
 			->map(fn($no) => "N'{$no}'")
-			->implode(','); */
+			->implode(','); *
 		
 		#只回傳query builder
 		$query = $db
@@ -208,7 +325,7 @@ class NewReleaseRepository extends Repository
 	 * @params: array
 	 * @params: array
 	 * @return: query builder
-	 */
+	 *
 	private function _getDualBrandedQuery($stDate, $endDate, $erpNos, $tastes, $dualBrandedShopIds)
 	{
 		if (empty($dualBrandedShopIds))
@@ -252,121 +369,6 @@ class NewReleaseRepository extends Repository
 		
 		return $query;
 	}
+	*/
 	
-	/* 取主資料 By records (不計算反而比較快?)
-	 * @params: enums
-	 * @params: datetime
-	 * @params: datetime
-	 * @params: array
-	 * @params: array
-	 * @params: array
-	 * @params: array
-	 * @return: array
-	 */
-	public function getSaleRecords($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds)
-	{
-		$primaryQuery 		= $this->_getPrimaryRecords($brand, $stDate, $endDate, $primaryIds, $tastes, $userAreaIds);
-		$dualBrandedQuery 	= $this->_getDualBrandedRecords($brand, $stDate, $endDate, $secondaryIds, $tastes, $userAreaIds);
-		
-		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
-		$result = $primaryQuery->merge($dualBrandedQuery)->toArray();
-	
-		return $result;
-	}
-	
-	/* Build query string | 八方,御廚
-	 * @params: enums
-	 * @params: datetime
-	 * @params: datetime
-	 * @params: array
-	 * @params: array
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getPrimaryRecords($brand, $stDate, $endDate, $erpNos, $tastes, $userAreaIds)
-	{
-		/* $erpNos = collect($erpNos)
-			->map(fn($no) => "N'{$no}'")
-			->implode(','); */
-		
-		if ($brand == Brand::BAFANG)
-		{
-			$db = $this->connectBFPosErp();
-			$authAreaIds = Area::toBafangId($userAreaIds);
-		}
-		else
-		{
-			$db = $this->connectBGPosErp();
-			$authAreaIds = Area::toBuygoodId($userAreaIds);
-		}
-		
-		#只回傳query builder
-		$query = $db
-				->table('zs_sd_order as a')
-				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
-				->select('a.shopId', 'a.qty')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
-				
-				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
-				->whereIn('c.gid', $authAreaIds)
-				->where(function ($db) use ($erpNos, $tastes){
-					#(product in (...) or taste_memo like ...)
-					$db->whereIn('a.productId', $erpNos)
-						->when(! empty($tastes), function ($db) use ($tastes) {
-							$db->orWhereAny(['a.taste'], 'like', $tastes);
-						});
-				})->get();
-		
-		return $query;
-	}
-	
-	/* Build query string | 八方:只有複合店才有的情境
-	 * @params: connection
-	 * @params: datetime
-	 * @params: datetime
-	 * @params: array
-	 * @params: array
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getDualBrandedRecords($brand, $stDate, $endDate, $erpNos, $tastes, $userAreaIds)
-	{
-		if ($brand == Brand::BAFANG)
-			return FALSE;
-		
-		
-		$db = $this->connectBGPosErp();
-		$authAreaIds = Area::toBuygoodId($userAreaIds);
-		$dualBrandedShopIds = config('web.shop.dualBrandedId');
-				
-		$caseShopId = "CASE ";
-		foreach ($dualBrandedShopIds as $bfId => $bgId) 
-		{
-			$caseShopId .= "WHEN a.SHOP_ID = '{$bfId}' THEN '{$bgId}' ";
-		}
-		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
-		
-		$query = $db
-				->table('zs_sd_order as a')
-				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
-				->select('a.shopId', 'a.qty')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
-				
-				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
-				->whereIn('c.gid', $authAreaIds)
-				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
-				->where(function ($db) use ($erpNos, $tastes){
-					#(product in (...) or taste_memo like ...)
-					$db->whereIn('a.productId', $erpNos)
-						->when(! empty($tastes), function ($db) use ($tastes) {
-							$db->orWhereAny(['a.taste'], 'like', $tastes);
-						});
-				})->get();
-		
-		return $query;
-	}
 }

@@ -43,7 +43,7 @@ document.addEventListener('alpine:init', () => {
 			
 			if (newItemId > 0)
 				minDate = this.options.newItems[newItemId].saleDate;
-
+		
 			this.$refs.searchStDate.min = minDate;
 			this.$refs.searchEndDate.min = minDate;
 			this.searchData.stDate = minDate; //用$refs...value無法連動

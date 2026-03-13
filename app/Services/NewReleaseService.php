@@ -13,7 +13,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Carbon\CarbonPeriod;
@@ -97,6 +96,7 @@ class NewReleaseService
 			if (Cache::has($cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get new release data from cache');
+				
 				$statistics = Cache::get($cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
@@ -105,11 +105,14 @@ class NewReleaseService
 				Log::channel('appServiceLog')->info('Get new release data from db');
 				
 				$this->_statistics['brandId'] =	$brand->value; 
-				$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
 				$response = $this->_analysisStatisticsData($brand, $searchNewItemId, $searchStDate, $searchEndDate);
 				
-				#成功
-				Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
+				if (! empty($this->_statistics['shop']))
+				{
+					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
+				}
+				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
 		}
@@ -224,22 +227,10 @@ class NewReleaseService
 	{
 		try
 		{
-			$cacheKey = implode(':', [$brand->code(), $stDate, $endDate]);
-		
-			if (Cache::has($cacheKey))
-			{
-				Log::channel('appServiceLog')->info('Get sales data from cache');
-				return Cache::get($cacheKey);
-			}
-			else
-			{
-				$saleData = $this->_repository->getSaleRecords($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
-				#$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
-				Cache::put($cacheKey, $saleData, now()->addMinutes(120));
-				Log::channel('appServiceLog')->info('Get sales data from DB');
+			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+			#$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes);
 				
-				return $saleData;
-			}
+			return $saleData;
 		}
 		catch(Exception $e)
 		{

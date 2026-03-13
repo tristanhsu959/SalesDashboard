@@ -16,7 +16,7 @@ Schedule::command('bafang:pos-order-replication')->hourly()->between('10:00', '2
 #Buygood zs_sd_order
 Schedule::command('buygood:pos-order-replication')->hourly()->between('10:00', '22:00');
 
-#Update data for current day
+/* #Update data for current day
 #橙汁排骨
 Schedule::command('new-release:update-to-local porkRibs 1')->everyFifteenMinutes()->between('10:00', '21:00');
 #蕃茄牛三寶
@@ -38,7 +38,7 @@ Schedule::command('new-release:update-to-local braisedPork 3')->dailyAt('23:10')
 #老皮嫩肉
 Schedule::command('new-release:update-to-local eggTofu 3')->dailyAt('23:15');
 #秘製滷肉汁
-Schedule::command('new-release:update-to-local braisedGravy 3')->dailyAt('23:20');
+Schedule::command('new-release:update-to-local braisedGravy 3')->dailyAt('23:20'); */
 
 /*
 Artisan::command('inspire', function () {

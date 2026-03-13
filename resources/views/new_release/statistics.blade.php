@@ -55,7 +55,7 @@
 </header>
 	
 @if($viewModel->status() === TRUE)	
-	@if($viewModel->search['newItemId'])
+	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
 	<section class="new-release-list container">
 		@if($viewModel->isDataEmpty())
 		<article class="error-container border">
@@ -76,21 +76,21 @@
 			<div class="page padding active" id="tab-area">
 				<section class="statistics-area">
 					<div class="grid header">
-						<div class="s1">區域</div>
-						<div class="s1">店家數</div>
-						<div class="s1">銷售總量</div>
-						<div class="s1">平均日銷售量</div>
-						<div class="s1">每店平均銷量</div>
+						<div class="s2">區域</div>
+						<div class="s2">店家數</div>
+						<div class="s2">銷售總量</div>
+						<div class="s2">平均日銷售量</div>
+						<div class="s2">每店平均銷量</div>
 						<div class="s2">每店平均日銷量</div>
 					</div>
 					
 					@foreach($viewModel->statistics['area'] as $id => $area)
 					<div class="grid data">
-						<div class="s1">{{ $id == 'total' ? '全區合計' : $viewModel->getAreaName($id) }}</div>
-						<div class="s1">{{ data_get($area, 'shopCount', 0) }}</div>
-						<div class="s1">{{ data_get($area, 'totalQty', 0) }}</div>
-						<div class="s1">{{ data_get($area, 'avgDayQty', 0) }}</div>
-						<div class="s1">{{ data_get($area, 'avgShopQty', 0) }}</div>
+						<div class="s2">{{ $id == 'total' ? '全區合計' : $viewModel->getAreaName($id) }}</div>
+						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
+						<div class="s2">{{ data_get($area, 'totalQty', 0) }}</div>
+						<div class="s2">{{ data_get($area, 'avgDayQty', 0) }}</div>
+						<div class="s2">{{ data_get($area, 'avgShopQty', 0) }}</div>
 						<div class="s2">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
 					</div>
 					@endforeach

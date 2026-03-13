@@ -25,17 +25,18 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.new_releases'),
 		],
 		[
-			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計,
-			'code'		=> Functions::BG_PURCHASE->value,
-			'style' 	=> ['icon' => 'trolley', 'color' => 'cyan-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
-		],
-		[
 			'name' 		=> Functions::BG_SALES->label(), #銷售統計,
 			'code'		=> Functions::BG_SALES->value,
 			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.sales'),
 		],
+		[
+			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計,
+			'code'		=> Functions::BG_PURCHASE->value,
+			'style' 	=> ['icon' => 'trolley', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
+		],
+		
 	],
 	
 	MenuGroup::SYSTEM->value => [

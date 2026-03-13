@@ -32,16 +32,30 @@ class SalesViewModel extends Fluent
 	 * @params: string
 	 * @return: void
 	 */
-	public function initialize($brand , $function, $action)
+	public function initialize($brand , $function)
 	{
 		$this->brand	= $brand;
 		$this->function = $function;
-		$this->action	= $action;
 		$this->statistics = [];
 		
-		#default today
-		$today = now()->format('Y-m-d');
-		$this->keepSearchData($today, $today);
+		$this->keepSearchData();
+	}
+	
+	/* Form submit action
+	 * @params: 
+	 * @return: string
+	 */
+	public function getFormAction($isExport = FALSE) : string
+    {
+		#因export不會有頁面
+		$action = ($isExport) ? FormAction::EXPORT : $this->action;
+		$brandCode = $this->brand->code();
+		
+		return match($action)
+		{
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.sales.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.sales.export'), ['token' => $this->statistics['exportToken']]),
+		};
 	}
 	
 	/* Keep form search data
@@ -50,24 +64,13 @@ class SalesViewModel extends Fluent
 	 * @params: date
 	 * @return: void
 	 */
-	public function keepSearchData($searchStDate, $searchEndDate)
+	public function keepSearchData($searchStDate = NULL, $searchEndDate = NULL)
     {
-		$this->set('search.stDate', $searchStDate); 
-		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.today', Carbon::now()->format('Y-m-d'));
-	}
-	
-	/* Form submit action
-	 * @params: 
-	 * @return: string
-	 */
-	public function getFormAction() : string
-    {
-		return match($this->brand)
-		{
-			Brand::BAFANG	=> route(Str::replace('?', Brand::BAFANG->code(), '?.sales.search')),
-			Brand::BUYGOOD	=> route(Str::replace('?', Brand::BUYGOOD->code(), '?.sales.search')),
-		};
+		$today = now()->format('Y-m-d');
+		
+		$this->set('search.stDate', $searchStDate ?? $today); 
+		$this->set('search.endDate', $searchEndDate ?? $today);
+		$this->set('search.today', $today);
 	}
 	
 	public function isDataEmpty()
@@ -76,6 +79,11 @@ class SalesViewModel extends Fluent
 			return TRUE;
 		else
 			return FALSE;
+	}
+	
+	public function getAreaName($id)
+	{
+		return Area::tryFrom($id)->label();
 	}
 	
 	public function hasExportData()

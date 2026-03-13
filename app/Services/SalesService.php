@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Facades\AppManager;
 use App\Repositories\SalesRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
@@ -32,6 +33,7 @@ class SalesService
 	{
 		#default
 		$this->_statistics = [
+			'brandId'		=> '', #export
 			'exportToken'	=> '',
 			'header'		=> [],
 			'shop' 			=> [],
@@ -68,28 +70,39 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($searchBrand, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchStDate, $searchEndDate)
 	{
-		#Check cache
-		$cacheKey = implode(':', [$searchBrand->value, $searchStDate, $searchEndDate]);
-		
-		if (Cache::has($cacheKey))
+		try
 		{
-			Log::channel('appServiceLog')->info('Get sales data from cache');
-			return Cache::get($cacheKey); #cache data is response format
+			$functions = $this->parsingFunction($brand);
+			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate]);
+			
+			if (Cache::has($cacheKey))
+			{
+				Log::channel('appServiceLog')->info('Get sales data from cache');
+				
+				$statistics = Cache::get($cacheKey); #cache data is response format
+				return ResponseLib::initialize($statistics)->success();
+			}
+			else
+			{
+				Log::channel('appServiceLog')->info('Get sales data from db');
+				
+				$this->_statistics['brandId'] =	$brand->value; 
+				$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
+				$response = $this->_analysisSalesData($brand, $searchStDate, $searchEndDate);
+				
+				#無值不cache, 只判斷一個就可
+				if (! empty($this->_statistics['shop']))
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+				
+				return ResponseLib::initialize($this->_statistics)->success();
+			}
 		}
-		else
+		catch(Exception $e)
 		{
-			Log::channel('appServiceLog')->info('Get sales data from db');
-			
-			$this->_statistics['exportToken'] = Crypt::encryptString($cacheKey); #同字串會不同,匯出用
-			$response = $this->_analysisSalesData($searchBrand, $searchStDate, $searchEndDate);
-			
-			#成功才存
-			if ($response->status === TRUE)
-				Cache::put($cacheKey, $response, now()->addMinutes(60));
-			
-			return $response;
+			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}
 	
@@ -99,42 +112,38 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _analysisSalesData($searchBrand, $searchStDate, $searchEndDate)
+	private function _analysisSalesData($brand, $searchStDate, $searchEndDate)
 	{
 		try
 		{
-			#目前暫只有梁社漢
-			#1.Check brand code
-			if (empty($searchBrand->value) != Brand::BAFANG->value && $searchBrand->value != Brand::BUYGOOD->value)
-				throw new Exception('品牌識別碼錯誤');
-			
-			if (empty($searchStDate) OR empty($searchEndDate))
-				throw new Exception('查詢時間參數須有起迄時間');
+			#1. Calc time
+			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
 			
 			#2. Get data from DB
-			$srcData = [];
-			
-			$srcData = $this->_getDataFromDB($searchBrand, $searchStDate, $searchEndDate);
+			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate);
 			
 			#3.refactor source data format
-			$baseData = $this->_rebuildBaseData($srcData);
+			$baseData = $this->_buildBaseData($saleData);
+			unset($saleData);
 			
-			#4.Filter by area (By User Permission)
-			$baseData = $this->_filterByAreaPermission($baseData);
-			
-			#4-1.Filter by product : 排除不統計的項目
+			#3-1.Filter by product : 排除不統計的項目
 			#$baseData = $this->_filterByProduct($baseData);
 			
-			/* Statistics Start */
-			#5.建共用Header, by product
-			$this->_statistics['header'] = $this->_buildListHeader($baseData);
+			/********** Statistics Start **********/
+			
+			#4.建共用Header, by product
+			$this->_statistics['header'] = $this->_buildHeader($baseData);
+			dd($this->_statistics);
 			
 			#6.By店別
 			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
 			
 			#7.區域彙總
 			$this->_statistics['area'] = $this->_parsingByArea($baseData);
-				
+			
+			/********** Statistics End **********/
+			
 			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
@@ -149,28 +158,27 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _getDataFromDB($searchBrand, $searchStDate, $searchEndDate)
+	private function _getDataFromDB($brand, $searchStDate, $searchEndDate)
 	{
 		try
 		{
 			/* Return format */
 			/*
 			array:9 [
-			  "SHOP_ID" => "100002"
-			  "PROD_ID" => "UC06100003"
-			  "QTY" => "1.0000"
-			  "SALE_PRICE" => "125.0000"
-			  "ITEM_DISC" => ".0000"
-			  "TASTE_MEMO" => ""
-			  "SALE_DATE" => "2026-01-15 08:29:54.000"
-			  "SHOP_NAME" => "御廚中正濟南店"
-			  "PROD_NAME1" => "滷排骨飯"
+				"shopId" => "103002"
+				"productId" => "UC06000002"
+				"price" => "128"
+				"qty" => "1"
+				"discount" => ".0000"
+				"shopName" => "御廚重慶北直營店"
+				"gid" => "A01"
+				"productName" => "炸雞腿飯"
 			]
 			*/
 			$currentUser = AppManager::getCurrentUser();
 			$userAreaIds = $currentUser['roleArea']; 
 			
-			$result = $this->_repository->getPosSaleData($searchBrand, $searchStDate, $searchEndDate, $userAreaIds);
+			$result = $this->_repository->getSaleData($brand, $searchStDate, $searchEndDate, $userAreaIds);
 			
 			return $result;
 		}
@@ -182,61 +190,31 @@ class SalesService
 	}
 	
 	/* Rebuild data format
-	 * @params: array
-	 * @return: array
-	 */
-	private function _rebuildBaseData($srcData)
-	{
-		/* 重整資料格式/命名/區域
-		array:11 [
-			"orderDate" => "2026-01-16"
-			"shopId" => "328001"
-			"shopName" => "御廚桃園新坡店"
-			"productNo" => "UC06000031"
-			"productName" => "椒麻雞飯"
-			"price" => 138
-			"quantity" => 3
-			"discount" => 0
-			"taste" => ""
-			"areaId" => 3
-			"area" => "桃竹苗區"
-		]
-		*/
-		
-		$baseData = [];
-		
-		foreach($srcData as $key=>$row)
-		{
-			$item = [];
-			$item['orderDate']	= Str::before($row['SALE_DATE'], ' '); #Y-m-d
-			$item['shopId']		= $row['SHOP_ID'];
-			$item['shopName'] 	= $row['SHOP_NAME'];
-			$item['productNo'] 	= $row['PROD_ID'];
-			$item['productName']= $row['PROD_NAME1'];
-			$item['price'] 		= intval($row['SALE_PRICE']);
-			$item['quantity'] 	= intval($row['QTY']);
-			$item['discount'] 	= intval($row['ITEM_DISC']); #折扣
-			$item['hasGravy'] 	= Str::contains($row['TASTE_MEMO'], '秘製滷肉汁'); 
-			$item['areaId']		= ShopLib::getAreaIdByShopId($item['shopId']); #過濾用
-			$item['area']		= ShopLib::getAreaByShopId($item['shopId']);
-			
-			$baseData[] = $item;
-		}
-		
-		return $baseData;
-	}
-	
-	/* 區域權限過濾
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _filterByAreaPermission($baseData)
+	private function _buildBaseData($saleData)
 	{
-		$currentUser = $this->getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		/* 重整資料格式/命名/區域
+		array:11 [
+			"shopId" => "103002"
+			"productId" => "UC06000002"
+			"price" => "128"
+			"qty" => "1"
+			"discount" => ".0000"
+			"shopName" => "御廚重慶北直營店"
+			"gid" => "A01"
+			"productName" => "炸雞腿飯"
+			"areaId" => 1
+			"areaName" => "大台北區"
+		]
+		*/
 		
-		$baseData = Arr::reject($baseData, function ($item, $key) use($userAreaIds) {
-			return ! in_array($item['areaId'], $userAreaIds);
+		$baseData = collect($saleData)->map(function($item, $key){
+			$item['areaId']		= Area::toId($item['gid']); 
+			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			
+			return $item;
 		});
 		
 		return $baseData;
@@ -261,7 +239,7 @@ class SalesService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildListHeader($baseData)
+	private function _buildHeader($baseData)
 	{
 		/*
 		"UC00000001" => array:3 [▼
@@ -271,8 +249,7 @@ class SalesService
 		]
 		*/
 		
-		$collection = collect($baseData);
-		$header = $collection->mapToGroups(function (array $item, int $key){
+		$header = collect($baseData)->mapToGroups(function (array $item, int $key){
 			$temp['productName']= $item['productName'];
 			$temp['quantity'] 	= $item['quantity'];
 			$temp['amount'] 	= $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數

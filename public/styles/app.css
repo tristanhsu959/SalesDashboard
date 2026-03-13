@@ -49,6 +49,12 @@ body {
 				margin-block-start: 1.5rem !important;
 			} */
 		}
+		
+		#searchPanel {
+			.field.round, nav {
+				margin-top: 1.5rem;
+			}
+		}
 	}
 	
 	main.signin {

@@ -66,11 +66,11 @@ class NewReleaseController extends Controller
 	 * @params: request
 	 * @return: view
 	 */
-	public function export(Request $request)
+	public function export(Request $request, $token)
 	{
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
-		$token 		= $request->query('token');
+		//$token 	= $request->query('token');
 		
 		$this->_viewModel->initialize($brand, $function);
 		

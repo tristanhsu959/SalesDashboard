@@ -12,6 +12,7 @@ form {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
+		
 		.grid.header div {
 			font-weight: bold;
 		}
