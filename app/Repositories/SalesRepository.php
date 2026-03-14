@@ -13,7 +13,57 @@ class SalesRepository extends Repository
 	#MSSQL
 	public function __construct()
 	{
+	}
+	
+	/* 取門店資料
+	 * @params: enums
+	 * @params: array
+	 * @return: array
+	 */
+	public function getShopList($brand, $userAreaIds)
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.shop.except.{$configCode}");
 		
+		if ($brand == Brand::BAFANG)
+		{
+			$db = $this->connectBFPosErp();
+			$authAreaIds = Area::toBafangId($userAreaIds);
+		}
+		else
+		{
+			$db = $this->connectBGPosErp();
+			$authAreaIds = Area::toBuygoodId($userAreaIds);
+		}
+			
+		$result = $db->table('hptrans_shop as a')
+			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
+			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
+			->where('b.closedown', '=', 0)
+			->whereIn('b.gid', $authAreaIds)
+			->whereNotIn('b.SHOP_ID', $excepts)
+			->orderBy('b.SHOP_ID')
+			->get()->toArray();
+	
+		return $result;
+	}
+	
+	/* 取新品設定相關條件
+	 * @params: int
+	 * @return: array
+	 */
+	public function getProductList($brand)
+	{
+		$db = $this->connectSalesDashboard('product');
+		$result = $db
+			->select('productBrand', 'productId', 'productName', 'erpNo', 'isPrimary')
+			->join('product_no', 'parentId', '=', 'productId')
+			->where('productStatus', '=', 1)
+			->where('productBrand', '=', $brand->value)
+			->get()
+			->toArray();
+		
+		return $result;
 	}
 	
 	/* Sale data | 新品:八方/梁社漢共用
@@ -25,11 +75,15 @@ class SalesRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getSaleData($brand, $stDate, $endDate, $userAreaIds)
+	public function getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds)
 	{
+		$primaryData 		= $this->_getPrimaryData($brand, $stDate, $endDate, $primaryIds, $userAreaIds);
+		$dualBrandedData	= $this->_getDualBrandedData($brand, $stDate, $endDate, $secondaryIds, $userAreaIds);
 		
+		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
+		$result = $primaryData->merge($dualBrandedData)->toArray();
 		
-		#Log::channel('appServiceLog')->info($query->toRawSql(), [ __class__, __function__, __line__]);
+		return $result;
 	}
 	
 	/* Build query string | 八方,御廚
@@ -58,13 +112,15 @@ class SalesRepository extends Repository
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join('SHOP00 as s', 's.SHOP_ID', '=', 'a.shopId')
-				->join('PRODUCT00 as p', 'p.PROD_ID', '=', 'a.productId')
-				->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
-				->addSelect('s.SHOP_NAME as shopName', 's.gid', 'p.PROD_NAME1 as productName')
+				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
+				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
+				->select('a.shopId', 'a.productId as erpNo')
+				->selectRaw('sum(a.price * a.qty + a.discount) as amount')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('s.gid', $authAreaIds)
 				->whereIn('a.productId', $erpNos)
+				->groupByRaw('a.shopId, a.productId')
 				->get();
 		
 		return $query;
@@ -79,14 +135,14 @@ class SalesRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDualBrandedData($brand, $stDate, $endDate, $erpNos, $tastes, $userAreaIds)
+	private function _getDualBrandedData($brand, $stDate, $endDate, $erpNos, $userAreaIds)
 	{
 		if ($brand == Brand::BAFANG)
-			return FALSE;
+			return [];
 		
 		
-		$db = $this->connectBGPosErp();
-		$authAreaIds = Area::toBuygoodId($userAreaIds);
+		$db = $this->connectBFPosErp();
+		$authAreaIds = Area::toBafangId($userAreaIds);
 		$dualBrandedShopIds = config('web.shop.dualBrandedId');
 				
 		$caseShopId = "CASE ";
@@ -99,21 +155,18 @@ class SalesRepository extends Repository
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
-				->select('a.shopId', 'a.qty')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
-				
+				->join('SHOP00 as s', 's.SHOP_ID', '=', 'a.shopId')
+				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
+				->select('a.shopId', 'a.productId as erpNo')
+				->selectRaw('sum(a.price * a.qty + a.discount) as amount')
+				->addSelect('s.SHOP_NAME as shopName', 's.gid')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
-				->whereIn('c.gid', $authAreaIds)
+				->whereIn('s.gid', $authAreaIds)
+				->whereIn('a.productId', $erpNos)
 				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
-				->where(function ($db) use ($erpNos, $tastes){
-					#(product in (...) or taste_memo like ...)
-					$db->whereIn('a.productId', $erpNos)
-						->when(! empty($tastes), function ($db) use ($tastes) {
-							$db->orWhereAny(['a.taste'], 'like', $tastes);
-						});
-				})->get();
+				->groupByRaw('a.shopId, a.productId, s.SHOP_NAME, s.gid')
+				->get();
 		
 		return $query;
 	}

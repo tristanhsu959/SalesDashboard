@@ -148,7 +148,7 @@
 									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
 									<span>{{ $shopGroup[0]['shopId'] }}</span>
 								</div>
-								<span class="badge none primary">{{ $shopGroup[0]['todayQty'] }}</span>
+								<span class="badge none primary">{{ $shopGroup[0]['qty'] }}</span>
 								<div class="max"></div>
 								<label>共 {{ count($shopGroup) }} 店家</label>
 							</li>
@@ -170,7 +170,7 @@
 									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
 									<span>{{ $shopGroup[0]['shopId'] }}</span>
 								</div>
-								<span class="badge none secondary">{{ $shopGroup[0]['todayQty'] }}</span>
+								<span class="badge none secondary">{{ $shopGroup[0]['qty'] }}</span>
 								<div class="max"></div>
 								<label>共 {{ count($shopGroup) }} 店家</label>
 							</li>

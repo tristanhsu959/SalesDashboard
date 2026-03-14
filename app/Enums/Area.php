@@ -16,7 +16,7 @@ enum Area : int
         return match ($this) 
 		{
 			self::TAIPEI	=> '大台北區',
-			self::YILAN 	=> '宜蘭區',
+			self::YILAN 	=> '宜蘭區',		#此區可歸至大台北
 			self::TCM		=> '桃竹苗區',
 			self::CCT 		=> '中彰投區',
 			self::YCN		=> '雲嘉南區',

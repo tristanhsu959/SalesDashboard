@@ -34,6 +34,7 @@ class SalesService
 		#default
 		$this->_statistics = [
 			'brandId'		=> '', #export
+			'productList'	=> [],
 			'exportToken'	=> '',
 			'header'		=> [],
 			'shop' 			=> [],
@@ -74,6 +75,7 @@ class SalesService
 	{
 		try
 		{
+			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate]);
@@ -90,12 +92,14 @@ class SalesService
 				Log::channel('appServiceLog')->info('Get sales data from db');
 				
 				$this->_statistics['brandId'] =	$brand->value; 
-				$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
 				$response = $this->_analysisSalesData($brand, $searchStDate, $searchEndDate);
 				
 				#無值不cache, 只判斷一個就可
 				if (! empty($this->_statistics['shop']))
+				{
+					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
@@ -120,36 +124,83 @@ class SalesService
 			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
 			
-			#2. Get data from DB
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate);
+			#2. Get product list
+			list($productList, $primaryIds, $secondaryIds) = $this->_getParams($brand);
+			$this->_statistics['productList'] = $productList;
 			
-			#3.refactor source data format
-			$baseData = $this->_buildBaseData($saleData);
-			unset($saleData);
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser['roleArea']; #
+					
+			#3. Get all shops with area permission
+			$shopList = $this->_getShopList($brand, $userAreaIds);
 			
-			#3-1.Filter by product : 排除不統計的項目
+			#4. Get data from DB
+			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
+			
+			#5-1.Filter by product : 排除不統計的項目
 			#$baseData = $this->_filterByProduct($baseData);
 			
-			/********** Statistics Start **********/
+			#5.build to base data
+			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
+			unset($saleData);
 			
-			#4.建共用Header, by product
-			$this->_statistics['header'] = $this->_buildHeader($baseData);
-			dd($this->_statistics);
-			
-			#6.By店別
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
-			
-			#7.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData);
-			
-			/********** Statistics End **********/
-			
-			return ResponseLib::initialize($this->_statistics)->success();
+			#6. output statistics
+			return $this->_outputReport($baseData);
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
+			throw new Exception($e->getMessage());
+		}
+	}
+	
+	/* 取ErpNo
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	private function _getParams($brand)
+	{
+		try
+		{
+			$productList = $this->_repository->getProductList($brand);
+			
+			#for primary secondary
+			$idType = collect($productList)->groupBy('isPrimary');
+			$primaryIds		= $idType[1]->pluck('erpNo')->toArray();
+			$secondaryIds 	= empty($idType[0]) ? [] : $idType[0]->pluck('erpNo')->toArray();
+			
+			#重整product list為key-value
+			$productList = collect($productList)->groupBy('erpNo')->map(function($item, $key) {
+				return $item[0];
+			});
+			
+			return [$productList, $primaryIds, $secondaryIds];
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('解析產品參數發生錯誤');
+		}
+	}
+	
+	/* 取店家並過濾區域權限
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getShopList($brand, $userAreaIds)
+	{
+		try
+		{
+			#會Filter區域權限
+			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
+		
+			return $shopList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料發生錯誤');
 		}
 	}
 	
@@ -158,7 +209,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $searchStDate, $searchEndDate)
+	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds)
 	{
 		try
 		{
@@ -167,18 +218,16 @@ class SalesService
 			array:9 [
 				"shopId" => "103002"
 				"productId" => "UC06000002"
-				"price" => "128"
-				"qty" => "1"
-				"discount" => ".0000"
+				#"price" => "128"
+				#"qty" => "1"
+				#"discount" => ".0000"
+				"amount" => 111 => price * qty + discount
 				"shopName" => "御廚重慶北直營店"
 				"gid" => "A01"
 				"productName" => "炸雞腿飯"
 			]
 			*/
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser['roleArea']; 
-			
-			$result = $this->_repository->getSaleData($brand, $searchStDate, $searchEndDate, $userAreaIds);
+			$result = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
 			
 			return $result;
 		}
@@ -193,30 +242,49 @@ class SalesService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($saleData)
+	private function _buildBaseData($shopList, $saleData)
 	{
 		/* 重整資料格式/命名/區域
 		array:11 [
 			"shopId" => "103002"
-			"productId" => "UC06000002"
-			"price" => "128"
-			"qty" => "1"
-			"discount" => ".0000"
 			"shopName" => "御廚重慶北直營店"
-			"gid" => "A01"
+			"productId" => "UC06000002"
 			"productName" => "炸雞腿飯"
+			"amount" => "128"
 			"areaId" => 1
 			"areaName" => "大台北區"
 		]
 		*/
 		
-		$baseData = collect($saleData)->map(function($item, $key){
-			$item['areaId']		= Area::toId($item['gid']); 
-			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
-			
-			return $item;
-		});
+		#要改成所有店家統計,以門店為基礎補全資料
+		$productList = $this->_statistics['productList'];
+		$groupSaleData = collect($saleData)->groupBy('shopId');
 		
+		$baseData = collect($shopList)->map(function($item, $key) use($productList, $groupSaleData) {
+			$temp['shopId']		= $item['shopId'];
+			$temp['shopName'] 	= $item['shopName'];
+			$temp['areaId'] 	= Area::toId($item['areaId']);
+			
+			#取出此門店的sale db data
+			$shopSalesData = data_get($groupSaleData, $temp['shopId'], FALSE);
+			
+			if (empty($shopSalesData))
+			{
+				$temp['products'] = [];
+			}
+			else
+			{
+				$temp['products'] = $shopSalesData->map(function($item, $key) use($productList) {
+					$product = data_get($productList, $item['erpNo'], FALSE);
+				
+					$item['productId'] = $product['productId'];
+					$item['productName'] = $product['productName'];
+					return $item;
+				})->toArray();
+			}
+			return $temp; 
+		})->toArray();
+		dd($baseData[0]);
 		return $baseData;
 	}
 	
@@ -234,6 +302,35 @@ class SalesService
 		
 		return $baseData;
 	}*/
+	
+	/* ========================== 統計 ========================== */
+	/* ========================================================== */
+	/* 取使用者可讀取區域資料(原主邏輯不動)
+	 * @params: array
+	 * @return: array
+	 */
+	private function _outputReport($baseData)
+	{
+		try
+		{
+			#1.計算查詢範圍總天數 (use Date not DateTime)
+			$this->_statistics['header'] = $this->_buildHeader($baseData);
+			dd($this->_statistics);
+			
+			#2.By店別
+			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
+				
+			#3.By區域
+			$this->_statistics['area'] = $this->_parsingByArea($baseData);
+							
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('解析報表資料發生錯誤');
+		}
+	}
 	
 	/* List header
 	 * @params: collection
@@ -289,6 +386,31 @@ class SalesService
 			]...
 		]
 		*/
+		
+		#要改成所有店家統計,以門店為基礎的資料
+		/* $groupSaleData = collect($saleData)->groupBy('shopId');
+		
+		$baseData = collect($shopList)->groupBy('shopId')->map(function($item, $key) use($groupSaleData) {
+			$temp['shopId']		= $item->pluck('shopId')->first();
+			$temp['shopName'] 	= $item->pluck('shopName')->first();
+			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
+			
+			$shopSalesData = data_get($groupSaleData, $temp['shopId'], FALSE);
+			
+			if ($shopSalesData)
+			{
+				$temp['productAmount'] = $shopSalesData->mapWithKeys(function($item, $key){
+					return [$item['productId'] => $item['amount']];
+				})->toArray();
+			}
+			else
+				$temp['productAmount'] = [];
+			
+			return $temp; 
+		})->toArray();
+		
+		return $baseData; */
+		
 		$collection = collect($baseData);
 		$result = $collection->groupBy('shopId')
 			->map(function($item, $key) {

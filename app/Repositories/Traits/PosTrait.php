@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Repositories\Traits;
+
+use App\Enums\Brand;
+use App\Enums\Area;
+use Illuminate\Support\Facades\DB;
+
+/* POS DB Common */
+trait PosTrait
+{
+	/* 取所有門店資料(有些門店目前可能已Close,故統計資料須抓全部的shop)
+	 * @params: enums
+	 * @params: array
+	 * @return: array
+	 */
+	public function getShopList($brand, $userAreaIds = [])
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.shop.except.{$configCode}");
+		
+		if ($brand == Brand::BAFANG)
+		{
+			$db = $this->connectBFPosErp();
+			$authAreaIds = Area::toBafangId($userAreaIds);
+		}
+		else
+		{
+			$db = $this->connectBGPosErp();
+			$authAreaIds = Area::toBuygoodId($userAreaIds);
+		}
+		
+		$result = $db->table('SHOP00 as a')
+			->select('a.SHOP_ID as shopId', 'a.SHOP_NAME as shopName', 'a.gid as areaId', 'a.closedown')
+			#->where('a.closedown', '=', 0)
+			->when(! empty($authAreaIds), function ($db) use ($authAreaIds) {
+				$db->whereIn('a.gid', $authAreaIds);
+			})
+			#->whereIn('a.gid', $authAreaIds)
+			->whereNotIn('a.SHOP_ID', $excepts)
+			->orderBy('a.SHOP_ID')
+			->get()
+			->toArray();
+	
+		return $result;
+	}
+	
+	/* 取Active門店資料(POS有在運作的才會在此Table)
+	 * @params: enums
+	 * @params: array
+	 * @return: array
+	 */
+	public function getHptransShopList($brand, $userAreaIds)
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.shop.except.{$configCode}");
+		
+		if ($brand == Brand::BAFANG)
+		{
+			$db = $this->connectBFPosErp();
+			$authAreaIds = Area::toBafangId($userAreaIds);
+		}
+		else
+		{
+			$db = $this->connectBGPosErp();
+			$authAreaIds = Area::toBuygoodId($userAreaIds);
+		}
+			
+		$result = $db->table('hptrans_shop as a')
+			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
+			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
+			->where('b.closedown', '=', 0)
+			->whereIn('b.gid', $authAreaIds)
+			->whereNotIn('b.SHOP_ID', $excepts)
+			->orderBy('b.SHOP_ID')
+			->get()
+			->toArray();
+	
+		return $result;
+	}
+}

@@ -40,7 +40,7 @@
 			<x-menu :menus="AppManager::getAuthMenu()" :currentPath="request()->url()"/>
 		@endif
 		
-		<main x-data="{hasAuth: @json(AppManager::hasAuth()), isTop: true}" :class="hasAuth ? 'app':'signin'" class="responsive" @scroll.capture.window="isTop = $event.target.scrollTop <= 10">
+		<main x-data="{hasAuth: @json(AppManager::hasAuth())}" :class="hasAuth ? 'app':'signin'" class="responsive"> <!--@scroll.capture.window="isTop = $event.target.scrollTop <= 10"-->
 			@if(AppManager::hasAuth())
 				<x-action-bar :initData="$viewModel->actionBarData()" />
 			@endif

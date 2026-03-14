@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Repositories\Traits\PosTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,8 @@ use Exception;
 
 class NewReleaseRepository extends Repository
 {
+	use PosTrait;
+	
 	public function __construct()
 	{
 		
@@ -81,39 +84,6 @@ class NewReleaseRepository extends Repository
 		return $result;
 	}
 	
-	/* 取門店資料
-	 * @params: enums
-	 * @params: array
-	 * @return: array
-	 */
-	public function getShopList($brand, $userAreaIds)
-	{
-		$configCode = $brand->code();
-		$excepts = config("web.shop.except.{$configCode}");
-		
-		if ($brand == Brand::BAFANG)
-		{
-			$db = $this->connectBFPosErp();
-			$authAreaIds = Area::toBafangId($userAreaIds);
-		}
-		else
-		{
-			$db = $this->connectBGPosErp();
-			$authAreaIds = Area::toBuygoodId($userAreaIds);
-		}
-			
-		$result = $db->table('hptrans_shop as a')
-			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
-			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
-			->where('b.closedown', '=', 0)
-			->whereIn('b.gid', $authAreaIds)
-			->whereNotIn('b.SHOP_ID', $excepts)
-			->orderBy('b.SHOP_ID')
-			->get()->toArray();
-	
-		return $result;
-	}
-	
 	/* 取主資料 By records 
 	 * @params: enums
 	 * @params: datetime
@@ -131,7 +101,7 @@ class NewReleaseRepository extends Repository
 		
 		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
 		$result = $primaryData->merge($dualBrandedData)->toArray();
-	
+		
 		return $result;
 	}
 	
@@ -149,6 +119,9 @@ class NewReleaseRepository extends Repository
 		/* $erpNos = collect($erpNos)
 			->map(fn($no) => "N'{$no}'")
 			->implode(','); */
+			
+		$configCode = $brand->code();
+		$excepts = config("web.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
 		{
@@ -165,24 +138,29 @@ class NewReleaseRepository extends Repository
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
-				->select('a.shopId', 'a.qty')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				#->select('a.shopId', 'a.qty')
+				#->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				->select('a.shopId')
+				->selectRaw('CAST(a.saleDate AS DATE) as saleDate, sum(a.qty) as qty')
 				
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('c.gid', $authAreaIds)
+				->whereNotIn('a.shopId', $excepts)
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
 					$db->whereIn('a.productId', $erpNos)
 						->when(! empty($tastes), function ($db) use ($tastes) {
 							$db->orWhereAny(['a.taste'], 'like', $tastes);
 						});
-				})->get();
+				})
+				->groupByRaw('a.shopId, CAST(a.saleDate AS DATE)')
+				->get();
 		
 		return $query;
 	}
 	
-	/* Build query string | 八方:只有複合店才有的情境
+	/* Build query string | 只有御廚才有複合店才有的情境, 需去八方取御廚的資料
 	 * @params: connection
 	 * @params: datetime
 	 * @params: datetime
@@ -196,24 +174,25 @@ class NewReleaseRepository extends Repository
 		if ($brand == Brand::BAFANG)
 			return FALSE;
 		
-		
-		$db = $this->connectBGPosErp();
-		$authAreaIds = Area::toBuygoodId($userAreaIds);
+		$db = $this->connectBFPosErp();
+		$authAreaIds = Area::toBafangId($userAreaIds);
 		$dualBrandedShopIds = config('web.shop.dualBrandedId');
 				
-		$caseShopId = "CASE ";
+		/* $caseShopId = "CASE ";
 		foreach ($dualBrandedShopIds as $bfId => $bgId) 
 		{
 			$caseShopId .= "WHEN a.SHOP_ID = '{$bfId}' THEN '{$bgId}' ";
 		}
-		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
+		$caseShopIdcaseShopId .= "ELSE a.SHOP_ID END as shopId"; */
 		
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join('SHOP00 as c', 'c.SHOP_ID', '=', 'a.shopId')
-				->select('a.shopId', 'a.qty')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				#->select('a.shopId', 'a.qty')
+				#->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
+				->select('a.shopId')
+				->selectRaw('CAST(a.saleDate AS DATE) as saleDate, sum(a.qty) as qty')
 				
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
@@ -225,7 +204,15 @@ class NewReleaseRepository extends Repository
 						->when(! empty($tastes), function ($db) use ($tastes) {
 							$db->orWhereAny(['a.taste'], 'like', $tastes);
 						});
-				})->get();
+				})
+				->groupByRaw('a.shopId, CAST(a.saleDate AS DATE)')
+				->get();
+		
+		#轉換shop id
+		$query = $query->map(function($item, $key) use($dualBrandedShopIds) {
+			$item['shopId'] = $dualBrandedShopIds[$item['shopId']];
+			return $item;
+		});
 		
 		return $query;
 	}
