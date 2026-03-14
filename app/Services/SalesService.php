@@ -34,11 +34,13 @@ class SalesService
 		#default
 		$this->_statistics = [
 			'brandId'		=> '', #export
-			'productList'	=> [],
-			'exportToken'	=> '',
+			'startDate'		=> '', #Y-m-d
+            'endDate'   	=> '',
 			'header'		=> [],
 			'shop' 			=> [],
 			'area' 			=> [],
+			'productList'	=> [],
+			'exportToken'	=> '',
 		];
 	}
 	
@@ -91,16 +93,19 @@ class SalesService
 			{
 				Log::channel('appServiceLog')->info('Get sales data from db');
 				
-				$this->_statistics['brandId'] =	$brand->value; 
-				$response = $this->_analysisSalesData($brand, $searchStDate, $searchEndDate);
+				$this->_statistics['brandId']	= $brand->value; 
+				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
+				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+				
+				$response = $this->_analysisStatisticsData($brand);
 				
 				#無值不cache, 只判斷一個就可
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
 				}
-				
+				dd($this->_statistics);
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
 		}
@@ -116,13 +121,13 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _analysisSalesData($brand, $searchStDate, $searchEndDate)
+	private function _analysisStatisticsData($brand)
 	{
 		try
 		{
 			#1. Calc time
-			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
+			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			#2. Get product list
 			list($productList, $primaryIds, $secondaryIds) = $this->_getParams($brand);
@@ -166,14 +171,14 @@ class SalesService
 			$productList = $this->_repository->getProductList($brand);
 			
 			#for primary secondary
-			$idType = collect($productList)->groupBy('isPrimary');
+			$idType 		= collect($productList)->groupBy('isPrimary');
 			$primaryIds		= $idType[1]->pluck('erpNo')->toArray();
 			$secondaryIds 	= empty($idType[0]) ? [] : $idType[0]->pluck('erpNo')->toArray();
 			
 			#重整product list為key-value
 			$productList = collect($productList)->groupBy('erpNo')->map(function($item, $key) {
 				return $item[0];
-			});
+			})->toArray();
 			
 			return [$productList, $primaryIds, $secondaryIds];
 		}
@@ -246,45 +251,36 @@ class SalesService
 	{
 		/* 重整資料格式/命名/區域
 		array:11 [
-			"shopId" => "103002"
-			"shopName" => "御廚重慶北直營店"
-			"productId" => "UC06000002"
-			"productName" => "炸雞腿飯"
-			"amount" => "128"
+			"shopId" => "100001"
+			"erpNo" => "UC00000042"
+			"price_sum" => "360.0"
+			"qty_sum" => "3"
+			"shopName" => "御廚中正南昌店"
 			"areaId" => 1
 			"areaName" => "大台北區"
+			"productId" => 2
+			"productName" => "橙汁排骨"
 		]
 		*/
 		
-		#要改成所有店家統計,以門店為基礎補全資料
+		#要改成所有店家統計
+		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
 		$productList = $this->_statistics['productList'];
-		$groupSaleData = collect($saleData)->groupBy('shopId');
+		$groupShopList = collect($shopList)->groupBy('shopId');
 		
-		$baseData = collect($shopList)->map(function($item, $key) use($productList, $groupSaleData) {
-			$temp['shopId']		= $item['shopId'];
-			$temp['shopName'] 	= $item['shopName'];
-			$temp['areaId'] 	= Area::toId($item['areaId']);
+		$baseData = collect($saleData)->map(function($item, $key) use($productList, $groupShopList) {
+			$shop = $groupShopList->get($item['shopId']);
+			$product = data_get($productList, $item['erpNo'], NULL);
 			
-			#取出此門店的sale db data
-			$shopSalesData = data_get($groupSaleData, $temp['shopId'], FALSE);
+			$item['shopName'] 	= $shop->pluck('shopName')->first();
+			$item['areaId'] 	= Area::toId($shop->pluck('areaId')->first());
+			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			$item['productId']	= empty($product) ? 0 : $product['productId'];
+			$item['productName']= empty($product) ? '' : $product['productName'];
 			
-			if (empty($shopSalesData))
-			{
-				$temp['products'] = [];
-			}
-			else
-			{
-				$temp['products'] = $shopSalesData->map(function($item, $key) use($productList) {
-					$product = data_get($productList, $item['erpNo'], FALSE);
-				
-					$item['productId'] = $product['productId'];
-					$item['productName'] = $product['productName'];
-					return $item;
-				})->toArray();
-			}
-			return $temp; 
+			return $item;
 		})->toArray();
-		dd($baseData[0]);
+		
 		return $baseData;
 	}
 	
@@ -315,13 +311,13 @@ class SalesService
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
 			$this->_statistics['header'] = $this->_buildHeader($baseData);
-			dd($this->_statistics);
 			
 			#2.By店別
 			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
 				
 			#3.By區域
 			$this->_statistics['area'] = $this->_parsingByArea($baseData);
+			dd($this->_statistics);
 							
 			return TRUE;
 		}
@@ -346,19 +342,20 @@ class SalesService
 		]
 		*/
 		
-		$header = collect($baseData)->mapToGroups(function (array $item, int $key){
-			$temp['productName']= $item['productName'];
-			$temp['quantity'] 	= $item['quantity'];
-			$temp['amount'] 	= $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
-			return [$item['productNo'] => $temp];
+		#是以DB product table有設定的產品為基礎
+		$productList = collect($this->_statistics['productList'])->groupBy('productId');
+		$baseData = collect($baseData);
+		
+		$header = $productList->map(function ($item, $id) use($baseData) {
+			$data = $baseData->where('productId', $id);
 			
-		})->map(function($item, $key){
-			$data = collect($item);
-			$temp['productName']= $data->pluck('productName')->first();
-			$temp['totalQty'] 	= $data->pluck('quantity')->sum();
-			$temp['totalAmount']= $data->pluck('amount')->sum();
+			$temp['productName']= $item->pluck('productName')->first();
+			$temp['totalQty'] 	= $data->pluck('qty_sum')->sum();
+			$temp['totalAmount']= $data->pluck('price_sum')->sum();
+			
 			return $temp;
-		})->sortKeys()->toArray();
+			
+		})->toArray();
 		
 		return $header;
 	}
@@ -371,74 +368,39 @@ class SalesService
 	{
 		/* 重整資料格式
 		array:6 [
-			"orderDate" => "2026-01-16"
-			"shopId" => "328001"
-			"shopName" => "御廚桃園新坡店"
-			"areaId" => 3
-			"area" => "桃竹苗區"
-			"products" => array:34 [▼
-				"UC00000001" => array:4 [▼
-					"productNo" => "UC00000001"
-					"productName" => "炸排骨(單點)"
-					"quantity" => 1
-					"amount" => 95
-				]
-			]...
+			"shopId" => "100001"
+			"shopName" => "御廚中正南昌店"
+			"areaId" => 1
+			"areaName" => null
+			"products" => array:5 [▼
+				2 => array:1 [▼
+					"productId" => 2
+					"productName" => "橙汁排骨"
+					"totalQty" => 15
+					"totalAmount" => 2260.0
+				]...
+			]
 		]
 		*/
 		
-		#要改成所有店家統計,以門店為基礎的資料
-		/* $groupSaleData = collect($saleData)->groupBy('shopId');
-		
-		$baseData = collect($shopList)->groupBy('shopId')->map(function($item, $key) use($groupSaleData) {
-			$temp['shopId']		= $item->pluck('shopId')->first();
-			$temp['shopName'] 	= $item->pluck('shopName')->first();
-			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
-			
-			$shopSalesData = data_get($groupSaleData, $temp['shopId'], FALSE);
-			
-			if ($shopSalesData)
-			{
-				$temp['productAmount'] = $shopSalesData->mapWithKeys(function($item, $key){
-					return [$item['productId'] => $item['amount']];
-				})->toArray();
-			}
-			else
-				$temp['productAmount'] = [];
-			
-			return $temp; 
-		})->toArray();
-		
-		return $baseData; */
-		
-		$collection = collect($baseData);
-		$result = $collection->groupBy('shopId')
-			->map(function($item, $key) {
-				$temp['orderDate'] 	= $item->pluck('orderDate')->get(0);
-				$temp['shopId'] 	= $item->pluck('shopId')->get(0);
-				$temp['shopName'] 	= $item->pluck('shopName')->get(0);
-				$temp['areaId'] 	= $item->pluck('areaId')->get(0);
-				$temp['area'] 		= $item->pluck('area')->get(0);
+		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
+			$temp['shopId'] 	= $item->pluck('shopId')->get(0);
+			$temp['shopName'] 	= $item->pluck('shopName')->get(0);
+			$temp['areaId'] 	= $item->pluck('areaId')->get(0);
+			$temp['areaName'] 	= $item->pluck('area')->get(0);
 				
-				$temp['products'] 	= $item->groupBy('productNo')
-					->map(function($item, $key){
-						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
-						$temp['productName'] 	= $item->pluck('productName')->get(0);
-						$temp['quantity'] 		= $item->sum('quantity');
-						$temp['amount'] 		= $item->sum(function($item){
-							return $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
-						});
-						
-						$item = $temp;
-						return $item;
-					})->sortKeys()->toArray();
+			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
+				$temp['productId'] 		= $item->pluck('productId')->get(0);
+				$temp['productName'] 	= $item->pluck('productName')->get(0);
+				$temp['totalQty'] 		= $item->sum('qty_sum');
+				$temp['totalAmount'] 	= $item->sum('price_sum');
 				
-				$item = $temp;	
-				return $item;
-				
+				return $temp;
 			})->toArray();
-			
-		#全轉成array回傳
+				
+			return $temp;	
+		})->toArray();
+	
 		return $result;
 	}
 	
@@ -452,6 +414,7 @@ class SalesService
 		/* Output
 		"area" => [
 			"大台北區" => [
+				"totalQty" => 101
 				"totalAmount" => 101
 				"products" => productNo => [
 					'productNo'
@@ -472,24 +435,7 @@ class SalesService
 		if (empty($baseData))
 			return [];
 		
-		/* 重整資料格式/命名/區域
-		array:11 [
-			"orderDate" => "2026-01-16"
-			"shopId" => "328001"
-			"shopName" => "御廚桃園新坡店"
-			"productNo" => "UC06000031"
-			"productName" => "椒麻雞飯"
-			"price" => 138
-			"quantity" => 3
-			"discount" => 0
-			"taste" => ""
-			"areaId" => 3
-			"area" => "桃竹苗區"
-		]
-		*/
-		
-		$collection = collect($baseData);
-		$data = $collection->groupBy('areaId')
+		$data = collect($baseData)->groupBy('areaId')
 			->map(function($item, $key) {
 				$temp['products'] 	= $item->groupBy('productNo')
 					->map(function($item, $key){

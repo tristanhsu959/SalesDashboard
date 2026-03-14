@@ -29,6 +29,9 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('purchase', [PurchaseController::class, 'showSearch'])->name('purchase');
 		Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
 		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
+		
+		/* 本日營收 */
+		Route::get('today_sales', [NewReleaseController::class, 'export'])->name('today_sales');
 	});
 });
 

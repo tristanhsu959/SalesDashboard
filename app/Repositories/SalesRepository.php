@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Repositories\Traits\PosTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use Illuminate\Support\Facades\DB;
@@ -10,42 +11,10 @@ use Log;
 
 class SalesRepository extends Repository
 {
-	#MSSQL
+	use PosTrait;
+	
 	public function __construct()
 	{
-	}
-	
-	/* 取門店資料
-	 * @params: enums
-	 * @params: array
-	 * @return: array
-	 */
-	public function getShopList($brand, $userAreaIds)
-	{
-		$configCode = $brand->code();
-		$excepts = config("web.shop.except.{$configCode}");
-		
-		if ($brand == Brand::BAFANG)
-		{
-			$db = $this->connectBFPosErp();
-			$authAreaIds = Area::toBafangId($userAreaIds);
-		}
-		else
-		{
-			$db = $this->connectBGPosErp();
-			$authAreaIds = Area::toBuygoodId($userAreaIds);
-		}
-			
-		$result = $db->table('hptrans_shop as a')
-			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
-			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
-			->where('b.closedown', '=', 0)
-			->whereIn('b.gid', $authAreaIds)
-			->whereNotIn('b.SHOP_ID', $excepts)
-			->orderBy('b.SHOP_ID')
-			->get()->toArray();
-	
-		return $result;
 	}
 	
 	/* 取新品設定相關條件
@@ -115,7 +84,8 @@ class SalesRepository extends Repository
 				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
 				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
 				->select('a.shopId', 'a.productId as erpNo')
-				->selectRaw('sum(a.price * a.qty + a.discount) as amount')
+				->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
+				->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('s.gid', $authAreaIds)
@@ -145,21 +115,15 @@ class SalesRepository extends Repository
 		$authAreaIds = Area::toBafangId($userAreaIds);
 		$dualBrandedShopIds = config('web.shop.dualBrandedId');
 				
-		$caseShopId = "CASE ";
-		foreach ($dualBrandedShopIds as $bfId => $bgId) 
-		{
-			$caseShopId .= "WHEN a.SHOP_ID = '{$bfId}' THEN '{$bgId}' ";
-		}
-		$caseShopId .= "ELSE a.SHOP_ID END as shopId";
-		
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join('SHOP00 as s', 's.SHOP_ID', '=', 'a.shopId')
 				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
+				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
 				->select('a.shopId', 'a.productId as erpNo')
-				->selectRaw('sum(a.price * a.qty + a.discount) as amount')
-				->addSelect('s.SHOP_NAME as shopName', 's.gid')
+				->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
+				->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('s.gid', $authAreaIds)
@@ -167,6 +131,12 @@ class SalesRepository extends Repository
 				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
 				->groupByRaw('a.shopId, a.productId, s.SHOP_NAME, s.gid')
 				->get();
+		
+		#轉換shop id
+		$query = $query->map(function($item, $key) use($dualBrandedShopIds) {
+			$item['shopId'] = $dualBrandedShopIds[$item['shopId']];
+			return $item;
+		});
 		
 		return $query;
 	}

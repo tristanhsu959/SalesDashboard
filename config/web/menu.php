@@ -15,6 +15,12 @@ return [
 			'style' 	=> ['icon' => 'chart_data', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.new_releases'),
 		],
+		/* [
+			'name' 		=> Functions::BF_TODAY_SALES->label(), #本日銷售,
+			'code'		=> Functions::BF_TODAY_SALES->value,
+			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.today_sales'),
+		], */
 	],
 	
 	MenuGroup::BUYGOOD->value => [
@@ -36,6 +42,12 @@ return [
 			'style' 	=> ['icon' => 'trolley', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
 		],
+		/* [
+			'name' 		=> Functions::BG_TODAY_SALES->label(), #本日銷售,
+			'code'		=> Functions::BG_TODAY_SALES->value,
+			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.today_sales'),
+		], */
 		
 	],
 	

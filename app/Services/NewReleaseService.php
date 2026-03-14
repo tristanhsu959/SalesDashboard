@@ -30,8 +30,6 @@ class NewReleaseService
 	{
 		$this->_statistics = [
 			'brandId'		=> '', #export
-			'productName'	=> '', #export
-			'exportToken'	=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'dayHeader'		=> [],
@@ -39,6 +37,8 @@ class NewReleaseService
 			'area' 			=> [],
 			'top' 			=> [],
 			'last' 			=> [],
+			'productName'	=> '', #export
+			'exportToken'	=> '', #export
 		];
 	}
 	
@@ -104,9 +104,13 @@ class NewReleaseService
 			{
 				Log::channel('appServiceLog')->info('Get new release data from db');
 				
-				$this->_statistics['brandId'] =	$brand->value; 
+				$this->_statistics['brandId']	= $brand->value; 
+				#儲存頁面計算天數用日期
+				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
+				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+				
 				#執行統計
-				$response = $this->_analysisStatisticsData($brand, $searchNewItemId, $searchStDate, $searchEndDate);
+				$response = $this->_analysisStatisticsData($brand, $searchNewItemId);
 				
 				#無值不cache
 				if (! empty($this->_statistics['shop']))
@@ -131,17 +135,13 @@ class NewReleaseService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand, $searchNewItemId, $searchStDate, $searchEndDate)
+	private function _analysisStatisticsData($brand, $searchNewItemId)
 	{
 		try
 		{
 			#1. Calc time
-			$stDate		= (new Carbon($searchStDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($searchEndDate))->format('Y-m-d 23:59:59');
-			
-			#儲存頁面計算天數用日期
-			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); #這裏只存日期
-			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			#2. Get params
 			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
@@ -242,7 +242,7 @@ class NewReleaseService
 	
 	
 	
-	/* 先分組成可共用的基底資料
+	/* 基底資料
 	 * @params: collection
 	 * @return: array
 	 */
@@ -261,7 +261,7 @@ class NewReleaseService
 		*/
 		
 		#要改成所有店家統計
-		#這裏只要先補全資料及所需欄位即可
+		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
 		$groupShopList = collect($shopList)->groupBy('shopId');
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($groupShopList) {
