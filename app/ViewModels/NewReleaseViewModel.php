@@ -91,10 +91,10 @@ class NewReleaseViewModel extends Fluent
 			return FALSE;
 	}
 	
-	public function getAreaName($id)
+	/* public function getAreaName($id)
 	{
 		return Area::tryFrom($id)->label();
-	}
+	} */
 	
 	/* 時間Header, 顯示方式不同
 	 * @params: boolean #default desc
@@ -120,5 +120,11 @@ class NewReleaseViewModel extends Fluent
 			return FALSE;
 		else
 			return TRUE;
+	}
+	
+	public function getBrandCode()
+	{
+		$id = $this->statistics['brandId'];
+		return (Brand::tryFrom($id))->code();
 	}
 }

@@ -2,6 +2,8 @@
 
 document.addEventListener('alpine:init', () => {
 	
+	Alpine.store('app', { isLoading: false });
+	
 	Alpine.store('tabIndex', {
 		product: Alpine.$persist(0),
 		newItem: Alpine.$persist(0), 
@@ -61,5 +63,5 @@ document.addEventListener('alpine:init', () => {
 		}
 	});
 	
-	Alpine.store('app', { isLoading: false });
+	
 });

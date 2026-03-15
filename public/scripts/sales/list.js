@@ -1,6 +1,15 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
+	//統計單位顯示
+	Alpine.store('sales', {
+		showAmount: Alpine.$persist(false),
+        
+		toggle() {
+           this.showAmount = ! this.showAmount;
+        }
+	});
+	
 	Alpine.data('searchSales', (searchData) => ({
 		searchData: searchData,
 		errors: new Set(),

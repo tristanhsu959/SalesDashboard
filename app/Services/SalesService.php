@@ -105,7 +105,7 @@ class SalesService
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
 				}
-				dd($this->_statistics);
+				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
 		}
@@ -223,10 +223,8 @@ class SalesService
 			array:9 [
 				"shopId" => "103002"
 				"productId" => "UC06000002"
-				#"price" => "128"
-				#"qty" => "1"
-				#"discount" => ".0000"
-				"amount" => 111 => price * qty + discount
+				"price_sum" => 111 => price * qty + discount
+				"qty_sum" => 99
 				"shopName" => "御廚重慶北直營店"
 				"gid" => "A01"
 				"productName" => "炸雞腿飯"
@@ -252,10 +250,10 @@ class SalesService
 		/* 重整資料格式/命名/區域
 		array:11 [
 			"shopId" => "100001"
+			"shopName" => "御廚中正南昌店"
 			"erpNo" => "UC00000042"
 			"price_sum" => "360.0"
 			"qty_sum" => "3"
-			"shopName" => "御廚中正南昌店"
 			"areaId" => 1
 			"areaName" => "大台北區"
 			"productId" => 2
@@ -279,7 +277,32 @@ class SalesService
 			$item['productName']= empty($product) ? '' : $product['productName'];
 			
 			return $item;
-		})->toArray();
+		});
+		
+		#補全未有銷售的門店資料(closedown = 0)
+		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
+		
+		$filterShops = $groupShopList->filter(function($item, $key) use($saleShopIds){
+			#過濾出無銷售且為active門店
+			return ! in_array($item->pluck('shopId')->first(), $saleShopIds) && ($item->pluck('closedown')->first() == 0);
+		});
+		
+		#重建
+		$filterShops = $filterShops->map(function($item, $key) {
+			$temp['shopId'] 	= $item->pluck('shopId')->first();
+			$temp['shopName'] 	= $item->pluck('shopName')->first();
+			$temp['erpNo'] 		= '';
+			$temp['price_sum'] 	= 0;
+			$temp['qty_sum'] 	= 0;
+			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
+			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
+			$temp['productId'] 	= 0;
+			$temp['productName']= '';
+			
+			return $temp;
+		});
+		
+		$baseData = $baseData->merge($filterShops)->toArray();
 		
 		return $baseData;
 	}
@@ -317,7 +340,6 @@ class SalesService
 				
 			#3.By區域
 			$this->_statistics['area'] = $this->_parsingByArea($baseData);
-			dd($this->_statistics);
 							
 			return TRUE;
 		}
@@ -387,7 +409,7 @@ class SalesService
 			$temp['shopId'] 	= $item->pluck('shopId')->get(0);
 			$temp['shopName'] 	= $item->pluck('shopName')->get(0);
 			$temp['areaId'] 	= $item->pluck('areaId')->get(0);
-			$temp['areaName'] 	= $item->pluck('area')->get(0);
+			$temp['areaName'] 	= $item->pluck('areaName')->get(0);
 				
 			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
 				$temp['productId'] 		= $item->pluck('productId')->get(0);
@@ -399,7 +421,7 @@ class SalesService
 			})->toArray();
 				
 			return $temp;	
-		})->toArray();
+		})->sortKeys()->toArray();
 	
 		return $result;
 	}
@@ -435,33 +457,35 @@ class SalesService
 		if (empty($baseData))
 			return [];
 		
-		$data = collect($baseData)->groupBy('areaId')
-			->map(function($item, $key) {
-				$temp['products'] 	= $item->groupBy('productNo')
-					->map(function($item, $key){
-						$temp['productNo'] 		= $item->pluck('productNo')->get(0);
-						$temp['productName'] 	= $item->pluck('productName')->get(0);
-						$temp['quantity'] 		= $item->sum('quantity');
-						$temp['amount'] 		= $item->sum(function($item){
-							return $item['price'] * $item['quantity'] + $item['discount']; #單價會不同? discount是負數
-						});
-						
-						$item = $temp;
-						return $item;
-					})->sortKeys()->toArray();
+		$result = collect($baseData)->groupBy('areaId')->map(function($item, $key) {
+			#區域總計
+			$temp['areaName'] 	= $item->pluck('areaName')->get(0);
+			$temp['shopCount']	= $item->pluck('shopId')->unique()->count(); #店家數
+			
+			#By product
+			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
+				if ($key == 0)
+					return [];
 				
-				$item = $temp;	
-				return $item;
+				$temp['totalQty'] 	= $item->sum('qty_sum');
+				$temp['totalAmount']= $item->sum('price_sum');
 				
+				return $temp;
 			})->toArray();
+				
+			return $temp;
+			
+		})->sortKeys()->toArray();
 		
-		#重排區域的順序以保持顯示一致(系統跑會依抓到資料的順序)
-		$result[Area::TAIPEI->label()] 		= data_get($data, Area::TAIPEI->value, []);
-		$result[Area::YILAN->label()] 		= data_get($data, Area::YILAN->value, []);
-		$result[Area::TCM->label()] 		= data_get($data, Area::TCM->value, []);
-		$result[Area::CCT->label()] 		= data_get($data, Area::CCT->value, []);
-		$result[Area::YCN->label()] 		= data_get($data, Area::YCN->value, []);
-		$result[Area::KAOHSIUNG->label()] 	= data_get($data, Area::KAOHSIUNG->value, []);
+		#這裏是依header
+		$result['total']['areaName']	= '全區合計';
+		$result['total']['shopCount'] 	= collect($baseData)->pluck('shopId')->unique()->count(); 
+		$result['total']['products'] = collect($baseData)->groupBy('productId')->map(function($item, $key){
+			$temp['totalQty'] 	= $item->sum('qty_sum');
+			$temp['totalAmount']= $item->sum('price_sum');
+			
+			return $temp;
+		})->toArray();
 		
 		return $result;
 	}
@@ -596,8 +620,8 @@ class SalesService
 	private function _buildExportShop($header, $shopData)
 	{
 		#金額及數量要分開
-		$export['shopAmount'] 	= [];
-		$export['shopQty'] 		= [];
+		$export['shopAmount'] 		= [];
+		$export['shopQtyshopQty'] 	= [];
 		
 		#Add header
 		$headerKeys = array_keys($header);

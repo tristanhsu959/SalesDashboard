@@ -10,43 +10,33 @@ form {
 /* Data */
 .page {
 	padding: 1rem;
+	
 	/* 區域彙總 */
 	.statistics-area {
+		width: max-content;
+		min-width: 100%;
 		
-		.grid.header div {
-			font-weight: bold;
+		thead>tr>th {
+			
 		}
-		
-		.grid.data:last-child {
+		table>tbody>tr:last-child {
 			color: red;
+			&>td {
+				border-block-start: .0625rem solid var(--outline);
+			}
 		}
 	}
 	
 	/* 門市 */
 	.statistics-shop {
-		&.bafang {
-			--table-bg: #ffb74d; 			/* light-2 */
-			--table-bg-dark: #f57c00; 		/* dark-2 */
-			--table-fixed-bg: #ffe0b2; 		/* light-4 */
-			--table-fixed-color: #3e2723;	/* dark-4 */
-			--table-stripes: #fff3e0;		/* light-5 */
-		}
-		&.buygood {
-			--table-bg: #80deea;
-			--table-bg-dark: #0097a7;
-			--table-fixed-bg: #b2ebf2;
-			--table-fixed-color: #01579b;
-			--table-stripes: #e0f7fa; 
-		}
-		
+		--table-bg: #80deea ;
 		position: relatvie;
 		width: auto;
 		max-height: calc(100vh - 220px);
 		overflow: auto;
 		/* scrollbar-width: thin; */
-		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		scrollbar-color: #0097a7 var(--table-bg); /*thumb - track*/
 		margin: 0;
-		border: 1px solid var(--table-bg-dark);
 		
 		table {
 			table-layout: fixed;
@@ -56,10 +46,6 @@ form {
 			padding: 0;
 			margin: 0;
 			border-radius: 4px;
-			
-			&.stripes tbody tr:nth-child(odd) {
-				background-color: var(--table-stripes);
-			}
 			
 			thead {
 				tr {
@@ -116,63 +102,28 @@ form {
 						position: sticky;
 						font-weight: normal;
 						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
+						color: #1b5e20; /*#1b3823;*/
 						/* border-bottom-width: 0; */
 						
 						&:nth-child(1) {
 							left: 0;
-							background-color: var(--table-fixed-bg);
+							background-color: #b2ebf2;
 						}
 						&:nth-child(2) {
 							left: 80px;
-							background-color: var(--table-fixed-bg);
+							background-color: #b2ebf2;
 						}
 						&:nth-child(3) {
 							left: 160px;
-							background-color: var(--table-fixed-bg);
+							background-color: #b2ebf2;
 						}
 					}
 					
 					td {
 						color: #424242;
-						/* 總計 */
-						&:nth-last-child(-n + 2) {
-							color: #f44336;
-						}
 					}
 				}
 			}
-		}
-	}
-
-	/* Top10 | Last10 */
-	.statistics-ranking {
-		max-height: calc(100vh - 220px);
-		overflow-y: auto;
-		
-		.ranking {
-			width: 64px;
-			height: 64px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 2rem;
-			
-			border-radius: .5rem;
-		}
-		
-		.ranking-top .ranking {
-			color: #fafafa;
-			background-color: #f44336;
-		}
-		.ranking-last .ranking {
-			color: #fafafa;
-			background-color: #263238;
-		}
-		
-		ul li label {
-			font-size: 1rem;
-			font-weight: bold;
 		}
 	}
 }

@@ -25,5 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (TokenMismatchException $e, Request $request) {
+            return redirect()
+                ->route('signin')
+                ->with('msg', '您的連線已過期，請重新登入');
+        });
     })->create();

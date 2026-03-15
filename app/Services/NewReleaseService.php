@@ -275,10 +275,10 @@ class NewReleaseService
 		});
 		
 		#補全未有銷售的門店資料(closedown = 0)
-		$saleShopIds = $baseData->pluck('shopId')->unique()->toArray();
+		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
 		
 		$filterShops = $groupShopList->filter(function($item, $key) use($saleShopIds){
-			#過濾無銷售且為active門店
+			#過濾出無銷售且為active門店
 			return ! in_array($item->pluck('shopId')->first(), $saleShopIds) && ($item->pluck('closedown')->first() == 0);
 		});
 		
@@ -385,7 +385,7 @@ class NewReleaseService
 			return [];
 		
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) use($totalDays) {
-			$temp['shopId']		= $item->pluck('shopId')->first();
+			#$temp['shopId']		= $item->pluck('shopId')->first();
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
 			$temp['areaId'] 	= $item->pluck('areaId')->first();
 			$temp['areaName'] 	= $item->pluck('areaName')->first();
@@ -402,7 +402,7 @@ class NewReleaseService
 			$temp['totalAvg'] = empty($temp['totalQty']) ? 0 : round($temp['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
 			
 			return $temp; 
-		})->sort()->toArray();
+		})->sortKeys()->toArray();
 		
 		return $result;
 	}
@@ -435,6 +435,7 @@ class NewReleaseService
 			return [];
 		
 		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) use($totalDays) {
+			$temp['areaName']		= $items->pluck('areaName')->first();
 			$temp['shopCount']		= $items->pluck('shopId')->unique()->count(); #店家數
 			$temp['totalQty'] 		= intval($items->pluck('qty')->sum()); #區域銷售總量
 			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
@@ -444,9 +445,10 @@ class NewReleaseService
 			return $temp;
 		})->sortKeys()->toArray();
 		
+		#這裏是依header
 		$result['total']['shopCount'] 		= collect($result)->pluck('shopCount')->sum(); 
 		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
-		$result['total']['avgDayQty'] 		= collect($result)->pluck('avgDayQty')->sum();
+		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
 		$result['total']['avgShopQty'] 		= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
 		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
 		

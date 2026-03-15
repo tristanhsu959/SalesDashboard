@@ -42,7 +42,7 @@
 </form>
 <!-- Search panel end -->
 
-<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+<header class="page-nav">
 	<nav>
 		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
 	
@@ -86,7 +86,7 @@
 					
 					@foreach($viewModel->statistics['area'] as $id => $area)
 					<div class="grid data">
-						<div class="s2">{{ $id == 'total' ? '全區合計' : $viewModel->getAreaName($id) }}</div>
+						<div class="s2">{{ $id == 'total' ? '全區合計' : data_get($area, 'areaName', '') }}</div>
 						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
 						<div class="s2">{{ data_get($area, 'totalQty', 0) }}</div>
 						<div class="s2">{{ data_get($area, 'avgDayQty', 0) }}</div>
@@ -96,9 +96,10 @@
 					@endforeach
 				</section>
 			</div>
+			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar">
-					<table class="stripes odd-cyan">
+				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+					<table class="stripes">
 						<thead>
 							<tr>
 								<th>區域</th>
@@ -115,10 +116,10 @@
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['shop'] as $shop)
+							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
 							<tr>
-								<th>{{ $viewModel->getAreaName($shop['areaId']) }}</th>
-								<th>{{ $shop['shopId'] }}</th>
+								<th>{{ $shop['areaName'] }}</th>
+								<th>{{ $shopId }}</th>
 								<th>{{ $shop['shopName'] }}</th>
 								
 								@foreach($viewModel->statistics['dayHeader'] as $date)
@@ -135,6 +136,7 @@
 					</table>
 				</section>
 			</div>
+			<!-- 排名 -->
 			<div class="page padding" id="tab-ranking-asc">
 				<section class="statistics-ranking">
 					<article class="border ranking-top">
@@ -144,7 +146,7 @@
 							<li>
 								<div class="ranking">{{ $ranking + 1 }}</div>
 								<div class="info">
-									{{ $viewModel->getAreaName($shopGroup[0]['areaId']) }}
+									{{ $shopGroup[0]['areaName'] }}
 									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
 									<span>{{ $shopGroup[0]['shopId'] }}</span>
 								</div>
@@ -166,7 +168,7 @@
 							<li>
 								<div class="ranking">{{ $ranking + 1 }}</div>
 								<div class="info">
-									{{ $viewModel->getAreaName($shopGroup[0]['areaId']) }}
+									{{ $shopGroup[0]['areaName'] }}
 									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
 									<span>{{ $shopGroup[0]['shopId'] }}</span>
 								</div>

@@ -81,11 +81,6 @@ class SalesViewModel extends Fluent
 			return FALSE;
 	}
 	
-	public function getAreaName($id)
-	{
-		return Area::tryFrom($id)->label();
-	}
-	
 	public function hasExportData()
 	{
 		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))

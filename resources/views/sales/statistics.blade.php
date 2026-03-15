@@ -33,7 +33,7 @@
 </form>
 <!-- Search panel end -->
 
-<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+<header class="page-nav">
 	<nav>
 		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
 		
@@ -41,11 +41,17 @@
 		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle red" type="button">
 			<span class="material-symbols-outlined filled-icon">download_2</span>
 		</a>
+		<label class="switch icon">
+			<input type="checkbox" x-model="$store.sales.showAmount">
+			<span>
+				<i>attach_money</i>
+			</span>
+		</label>
 		@endif
 	</nav>
 </header>
 	
-@if($viewModel->status() === TRUE)
+@if($viewModel->status() === TRUE)	
 	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
 	<section class="sales-list container">
 		@if($viewModel->isDataEmpty())
@@ -56,90 +62,78 @@
 		</article>
 		@else
 		<div class="statistics">
-			<ul class="nav nav-tab" id="nav-tab" role="tablist">
-				<li class="nav-item" role="presentation">
-					<button class="nav-link active" id="nav-area-tab" type="button" role="tab" 
-						data-bs-toggle="pill" data-bs-target="#area" aria-controls="nav-area" aria-selected="true">
-						區域彙總
-					</button>
-				</li>
-				<li class="nav-item" role="presentation">
-					<button class="nav-link" id="nav-shop-tab" type="button" role="tab" 
-						data-bs-toggle="pill" data-bs-target="#shop" aria-controls="nav-shop" aria-selected="true">
-						店別明細
-					</button>
-				</li>
-			</ul>
-
-			<div class="tab-content" id="nav-tabContent">
-				<!-- 區域彙總 -->
-				<div class="tab-pane fade show active" id="area" role="tabpanel" aria-labelledby="nav-area-tab" tabindex="0">
-					<section class="statistics-area section-wrapper">
-						<div class="d-table-row">
-							<div class="d-table-cell">區域</div>
-							@foreach($viewModel->statistics['header'] as $product)
-							<div class="d-table-cell">{{ $product['productName'] }}</div>
-							@endforeach
-						</div>
-						
-						@foreach($viewModel->statistics['area'] as $name => $area)
-						<div class="d-table-row">
-							<div class="d-table-cell">{{ $name }}</div>
-							@foreach($viewModel->statistics['header'] as $no => $product)
-							<div class="d-table-cell">
-								{{ Number::currency(intval(data_get($area, "products.{$no}.amount")), precision: 0) }}
-								/
-								{{ intval(data_get($area, "products.{$no}.quantity")) }}
-								{{-- $product['unit'] --}}
-							</div>
-							@endforeach
-						</div>
-						@endforeach
-						
-						<div class="d-table-row">
-							<div class="d-table-cell">合計</div>
-							@foreach($viewModel->statistics['header'] as $product)
-							<div class="d-table-cell">{{ Number::currency(intval($product['totalAmount']), precision: 0) }} / {{ intval($product['totalQty']) }}</div>
-							@endforeach
-						</div>
-					</section>
-				</div>
-				
-				<!-- 店別明細 -->
-				<div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="nav-shop-tab" tabindex="0">
-					
-					<section class="statistics-shop section-wrapper scrollbar">
-						<div class="d-table-row">
-							<div class="d-table-cell">區域</div>
-							<div class="d-table-cell">門店代號</div>
-							<div class="d-table-cell">門店名稱</div>
-							@foreach($viewModel->statistics['header'] as $product)
-							<div class="d-table-cell">{{ $product['productName'] }}</div>
-							@endforeach
-							<!--div class="d-table-cell">總金額</div-->
-						</div>
-						
-						@foreach($viewModel->statistics['shop'] as $shop)
-						<div class="d-table-row">
-							<div class="d-table-cell">{{ $shop['area'] }}</div>
-							<div class="d-table-cell">{{ $shop['shopId'] }}</div>
-							<div class="d-table-cell">{{ $shop['shopName'] }}</div>
-							@foreach($viewModel->statistics['header'] as $no => $product)
-							<div class="d-table-cell">
-								{{ Number::currency(intval(data_get($shop, "products.{$no}.amount")), precision: 0) }}
-								/
-								{{ intval(data_get($shop, "products.{$no}.quantity")) }}
-							</div>
-							@endforeach
-						</div>
-						@endforeach
-					</section>
-					
-				</div>
+			<div class="tabs cyan-text">
+				<a class="active" data-ui="#tab-area">區域彙總</a>
+				<a data-ui="#tab-shop">店別明細</a>
 			</div>
+			
+			<!-- 區域彙總 -->
+			<div class="page padding active scroll" id="tab-area">
+				<section class="statistics-area">
+					<table>
+						<thead>
+							<tr>
+								<th>區域</th>
+								<th>店家數</th>
+								@foreach($viewModel->statistics['header'] as $header)
+								<th>{{$header['productName']}}</th>
+								@endforeach
+							</tr>
+						</thead>
+						<tbody>
+							@foreach($viewModel->statistics['area'] as $area)
+							<tr>
+								<td>{{ $area['areaName'] }}</td>
+								<td>{{ data_get($area, 'shopCount', 0) }}</td>
+								@foreach($viewModel->statistics['header'] as $productId => $product)
+								<td>
+									<span x-show="!$store.sales.showAmount">{{ data_get($area, "products.$productId.totalQty", 0)}}</span>
+									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($area, "products.$productId.totalAmount", 0), precision: 0)}}</span>
+								</td>
+								@endforeach
+							</tr>
+							@endforeach
+						</tbody>
+					</table>
+				</section>
+			</div>
+			
+			<div class="page padding" id="tab-shop">
+				<section class="statistics-shop scrollbar">
+					<table class="stripes odd-cyan">
+						<thead>
+							<tr>
+								<th>區域</th>
+								<th>門店代號</th>
+								<th>門店名稱</th>
+								@foreach($viewModel->statistics['header'] as $header)
+								<th>{{$header['productName']}}</th>
+								@endforeach
+							</tr>
+						</thead>
+						<tbody>
+							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
+							<tr>
+								<th>{{ $shop['areaName'] }}</th>
+								<th>{{ $shopId }}</th>
+								<th>{{ $shop['shopName'] }}</th>
+								@foreach($viewModel->statistics['header'] as $productId => $prouct)
+								<td>
+									<span x-show="!$store.sales.showAmount">{{ data_get($shop, "products.$productId.totalQty", 0)}}</span>
+									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($shop, "products.$productId.totalAmount", 0), precision: 0)}}</span>
+								</td>
+								@endforeach
+							</tr>
+							@endforeach
+						</tbody>
+					</table>
+				</section>
+			</div>
+			
 		</div>
 		@endif
-	</div>
-	@endif <!-- Empty -->
-@endif <!-- Status -->
+	</section>
+	@endif
+@endif
+
 @endsection
