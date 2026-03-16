@@ -64,6 +64,12 @@ return [
 			'style' 	=> ['icon' => 'fiber_new', 'color' => 'light-blue-text'],
 			'url' 		=> 'new_items', 
 		],
+		[
+			'name' 		=> Functions::SALES_SETTING->label(), #銷售設定,
+			'code'		=> Functions::SALES_SETTING->value,
+			'style' 	=> ['icon' => 'settings_applications', 'color' => 'light-blue-text'],
+			'url' 		=> 'sales_setting', 
+		],
 	],
 	
 	MenuGroup::MANAGE->value => [
@@ -76,7 +82,7 @@ return [
 		[
 			'name' 		=> Functions::ROLE->label(), #身份管理,
 			'code'		=> Functions::ROLE->value,
-			'style' 	=> ['icon' => 'admin_panel_settings', 'color' => 'red-text'],
+			'style' 	=> ['icon' => 'how_to_reg', 'color' => 'red-text'],
 			'url' 		=> 'roles', 
 		],
 	],

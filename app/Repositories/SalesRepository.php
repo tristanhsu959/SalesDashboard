@@ -17,7 +17,7 @@ class SalesRepository extends Repository
 	{
 	}
 	
-	/* 取新品設定相關條件
+	/* 取產品設定相關條件
 	 * @params: int
 	 * @return: array
 	 */

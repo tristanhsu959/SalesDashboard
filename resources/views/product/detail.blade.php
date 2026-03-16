@@ -37,12 +37,12 @@
 		<div class="row top-align">
 			<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'primaryNo')">
 				<i class="small red-text">asterisk</i>
-				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="10" placeholder=" "></textarea>
+				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="20" placeholder=" "></textarea>
 				<label>主要ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>
 			<div x-show="hasSecondaryNo" class="field label border field-dark-blue w30">
-				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="10" placeholder=" "></textarea>
+				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="20" placeholder=" "></textarea>
 				<label>複合店ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>

@@ -1,0 +1,31 @@
+/* Product list */
+
+.sales-setting {
+	.tabs a {
+		font-size: 1.2rem; 
+	}
+	ul.list li {
+		i.extra {
+			--_size: 2.5rem;
+		}
+	}
+	ul.list li {
+		.brand-label {
+			display: inline-flex;
+			justify-content: center;
+			align-items: center;
+			width: 40px;
+			height: 40px;
+			border-radius: .75rem;
+			
+			&.bf {
+				background-color: #ffc107;
+				color: #212121;
+			}
+			&.bg {
+				background-color: #b71c1c;
+				color: #fafafa;
+			}
+		}
+	}
+}

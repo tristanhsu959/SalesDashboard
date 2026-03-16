@@ -40,6 +40,7 @@ class NewItemRepository extends Repository
 	 */
 	public function getProductSettings()
 	{
+		#不判別product status, 是否啟用由新品設定決定
 		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db

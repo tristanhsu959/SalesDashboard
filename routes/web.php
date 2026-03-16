@@ -7,7 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewItemController;
-
+use App\Http\Controllers\SalesSettingController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -43,6 +43,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('new_item/update/{id}', [NewItemController::class, 'showUpdate'])->name('new_item.update');
 		Route::post('new_item/update', [NewItemController::class, 'update'])->name('new_item.update.post');
 		Route::post('new_item/delete/{id}', [NewItemController::class, 'delete'])->name('new_item.delete');
+	});
+	
+	/***** 銷售設定 *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::SALES_SETTING->value, ':')])->group(function(){
+		Route::get('sales_setting', [SalesSettingController::class, 'list'])->name('sales_setting');
+		Route::get('sales_setting/list', [SalesSettingController::class, 'list'])->name('sales_setting.list');
+		Route::post('sales_setting/update', [SalesSettingController::class, 'update'])->name('sales_setting.update.post');
 	});
 	
 	/***** 身份管理 *****/

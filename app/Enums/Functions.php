@@ -11,6 +11,7 @@ enum Functions : string
 	#System
 	case PRODUCT 			= 'product';
 	case NEW_ITEM 			= 'new_item';
+	case SALES_SETTING		= 'sales_setting';
 	
 	#Bafang
 	case BF_NEW_RELEASE		= 'bafang:new_releases';
@@ -34,6 +35,7 @@ enum Functions : string
 			self::ROLE 				=> '身份管理',
 			self::PRODUCT 			=> '產品料號設定',
 			self::NEW_ITEM 			=> '新品設定',
+			self::SALES_SETTING		=> '銷售設定',
 			
 			#八方
 			self::BF_NEW_RELEASE	=> '新品銷售',
