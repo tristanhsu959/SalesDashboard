@@ -13,7 +13,7 @@
 			align-items: center;
 			width: 40px;
 			height: 40px;
-			border-radius: 8px;
+			border-radius: .75rem;
 			
 			&.bf {
 				background-color: #ffc107;

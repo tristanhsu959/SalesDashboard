@@ -25,11 +25,11 @@ form {
 	/* 門市 */
 	.statistics-shop {
 		&.bafang {
-			--table-bg: #ffb74d; 			/* light-2 */
-			--table-bg-dark: #f57c00; 		/* dark-2 */
-			--table-fixed-bg: #ffe0b2; 		/* light-4 */
+			--table-bg: #a1887f; 			/* light-2 */
+			--table-bg-dark: #5d4037; 		/* dark-2 */
+			--table-fixed-bg: #d7ccc8; 		/* light-4 */
 			--table-fixed-color: #3e2723;	/* dark-4 */
-			--table-stripes: #fff3e0;		/* light-5 */
+			--table-stripes: #efebe9;		/* light-5 */
 		}
 		&.buygood {
 			--table-bg: #80deea;

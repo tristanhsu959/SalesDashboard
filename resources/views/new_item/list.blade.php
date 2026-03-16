@@ -11,7 +11,7 @@
 
 @section('content')
 <!-- Content -->
-	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+	<header class="page-nav">
 		<nav>
 			<a href="{{ route('new_item.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>
@@ -24,7 +24,7 @@
 			<div>
 				<div class="tabs center-align">
 					<template x-for="(brand, key) in brands" :key="key">
-						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.tabIndex.newItem = key"></a>
+						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.newItem.tabIndex = key"></a>
 					</template>
 				</div>
 				
