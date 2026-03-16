@@ -75,8 +75,8 @@
 							<tr>
 								<th>區域</th>
 								<th>店家數</th>
-								@foreach($viewModel->statistics['header'] as $header)
-								<th>{{$header['productName']}}</th>
+								@foreach($viewModel->statistics['header'] as $productName)
+								<th>{{$productName}}</th>
 								@endforeach
 							</tr>
 						</thead>
@@ -85,7 +85,7 @@
 							<tr>
 								<td>{{ $area['areaName'] }}</td>
 								<td>{{ data_get($area, 'shopCount', 0) }}</td>
-								@foreach($viewModel->statistics['header'] as $productId => $product)
+								@foreach($viewModel->statistics['header'] as $productId => $productName)
 								<td>
 									<span x-show="!$store.sales.showAmount">{{ data_get($area, "products.$productId.totalQty", 0)}}</span>
 									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($area, "products.$productId.totalAmount", 0), precision: 0)}}</span>
@@ -106,8 +106,8 @@
 								<th>區域</th>
 								<th>門店代號</th>
 								<th>門店名稱</th>
-								@foreach($viewModel->statistics['header'] as $header)
-								<th>{{$header['productName']}}</th>
+								@foreach($viewModel->statistics['header'] as $productName)
+								<th>{{$productName}}</th>
 								@endforeach
 							</tr>
 						</thead>
@@ -117,7 +117,7 @@
 								<th>{{ $shop['areaName'] }}</th>
 								<th>{{ $shopId }}</th>
 								<th>{{ $shop['shopName'] }}</th>
-								@foreach($viewModel->statistics['header'] as $productId => $prouct)
+								@foreach($viewModel->statistics['header'] as $productId => $productName)
 								<td>
 									<span x-show="!$store.sales.showAmount">{{ data_get($shop, "products.$productId.totalQty", 0)}}</span>
 									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($shop, "products.$productId.totalAmount", 0), precision: 0)}}</span>

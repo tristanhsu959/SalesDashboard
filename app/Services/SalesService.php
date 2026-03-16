@@ -87,6 +87,7 @@ class SalesService
 				Log::channel('appServiceLog')->info('Get sales data from cache');
 				
 				$statistics = Cache::get($cacheKey); #cache data is response format
+				
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
@@ -97,7 +98,10 @@ class SalesService
 				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
 				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 				
-				$response = $this->_analysisStatisticsData($brand);
+				$response = $this->_analysisStatisticsData($brand); #true/false
+				
+				#destroy var
+				unset($this->_statistics['productList']);
 				
 				#無值不cache, 只判斷一個就可
 				if (! empty($this->_statistics['shop']))
@@ -333,7 +337,7 @@ class SalesService
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['header'] = $this->_buildHeader($baseData);
+			$this->_statistics['header'] = $this->_buildHeader();
 			
 			#2.By店別
 			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
@@ -354,29 +358,21 @@ class SalesService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildHeader($baseData)
+	private function _buildHeader()
 	{
 		/*
-		"UC00000001" => array:3 [▼
-			"productName" => "炸排骨(單點)"
-			"totalQty" => 6
-			"totalAmount" => 560
+		[
+			2 => "橙汁排骨"
+			3 => "蕃茄牛三寶"
+			4 => "老皮嫩肉"
+			5 => "主廚秘製滷肉飯"
+			7 => "牛小排飯"
 		]
 		*/
 		
 		#是以DB product table有設定的產品為基礎
-		$productList = collect($this->_statistics['productList'])->groupBy('productId');
-		$baseData = collect($baseData);
-		
-		$header = $productList->map(function ($item, $id) use($baseData) {
-			$data = $baseData->where('productId', $id);
-			
-			$temp['productName']= $item->pluck('productName')->first();
-			$temp['totalQty'] 	= $data->pluck('qty_sum')->sum();
-			$temp['totalAmount']= $data->pluck('price_sum')->sum();
-			
-			return $temp;
-			
+		$header =  collect($this->_statistics['productList'])->groupBy('productId')->map(function ($item, $id) {
+			return $item->pluck('productName')->first();
 		})->toArray();
 		
 		return $header;
@@ -406,14 +402,14 @@ class SalesService
 		*/
 		
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
-			$temp['shopId'] 	= $item->pluck('shopId')->get(0);
+			#$temp['shopId'] 	= $item->pluck('shopId')->get(0);
 			$temp['shopName'] 	= $item->pluck('shopName')->get(0);
-			$temp['areaId'] 	= $item->pluck('areaId')->get(0);
+			#$temp['areaId'] 	= $item->pluck('areaId')->get(0);
 			$temp['areaName'] 	= $item->pluck('areaName')->get(0);
 				
 			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
-				$temp['productId'] 		= $item->pluck('productId')->get(0);
-				$temp['productName'] 	= $item->pluck('productName')->get(0);
+				#$temp['productId'] 		= $item->pluck('productId')->get(0);
+				#$temp['productName'] 	= $item->pluck('productName')->get(0);
 				$temp['totalQty'] 		= $item->sum('qty_sum');
 				$temp['totalAmount'] 	= $item->sum('price_sum');
 				
@@ -499,39 +495,43 @@ class SalesService
 	public function export($token)
 	{
 		#取資料邏輯共用
-		$cacheKey = Crypt::decryptString($token);
+		$cacheKey = hex2bin($token);
 		
 		if (! Cache::has($cacheKey))
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
 		
-		Log::channel('appServiceLog')->info('Export sales data');
+		$currentUser = AppManager::getCurrentUser();
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Exportsales data-?'));
 		
 		try
 		{
-			$response = Cache::get($cacheKey);
-			$sourceData = $response->data;
+			$sourceData = Cache::get($cacheKey);
+			
 			#Build export data
-			$area = $this->_buildExportArea($sourceData['header'], $sourceData['area']);
-			$shop = $this->_buildExportShop($sourceData['header'], $sourceData['shop']);
-			$export = array_merge($area, $shop);
+			list($export['區域彙總-數量'], $export['區域彙總-金額']) = $this->_buildExportArea($sourceData['header'], $sourceData['area']);
+			list($export['店別明細-數量'], $export['店別明細-金額']) = $this->_buildExportShop($sourceData['header'], $sourceData['shop']);
 			
 			#Write export to file
-			$fileName = Str::replace(':', '_', $cacheKey); 
-			$fileName = "銷售_{$fileName}.xlsx";
+			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['startDate'], $sourceData['endDate']], '?_銷售_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
-			foreach($export as $key => $data)
+			foreach($export as $sheetName => $sheetData)
 			{
-				$sheetName = $this->_getSheetName($key);
-				$sheet = ($key == 'areaAmount') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
+				$sheet = ($sheetName == '區域彙總-數量') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
 				$sheet->setName($sheetName);
-				$writer->addRows($data);
+				
+				foreach($sheetData as $data)
+				{
+					$row =  Row::fromValues($data);
+					$writer->addRow($row);
+				}
 			}
+			
 			$writer->close();
-
 			return ResponseLib::initialize($fileName)->success();
 		}
 		catch(Exception $e)
@@ -539,22 +539,6 @@ class SalesService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
 		}
-	}
-	
-	/* Build data for export
-	 * @params: string
-	 * @return: string
-	 */
-	private function _getSheetName($key)
-	{
-		return match($key)
-		{
-			'areaAmount'	=> '區域-金額',
-			'areaQty'		=> '區域-數量',
-			'shopAmount'	=> '門店-金額',
-			'shopQty'		=> '門店-數量',
-			default 		=> '統計',
-		};
 	}
 	
 	/* Build data for export
@@ -566,48 +550,39 @@ class SalesService
 	 */
 	private function _buildExportArea($header, $areaData)
 	{
-		#金額及數量要分開
-		$export['areaAmount'] 	= [];
+		#標頭都相同, 但要產生數量及金額兩個sheets
 		$export['areaQty'] 		= [];
+		$export['areaAmount'] 	= [];
 		
-		#Add header
-		$headerKeys	= array_keys($header);
-		$headerName	= Arr::pluck($header, 'productName');
-		$headerName	= Row::fromValues(array_merge(['區域'], $headerName));
+		$headerProducts = array_merge(['區域', '店家數'], array_values($header));
 		
 		#Header相同
-		$export['areaAmount'][] = $headerName;
-		$export['areaQty'][]	= $headerName;
+		$export['areaQty'][]	= $headerProducts;
+		$export['areaAmount'][] = $headerProducts;
 		
-		foreach($areaData as $areaName => $data)
+		foreach($areaData as $areaId => $data)
 		{
-			$rowAmount 	= [];
 			$rowQty		= [];
+			$rowAmount 	= [];
 			
-			$rowAmount[] = $areaName;
-			$rowQty[]	 = $areaName;
+			$rowQty[]	 = $data['areaName'];
+			$rowAmount[] = $data['areaName'];
 			
-			foreach($headerKeys as $no)
+			$rowQty[]	 = $data['shopCount'];
+			$rowAmount[] = $data['shopCount'];
+			
+			#須依header的順序取資料
+			foreach($header as $productId => $productName)
 			{
-				$rowAmount[]= Number::currency(intval(data_get($data, "products.{$no}.amount")), precision: 0);
-				$rowQty[]	= intval(data_get($data, "products.{$no}.quantity"));
+				$rowQty[]	= intval(data_get($data, "products.{$productId}.totalQty", 0));
+				$rowAmount[]= Number::currency(intval(data_get($data, "products.{$productId}.totalAmount", 0)), precision: 0);
 			}
 			
-			$export['areaAmount'][] = Row::fromValues($rowAmount);
-			$export['areaQty'][]	= Row::fromValues($rowQty);
+			$export['areaQty'][]	= $rowQty;
+			$export['areaAmount'][] = $rowAmount;
 		}
 		
-		#Total
-		/* $row = [];
-		foreach($header as $no => $product)
-		{
-			$rowData = intval(data_get($data, "products.{$no}.{$totalKey}"));
-			$row[] 	= ($isCurrency) ? Number::currency($rowData, precision: 0) : $rowData;
-		}
-		
-		$export[] = Row::fromValues($row); */
-		
-		return $export;
+		return [$export['areaQty'], $export['areaAmount']] ;
 	}
 	
 	/* Build data for export
@@ -619,41 +594,39 @@ class SalesService
 	 */
 	private function _buildExportShop($header, $shopData)
 	{
-		#金額及數量要分開
-		$export['shopAmount'] 		= [];
-		$export['shopQtyshopQty'] 	= [];
+		#標頭都相同, 但要產生數量及金額兩個sheets
+		$export['shopQty'] 		= [];
+		$export['shopAmount'] 	= [];
 		
-		#Add header
-		$headerKeys = array_keys($header);
-		$headerName = Arr::pluck($header, 'productName');
-		$headerName = Row::fromValues(array_merge(['區域', '門店代號', '門店名稱'], $headerName));
+		$headerProducts = array_merge(['區域', '門店代號', '門店名稱'], array_values($header));
 		
 		#Header相同
-		$export['shopAmount'][] = $headerName;
-		$export['shopQty'][]	= $headerName;
+		$export['shopQty'][]	= $headerProducts;
+		$export['shopAmount'][] = $headerProducts;
 		
-		foreach($shopData as $data)
+		foreach($shopData as $shopId => $data)
 		{
-			$rowAmount 	= [];
 			$rowQty		= [];
+			$rowAmount 	= [];
 			
-			$rowAmount[]= $data['area'];
-			$rowAmount[]= $data['shopId'];
-			$rowAmount[]= $data['shopName'];
-			$rowQty[]	= $data['area'];
-			$rowQty[]	= $data['shopId'];
+			$rowQty[]	= $data['areaName'];
+			$rowQty[]	= $shopId;
 			$rowQty[]	= $data['shopName'];
-				
-			foreach($headerKeys as $no)
+			
+			$rowAmount[]= $data['areaName'];
+			$rowAmount[]= $shopId;
+			$rowAmount[]= $data['shopName'];
+			
+			foreach($header as $productId => $productName)
 			{
-				$rowAmount[]= Number::currency(intval(data_get($data, "products.{$no}.amount")), precision: 0);
-				$rowQty[]	= intval(data_get($data, "products.{$no}.quantity"));
+				$rowQty[]	= intval(data_get($data, "products.{$productId}.totalQty", 0));
+				$rowAmount[]= Number::currency(intval(data_get($data, "products.{$productId}.totalAmount", 0)), precision: 0);
 			}
 			
-			$export['shopAmount'][]	= Row::fromValues($rowAmount);
-			$export['shopQty'][]	= Row::fromValues($rowQty);
+			$export['shopQty'][]	= $rowQty;
+			$export['shopAmount'][] = $rowAmount;
 		}
 		
-		return $export;
+		return [$export['shopQty'], $export['shopAmount']] ;
 	}
 }

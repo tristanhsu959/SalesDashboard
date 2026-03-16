@@ -387,12 +387,12 @@ class NewReleaseService
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) use($totalDays) {
 			#$temp['shopId']		= $item->pluck('shopId')->first();
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
-			$temp['areaId'] 	= $item->pluck('areaId')->first();
+			#$temp['areaId'] 	= $item->pluck('areaId')->first();
 			$temp['areaName'] 	= $item->pluck('areaName')->first();
 			
 			$temp['dayQty'] = $item->mapWithKeys(function($item, $key){
 				if (! empty($item['saleDate']))
-					return [$item['saleDate'] => $item['qty']];
+					return [$item['saleDate'] => intval($item['qty'])];
 				else
 					return [];
 			})->toArray();
@@ -484,8 +484,9 @@ class NewReleaseService
 			$dayData = $items->groupBy('saleDate')->get($endDate, collect([]))->first();
 			
 			$temp = $items->first(); #當基底資料
-			$temp['saleDate'] 	= $endDate;
-			$temp['qty']		= data_get($dayData, 'qty', 0); 
+			#$temp['saleDate'] 	= $endDate;
+			$temp['qty']		= intval(data_get($dayData, 'qty', 0)); 
+			unset($temp['saleDate'], $temp['areaId']);
 			
 			return $temp;
 		});
@@ -590,13 +591,11 @@ class NewReleaseService
 	{
 		$export[] = array_merge(['區域', '門店代號', '門店名稱'], $header, ['銷售總量', '平均銷售數量']);
 		
-		foreach($shopData as $data)
+		foreach($shopData as $shopId => $data)
 		{
-			$areaName = Area::tryFrom(intval($data['areaId']))->label();
-			
 			$row = [];
-			$row[] = $areaName;
-			$row[] = $data['shopId'];
+			$row[] = $data['areaName'];
+			$row[] = $shopId;
 			$row[] = $data['shopName'];
 			
 			foreach($header as $date)
@@ -624,12 +623,10 @@ class NewReleaseService
 		foreach($rankingData as $ranking => $shopList)
 		{
 			#同一排名會有重複
-			foreach($shopList as $data)
+			foreach($shopList as $shopId => $data)
 			{
-				$areaName = Area::tryFrom(intval($data['areaId']))->label();
-			
 				$row = [];
-				$row[] = $areaName;
+				$row[] = $data['areaName'];
 				$row[] = $data['shopId'];
 				$row[] = $data['shopName'];
 				$row[] = $data['qty'];
