@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\SalesSettingRepository;
 use App\Libraries\ResponseLib;
-use App\Enums\Brand;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -18,47 +17,36 @@ class SalesSettingService
 	{
 	}
 	
-	/* 取銷售設定清單
+	/* 取設定清單(Get ALL)
 	 * @params: 
 	 * @return: array
 	 */
-	public function getSettings()
+	public function getList()
 	{
 		try
 		{
-			$setting = $this->_repository->getSettings();
+			$list = $this->_repository->getList();
+			$list = collect($list)->groupBy('salesBrandId')->toArray();
 			
-			if (empty($setting))
-			{
-				$setting[Brand::BAFANG->value]	= [];
-				$setting[Brand::BUYGOOD->value] = [];
-			}
-			else
-			{	
-				$setting = collect($setting)->groupBy('brandId')->map(function($item, $key){
-					return $item->pluck('productId')->toArray();
-				})->toArray();
-			}
-			
-			return ResponseLib::initialize($setting)->success();
+			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取銷售設定時發生錯誤');
+			return ResponseLib::initialize()->fail('讀取銷售設定清單發生錯誤');
 		}
 	}
 	
-	/* 取Product料號清單
-	 * @params: 
+	/* Get product for options
+	 * @params: int
 	 * @return: array
 	 */
 	public function getProductList()
 	{
 		try
 		{
-			$list = $this->_repository->getProductList();
-			$list = collect($list)->groupBy('productBrandId')->sortKeys()->toArray();
+			$list = $this->_repository->getProductSettings();
+			$list = collect($list)->groupBy('productBrandId')->toArray();
 			
 			return $list;
 		}
@@ -69,22 +57,98 @@ class SalesSettingService
 		}
 	}
 	
-	/* Update Role
+	/* Create new item
+	 * @params: string
+	 * @params: int
+	 * @params: array
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateSetting($settings)
+	public function createSetting($id, $brandId, $name, $status, $productIds)
 	{
 		try
 		{
-			$this->_repository->update($settings);
+			$this->_repository->insert($brandId, $name, $status, $productIds);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('銷售設定更新失敗');
+			return ResponseLib::initialize()->fail('銷售設定新增失敗');
 		}
 	}
+	
+	/* Get setting by id
+	 * @params: int
+	 * @return: array
+	 */
+	public function getSettingById($id)
+	{
+		try
+		{
+			$data = $this->_repository->getById($id);
+			$data = collect($data)->groupBy('salesId')->map(function($items, $key){
+				$items = collect($items);
+				
+				$temp['salesId'] 		= $items->pluck('salesId')->first();
+				$temp['salesBrandId'] 	= $items->pluck('salesBrandId')->first();
+				$temp['salesName'] 		= $items->pluck('salesName')->first();
+				$temp['salesStatus'] 	= $items->pluck('salesStatus')->first();
+				$temp['updateAt'] 		= $items->pluck('updateAt')->first();
+				$temp['productIds'] 	= $items->pluck('productId')->values()->filter()->toArray();
+				
+				return $temp;
+			})->first();
+			
+			return ResponseLib::initialize($data)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('讀取銷售設定時發生錯誤');
+		}
+	}
+	
+	/* Update Role
+	 * @params: int
+	 * @params: int
+	 * @params: string
+	 * @params: boolean
+	 * @params: array
+	 * @return: array
+	 */
+	public function updateSetting($id, $brandId, $name, $status, $productIds)
+	{
+		try
+		{
+			$this->_repository->update($id, $brandId, $name, $status, $productIds);
+			
+			return ResponseLib::initialize()->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('編輯銷售設定失敗');
+		}
+	}
+	
+	/* Remove Role
+	 * @params: int
+	 * @return: array
+	 */
+	public function deleteSetting($id)
+	{
+		try
+		{
+			$this->_repository->remove($id);
+			return ResponseLib::initialize()->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('刪除銷售設定失敗');
+		}
+	}
+	
 }

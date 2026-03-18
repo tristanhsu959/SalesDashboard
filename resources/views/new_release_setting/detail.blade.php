@@ -46,7 +46,7 @@
 			<legend>選擇對應產品料號</legend>
 			<div class="grid">
 				<template x-for="(item, idx) in products" :key="idx">
-					<label class="checkbox large s2">
+					<label class="checkbox large s2 check-red">
 						<input type="checkbox" name="productIds[]" x-model="formData.productIds" :value="item.productId">
 						<span x-text="item.productName"></span>
 					</label>

@@ -5,9 +5,8 @@ document.addEventListener('alpine:init', () => {
 		tabIndex: Alpine.$persist(1),
 	});
 	
-	Alpine.data('salesSetting', (settings, options) => ({
-		settings: settings,
-		products: options.products,
+	Alpine.data('salesSettingList', (settings, options) => ({
+		settings: {...settings},
 		brands: options.brands,
 		activeTab: 0,
 		
@@ -18,6 +17,16 @@ document.addEventListener('alpine:init', () => {
 				this.activeTab = 1;
 		},
 		
+		confirmDelete(url) {
+			Alpine.store('dialog').show('確定要刪除此銷售設定?', true, () => this.deleteSetting(url));
+		},
+		
+		deleteSetting(url) {
+			this.$dispatch('show-loading');
+			const form = this.$refs.salesSettingListForm;
+            form.action = url;
+            form.submit();
+		},
     }));
 });
 

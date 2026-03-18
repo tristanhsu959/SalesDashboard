@@ -15,7 +15,7 @@
 	@csrf
 	
 	<section class="product-data container">
-		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brandId')">
+		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brandId" name="brandId" @change="initErpNoInput(); initCategory();">
 				<option value="">請選擇</option>
@@ -27,7 +27,7 @@
 			<i>arrow_drop_down</i>
 		</div>
 		
-		<div class="field label suffix border field-dark-blue w20 prefix">
+		<div class="field label suffix border field-dark-blue w25 prefix">
 			<select x-model="formData.category" name="category">
 				<option value="">請選擇</option>
 				<template x-for="(name, id) in options.categories[formData.brandId]" :key="id">
@@ -38,20 +38,20 @@
 			<i>arrow_drop_down</i>
 		</div>
 		
-		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'name')">
+		<div class="field label border field-dark-blue w40 prefix" :class="Helper.hasError(errors, 'name')">
 			<i class="small red-text">asterisk</i>
 			<input type="text" name="name" maxlength="15" x-model="formData.name" @input="errors.delete('name')">
 			<label>產品名稱</label>
 		</div>
 		 
 		<div class="row top-align">
-			<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'primaryNo')">
+			<div class="field label border field-dark-blue w40 prefix" :class="Helper.hasError(errors, 'primaryNo')">
 				<i class="small red-text">asterisk</i>
 				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="15" placeholder=" "></textarea>
 				<label>主要ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>
-			<div x-show="hasSecondaryNo" class="field label border field-dark-blue w30">
+			<div x-show="hasSecondaryNo" class="field label border field-dark-blue w40">
 				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="15" placeholder=" "></textarea>
 				<label>複合店ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>

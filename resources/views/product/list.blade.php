@@ -24,7 +24,10 @@
 			<div>
 				<div class="tabs">
 					<template x-for="(brand, key) in brands" :key="key">
-						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.product.tabIndex = key" class="tab-pink"></a>
+						<a :data-ui="'#page-' + key" :class="activeTab == key ? 'active':''" @click="$store.product.tabIndex = key" class="tab-pink">
+							<span x-text="brand"></span>
+							<span x-text="products[key].length" class="chip"></span>
+						</a>
 					</template>
 				</div>
 				
@@ -36,6 +39,7 @@
 							<span class="brand-label" x-text="item.productBrandId == 1 ? '八':'御'" :class="item.productBrandId == 1 ? 'bf':'bg'"></span>
 							<div class="max">
 								<h6 x-text="item.productName"></h6>
+								<div class="small" x-text="item.categoryName"></div>
 							</div>
 							<div>
 								<a :href="'{{ route('product.update', ['_ID_']) }}'.replace('_ID_', item.productId)" class="btn-edit button circle small">

@@ -35,9 +35,8 @@ class SalesSettingController extends Controller
 			$this->_viewModel->list = $response->data;
 		}
 		
-		return view('new_release_setting/list')->with('viewModel', $this->_viewModel);
+		return view('sales_setting/list')->with('viewModel', $this->_viewModel);
 	}
-	
 	
 	
 	/* 新增Form
@@ -51,7 +50,7 @@ class SalesSettingController extends Controller
 		$this->_viewModel->keepFormData(); #init
 		$this->_viewModel->success();
 		
-		return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+		return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 新增 POST
@@ -65,36 +64,33 @@ class SalesSettingController extends Controller
 		$brandId		= $request->integer('brandId', 0);
 		$productIds		= $request->array('productIds', []);
 		$name			= $request->input('name');
-		$saleDate		= $request->input('saleDate');
-		$tasteKeyWord	= $request->input('tasteKeyWord');
 		$status			= $request->boolean('status', FALSE);
 		
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$this->_viewModel->keepFormData($id, $brandId, $name, $status, $productIds);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
 			'brandId' 	=> 'required|integer',
 			'productIds'=> 'required',
             'name' 		=> 'required|max:30',
-			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+			return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$response = $this->_service->createSetting($id, $brandId, $name, $status, $productIds);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+			return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('new_release_setting.list')->with('msg', '新品設定完成');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定新增完成');
 	}
 	
 	/* 編輯Form
@@ -108,19 +104,19 @@ class SalesSettingController extends Controller
 		$this->_viewModel->initialize(FormAction::UPDATE);
 		
 		if (empty($id))
-			return redirect()->route('new_release_setting.list')->with('msg', '新品識別ID為空值');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定識別ID為空值');
 		
-		$response = $this->_service->getNewReleaseById($id);
+		$response = $this->_service->getSettingById($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('new_release_setting.list')->with('msg', $response->msg);
+			return redirect()->route('sales_setting.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['releaseId'], $data['releaseBrandId'], $data['productIds'], 
-			$data['releaseName'], $data['releaseSaleDate'], $data['releaseTaste'],  $data['releaseStatus'], $data['updateAt']);
+		$this->_viewModel->keepFormData($data['salesId'], $data['salesBrandId'], $data['salesName'], 
+				$data['salesStatus'], $data['productIds'], $data['updateAt']);
 		$this->_viewModel->success();
 		
-		return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+		return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form
@@ -133,15 +129,13 @@ class SalesSettingController extends Controller
 		$brandId		= $request->integer('brandId', 0);
 		$productIds		= $request->array('productIds', []);
 		$name			= $request->input('name');
-		$saleDate		= $request->input('saleDate');
-		$tasteKeyWord	= $request->input('tasteKeyWord');
 		$status			= $request->boolean('status', FALSE);
 		
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$this->_viewModel->keepFormData($id, $brandId, $name, $status, $productIds);
 		
 		if (empty($id))
-			return redirect()->route('new_release_setting.list')->with('msg', '新品識別ID為空值');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定識別ID為空值');
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -149,24 +143,23 @@ class SalesSettingController extends Controller
 			'brandId' 	=> 'required|integer',
 			'productIds'=> 'required',
             'name' 		=> 'required|max:30',
-			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
 		
 		if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
-			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+			return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$response = $this->_service->updateSetting($id, $brandId, $name, $status, $productIds);
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
+			return view('sales_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect()->route('new_release_setting.list')->with('msg', '新品編輯完成');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定編輯完成');
 	}
 	
 	/* 刪除
@@ -181,13 +174,13 @@ class SalesSettingController extends Controller
 		
 		/*跟validator整併即可*/
 		if (empty($id))
-			return redirect()->route('new_release_setting.list')->with('msg', '新品識別ID為空值');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定識別ID為空值');
 		
-		$response = $this->_service->deleteNewRelease($id);
+		$response = $this->_service->deleteSetting($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('new_release_setting.list')->with('msg', $response->msg);
+			return redirect()->route('sales_setting.list')->with('msg', $response->msg);
 		else
-			return redirect()->route('new_release_setting.list')->with('msg', '新品刪除完成');
+			return redirect()->route('sales_setting.list')->with('msg', '銷售設定刪除完成');
 	}
 }

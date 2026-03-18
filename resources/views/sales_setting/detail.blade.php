@@ -5,17 +5,17 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/new_release_setting/detail.js') }}" defer></script>
+    <script src="{{ asset('scripts/sales_setting/detail.js') }}" defer></script>
 @endpush
 
 @section('content')
 
-<form x-data='releaseSettingForm(@json($viewModel->formData), @json($viewModel->options))' 
+<form x-data='salesSettingForm(@json($viewModel->formData), @json($viewModel->options))' 
 	action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
 	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
 	@csrf
 	
-	<section class="release-setting-data container">
+	<section class="sales-setting-data container">
 		@if(! empty($viewModel->formData['id']))
 			<label class="large-text" x-text="'更新時間：' + formData.updateAt"></label>
 		@endif
@@ -33,32 +33,23 @@
 		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'name')">
 			<i class="small red-text">asterisk</i>
 			<input type="text" name="name" maxlength="20" x-model="formData.name" @input="errors.delete('name')">
-			<label>新品名稱</label>
-		</div>
-		
-		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'saleDate')">
-			<i class="small red-text">asterisk</i>
-			<input type="date" name="saleDate" maxlength="15" x-model="formData.saleDate" @input="errors.delete('saleDate')">
-			<label>發售日</label>
+			<label>產品名稱</label>
 		</div>
 		
 		<fieldset class="field-dark-blue fieldset">
-			<legend>選擇對應產品料號</legend>
+			<legend>
+				<i class="small red-text">asterisk</i>
+				選擇對應產品料號
+			</legend>
 			<div class="grid">
 				<template x-for="(item, idx) in products" :key="idx">
-					<label class="checkbox large s2">
+					<label class="checkbox large s2 check-amber">
 						<input type="checkbox" name="productIds[]" x-model="formData.productIds" :value="item.productId">
 						<span x-text="item.productName"></span>
 					</label>
 				</template>
 			</div>
 		</fieldset>
-
-		<div class="field label border field-dark-blue w30">
-			<textarea x-model="formData.tasteKeyWord" name="tasteKeyWord" rows="5" placeholder=" "></textarea>
-			<label>加值關鍵字</label>
-			<output class="red-text">每個關鍵字以換行分隔</output>
-  		</div>
 		
 		<div class="row">
 			<label class="switch field-light-green">

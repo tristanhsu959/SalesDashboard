@@ -18,7 +18,7 @@
 	</header>
 	
 @if($viewModel->status() === TRUE)
-	<form x-data='salesSettingList(@json($viewModel->list), @json($viewModel->options["brands"]) )' action="" method="post" x-ref="salesSettingListForm">
+	<form x-data='salesSettingList(@json($viewModel->list), @json($viewModel->options) )' action="" method="post" x-ref="salesSettingListForm">
 		@csrf
 		<section class="setting-list container">
 			<div>

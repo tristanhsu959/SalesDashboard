@@ -63,6 +63,13 @@
 	}
 }
 
+.fieldset {
+	border-color: var(--primary);
+	legend {
+		color: var(--primary);
+	}
+}
+
 .switch {
 	i.output { 
 		color: var(--primary); 
@@ -71,9 +78,14 @@
 	}
 }
 
-.fieldset {
-	border-color: var(--primary);
-	legend {
-		color: var(--primary);
+.checkbox {
+	&.check-red {
+		--primary: #f44336; 
+		--on-primary: #ffffff;
+	}
+	&.check-amber {
+		--primary: #ff9800; 
+		--on-primary: #ffffff;
 	}
 }
+

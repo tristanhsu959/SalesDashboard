@@ -20,7 +20,7 @@ class SalesSettingViewModel extends Fluent
 	{
 		$this->function		= Functions::SALES_SETTING;
 		$this->action 		= FormAction::LIST; 
-		$this->backRoute 	= '';
+		$this->backRoute 	= 'sales_setting';
 		$this->success();
 	}
 	
@@ -43,6 +43,39 @@ class SalesSettingViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
-		$this->set('options.products', $this->_service->getProductList()); 
+		
+		if ($this->action != FormAction::LIST)
+			$this->set('options.products', $this->_service->getProductList()); 
+	}
+	
+	/* Form submit action
+	 * @params: 
+	 * @return: string
+	 */
+	public function getFormAction() : string
+    {
+		return match($this->action)
+		{
+			FormAction::CREATE => route('sales_setting.create.post'),
+			FormAction::UPDATE => route('sales_setting.update.post'),
+		};
+	}
+	
+	/* Keep form data
+	 * @params: int
+	 * @params: int
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: void
+	 */
+	public function keepFormData($id = 0, $brandId = Brand::BAFANG->value, $name = '', $status = TRUE, $productIds = [], $updateAt = '')
+    {
+		$this->set('formData.id', $id);
+		$this->set('formData.brandId', $brandId);
+		$this->set('formData.name', $name);
+		$this->set('formData.status', $status);
+		$this->set('formData.productIds', $productIds);
+		$this->set('formData.updateAt', $updateAt);
 	}
 }

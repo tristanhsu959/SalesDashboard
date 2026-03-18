@@ -14,27 +14,27 @@ class SalesSettingRepository extends Repository
 		
 	}
 	
-	/* Get sales product settings
+	/* Get product list from DB 
 	 * @params: 
 	 * @return: array
 	 */
-	public function getSettings()
+	public function getList()
 	{
 		$db = $this->connectSalesDashboard('sales_setting');
 			
 		$result = $db
-			->select('salesProductId as productId', 'salesBrandId as brandId')
+			->select('salesId', 'salesBrandId', 'salesName', 'salesStatus', 'updateAt')
 			->get()
 			->toArray();
 			
 		return $result;
 	}
 	
-	/* Get product settings for options
+	/* Get product settings for options(產品料號設定)
 	 * @params: 
 	 * @return: array
 	 */
-	public function getProductList()
+	public function getProductSettings()
 	{
 		#不判別product status, 是否啟用由新品設定決定
 		$db = $this->connectSalesDashboard('product');
@@ -47,19 +47,31 @@ class SalesSettingRepository extends Repository
 		return $result;
 	}
 	
-	/* Remove new item
+	/* Create new item
+	 * @params: int
+	 * @params: string
+	 * @params: boolean
 	 * @params: array
-	 * @return: boolean
+	 * @return: array
 	 */
-	public function update($settings)
+	public function insert($brandId, $name, $status, $productIds)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
 		
 		try 
 		{
-			$this->_removeSetting();
-			$this->_updateSetting($settings);
+			$data['salesBrandId']	= $brandId;
+			$data['salesName'] 		= $name;
+			$data['salesStatus'] 	= $status;
+			$data['createAt'] 		= now()->format('Y-m-d H:i:s');
+			$data['updateAt'] 		= $data['createAt'];
+			
+			$db = $this->connectSalesDashboard();
+			$insertId = $db->table('sales_setting')->insertGetId($data);
+			
+			$this->_insertProducts($insertId, $productIds);
+			
 			$db->commit();
 
 			return TRUE;
@@ -69,45 +81,118 @@ class SalesSettingRepository extends Repository
 			$db->rollBack();
 			throw new Exception($e->getMessage());
 		}
-	
-		return TRUE;
 	}
 	
-	/* Create product no
+	/* Insert product ids
 	 * @params: int
 	 * @return: array
 	 */
-	private function _removeSetting()
+	private function _insertProducts($parentId, $productIds)
 	{
-		$db = $this->connectSalesDashboard();
-		$db->table('sales_setting')
-			->delete();
+		$items = [];
 		
-		return TRUE;
-	}
-	
-	/* Create product no
-	 * @params: int
-	 * @return: array
-	 */
-	private function _updateSetting($settings)
-	{
-		$data = [];
-		foreach($settings as $brandId => $productIds)
+		foreach($productIds as $id)
 		{
-			foreach($productIds as $id)
-			{
-				$row['salesProductId'] 	= $id;
-				$row['salesBrandId'] 	= $brandId;
-				$data[] = $row;
-			}
+			$data['parentId']	= $parentId;
+			$data['productId']	= $id;
+			
+			$items[] = $data;
 		}
 		
 		$db = $this->connectSalesDashboard();
-		$db->table('sales_setting')
-			->insert($data);
+		$db->table('sales_product')
+			->where('parentId', '=', $parentId)
+			->delete();
+			
+		$db->table('sales_product')->insert($items);
 		
 		return TRUE;
+	}
+	
+	/* Get product by id
+	 * @params: int
+	 * @return: array
+	 */
+	public function getById($id)
+	{
+		$db = $this->connectSalesDashboard('sales_setting');
+			
+		$result = $db->select('salesId', 'salesBrandId', 'salesName', 'salesStatus', 'updateAt', 'productId')
+					->leftJoin('sales_product', 'parentId', '=', 'salesId')
+					->where('salesId', '=', $id)
+					->get()
+					->toArray();
+		
+		return $result;
+	}
+	
+	/* Update new item
+	 * @params: int
+	 * @params: int
+	 * @params: string
+	 * @params: boolean
+	 * @params: array
+	 * @return: boolean
+	 */
+	public function update($id, $brandId, $name, $status, $productIds)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
+		
+		try 
+		{
+			$data['salesBrandId']	= $brandId;
+			$data['salesName'] 		= $name;
+			$data['salesStatus'] 	= $status;
+			$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+			
+			$db = $this->connectSalesDashboard();
+			$db->table('sales_setting')
+					->where('salesId', '=', $id)
+					->update($data);
+					
+			$this->_insertProducts($id, $productIds);
+			
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+	}
+	
+	/* Remove new item
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function remove($id)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
+		
+		try 
+		{
+			$db = $this->connectSalesDashboard();
+			$db->table('sales_setting')
+				->where('salesId', '=', $id)
+				->delete();
+			
+			$db->table('sales_product')
+				->where('parentId', '=', $id)
+				->delete();
+					
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
 	}
 	
 	/* Update status when product removed
@@ -118,10 +203,10 @@ class SalesSettingRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard();
 		$db->reconnect(); 
-		$db->table('sales_setting')
-			->where('salesProductId', '=', $productId)
+		$result = $db->table('sales_product')
+			->where('productId', '=', $productId)
 			->delete();
-		
+		 
 		return TRUE;
 	}
 }

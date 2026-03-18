@@ -31,6 +31,9 @@
 .w30 {
 	width: calc((100% - 2rem) / 3);
 }
+.w40 {
+	width: calc((100% - 2rem) / 5 * 2);
+}
 .w50 {
 	width: calc((100% - 1rem) / 2);
 }

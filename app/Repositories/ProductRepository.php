@@ -25,6 +25,8 @@ class ProductRepository extends Repository
 			
 		$result = $db
 			->select('productId', 'productName', 'productBrandId', 'productCategory')
+			->orderBy('productName')
+			->orderBy('productCategory')
 			->get()
 			->toArray();
 			

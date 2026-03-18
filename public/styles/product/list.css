@@ -31,7 +31,9 @@
 		h6 {
 			line-height: 40px;
 		}
-		
+		h6+div {
+			color: rgba(0, 0, 0, .61);
+		}
 		&:hover {
 			background-color: #e0f7fa;
 		}

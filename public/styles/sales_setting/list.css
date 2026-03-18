@@ -1,6 +1,6 @@
 /* Product list */
 
-.sales-setting {
+.setting-list {
 	.tabs a {
 		font-size: 1.2rem; 
 	}
@@ -36,7 +36,7 @@
 		}
 		
 		&:hover {
-			background-color: #f3e5f5;
+			background-color: #fce4ec;
 		}
 	}
 }
