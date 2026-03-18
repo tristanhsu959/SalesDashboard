@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\NewItemRepository;
+use App\Repositories\NewReleaseSettingRepository;
 use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -10,10 +10,10 @@ use Illuminate\Support\Carbon;
 use Exception;
 use Log;
 
-class NewItemService
+class NewReleaseSettingService
 {
 	
-	public function __construct(protected NewItemRepository $_repository)
+	public function __construct(protected NewReleaseSettingRepository $_repository)
 	{
 	}
 	
@@ -26,7 +26,19 @@ class NewItemService
 		try
 		{
 			$list = $this->_repository->getList();
-			$list = collect($list)->groupBy('newItemBrand')->toArray();
+			$list = collect($list)->groupBy('releaseBrandId')->toArray();
+			/* $list = collect($list)->groupBy('releaseId')->map(function($items, $key){
+				$temp['releaseId'] 		= $items->pluck('releaseId')->first();
+				$temp['releaseBrandId'] = $items->pluck('releaseBrandId')->first();
+				$temp['releaseName'] 	= $items->pluck('releaseName')->first();
+				$temp['releaseSaleDate']= $items->pluck('releaseSaleDate')->first();
+				$temp['releaseTaste'] 	= $items->pluck('releaseTaste')->first();
+				$temp['releaseStatus'] 	= $items->pluck('releaseStatus')->first();
+				$temp['updateAt'] 		= $items->pluck('updateAt')->first();
+				$temp['productIds'] 	= $items->pluck('productId')->values()->filter()->toArray();
+				
+				return $temp;
+			})->groupBy('releaseBrandId')->toArray(); */
 			
 			return ResponseLib::initialize($list)->success();
 		}
@@ -41,12 +53,12 @@ class NewItemService
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductOptions()
+	public function getProductList()
 	{
 		try
 		{
 			$list = $this->_repository->getProductSettings();
-			$list = collect($list)->groupBy('productBrand')->toArray();
+			$list = collect($list)->groupBy('productBrandId')->toArray();
 			
 			return $list;
 		}
@@ -64,7 +76,7 @@ class NewItemService
 	 * @params: array
 	 * @return: array
 	 */
-	public function createNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status)
+	public function createNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status)
 	{
 		try
 		{
@@ -73,7 +85,7 @@ class NewItemService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->insert($brand, $productId, $name, $saleDate, $tastes, $status);
+			$this->_repository->insert($brandId, $productIds, $name, $saleDate, $tastes, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -88,11 +100,25 @@ class NewItemService
 	 * @params: int
 	 * @return: array
 	 */
-	public function getNewItemById($id)
+	public function getNewReleaseById($id)
 	{
 		try
 		{
 			$data = $this->_repository->getById($id);
+			$data = collect($data)->groupBy('releaseId')->map(function($items, $key){
+				$items = collect($items);
+				
+				$temp['releaseId'] 		= $items->pluck('releaseId')->first();
+				$temp['releaseBrandId'] = $items->pluck('releaseBrandId')->first();
+				$temp['releaseName'] 	= $items->pluck('releaseName')->first();
+				$temp['releaseSaleDate']= $items->pluck('releaseSaleDate')->first();
+				$temp['releaseTaste'] 	= $items->pluck('releaseTaste')->first();
+				$temp['releaseStatus'] 	= $items->pluck('releaseStatus')->first();
+				$temp['updateAt'] 		= $items->pluck('updateAt')->first();
+				$temp['productIds'] 	= $items->pluck('productId')->values()->filter()->toArray();
+				
+				return $temp;
+			})->first();
 			
 			return ResponseLib::initialize($data)->success();
 		}
@@ -111,7 +137,7 @@ class NewItemService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateNewItem($id, $brand, $productId, $name, $saleDate, $tasteKeyWord, $status)
+	public function updateNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status)
 	{
 		try
 		{
@@ -120,7 +146,7 @@ class NewItemService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->update($id, $brand, $productId, $name, $saleDate, $tastes, $status);
+			$this->_repository->update($id, $brandId, $productIds, $name, $saleDate, $tastes, $status);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -135,7 +161,7 @@ class NewItemService
 	 * @params: int
 	 * @return: array
 	 */
-	public function deleteNewItem($id)
+	public function deleteNewRelease($id)
 	{
 		try
 		{

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\SalesSettingService;
-use App\ViewModels\SalesSettingViewModel;
+use App\Services\NewReleaseSettingService;
+use App\ViewModels\NewReleaseSettingViewModel;
 use App\Enums\FormAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
-class SalesSettingController extends Controller
+class NewReleaseSettingController extends Controller
 {
 	
-	public function __construct(protected SalesSettingService $_service, protected SalesSettingViewModel $_viewModel)
+	public function __construct(protected NewReleaseSettingService $_service, protected NewReleaseSettingViewModel $_viewModel)
 	{
 	}
 	
@@ -63,19 +63,19 @@ class SalesSettingController extends Controller
 		#fetch form data
 		$id				= $request->integer('id');
 		$brandId		= $request->integer('brandId', 0);
-		$productIds		= $request->array('productIds', []);
+		$productId		= $request->array('productIds', []);
 		$name			= $request->input('name');
 		$saleDate		= $request->input('saleDate');
 		$tasteKeyWord	= $request->input('tasteKeyWord');
 		$status			= $request->boolean('status', FALSE);
 		
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$this->_viewModel->keepFormData($id, $brandId, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
 			'brandId' 	=> 'required|integer',
-			'productIds'=> 'required',
+			'productId' => 'required|integer',
             'name' 		=> 'required|max:30',
 			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
@@ -86,7 +86,7 @@ class SalesSettingController extends Controller
 			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$response = $this->_service->createNewRelease($id, $brandId, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if ($response->status === FALSE)
 		{
@@ -116,7 +116,7 @@ class SalesSettingController extends Controller
 			return redirect()->route('new_release_setting.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['releaseId'], $data['releaseBrandId'], $data['productIds'], 
+		$this->_viewModel->keepFormData($data['releaseId'], $data['releaseBrandId'], $data['releaseProductId'], 
 			$data['releaseName'], $data['releaseSaleDate'], $data['releaseTaste'],  $data['releaseStatus'], $data['updateAt']);
 		$this->_viewModel->success();
 		
@@ -131,14 +131,14 @@ class SalesSettingController extends Controller
 	{
 		$id				= $request->integer('id');
 		$brandId		= $request->integer('brandId', 0);
-		$productIds		= $request->array('productIds', []);
+		$productId		= $request->integer('productId', 0);
 		$name			= $request->input('name');
 		$saleDate		= $request->input('saleDate');
 		$tasteKeyWord	= $request->input('tasteKeyWord');
 		$status			= $request->boolean('status', FALSE);
 		
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$this->_viewModel->keepFormData($id, $brandId, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if (empty($id))
 			return redirect()->route('new_release_setting.list')->with('msg', '新品識別ID為空值');
@@ -147,7 +147,7 @@ class SalesSettingController extends Controller
 		$validator = Validator::make($request->all(), [
 			'id' 		=> 'required|integer',
 			'brandId' 	=> 'required|integer',
-			'productIds'=> 'required',
+			'productId' => 'required|integer',
             'name' 		=> 'required|max:30',
 			'saleDate' 	=> 'required|date_format:Y-m-d',
         ]);
@@ -158,7 +158,7 @@ class SalesSettingController extends Controller
 			return view('new_release_setting/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateNewRelease($id, $brandId, $productIds, $name, $saleDate, $tasteKeyWord, $status);
+		$response = $this->_service->updateNewRelease($id, $brandId, $productId, $name, $saleDate, $tasteKeyWord, $status);
 		
 		if ($response->status === FALSE)
 		{

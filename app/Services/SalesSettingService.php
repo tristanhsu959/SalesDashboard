@@ -49,16 +49,16 @@ class SalesSettingService
 		}
 	}
 	
-	/* 取Product清單
+	/* 取Product料號清單
 	 * @params: 
 	 * @return: array
 	 */
-	public function getProductOptions()
+	public function getProductList()
 	{
 		try
 		{
 			$list = $this->_repository->getProductList();
-			$list = collect($list)->groupBy('productBrand')->sortKeys()->toArray();
+			$list = collect($list)->groupBy('productBrandId')->sortKeys()->toArray();
 			
 			return $list;
 		}

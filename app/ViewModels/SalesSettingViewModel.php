@@ -43,6 +43,6 @@ class SalesSettingViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
-		$this->set('options.products', $this->_service->getProductOptions()); 
+		$this->set('options.products', $this->_service->getProductList()); 
 	}
 }

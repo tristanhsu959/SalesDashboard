@@ -33,7 +33,7 @@
 					<ul class="list border">
 						<template x-for="item in products[key]">
 						<li>
-							<span class="brand-label" x-text="item.productBrand == 1 ? '八':'御'" :class="item.productBrand == 1 ? 'bf':'bg'"></span>
+							<span class="brand-label" x-text="item.productBrandId == 1 ? '八':'御'" :class="item.productBrandId == 1 ? 'bf':'bg'"></span>
 							<div class="max">
 								<h6 x-text="item.productName"></h6>
 							</div>

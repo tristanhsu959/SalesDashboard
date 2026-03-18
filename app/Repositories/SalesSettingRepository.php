@@ -23,7 +23,7 @@ class SalesSettingRepository extends Repository
 		$db = $this->connectSalesDashboard('sales_setting');
 			
 		$result = $db
-			->select('salesSettingProductId as productId', 'salesSettingBrand as brandId')
+			->select('salesProductId as productId', 'salesBrandId as brandId')
 			->get()
 			->toArray();
 			
@@ -40,7 +40,7 @@ class SalesSettingRepository extends Repository
 		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db
-			->select('productId', 'productName', 'productBrand')
+			->select('productId', 'productName', 'productBrandId')
 			->get()
 			->toArray();
 			
@@ -93,12 +93,12 @@ class SalesSettingRepository extends Repository
 	private function _updateSetting($settings)
 	{
 		$data = [];
-		foreach($settings as $brand => $productIds)
+		foreach($settings as $brandId => $productIds)
 		{
 			foreach($productIds as $id)
 			{
-				$row['salesSettingProductId'] 	= $id;
-				$row['salesSettingBrand'] 		= $brand;
+				$row['salesProductId'] 	= $id;
+				$row['salesBrandId'] 	= $brandId;
 				$data[] = $row;
 			}
 		}
@@ -119,7 +119,7 @@ class SalesSettingRepository extends Repository
 		$db = $this->connectSalesDashboard();
 		$db->reconnect(); 
 		$db->table('sales_setting')
-			->where('salesSettingProductId', '=', $productId)
+			->where('salesProductId', '=', $productId)
 			->delete();
 		
 		return TRUE;

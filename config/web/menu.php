@@ -59,10 +59,10 @@ return [
 			'url' 		=> 'products', 
 		],
 		[
-			'name' 		=> Functions::NEW_ITEM->label(), #新品設定,
-			'code'		=> Functions::NEW_ITEM->value,
+			'name' 		=> Functions::NEW_RELEASE_SETTING->label(), #新品設定,
+			'code'		=> Functions::NEW_RELEASE_SETTING->value,
 			'style' 	=> ['icon' => 'fiber_new', 'color' => 'light-blue-text'],
-			'url' 		=> 'new_items', 
+			'url' 		=> 'new_release_setting', 
 		],
 		[
 			'name' 		=> Functions::SALES_SETTING->label(), #銷售設定,

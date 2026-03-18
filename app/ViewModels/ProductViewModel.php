@@ -66,13 +66,13 @@ class ProductViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brand = 0, $category = 0, $name = '', $primaryNo = '', $secondaryNo = '')
+	public function keepFormData($id = 0, $brandId = 0, $category = 0, $name = '', $primaryNo = '', $secondaryNo = '')
     {
 		$primaryNo	= is_array($primaryNo) ? Arr::join($primaryNo, "\r\n") : $primaryNo;
 		$secondaryNo= is_array($secondaryNo) ? Arr::join($secondaryNo, "\r\n") : $secondaryNo;
 		
 		$this->set('formData.id', $id);
-		$this->set('formData.brand', $brand);
+		$this->set('formData.brandId', $brandId);
 		$this->set('formData.category', $category);
 		$this->set('formData.name', $name);
 		$this->set('formData.primaryNo', $primaryNo);

@@ -24,7 +24,7 @@ class ProductRepository extends Repository
 		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db
-			->select('productId', 'productName', 'productBrand', 'productCategory')
+			->select('productId', 'productName', 'productBrandId', 'productCategory')
 			->get()
 			->toArray();
 			
@@ -73,7 +73,7 @@ class ProductRepository extends Repository
 	 */
 	private function _insertProduct($brandId, $category, $name)
 	{
-		$data['productBrand']	= $brandId;
+		$data['productBrandId']	= $brandId;
 		$data['productCategory']= $category;
 		$data['productName'] 	= $name;
 		
@@ -115,7 +115,7 @@ class ProductRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('product');
 			
-		$result = $db->select('productId', 'productBrand', 'productName', 'productCategory')
+		$result = $db->select('productId', 'productBrandId', 'productName', 'productCategory')
 					->addSelect('erpNo', 'isPrimary')
 					->leftJoin('product_no', 'parentId', '=', 'productId')
 					->where('productId', '=', $id)
@@ -168,7 +168,7 @@ class ProductRepository extends Repository
 	 */
 	private function _updateProduct($id, $brandId, $category, $name)
 	{
-		$data['productBrand']		= $brandId;
+		$data['productBrandId']		= $brandId;
 		$data['productCategory']	= $category;
 		$data['productName'] 		= $name;
 		

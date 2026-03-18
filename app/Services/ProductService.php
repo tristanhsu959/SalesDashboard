@@ -27,7 +27,7 @@ class ProductService
 		try
 		{
 			$list = $this->_repository->getList();
-			$list = collect($list)->groupBy('productBrand')->toArray();
+			$list = collect($list)->groupBy('productBrandId')->toArray();
 			
 			return ResponseLib::initialize($list)->success();
 		}
@@ -88,7 +88,7 @@ class ProductService
 				$collection = collect($data);
 				
 				$result['productId'] 		= $collection->pluck('productId')->first();
-				$result['productBrand'] 	= $collection->pluck('productBrand')->first();
+				$result['productBrandId'] 	= $collection->pluck('productBrandId')->first();
 				$result['productCategory'] 	= $collection->pluck('productCategory')->first();
 				$result['productName'] 		= $collection->pluck('productName')->first();
 				$result['primaryNo'] 		= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();

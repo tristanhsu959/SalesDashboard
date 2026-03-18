@@ -15,24 +15,22 @@
 	@csrf
 	
 	<section class="product-data container">
-		
-		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brand')">
+		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
-			<select x-model="formData.brand" name="brand" @change="initErpNoInput(); initCategory();">
+			<select x-model="formData.brandId" name="brandId" @change="initErpNoInput(); initCategory();">
 				<option value="">請選擇</option>
 				<template x-for="(name, id) in options.brands" :key="id">
-					<option :value="id" x-text="name" :selected="formData.brand == id"></option>
+					<option :value="id" x-text="name" :selected="formData.brandId == id"></option>
 				</template>
 			</select>
 			<label>品牌</label>
 			<i>arrow_drop_down</i>
 		</div>
 		
-		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'category')">
-			<i class="small red-text">asterisk</i>
+		<div class="field label suffix border field-dark-blue w20 prefix">
 			<select x-model="formData.category" name="category">
 				<option value="">請選擇</option>
-				<template x-for="(name, id) in options.categories[formData.brand]" :key="id">
+				<template x-for="(name, id) in options.categories[formData.brandId]" :key="id">
 					<option :value="id" x-text="name" :selected="formData.category == id"></option>
 				</template>
 			</select>
@@ -49,20 +47,21 @@
 		<div class="row top-align">
 			<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'primaryNo')">
 				<i class="small red-text">asterisk</i>
-				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="20" placeholder=" "></textarea>
+				<textarea x-model="formData.primaryNo" @input="errors.delete('primaryNo')" name="primaryNo" rows="15" placeholder=" "></textarea>
 				<label>主要ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>
 			<div x-show="hasSecondaryNo" class="field label border field-dark-blue w30">
-				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="20" placeholder=" "></textarea>
+				<textarea x-model="formData.secondaryNo" :disabled="!hasSecondaryNo" name="secondaryNo" rows="15" placeholder=" "></textarea>
 				<label>複合店ERP No</label>
 				<output class="red-text">每個序號以換行分隔</output>
   			</div>
 		</div>
 		
+		<div class="space"></div>
 		<nav class="toolbar">
-			<button type="submit" class="button btn-save btn-primary">{{ $viewModel->action->label()}}</button>
-			<button @click="reset() "type="button" class="button btn-cancel border">重置</button>
+			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
+			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 		</nav>
 	</section>
 </form>

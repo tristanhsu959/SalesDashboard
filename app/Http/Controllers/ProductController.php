@@ -62,7 +62,7 @@ class ProductController extends Controller
 	{
 		#fetch form data
 		$id			= $request->input('id');
-		$brand		= $request->integer('brand', 0);
+		$brandId	= $request->integer('brandId', 0);
 		$category	= $request->integer('category', 0);
 		$name		= $request->input('name');
 		$primaryNo	= $request->input('primaryNo');
@@ -70,11 +70,11 @@ class ProductController extends Controller
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $category, $brand, $name, $primaryNo, $secondaryNo);
+		$this->_viewModel->keepFormData($id, $category, $brandId, $name, $primaryNo, $secondaryNo);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-			'brand' => 'required|integer',
+			'brandId' => 'required|integer',
             'name' => 'required|max:15',
 			'primaryNo' => 'required',
         ]);
@@ -85,7 +85,7 @@ class ProductController extends Controller
 			return view('product/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createProduct($brand, $category, $name, $primaryNo, $secondaryNo);
+		$response = $this->_service->createProduct($brandId, $category, $name, $primaryNo, $secondaryNo);
 		
 		if ($response->status === FALSE)
 		{
@@ -115,7 +115,7 @@ class ProductController extends Controller
 			return redirect()->route('product.list')->with('msg', $response->msg);
 		
 		$data = $response->data; 
-		$this->_viewModel->keepFormData($data['productId'], $data['productBrand'], $data['productCategory'], $data['productName'], $data['primaryNo'], $data['secondaryNo']);
+		$this->_viewModel->keepFormData($data['productId'], $data['productBrandId'], $data['productCategory'], $data['productName'], $data['primaryNo'], $data['secondaryNo']);
 		$this->_viewModel->success();
 		
 		return view('product/detail')->with('viewModel', $this->_viewModel);
@@ -128,7 +128,7 @@ class ProductController extends Controller
 	public function update(Request $request)
 	{
 		$id			= $request->input('id');
-		$brand		= $request->integer('brand', 0);
+		$brandId	= $request->integer('brandId', 0);
 		$category	= $request->integer('category', 0);
 		$name		= $request->input('name');
 		$primaryNo	= $request->input('primaryNo');
@@ -136,14 +136,14 @@ class ProductController extends Controller
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($id, $brand, $category, $name, $primaryNo, $secondaryNo);
+		$this->_viewModel->keepFormData($id, $brandId, $category, $name, $primaryNo, $secondaryNo);
 		
 		if (empty($id))
 			return redirect()->route('product.list')->with('msg', '產品識別ID為空值');
 		
 		$validator = Validator::make($request->all(), [
 			'id' => 'required|integer',
-            'brand' => 'required|integer',
+            'brandId' => 'required|integer',
             'name' => 'required|max:15',
 			'primaryNo' => 'required',
         ]);
@@ -154,7 +154,7 @@ class ProductController extends Controller
 			return view('product/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateProduct($id, $brand, $category, $name, $primaryNo, $secondaryNo);
+		$response = $this->_service->updateProduct($id, $brandId, $category, $name, $primaryNo, $secondaryNo);
 		
 		if ($response->status === FALSE)
 		{

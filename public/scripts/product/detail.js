@@ -2,23 +2,26 @@
 
 document.addEventListener('alpine:init', () => {
 	Alpine.data('productForm', (formData, options) => ({
-		formData: formData,
-		options: options,
+		initFormData: {...formData}, /*避免引用同一object位址*/
+		formData: {...formData},
+		options: {...options},
 		hasSecondaryNo: false,
 		errors: new Set(),
 		
 		init() {
 			this.initErpNoInput();
+			console.log(this.initFormData);
 		},
 		
 		initErpNoInput() {
-			this.errors.delete('brand');
-			this.hasSecondaryNo = (this.formData.brand == formData.buygoodId);
+			this.errors.delete('brandId');
+			this.hasSecondaryNo = (this.formData.brandId == formData.buygoodId);
 		},
 		
 		initCategory(){
 			this.errors.delete('category');
 			this.formData.category = 0;
+			this.initErpNoInput();
 		},
 		
 		validate() {
@@ -26,8 +29,8 @@ document.addEventListener('alpine:init', () => {
 			
 			if (Helper.isEmpty(this.formData.name))
 				this.errors.add('name');
-			if (this.formData.brand == 0)
-				this.errors.add('brand');
+			if (this.formData.brandId == 0)
+				this.errors.add('brandId');
 			if (this.formData.primaryNo == '')
 				this.errors.add('primaryNo');
 			
@@ -41,11 +44,8 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		reset() {
-			this.formData.name = '';
-			this.formData.brand = 0;
-			this.formData.primaryNo = '';
-			this.formData.secondaryNo = '';
-			this.formData.status = 1;
+			this.formData = {...this.initFormData};
+			this.errors.clear();
 		}
     }));
 });

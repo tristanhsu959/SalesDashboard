@@ -2,7 +2,7 @@
 
 namespace App\ViewModels;
 
-use App\Services\NewItemService;
+use App\Services\NewReleaseSettingService;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\Enums\Brand;
@@ -12,15 +12,15 @@ use App\ViewModels\Attributes\attrAllowAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Fluent;
 
-class NewItemViewModel extends Fluent
+class NewReleaseSettingViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct(protected NewItemService $_service)
+	public function __construct(protected NewReleaseSettingService $_service)
 	{
-		$this->function		= Functions::NEW_ITEM;
+		$this->function		= Functions::NEW_RELEASE_SETTING;
 		$this->action 		= FormAction::LIST; 
-		$this->backRoute 	= 'new_items';
+		$this->backRoute 	= 'new_release_setting';
 		$this->success();
 	}
 	
@@ -45,7 +45,7 @@ class NewItemViewModel extends Fluent
 		$this->set('options.brands', Brand::toArray()); 
 		
 		if ($this->action != FormAction::LIST)
-			$this->set('options.products', $this->_service->getProductOptions()); 
+			$this->set('options.products', $this->_service->getProductList()); 
 	}
 	
 	/* Form submit action
@@ -56,8 +56,8 @@ class NewItemViewModel extends Fluent
     {
 		return match($this->action)
 		{
-			FormAction::CREATE => route('new_item.create.post'),
-			FormAction::UPDATE => route('new_item.update.post'),
+			FormAction::CREATE => route('new_release_setting.create.post'),
+			FormAction::UPDATE => route('new_release_setting.update.post'),
 		};
 	}
 	
@@ -68,11 +68,18 @@ class NewItemViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brand = Brand::BAFANG->value, $productId = 0, $name = '', $saleDate = '', $tasteKeyWord = '', $status = TRUE, $updateAt = '')
+	public function keepFormData($id = 0, $brandId = Brand::BAFANG->value, $productIds = [], $name = '', $saleDate = '', $tasteKeyWord = '', $status = TRUE, $updateAt = '')
     {
+		/* $formatProductIds = [
+			Brand::BAFANG->value => [], 
+			Brand::BUYGOOD->value => []
+		];
+		
+		$formatProductIds[$brandId] = $productIds; */
+		
 		$this->set('formData.id', $id);
-		$this->set('formData.brand', $brand);
-		$this->set('formData.productId', $productId);
+		$this->set('formData.brandId', $brandId);
+		$this->set('formData.productIds', $productIds);
 		$this->set('formData.name', $name);
 		$this->set('formData.saleDate', $saleDate);
 		$this->set('formData.tasteKeyWord', is_array($tasteKeyWord) ? implode("\r\n", $tasteKeyWord) : $tasteKeyWord);

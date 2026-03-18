@@ -17,19 +17,15 @@
 	<section class="user-data container">
 		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
 		
-		<div class="row">
-			<div class="field label border field-purple w25 prefix" :class="Helper.hasError(errors, 'ad')">
-				<i class="small red-text">asterisk</i>
-				<input type="text" name="adAccount" maxlength="15" required x-model="formData.ad" @input="errors.delete('ad')">
-				<label>AD帳號</label>
-			</div>
+		<div class="field label border field-purple w25 prefix" :class="Helper.hasError(errors, 'ad')">
+			<i class="small red-text">asterisk</i>
+			<input type="text" name="adAccount" maxlength="15" required x-model="formData.ad" @input="errors.delete('ad')">
+			<label>AD帳號</label>
 		</div>
 		
-		<div class="row">
-			<div class="field label border field-purple w25">
-				<input type="text" name="displayName" maxlength="15" x-model="formData.name">
-				<label>顯示名稱</label>
-			</div>
+		<div class="field label border field-purple w25">
+			<input type="text" name="displayName" maxlength="15" x-model="formData.name">
+			<label>顯示名稱</label>
 		</div>
 		
 		<div class="field label suffix border field-purple w25 prefix" :class="Helper.hasError(errors, 'roleId')">
@@ -43,10 +39,11 @@
 			<label>身份</label>
 			<i>arrow_drop_down</i>
 		</div>
-	
+		
+		<div class="space"></div>
 		<nav class="toolbar">
-			<button type="submit" class="button btn-save btn-primary">{{ $viewModel->action->label()}}</button>
-			<button @click="reset() "type="button" class="button btn-cancel border">重置</button>
+			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
+			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 		</nav>
 	</section>
 </form>

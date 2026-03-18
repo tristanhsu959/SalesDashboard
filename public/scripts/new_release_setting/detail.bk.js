@@ -1,27 +1,27 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('newItemForm', (formData, options) => ({
+	Alpine.data('releaseSettingForm', (formData, options) => ({
 		formData: formData,
 		options: options,
 		products: [],
 		errors: new Set(),
 		
 		init() {
-			if (this.formData.brand)
+			if (this.formData.brandId)
 				this.updateProducts();
 		},
 		
 		updateProducts() {
-			const selectedBrand = this.formData.brand;
-			this.products = this.options.products[selectedBrand] || [];
+			const selectedBrandId = this.formData.brandId;
+			this.products = this.options.products[selectedBrandId] || [];
 		},
 		
 		validate() {
 			this.errors.clear();
 			
-			if (this.formData.brand == 0)
-				this.errors.add('brand');
+			if (this.formData.brandId == 0)
+				this.errors.add('brandId');
 			if (this.formData.productId == 0)
 				this.errors.add('productId');
 			if (Helper.isEmpty(this.formData.name))
@@ -39,12 +39,13 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		reset() {
-			this.formData.brand = 1;
+			this.formData.brandId = 1;
 			this.formData.productId = 0;
 			this.formData.name = '';
 			this.formData.saleDate = '';
 			this.formData.tasteKeyWord = '';
 			this.formData.status = 1;
+			this.errors.clear();
 		}
     }));
 });

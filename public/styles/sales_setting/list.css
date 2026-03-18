@@ -4,12 +4,15 @@
 	.tabs a {
 		font-size: 1.2rem; 
 	}
+	
 	ul.list li {
+		display: flex;
+		align-items: center;
+		
 		i.extra {
 			--_size: 2.5rem;
 		}
-	}
-	ul.list li {
+		
 		.brand-label {
 			display: inline-flex;
 			justify-content: center;
@@ -26,6 +29,14 @@
 				background-color: #b71c1c;
 				color: #fafafa;
 			}
+		}
+		
+		h6 {
+			line-height: 40px;
+		}
+		
+		&:hover {
+			background-color: #f3e5f5;
 		}
 	}
 }

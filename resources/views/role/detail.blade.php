@@ -19,14 +19,14 @@
 	@csrf
 	
 	<section class="role-data container">
-		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
+		@if(! empty($viewModel->formData['id']))
+			<label class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
+		@endif
 		
-		<div class="row">
-			<div class="field label border field-purple w30 prefix" :class="Helper.hasError(errors, 'name')">
-				<i class="small red-text">asterisk</i>
-				<input type="text" name="name" maxlength="20" required x-model="formData.name" @input="errors.delete('name')">
-				<label>身份名稱</label>
-			</div>
+		<div class="field label border field-purple w30 prefix" :class="Helper.hasError(errors, 'name')">
+			<i class="small red-text">asterisk</i>
+			<input type="text" name="name" maxlength="20" required x-model="formData.name" @input="errors.delete('name')">
+			<label>身份名稱</label>
 		</div>
 		
 		@foreach($viewModel->options['functions'] as $title => $groups)
@@ -59,9 +59,10 @@
 			@endforeach
 		</fieldset>
 	
+		<div class="space"></div>
 		<nav class="toolbar">
-			<button type="submit" class="button btn-save btn-primary">{{ $viewModel->action->label()}}</button>
-			<button @click="reset() "type="button" class="button btn-cancel border" id="btnReset">重置</button>
+			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
+			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple" id="btnReset">重置</button>
 		</nav>
 	</section>
 </form>
