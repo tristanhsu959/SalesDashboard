@@ -180,13 +180,13 @@ class NewItemController extends Controller
 		
 		/*跟validator整併即可*/
 		if (empty($id))
-			return redirect()->route('product.list')->with('msg', '產品識別ID為空值');
+			return redirect()->route('new_item.list')->with('msg', '新品識別ID為空值');
 		
-		$response = $this->_service->deleteProduct($id);
+		$response = $this->_service->deleteNewItem($id);
 		
 		if ($response->status === FALSE)
-			return redirect()->route('product.list')->with('msg', $response->msg);
+			return redirect()->route('new_item.list')->with('msg', $response->msg);
 		else
-			return redirect()->route('product.list')->with('msg', '產品刪除完成');
+			return redirect()->route('new_item.list')->with('msg', '新品刪除完成');
 	}
 }

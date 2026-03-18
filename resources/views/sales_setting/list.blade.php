@@ -22,9 +22,9 @@
 		@csrf
 		<section class="sales-setting container">
 			<div>
-				<div class="tabs center-align">
+				<div class="tabs">
 					<template x-for="(brand, key) in brands" :key="key">
-						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="activeTab = key"></a>
+						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.salesSetting.tabIndex = key"></a>
 					</template>
 				</div>
 				
@@ -33,13 +33,14 @@
 					<ul class="list border">
 						<template x-for="item in productList">
 						<li>
-							<span class="brand-label" x-text="item.productBrand == 1 ? '八':'御'" :class="item.productBrand == 1 ? 'bf':'bg'"></span>
+							<i class="fill extra green-text" x-show="settings[brand].some(id => id == item.productId)">check_circle</i>
+							<i class="fill extra red-text" x-show="!settings[brand].some(id => id == item.productId)">cancel</i>
 							<div class="max">
 								<h6 x-text="item.productName"></h6>
 							</div>
 							<div>
 								<label class="switch icon">
-									<input type="checkbox" :name="`settings[${brand}][]`" :value="item.productId" :checked="settings[brand]">
+									<input type="checkbox" x-model="settings[brand]" :name="`settings[${brand}][]`" :value="item.productId">
 									<span>
 										<i>close</i>
 										<i>done</i>

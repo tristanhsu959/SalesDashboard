@@ -13,7 +13,7 @@
 			align-items: center;
 			width: 40px;
 			height: 40px;
-			border-radius: .75rem;
+			border-radius: .875rem;
 			
 			&.bf {
 				background-color: #ffc107;
@@ -23,6 +23,10 @@
 				background-color: #b71c1c;
 				color: #fafafa;
 			}
+		}
+		
+		&:hover {
+			background-color: #e0f7fa;
 		}
 	}
 }

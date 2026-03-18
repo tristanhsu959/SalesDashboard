@@ -109,4 +109,19 @@ class SalesSettingRepository extends Repository
 		
 		return TRUE;
 	}
+	
+	/* Update status when product removed
+	 * @params: int
+	 * @return: array
+	 */
+	public function updateStatus($productId)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->reconnect(); 
+		$db->table('sales_setting')
+			->where('salesSettingProductId', '=', $productId)
+			->delete();
+		
+		return TRUE;
+	}
 }

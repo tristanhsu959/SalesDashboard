@@ -135,7 +135,7 @@ class NewItemService
 	 * @params: int
 	 * @return: array
 	 */
-	public function deleteProduct($id)
+	public function deleteNewItem($id)
 	{
 		try
 		{
@@ -145,7 +145,7 @@ class NewItemService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('刪除產品失敗');
+			return ResponseLib::initialize()->fail('刪除新品失敗');
 		}
 	}
 	

@@ -23,12 +23,12 @@ class SalesRepository extends Repository
 	 */
 	public function getProductList($brand)
 	{
-		$db = $this->connectSalesDashboard('product');
+		$db = $this->connectSalesDashboard('sales_setting');
 		$result = $db
 			->select('productBrand', 'productId', 'productName', 'erpNo', 'isPrimary')
+			->join('product', 'productId', '=', 'salesSettingProductId')
 			->join('product_no', 'parentId', '=', 'productId')
-			->where('productStatus', '=', 1)
-			->where('productBrand', '=', $brand->value)
+			->where('salesSettingBrand', '=', $brand->value)
 			->get()
 			->toArray();
 		

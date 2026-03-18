@@ -22,7 +22,7 @@
 		@csrf
 		<section class="new-item-list container">
 			<div>
-				<div class="tabs center-align">
+				<div class="tabs">
 					<template x-for="(brand, key) in brands" :key="key">
 						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.newItem.tabIndex = key"></a>
 					</template>
@@ -42,7 +42,7 @@
 								<a :href="'{{ route('new_item.update', ['_ID_']) }}'.replace('_ID_', item.newItemId)" class="btn-edit button circle small">
 									<i class="small">edit</i>
 								</a>
-								<a :href="'{{ route('user.delete', ['_ID_']) }}'.replace('_ID_', item.newItemId)" @click.prevent="confirmDelete($el.href)" class="btn-delete button circle small">
+								<a :href="'{{ route('new_item.delete', ['_ID_']) }}'.replace('_ID_', item.newItemId)" @click.prevent="confirmDelete($el.href)" class="btn-delete button circle small">
 									<i class="small">delete</i>
 								</a>
 							</div>

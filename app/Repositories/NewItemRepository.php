@@ -129,50 +129,25 @@ class NewItemRepository extends Repository
 	public function remove($id)
 	{
 		$db = $this->connectSalesDashboard();
-		$db->beginTransaction();
-		
-		try 
-		{
-			$this->_removeProduct($id);
-			$this->_removeProductNo($id);
-			$db->commit();
-
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw new Exception($e->getMessage());
-		}
-	
-		return TRUE;
-	}
-	
-	/* Create product no
-	 * @params: int
-	 * @return: array
-	 */
-	private function _removeProduct($id)
-	{
-		$db = $this->connectSalesDashboard();
-		$db->table('product')
-			->where('productId', '=', $id)
+		$db->table('new_item')
+			->where('newItemId', '=', $id)
 			->delete();
 		
 		return TRUE;
 	}
 	
-	/* Create product no
+	/* Update status when product removed
 	 * @params: int
 	 * @return: array
 	 */
-	private function _removeProductNo($id)
+	public function updateStatus($productId)
 	{
 		$db = $this->connectSalesDashboard();
-		$db->table('product_no')
-			->where('parentId', '=', $id)
-			->delete();
-		
+		$db->reconnect(); 
+		$result = $db->table('new_item')
+			->where('newItemProductId', '=', $productId)
+			->update(['newItemStatus' => 0, 'updateAt' => now()->format('Y-m-d H:i:s')]);
+		 
 		return TRUE;
 	}
 }

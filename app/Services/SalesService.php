@@ -189,7 +189,7 @@ class SalesService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('解析產品參數發生錯誤');
+			throw new Exception('解析銷售參數發生錯誤');
 		}
 	}
 	

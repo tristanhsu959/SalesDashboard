@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\ProductRepository;
 use App\Libraries\ResponseLib;
+use App\Events\ProductRemoved;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -17,7 +18,7 @@ class ProductService
 	{
 	}
 	
-	/* 取Role清單(Get ALL)
+	/* 取Product清單(Get ALL)
 	 * @params: 
 	 * @return: array
 	 */
@@ -37,14 +38,15 @@ class ProductService
 		}
 	}
 	
-	/* Create role
-	 * @params: string
+	/* Create product
+	 * @params: enums
 	 * @params: int
+	 * @params: string
 	 * @params: array
 	 * @params: array
 	 * @return: array
 	 */
-	public function createProduct($brand, $name, $primaryNo, $secondaryNo)
+	public function createProduct($brandId, $category, $name, $primaryNo, $secondaryNo)
 	{
 		try
 		{
@@ -58,7 +60,7 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->insert($brand, $name, $primaryNo, $secondaryNo);
+			$this->_repository->insert($brandId, $category, $name, $primaryNo, $secondaryNo);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -85,11 +87,13 @@ class ProductService
 			{
 				$collection = collect($data);
 				
-				$result['productId'] 	= $collection->pluck('productId')->first();
-				$result['productBrand'] = $collection->pluck('productBrand')->first();
-				$result['productName'] 	= $collection->pluck('productName')->first();
-				$result['primaryNo'] 	= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
-				$result['secondaryNo'] 	= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
+				$result['productId'] 		= $collection->pluck('productId')->first();
+				$result['productBrand'] 	= $collection->pluck('productBrand')->first();
+				$result['productCategory'] 	= $collection->pluck('productCategory')->first();
+				$result['productName'] 		= $collection->pluck('productName')->first();
+				$result['primaryNo'] 		= $collection->where('isPrimary', TRUE)->pluck('erpNo')->toArray();
+				$result['secondaryNo'] 		= $collection->where('isPrimary', FALSE)->pluck('erpNo')->toArray();
+				$result['productCategory'] 	= $collection->pluck('productCategory')->first();
 			}
 			
 			return ResponseLib::initialize($result)->success();
@@ -109,7 +113,7 @@ class ProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateProduct($id, $brand, $name, $primaryNo, $secondaryNo)
+	public function updateProduct($id, $brandId, $category, $name, $primaryNo, $secondaryNo)
 	{
 		try
 		{
@@ -123,7 +127,7 @@ class ProductService
 					return empty($value);
 			})->toArray();
 			
-			$this->_repository->update($id, $brand, $name, $primaryNo, $secondaryNo);
+			$this->_repository->update($id, $brandId, $category, $name, $primaryNo, $secondaryNo);
 			
 			return ResponseLib::initialize()->success();
 		}
@@ -143,6 +147,8 @@ class ProductService
 		try
 		{
 			$this->_repository->remove($id);
+			ProductRemoved::dispatch($id);
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)

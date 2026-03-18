@@ -16,6 +16,11 @@ document.addEventListener('alpine:init', () => {
 			this.hasSecondaryNo = (this.formData.brand == formData.buygoodId);
 		},
 		
+		initCategory(){
+			this.errors.delete('category');
+			this.formData.category = 0;
+		},
+		
 		validate() {
 			this.errors.clear();
 			

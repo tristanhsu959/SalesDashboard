@@ -18,13 +18,25 @@
 		
 		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brand')">
 			<i class="small red-text">asterisk</i>
-			<select x-model="formData.brand" name="brand" @change="initErpNoInput">
+			<select x-model="formData.brand" name="brand" @change="initErpNoInput(); initCategory();">
 				<option value="">請選擇</option>
 				<template x-for="(name, id) in options.brands" :key="id">
 					<option :value="id" x-text="name" :selected="formData.brand == id"></option>
 				</template>
 			</select>
 			<label>品牌</label>
+			<i>arrow_drop_down</i>
+		</div>
+		
+		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'category')">
+			<i class="small red-text">asterisk</i>
+			<select x-model="formData.category" name="category">
+				<option value="">請選擇</option>
+				<template x-for="(name, id) in options.categories[formData.brand]" :key="id">
+					<option :value="id" x-text="name" :selected="formData.category == id"></option>
+				</template>
+			</select>
+			<label>分類</label>
 			<i>arrow_drop_down</i>
 		</div>
 		

@@ -22,7 +22,7 @@
 		@csrf
 		<section class="product-list container">
 			<div>
-				<div class="tabs center-align">
+				<div class="tabs">
 					<template x-for="(brand, key) in brands" :key="key">
 						<a :data-ui="'#page-' + key" x-text="brand" :class="activeTab == key ? 'active':''" @click="$store.product.tabIndex = key" class="tab-pink"></a>
 					</template>

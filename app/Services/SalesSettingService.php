@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\SalesSettingRepository;
 use App\Libraries\ResponseLib;
+use App\Enums\Brand;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -26,7 +27,18 @@ class SalesSettingService
 		try
 		{
 			$setting = $this->_repository->getSettings();
-			$setting = collect($setting)->groupBy('brand')->toArray();
+			
+			if (empty($setting))
+			{
+				$setting[Brand::BAFANG->value]	= [];
+				$setting[Brand::BUYGOOD->value] = [];
+			}
+			else
+			{	
+				$setting = collect($setting)->groupBy('brandId')->map(function($item, $key){
+					return $item->pluck('productId')->toArray();
+				})->toArray();
+			}
 			
 			return ResponseLib::initialize($setting)->success();
 		}
