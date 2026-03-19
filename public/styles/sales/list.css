@@ -87,7 +87,7 @@ form {
 							z-index: 6;
 						}
 						&:nth-child(3) {
-							min-width: 160px;
+							min-width: 170px;
 							position: sticky;
 							left: 160px;
 							z-index: 6;
