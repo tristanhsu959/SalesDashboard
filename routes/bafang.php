@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\NewReleaseController;
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\PurchaseController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -18,7 +20,18 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 		Route::get('new_releases/export/{token}', [NewReleaseController::class, 'export'])->name('new_releases.export');
 		
+		/* 銷售報表 */
+		Route::get('sales', [SalesController::class, 'showSearch'])->name('sales');
+		Route::post('sales/search', [SalesController::class, 'search'])->name('sales.search');
+		Route::get('sales/export/{token}', [SalesController::class, 'export'])->name('sales.export');
+		
+		/* 出貨報表 */
+		Route::get('purchase', [PurchaseController::class, 'showSearch'])->name('purchase');
+		Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
+		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
+		
 		/* 本日營收 */
-		Route::get('today_sales', [NewReleaseController::class, 'export'])->name('today_sales');
+		/* Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
+		Route::post('daily_revenue/search', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue.search'); */
 	});
 });

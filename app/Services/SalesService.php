@@ -121,8 +121,6 @@ class SalesService
 	
 	/* Get search data
 	 * @params: enum
-	 * @params: date
-	 * @params: date
 	 * @return: array
 	 */
 	private function _analysisStatisticsData($brand)
@@ -164,24 +162,26 @@ class SalesService
 	}
 	
 	/* 取ErpNo
-	 * @params: date
-	 * @params: date
+	 * @params: eunums
 	 * @return: array
 	 */
 	private function _getParams($brand)
 	{
 		try
 		{
-			$productList = $this->_repository->getProductList($brand);
+			$productList = $this->_repository->getProductList($brand->value);
 			
 			#for primary secondary
 			$idType 		= collect($productList)->groupBy('isPrimary');
 			$primaryIds		= $idType[1]->pluck('erpNo')->toArray();
 			$secondaryIds 	= empty($idType[0]) ? [] : $idType[0]->pluck('erpNo')->toArray();
 			
-			#重整product list為key-value
+			#重整product list為key-value by erpNo
 			$productList = collect($productList)->groupBy('erpNo')->map(function($item, $key) {
-				return $item[0];
+				$temp['salesId'] 	= $item->pluck('salesId')->first();
+				$temp['salesName'] 	= $item->pluck('salesName')->first();
+				
+				return $temp;
 			})->toArray();
 			
 			return [$productList, $primaryIds, $secondaryIds];
@@ -267,18 +267,20 @@ class SalesService
 		
 		#要改成所有店家統計
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		$productList = $this->_statistics['productList'];
+		$productList = $this->_statistics['productList']; 
 		$groupShopList = collect($shopList)->groupBy('shopId');
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($productList, $groupShopList) {
-			$shop = $groupShopList->get($item['shopId']);
+			$shop = $groupShopList->get($item['shopId']); 
 			$product = data_get($productList, $item['erpNo'], NULL);
 			
 			$item['shopName'] 	= $shop->pluck('shopName')->first();
 			$item['areaId'] 	= Area::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
-			$item['productId']	= empty($product) ? 0 : $product['productId'];
-			$item['productName']= empty($product) ? '' : $product['productName'];
+			
+			#轉換成系統設定Id and Name
+			$item['productId']	= empty($product) ? 0 : $product['salesId'];
+			$item['productName']= empty($product) ? '' : $product['salesName'];
 			
 			return $item;
 		});
@@ -361,7 +363,7 @@ class SalesService
 	private function _buildHeader()
 	{
 		/*
-		[
+		[ salesId => salesName
 			2 => "橙汁排骨"
 			3 => "蕃茄牛三寶"
 			4 => "老皮嫩肉"
@@ -371,8 +373,8 @@ class SalesService
 		*/
 		
 		#是以DB product table有設定的產品為基礎
-		$header =  collect($this->_statistics['productList'])->groupBy('productId')->map(function ($item, $id) {
-			return $item->pluck('productName')->first();
+		$header =  collect($this->_statistics['productList'])->groupBy('salesId')->map(function ($item, $id) {
+			return $item->pluck('salesName')->first();
 		})->toArray();
 		
 		return $header;

@@ -49,7 +49,7 @@ class NewReleaseViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.newItems', $this->_service->getNewItemOptions($this->brand->value));
+		$this->set('options.newReleaseProducts', $this->_service->getNewReleaseProducts($this->brand->value));
 	}
 	
 	/* Form submit action
@@ -75,9 +75,9 @@ class NewReleaseViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($searchNewItemId = 0, $searchStDate = '', $searchEndDate = '')
+	public function keepSearchData($searchReleaseId = 0, $searchStDate = '', $searchEndDate = '')
     {
-		$this->set('search.newItemId', $searchNewItemId);
+		$this->set('search.releaseId', $searchReleaseId);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));

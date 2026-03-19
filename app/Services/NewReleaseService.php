@@ -53,7 +53,7 @@ class NewReleaseService
 	}
 	
 	/* Parsing function by brand
-	 * @params: string
+	 * @params: enums
 	 * @return: string
 	 */
 	public function parsingFunction($brand)
@@ -69,9 +69,9 @@ class NewReleaseService
 	 * @params: int
 	 * @return: string
 	 */
-	public function getNewItemOptions($brandId)
+	public function getNewReleaseProducts($brandId)
 	{
-		$result = $this->_repository->getNewItemOptions($brandId);
+		$result = $this->_repository->getNewReleaseProducts($brandId);
 		$result = collect($result)->keyBy('id')->all();
 		
 		return $result;
@@ -80,18 +80,19 @@ class NewReleaseService
 	/* ====================== 主流程 ====================== */
 	/* Search data
 	 * @params: enum
+	 * @params: int
 	 * @params: date
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate)
 	{
 		try
 		{
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchNewItemId, $searchStDate, $searchEndDate]);
+			$cacheKey = implode(':', [$functions->value, $searchReleaseId, $searchStDate, $searchEndDate]);
 			
 			if (Cache::has($cacheKey))
 			{
@@ -110,7 +111,7 @@ class NewReleaseService
 				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 				
 				#執行統計
-				$response = $this->_analysisStatisticsData($brand, $searchNewItemId);
+				$response = $this->_analysisStatisticsData($brand, $searchReleaseId);
 				
 				#無值不cache
 				if (! empty($this->_statistics['shop']))
@@ -131,11 +132,9 @@ class NewReleaseService
 	/* 取新品銷售統計
 	 * @params: enums
 	 * @params: integer
-	 * @params: date
-	 * @params: date
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand, $searchNewItemId)
+	private function _analysisStatisticsData($brand, $searchReleaseId)
 	{
 		try
 		{
@@ -144,7 +143,7 @@ class NewReleaseService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			#2. Get params
-			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchNewItemId);
+			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchReleaseId);
 			$this->_statistics['productName'] = $productName;
 			
 			$currentUser = AppManager::getCurrentUser();
@@ -173,23 +172,25 @@ class NewReleaseService
 	
 	
 	/* 取ErpNo及條件
-	 * @params: date
-	 * @params: date
+	 * @params: int
 	 * @return: array
 	 */
-	private function _getParams($searchNewItemId)
+	private function _getParams($releaseId)
 	{
 		try
 		{
-			$productName = $this->_repository->getNameById($searchNewItemId);
-			$tastes = $this->_repository->getTasteById($searchNewItemId);
-			$result = $this->_repository->getErpNoById($searchNewItemId);
+			$settings = $this->_repository->getSettingById($releaseId);
 			
+			if (empty($settings))
+				throw new Exception('新品設定不存在或已停用');
+			
+			$result = $this->_repository->getErpNoById($releaseId);
 			$result = collect($result)->groupBy('isPrimary');
+			
 			$primaryIds		= $result[1]->pluck('erpNo')->toArray();
 			$secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
 			
-			return [$productName, $primaryIds, $secondaryIds, $tastes];
+			return [$settings['releaseName'], $primaryIds, $secondaryIds, $settings['releaseTaste']];
 		}
 		catch(Exception $e)
 		{

@@ -16,6 +16,7 @@
 
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
+		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
@@ -25,6 +26,7 @@
 			<label>結束日期</label>
 		</div>
 		
+		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
 			<button @click="resetSearch()" type="button" class="btn-search-reset right-round square large"><i>backspace</i></button>

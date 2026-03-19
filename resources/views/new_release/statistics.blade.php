@@ -15,10 +15,11 @@
 
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
-		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'newItemId')">
-			<select x-model="searchData.newItemId" name="searchNewItemId" @change="initSearchStDate($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.newItemId)">
+		<div class="space"></div>
+		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'releaseId')">
+			<select x-model="searchData.releaseId" name="searchReleaseId" @change="initSearchStDate($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.releaseId)">
 				<option value="0">請選擇</option>
-				<template x-for="(item, key) in options.newItems" :key="key">
+				<template x-for="(item, key) in options.newReleaseProducts" :key="key">
 					<option x-text="item.name" :value="item.id"></option>
 				</template>
 			</select>
@@ -34,6 +35,7 @@
 			<label>結束日期</label>
 		</div>
 		
+		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
 			<button @click="resetSearch()" type="button" class="btn-search-reset right-round square large"><i>backspace</i></button>

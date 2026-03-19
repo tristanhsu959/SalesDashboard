@@ -21,14 +21,16 @@ class SalesRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductList($brand)
+	public function getProductList($brandId)
 	{
-		$db = $this->connectSalesDashboard('sales_setting');
+		$db = $this->connectSalesDashboard();
 		$result = $db
-			->select('productBrand', 'productId', 'productName', 'erpNo', 'isPrimary')
-			->join('product', 'productId', '=', 'salesSettingProductId')
-			->join('product_no', 'parentId', '=', 'productId')
-			->where('salesSettingBrand', '=', $brand->value)
+			->table('sales_setting as a')
+			->select('a.salesId', 'a.salesBrandId', 'a.salesName', 'c.erpNo', 'c.isPrimary')
+			->join('sales_product as b', 'b.parentId', '=', 'a.salesId')
+			->join('product_no as c', 'c.parentId', '=', 'b.productId')
+			->where('a.salesBrandId', '=', $brandId)
+			->where('a.salesStatus', '=', TRUE)
 			->get()
 			->toArray();
 		

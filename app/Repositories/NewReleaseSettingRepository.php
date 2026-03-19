@@ -48,7 +48,7 @@ class NewReleaseSettingRepository extends Repository
 		$db = $this->connectSalesDashboard('product');
 			
 		$result = $db
-			->select('productId', 'productName', 'productBrandId')
+			->select('productId', 'productBrandId', 'productName', 'productCategory')
 			->get()
 			->toArray();
 			

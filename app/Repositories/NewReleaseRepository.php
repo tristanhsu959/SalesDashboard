@@ -22,15 +22,65 @@ class NewReleaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getNewItemOptions($brandId)
+	public function getNewReleaseProducts($brandId)
 	{
-		$db = $this->connectSalesDashboard('new_item');
+		$db = $this->connectSalesDashboard('new_release_setting');
 		$result = $db
-			->select('newItemId as id', 'newItemName as name', 'newItemSaleDate as saleDate')
-			->where('newItemBrand', '=', $brandId)
-			->where('newItemStatus', '=', TRUE)
+			->select('releaseId as id', 'releaseName as name', 'releaseSaleDate as saleDate')
+			->where('releaseBrandId', '=', $brandId)
+			->where('releaseStatus', '=', TRUE)
 			->get()
 			->toArray();
+		
+		return $result;
+	}
+	
+	/* 取新品設定相關條件(暫保留)
+	 * @params: int
+	 * @return: array
+	 */
+	public function getNameById($id)
+	{
+		$db = $this->connectSalesDashboard('new_release_setting');
+		$result = $db
+			->select('releaseName')
+			->where('releaseId', '=', $id)
+			->get()
+			->first();
+		
+		return $result['releaseName'];
+	}
+	
+	/* 取新品設定相關條件(暫保留)
+	 * @params: int
+	 * @return: array
+	 */
+	public function getTasteById($id)
+	{
+		$db = $this->connectSalesDashboard('new_release_setting');
+		$result = $db
+			->select('releaseTaste')
+			->where('releaseId', '=', $id)
+			->get()
+			->first();
+		
+		return json_decode($result['releaseTaste'], TRUE);
+	}
+	
+	public function getSettingById($id)
+	{
+		$db = $this->connectSalesDashboard('new_release_setting');
+		$result = $db
+			->select('releaseName', 'releaseTaste')
+			->where('releaseId', '=', $id)
+			->where('releaseStatus', '=', TRUE)
+			->get()
+			->first();
+		
+		if (empty($result))
+			return FALSE;
+		
+		$result['releaseTaste'] = json_decode($result['releaseTaste'], TRUE);
 		
 		return $result;
 	}
@@ -39,45 +89,14 @@ class NewReleaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getNameById($id)
-	{
-		$db = $this->connectSalesDashboard('new_item');
-		$result = $db
-			->select('newItemName')
-			->where('newItemId', '=', $id)
-			->get()
-			->first();
-		
-		return $result['newItemName'];
-	}
-	
-	/* 取新品設定相關條件
-	 * @params: int
-	 * @return: array
-	 */
-	public function getTasteById($id)
-	{
-		$db = $this->connectSalesDashboard('new_item');
-		$result = $db
-			->select('newItemTaste')
-			->where('newItemId', '=', $id)
-			->get()
-			->first();
-		
-		return json_decode($result['newItemTaste'], TRUE);
-	}
-	
-	/* 取新品設定相關條件
-	 * @params: int
-	 * @return: array
-	 */
 	public function getErpNoById($id)
 	{
-		$db = $this->connectSalesDashboard('new_item');
+		$db = $this->connectSalesDashboard();
 		$result = $db
-			->select('erpNo', 'isPrimary')
-			->join('product_no', 'parentId', '=', 'newItemProductId')
-			->where('newItemId', '=', $id)
+			->table('new_release_product as a')
+			->select('b.erpNo', 'b.isPrimary')
+			->join('product_no as b', 'b.parentId', '=', 'a.productId')
+			->where('a.parentId', '=', $id)
 			->get()
 			->toArray();
 		

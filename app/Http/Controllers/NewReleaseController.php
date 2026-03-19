@@ -43,14 +43,14 @@ class NewReleaseController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		#query params
-		$searchNewItemId= $request->integer('searchNewItemId');
+		$searchReleaseId= $request->integer('searchReleaseId');
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchNewItemId, $searchStDate, $searchEndDate);
+		$this->_viewModel->keepSearchData($searchReleaseId, $searchStDate, $searchEndDate);
 	
-		$response = $this->_service->getStatistics($brand, $searchNewItemId, $searchStDate, $searchEndDate);
+		$response = $this->_service->getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

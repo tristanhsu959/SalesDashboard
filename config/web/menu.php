@@ -15,6 +15,12 @@ return [
 			'style' 	=> ['icon' => 'chart_data', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.new_releases'),
 		],
+		[
+			'name' 		=> Functions::BF_SALES->label(), #銷售統計,
+			'code'		=> Functions::BF_SALES->value,
+			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
+		],
 		/* [
 			'name' 		=> Functions::BF_TODAY_SALES->label(), #本日銷售,
 			'code'		=> Functions::BF_TODAY_SALES->value,
@@ -36,12 +42,12 @@ return [
 			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.sales'),
 		],
-		[
+		/* [
 			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計,
 			'code'		=> Functions::BG_PURCHASE->value,
 			'style' 	=> ['icon' => 'trolley', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
-		],
+		], */
 		/* [
 			'name' 		=> Functions::BG_TODAY_SALES->label(), #本日銷售,
 			'code'		=> Functions::BG_TODAY_SALES->value,

@@ -43,15 +43,26 @@
 		</div>
 		
 		<fieldset class="field-dark-blue fieldset">
-			<legend>選擇對應產品料號</legend>
-			<div class="grid">
+			<legend><i class="small red-text">asterisk</i>選擇對應產品料號</legend>
+			<template x-for="cat in products">
+				<div class="grid">
+					<template x-for="(item, idx) in cat" :key="idx">
+					<label class="checkbox large s2 check-red">
+						<input type="checkbox" name="productIds[]" x-model="formData.productIds" :value="item.productId">
+						<span x-text="item.productName"></span>
+					</label>
+					</template>
+					<div class="space s12"></div>
+				</div>
+			</template>
+			<!--div class="grid">
 				<template x-for="(item, idx) in products" :key="idx">
 					<label class="checkbox large s2 check-red">
 						<input type="checkbox" name="productIds[]" x-model="formData.productIds" :value="item.productId">
 						<span x-text="item.productName"></span>
 					</label>
 				</template>
-			</div>
+			</div-->
 		</fieldset>
 
 		<div class="field label border field-dark-blue w30">

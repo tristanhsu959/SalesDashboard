@@ -39,6 +39,8 @@ enum Functions : string
 			
 			#八方
 			self::BF_NEW_RELEASE		=> '新品銷售',
+			self::BF_PURCHASE 			=> '進貨統計',
+			self::BF_SALES 				=> '銷售統計',
 			self::BF_TODAY_SALES		=> '本日營收',
 			
 			#御廚

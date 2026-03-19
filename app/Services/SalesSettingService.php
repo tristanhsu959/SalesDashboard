@@ -46,7 +46,19 @@ class SalesSettingService
 		try
 		{
 			$list = $this->_repository->getProductSettings();
-			$list = collect($list)->groupBy('productBrandId')->toArray();
+			$list = collect($list)->groupBy('productBrandId')->map(function($items, $key){
+				return $items->groupBy('productCategory')->map(function($items, $key){
+					return $items->map(function($item, $key){
+						$brandId = $item['productBrandId'];
+						$catId = $item['productCategory'];
+						$item['categoryName'] = config("web.category.{$brandId}.{$catId}");
+						return $item;
+					});
+					return $items;
+				});
+				
+				return $items;
+			})->toArray();
 			
 			return $list;
 		}

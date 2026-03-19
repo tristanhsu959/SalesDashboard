@@ -6,7 +6,6 @@ use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
 
-
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
 use App\Enums\Functions;
@@ -31,7 +30,8 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
 		
 		/* 本日營收 */
-		Route::get('today_sales', [NewReleaseController::class, 'export'])->name('today_sales');
+		/* Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
+		Route::post('daily_revenue/search', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue.search'); */
 	});
 });
 
