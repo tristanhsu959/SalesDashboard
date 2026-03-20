@@ -17,13 +17,13 @@ enum Functions : string
 	case BF_NEW_RELEASE			= 'bafang:new_releases';
 	case BF_PURCHASE			= 'bafang:purchase';
 	case BF_SALES				= 'bafang:sales';
-	case BF_TODAY_SALES			= 'bafang:today_sales';
+	case BF_DAILY_REVENUE		= 'bafang:daily_revenue';
 		
 	#Buygood	
 	case BG_NEW_RELEASE			= 'buygood:new_releases';
 	case BG_PURCHASE			= 'buygood:purchase';
 	case BG_SALES				= 'buygood:sales';
-	case BG_TODAY_SALES			= 'buygood:today_sales';
+	case BG_DAILY_REVENUE		= 'buygood:daily_revenue';
 	
 	
 	public function label() : string
@@ -41,13 +41,13 @@ enum Functions : string
 			self::BF_NEW_RELEASE		=> '新品銷售',
 			self::BF_PURCHASE 			=> '進貨統計',
 			self::BF_SALES 				=> '銷售統計',
-			self::BF_TODAY_SALES		=> '本日營收',
+			self::BF_DAILY_REVENUE		=> '門店營收',
 			
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',
 			self::BG_PURCHASE 			=> '進貨統計',
 			self::BG_SALES 				=> '銷售統計',
-			self::BG_TODAY_SALES		=> '本日營收',
+			self::BG_DAILY_REVENUE		=> '門店營收',
         };
     }
 }

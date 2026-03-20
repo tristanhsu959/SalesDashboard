@@ -33,7 +33,7 @@
 
 	<body class="responsive" x-cloak>
 		<div x-data x-cloak x-show="$store.app.isLoading">
-			<progress class="light-blue-text"></progress>
+			<progress class="pink-text"></progress>
 		</div>
 		
 		@if(AppManager::hasAuth())

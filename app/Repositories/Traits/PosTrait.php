@@ -31,7 +31,9 @@ trait PosTrait
 		}
 		
 		$result = $db->table('SHOP00 as a')
+			->join('shop_kind as b', 'b.sk_id', '=', 'a.shop_kind')
 			->select('a.SHOP_ID as shopId', 'a.SHOP_NAME as shopName', 'a.gid as areaId', 'a.closedown')
+			->addSelect('b.sk_id as typeId', 'b.Sk_name as typeName')
 			#->where('a.closedown', '=', 0)
 			->when(! empty($authAreaIds), function ($db) use ($authAreaIds) {
 				$db->whereIn('a.gid', $authAreaIds);

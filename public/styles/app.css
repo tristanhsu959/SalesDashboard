@@ -14,8 +14,9 @@ body {
 	progress {
 		position: absolute;
 		top: 0;
-		left: 0;
+		left: -304px;
 		z-index: 999;
+		width: 100vw;
 	}
 	
 	main.app {

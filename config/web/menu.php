@@ -21,12 +21,12 @@ return [
 			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
 		],
-		/* [
-			'name' 		=> Functions::BF_TODAY_SALES->label(), #本日銷售,
-			'code'		=> Functions::BF_TODAY_SALES->value,
+		[
+			'name' 		=> Functions::BF_DAILY_REVENUE->label(), #本日銷售,
+			'code'		=> Functions::BF_DAILY_REVENUE->value,
 			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.today_sales'),
-		], */
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.daily_revenue'),
+		],
 	],
 	
 	MenuGroup::BUYGOOD->value => [
@@ -48,12 +48,12 @@ return [
 			'style' 	=> ['icon' => 'trolley', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
 		], */
-		/* [
-			'name' 		=> Functions::BG_TODAY_SALES->label(), #本日銷售,
-			'code'		=> Functions::BG_TODAY_SALES->value,
+		[
+			'name' 		=> Functions::BG_DAILY_REVENUE->label(), #本日銷售,
+			'code'		=> Functions::BG_DAILY_REVENUE->value,
 			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.today_sales'),
-		], */
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.daily_revenue'),
+		],
 		
 	],
 	

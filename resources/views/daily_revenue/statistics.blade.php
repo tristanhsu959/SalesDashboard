@@ -2,20 +2,21 @@
 @use('Illuminate\Support\Number')
 
 @push('styles')
-    <link href="{{ asset('styles/sales/list.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/daily_revenue/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/sales/list.js') }}" defer></script>
+    <script src="{{ asset('scripts/daily_revenue/list.js') }}" defer></script>
 @endpush
 
 @section('content')
 <!-- Search panel -->
-<form x-data='searchSales(@json($viewModel->search))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+<form x-data='search(@json($viewModel->search), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
 	@csrf
 
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
+		
 		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
@@ -26,6 +27,17 @@
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
+		</div>
+		
+		<div class="field middle-align">
+			<nav>
+				<template x-for="(name, id) in options.shopType" :key="id">
+					<label class="checkbox large">
+						<input type="checkbox" name="searchShopType[]" :value="id" x-model="searchData.shopType">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
 		</div>
 		
 		<div class="space"></div>
@@ -40,24 +52,20 @@
 <header class="page-nav">
 	<nav>
 		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
-		
+	
+	{{--
 		@if ($viewModel->hasExportData())
 		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle red" type="button">
 			<span class="material-symbols-outlined filled-icon">download_2</span>
 		</a>
-		<label class="switch icon">
-			<input type="checkbox" x-model="$store.sales.showAmount">
-			<span>
-				<i>attach_money</i>
-			</span>
-		</label>
 		@endif
+	--}}
 	</nav>
 </header>
 	
 @if($viewModel->status() === TRUE)	
 	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
-	<section class="sales-list container">
+	<section class="new-release-list container">
 		@if($viewModel->isDataEmpty())
 		<article class="error-container border">
 			<div class="row">
@@ -72,46 +80,41 @@
 			</div>
 			
 			<!-- 區域彙總 -->
-			<div class="page padding active scroll" id="tab-area">
+			<div class="page padding active" id="tab-area">
 				<section class="statistics-area">
-					<table>
-						<thead>
-							<tr>
-								<th>區域</th>
-								<th>店家數</th>
-								@foreach($viewModel->statistics['header'] as $productName)
-								<th>{{$productName}}</th>
-								@endforeach
-							</tr>
-						</thead>
-						<tbody>
-							@foreach($viewModel->statistics['area'] as $area)
-							<tr>
-								<td>{{ $area['areaName'] }}</td>
-								<td>{{ data_get($area, 'shopCount', 0) }}</td>
-								@foreach($viewModel->statistics['header'] as $productId => $productName)
-								<td>
-									<span x-show="!$store.sales.showAmount">{{ data_get($area, "products.$productId.totalQty", 0)}}</span>
-									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($area, "products.$productId.totalAmount", 0), precision: 0)}}</span>
-								</td>
-								@endforeach
-							</tr>
-							@endforeach
-						</tbody>
-					</table>
+					<div class="grid header">
+						<div class="s2">區域</div>
+						<div class="s2">店家數</div>
+						@foreach($viewModel->statistics['header'] as $date)
+						<div class="s2">{{$date}}</div>
+						@endforeach
+
+					</div>
+					
+					@foreach($viewModel->statistics['area'] as $id => $area)
+					<div class="grid data">
+						<div class="s2">{{ data_get($area, 'areaName', '') }}</div>
+						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
+						@foreach($viewModel->statistics['header'] as $date)
+						<div class="s2">{{ Number::currency(data_get($area, "dayAmount.$date", 0), precision: 0) }}</div>
+						@endforeach
+					</div>
+					@endforeach
 				</section>
 			</div>
 			
+			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar">
-					<table class="stripes odd-cyan">
+				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+					<table class="stripes">
 						<thead>
 							<tr>
 								<th>區域</th>
 								<th>門店代號</th>
 								<th>門店名稱</th>
-								@foreach($viewModel->statistics['header'] as $productName)
-								<th>{{$productName}}</th>
+								<th>類型</th>
+								@foreach($viewModel->statistics['header'] as $date)
+								<th class="col-date">{{$date}}</th>
 								@endforeach
 							</tr>
 						</thead>
@@ -121,10 +124,11 @@
 								<th>{{ $shop['areaName'] }}</th>
 								<th>{{ $shopId }}</th>
 								<th>{{ $shop['shopName'] }}</th>
-								@foreach($viewModel->statistics['header'] as $productId => $productName)
+								<th>{{ $shop['shopTypeName'] }}</th>
+								
+								@foreach($viewModel->statistics['header'] as $date)
 								<td>
-									<span x-show="!$store.sales.showAmount">{{ data_get($shop, "products.$productId.totalQty", 0)}}</span>
-									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($shop, "products.$productId.totalAmount", 0), precision: 0)}}</span>
+									{{ Number::currency(data_get($shop, "dayAmount.$date", 0), precision: 0) }}
 								</td>
 								@endforeach
 							</tr>

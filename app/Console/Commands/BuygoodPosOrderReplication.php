@@ -93,13 +93,13 @@ class BuygoodPosOrderReplication extends Command
 					ORDER BY saleDate DESC");
 			
 			if ($result) #取最後更新時間
-				$stDate = Carbon::parse($result['saleDate'])->subMinutes(15)->format('Y-m-d H:i:s');
+				$stDate = Carbon::parse($result['saleDate'])->subMinutes(30)->format('Y-m-d H:i:s');
 			else if ($stDate) #取指定的開始時間
 				$stDate = Carbon::parse($stDate)->format('Y-m-d 00:00:00');
 			else
-				$stDate = now()->subMinutes(15)->format('Y-m-d 00:00:00');
+				$stDate = now()->subMinutes(30)->format('Y-m-d 00:00:00');
 			
-			$endDate = Carbon::parse($stDate)->addDay()->subMinutes(15)->format('Y-m-d H:i:s');
+			$endDate = Carbon::parse($stDate)->addDay()->subMinutes(30)->format('Y-m-d H:i:s');
 		}
 		
 		return [$stDate, $endDate];
