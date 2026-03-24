@@ -27,6 +27,13 @@ return [
 			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.daily_revenue'),
 		],
+		[
+			'name' 		=> Functions::BF_SHIPMENTS->label(), #出貨查詢,
+			'code'		=> Functions::BF_SHIPMENTS->value,
+			'style' 	=> ['icon' => 'local_shipping', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
+		],
+		
 	],
 	
 	MenuGroup::BUYGOOD->value => [
@@ -53,6 +60,12 @@ return [
 			'code'		=> Functions::BG_DAILY_REVENUE->value,
 			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.daily_revenue'),
+		],
+		[
+			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨查詢,
+			'code'		=> Functions::BG_SHIPMENTS->value,
+			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
 		],
 		
 	],

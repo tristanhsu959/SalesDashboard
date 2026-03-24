@@ -6,6 +6,7 @@ use App\Http\Controllers\NewReleaseController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DailyRevenueController;
+use App\Http\Controllers\ShipmentsController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -28,6 +29,12 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('sales/export/{token}', [SalesController::class, 'export'])->name('sales.export');
 	});
 	
+	/* 本日營收 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_DAILY_REVENUE->value, ':')])->group(function(){
+		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
+		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
+	});
+	
 	/* 出貨報表 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_PURCHASE->value, ':')])->group(function(){
 		Route::get('purchase', [PurchaseController::class, 'showSearch'])->name('purchase');
@@ -35,11 +42,14 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
 	});
 	
-	/* 本日營收 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_DAILY_REVENUE->value, ':')])->group(function(){
-		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
-		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
-	});
+	/* 出貨總量查詢 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_SHIPMENTS->value, ':')])->group(function(){
+		Route::get('shipments', [ShipmentsController::class, 'showSearch'])->name('shipments');
+		Route::post('shipments/search', [ShipmentsController::class, 'search'])->name('shipments.search');
+		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
+	});	
+	
+	
 });
 
 
