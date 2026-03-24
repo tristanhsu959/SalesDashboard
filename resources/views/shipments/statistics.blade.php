@@ -15,50 +15,66 @@
 
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
-		<div class="field middle-align">
+		
+		<div class="field middle-align w40">
 			<nav>
-				<template x-for="(name, id) in options.types" :key="id">
+				<template x-for="(name, id) in options.modes" :key="id">
 					<label class="radio field-light-blue">
-						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<input type="radio" name="searchMode" x-model="searchData.mode" :value="id">
 						<span x-text="name"></span>
 					</label>
 				</template>
 			</nav>
 		</div>
 		
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'name')">
-			<input type="text" name="searchName" maxlength="15" x-model="searchData.name" @input="errors.delete('name')">
-			<label>產品名稱</label>
+		<div class="space"></div>
+		<div class="field label border round field-light-blue s2" :class="Helper.hasError(errors, 'stDate')">
+			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
+			<label>開始日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'day'">
+		<div class="space"></div>
+		<div class="field label border round field-light-blue s2" :class="Helper.hasError(errors, 'endDate')">
+			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
+			<label>結束日期</label>
+		</div>
+		
+		<div class="space"></div>
+		<div class="field label suffix round border field-light-blue s4" :class="Helper.hasError(errors, 'catNo')">
+			<select x-model="searchData.catNo" name="searchCatNo" @change="initProducts($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.catNo)">
+				<option value="0">請選擇</option>
+				<template x-for="(name, no) in options.category" :key="no">
+					<option x-text="name" :value="no"></option>
+				</template>
+			</select>
+			<label>類別</label>
+			<i>arrow_drop_down</i>
+		</div>
+		
+		<div x-show="searchData.mode == 'date'">
 			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-				<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
-				<label>開始日期</label>
-			</div>
-			
-			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-				<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
-				<label>結束日期</label>
+			<div class="field label suffix round border field-light-blue s4" :class="Helper.hasError(errors, 'productNo')">
+				<select x-model="searchData.productNos" name="searchProductNos" @change="initSearchStDate($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.releaseId)">
+					<option value="0">請選擇</option>
+					<template x-for="(item, key) in options.searchCatNo" :key="key">
+						<option x-text="item.name" :value="item.id"></option>
+					</template>
+				</select>
+				<label>產品</label>
+				<i>arrow_drop_down</i>
 			</div>
 		</div>
 		
-		<div x-show="searchData.type == 'month'">
-			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stMonth')">
-				<input type="month" name="searchStMonth" maxlength="10" x-model="searchData.stMonth" x-ref="searchStMonth" @input="errors.delete('stMonth')" :max="searchData.currentMonth">
-				<label>開始年月</label>
-			</div>
-			
-			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endMonth')">
-				<input type="month" name="searchEndMonth" maxlength="10" x-model="searchData.endMonth" x-ref="searchEndMonth" @input="errors.delete('endMonth')" :max="searchData.currentMonth">
-				<label>結束年月</label>
-			</div>
-		</div>
-		
+		<fieldset class="light-blue-border light-blue-text field-light-blue" x-show="searchData.mode != 'date'">
+			<legend>產品</legend>
+			<nav>
+				<label class="checkbox">
+					<input type="checkbox">
+					<span>Item 1</span>
+				</label>
+		  </nav>
+		</fieldset>
+
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

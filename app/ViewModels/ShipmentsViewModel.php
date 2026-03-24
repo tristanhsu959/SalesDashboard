@@ -49,7 +49,18 @@ class ShipmentsViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.types', ['day' => '以日計算', 'month' => '以月計算']);
+		$modes = [
+			'date'		=> '依日/月統計', 
+			'area' 		=> '依區域統計',
+			'factory' 	=> '依工廠統計',
+			'shop' 		=> '依門店統計',
+		];
+		
+		$this->set('options.modes', $modes);
+		
+		list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
+		$this->set('options.category', $category);
+		$this->set('options.products', $products);
 	}
 	
 	/* Form submit action
@@ -64,8 +75,8 @@ class ShipmentsViewModel extends Fluent
 		
 		return match($action)
 		{
-			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.new_releases.search')),
-			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.new_releases.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.shipments.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.shipments.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -76,14 +87,14 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'day', $searchName = '', $searchSt = '', $searchEnd = '')
+	public function keepSearchData($searchMode = 'date', $searchStDate = '', $searchEndDate = '', $searchCatNo = 0, $searchProductNos = [])
     {
-		$this->set('search.type', $searchType);
-		$this->set('search.name', $searchName);
-		$this->set('search.start', $searchSt);
-		$this->set('search.end', $searchEnd);
+		$this->set('search.mode', $searchMode);
+		$this->set('search.stDate', $searchStDate);
+		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.catNo', $searchCatNo);
+		$this->set('search.productNos', $searchProductNos);
 		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
-		$this->set('search.currentMonth', Carbon::now()->format('Y-m')); 
 	}
 	
 	public function isDataEmpty()

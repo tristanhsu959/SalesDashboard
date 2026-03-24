@@ -65,16 +65,30 @@ class ShipmentsService
         };
 	}
 	
-	/* 取新品設定by brand
+	/* 取產品設定by brand
 	 * @params: int
 	 * @return: string
 	 */
-	public function getNewReleaseProducts($brandId)
+	public function getCategoryAndProduct($brandId)
 	{
-		$result = $this->_repository->getNewReleaseProducts($brandId);
-		$result = collect($result)->keyBy('id')->all();
+		$result = $this->_repository->getProductWithType($brandId);
+		$result = collect($result)->groupBy('catNo');
 		
-		return $result;
+		#Build category
+		$category = $result->map(function($item, $no){
+			return $item->pluck('catName')->first();
+		});
+		
+		#Build product mapping
+		$products = $result->map(function($items, $no){
+			$items = $items->mapWithKeys(function($item, $key){
+				return [$item['productNo'] => $item['productName']];
+			})->toArray();
+			
+			return $items;
+		});
+		
+		return [$category, $products];
 	}
 	
 	/* ====================== 主流程 ====================== */

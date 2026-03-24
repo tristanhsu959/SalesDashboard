@@ -2,35 +2,58 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\OrderTrait;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
-use App\Enums\Area;
+use App\Enums\Factory;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 
 class ShipmentsRepository extends Repository
 {
-	use PosTrait;
+	use OrderTrait;
 	
 	public function __construct()
 	{
 		
 	}
 	
-	/* 取啟用的新品設定
+	/* 取產品設定
 	 * @params: int
 	 * @return: array
 	 */
-	public function getNewReleaseProducts($brandId)
+	public function getProductWithType($brandId)
 	{
-		$db = $this->connectSalesDashboard('new_release_setting');
+		$db = $this->connectNewOrder();
 		$result = $db
-			->select('releaseId as id', 'releaseName as name', 'releaseSaleDate as saleDate')
-			->where('releaseBrandId', '=', $brandId)
-			->where('releaseStatus', '=', TRUE)
+			->table('Product as a')
+			->join('ProductType as b', 'b.Id', '=', 'a.ProductTypeId')
+			->join('Stocks as c', 'c.ProductId', '=', 'a.Id')
+			->select('a.OldNo as productNo', 'a.Name as productName', 'b.No as catNo', 'b.Name as catName')
+			->where('a.OldNo', '!=', '')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as a1')
+					->whereColumn('a1.Id', 'a.OperationCenterId')
+					->whereIn('a1.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as c1')
+					->whereColumn('c1.Id', 'c.BrandId')
+					->where('c1.No',  $this->getBrandNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as c2')
+					->whereColumn('c2.Id', 'c.FactoryId')
+					->whereIn('c2.No',  $this->getFactoryNo($brandId));
+			})
+			->whereNotIn('b.No', config("web.shipments.productType.{$brandId}.except"))
+			->groupBy('a.OldNo', 'a.Name', 'b.No', 'b.Name')
 			->get()
-			->toArray();
+			->toArray(); 
 		
 		return $result;
 	}

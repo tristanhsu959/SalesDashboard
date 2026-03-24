@@ -4,10 +4,19 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('searchShipments', (searchData, options) => ({
 		searchData: {...searchData},
 		options: {...options},
+		/* mode: {...options.mode},
+		category: {...options.category},
+		products: {...options.products}, */
 		errors: new Set(),
 		
 		init() {console.log(this.searchData);
-			/* this.initSearchDateFields(); */
+			console.log(this.category);console.log(this.products);
+		},
+		
+		initProducts(catNo) {
+			let products = options.products.catNo;
+			
+			this.errors.delete('productNo');
 		},
 		
 		search() {
@@ -38,20 +47,7 @@ document.addEventListener('alpine:init', () => {
 				return false;
 		},
 		
-		/* initSearchDateFields() {
-			let minDate = '';
-			
-			if (this.formData.type == 'date')
-				minDate = this.options.newReleaseProducts[releaseId].saleDate;
 		
-			this.$refs.searchStDate.min = minDate;
-			this.$refs.searchEndDate.min = minDate;
-			this.searchData.stDate = minDate; //用$refs...value無法連動
-			this.searchData.endDate = ''; //reset
-			
-			this.errors.delete('releaseId')
-			this.errors.delete('stDate');
-		}, */
 		
 		resetSearch() {
 			this.searchData.releaseId = '';

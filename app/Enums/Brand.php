@@ -23,7 +23,16 @@ enum Brand : int
 			self::BAFANG	=> 'bafang',
 			self::BUYGOOD	=> 'buygood',
         };
-	} 
+	}
+
+	public function shortCode()
+	{
+		return match ($this) 
+		{
+			self::BAFANG	=> 'BF',
+			self::BUYGOOD	=> 'BG',
+        };
+	} 	
 	
 	public static function tryFromCode($code)
 	{
