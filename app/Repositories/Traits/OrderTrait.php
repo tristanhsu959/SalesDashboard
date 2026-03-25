@@ -39,6 +39,43 @@ trait OrderTrait
 			return [Factory::TS->value, Factory::RL->value];
 	}
 	
+	/* 取門店清單
+	 * @params: int
+	 * @return: array
+	 */
+	public function getStoreList($brandId)
+	{
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Store as s')
+			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
+			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
+			->select('ar.Name as area', 's.Id', 's.No as storeNo', 's.Name as storeName')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->where('bd.No',  $this->getBrandNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'sc.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->whereNull('s.CloseDate')->toRawSql();
+			/* ->get()
+			->toArray(); */
+		dd($result);
+		return $result;
+	}
+	
 	/* 取產品分類
 	 * @params: int
 	 * @return: array
@@ -69,34 +106,67 @@ trait OrderTrait
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Product as a')
-			->join('ProductType as b', 'b.Id', '=', 'a.ProductTypeId')
-			->join('Stocks as c', 'c.ProductId', '=', 'a.Id')
-			->select('a.OldNo as productNo', 'a.Name as productName', 'b.No as catNo', 'b.Name as catName')
+			->join('ProductType as pt', 'pt.Id', '=', 'a.ProductTypeId')
+			->join('Stocks as st', 'st.ProductId', '=', 'a.Id')
+			->select('a.OldNo as productNo', 'a.Name as productName', 'pt.No as catNo', 'pt.Name as catName')
 			->where('a.OldNo', '!=', '')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
-					->from('OperationCenter as a1')
-					->whereColumn('a1.Id', 'a.OperationCenterId')
-					->whereIn('a1.No', $this->getOpCenterNo($brandId));
+					->from('OperationCenter as op')
+					->whereColumn('op.Id', 'a.OperationCenterId')
+					->whereIn('op.No', $this->getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
-					->from('Brand as c1')
-					->whereColumn('c1.Id', 'c.BrandId')
-					->where('c1.No',  $this->getBrandNo($brandId));
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 'st.BrandId')
+					->where('bd.No',  $this->getBrandNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
-					->from('Factory as c2')
-					->whereColumn('c2.Id', 'c.FactoryId')
-					->whereIn('c2.No',  $this->getFactoryNo($brandId));
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'st.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->whereNotIn('b.No', config("web.shipments.productType.{$brandId}.except"))
-			->groupBy('a.OldNo', 'a.Name', 'b.No', 'b.Name')
-			->orderBy('b.No')
+			->whereNotIn('pt.No', config("web.shipments.productType.{$brandId}.except"))
+			->groupBy('a.OldNo', 'a.Name', 'pt.No', 'pt.Name')
+			->orderBy('pt.No')
 			->orderBy('a.OldNo')
 			->get()
 			->toArray(); 
+		
+		return $result;
+	}
+	
+	/* 取Product id
+	 * @params: string
+	 * @return: array
+	 */
+	public function getProductIdByName($brandId, $name)
+	{
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Product as a')
+			->join('Stocks as st', 'st.ProductId', '=', 'a.Id')
+			->select('a.Id')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'a.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'st.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->where('a.IsStop', '=', 0)
+			->where('a.Name', 'like', "%{$name}%")
+			->groupBy('a.Id')
+			->get()
+			->pluck('Id')
+			->toArray();
 		
 		return $result;
 	}

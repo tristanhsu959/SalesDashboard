@@ -22,7 +22,7 @@ use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
-#當主Service
+#partial Service
 class ShipmentsByNameService
 {
 	const MODE = 'Name';
@@ -36,6 +36,7 @@ class ShipmentsByNameService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
+			'productIds'	=> [],
 			'header'		=> [],
 			'shop' 			=> [],
 			'area' 			=> [],
@@ -58,18 +59,18 @@ class ShipmentsByNameService
 		{
 			#Check cache
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$function->value, self::MODE, $searchStDate, $searchEndDate]);
-			dd($cacheKey);
+			$cacheKey = implode(':', [$function->value, $searchProductName, $searchStDate, $searchEndDate]);
+			
 			if (Cache::has($cacheKey))
 			{
-				Log::channel('appServiceLog')->info('Get shipments data (By Name) from cache');
+				Log::channel('appServiceLog')->info('Get shipments data by name from cache');
 				
 				$statistics = Cache::get($cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
-				Log::channel('appServiceLog')->info('Get shipments data (By Name) from db');
+				Log::channel('appServiceLog')->info('Get shipments data by name from db');
 				
 				$this->_statistics['brandId']	= $brand->value; 
 				#儲存頁面計算天數用日期
@@ -78,7 +79,7 @@ class ShipmentsByNameService
 				$this->_statistics['exportName']= $searchProductName;
 				
 				#執行統計
-				$response = $this->_analysisStatisticsData($brand, $searchReleaseId);
+				$response = $this->_analysisStatisticsData($brand, $searchProductName);
 				
 				#無值不cache
 				if (! empty($this->_statistics['shop']))
@@ -91,7 +92,7 @@ class ShipmentsByNameService
 			}
 		}
 		catch(Exception $e)
-		{dd($e->getMessage());
+		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}
@@ -101,7 +102,7 @@ class ShipmentsByNameService
 	 * @params: integer
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand, $searchReleaseId)
+	private function _analysisStatisticsData($brand, $productName)
 	{
 		try
 		{
@@ -110,17 +111,14 @@ class ShipmentsByNameService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			#2. Get params
-			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchReleaseId);
-			$this->_statistics['productName'] = $productName;
+			$productIds = $this->_getParams($brand, $productName);
+			$this->_statistics['productIds'] = $productIds;
 			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser['roleArea']; #
-					
-			#3. Get all shops with area permission
-			$shopList = $this->_getShopList($brand, $userAreaIds);
-			
-			#4. Get POS data
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+			#3. Get store list
+			$storeList = $this->_repository->getStoreList($brand->value);
+			dd($storeList);
+			#4. Get Order data
+			$orderData = $this->_getDataFromDB($brand, $stDate, $endDate, $productIds);
 			
 			#5. Build base data
 			#會有false的無效array, 用array_filter去除
@@ -142,73 +140,45 @@ class ShipmentsByNameService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _getParams($releaseId)
+	private function _getParams($brand, $productName)
 	{
 		try
 		{
-			$settings = $this->_repository->getSettingById($releaseId);
+			$ids = $this->_repository->getProductIdByName($brand->value, $productName);
 			
-			if (empty($settings))
-				throw new Exception('新品設定不存在或已停用');
+			if (empty($ids))
+				throw new Exception('無此產品名稱');
 			
-			$result = $this->_repository->getErpNoById($releaseId);
-			$result = collect($result)->groupBy('isPrimary');
-			
-			$primaryIds		= $result[1]->pluck('erpNo')->toArray();
-			$secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
-			
-			return [$settings['releaseName'], $primaryIds, $secondaryIds, $settings['releaseTaste']];
+			return $ids;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('解析查詢參數發生錯誤');
+			throw new Exception('解析產品參數發生錯誤');
 		}
 	}
 	
-	/* 取店家並過濾區域權限
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _getShopList($brand, $userAreaIds)
-	{
-		try
-		{
-			#會Filter區域權限
-			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
-		
-			return $shopList;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料發生錯誤');
-		}
-	}
-	
-	/* Get main data & mapping data
+	/* Get order data
+	 * @params: enums
 	 * @params: date
 	 * @params: date
 	 * @params: array
-	 * @params: array => product ids of BF
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds)
+	private function _getDataFromDB($brand, $stDate, $endDate, $productIds)
 	{
 		try
 		{
-			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+			$orderData = $this->_repository->getOrderDataById($brand->value, $stDate, $endDate, $productIds);
 				
-			return $saleData;
+			return $orderData;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取POS DB資料失敗');
+			throw new Exception('讀取訂貨資料失敗');
 		}
 	}
-	
-	
 	
 	/* 基底資料
 	 * @params: collection

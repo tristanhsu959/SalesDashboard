@@ -58,8 +58,6 @@ class ShipmentsController extends Controller
 			$this->_viewModel->fail('查詢參數錯誤');
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
-			
-		
 	}
 	
 	private function _searchByName(Request $request, $brand, $function)
