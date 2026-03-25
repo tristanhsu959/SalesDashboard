@@ -89,7 +89,7 @@ class CurrentUser extends Fluent
 			return TRUE;
 		
 		$permissions	= $this->get('rolePermission', []);
-		$allowFunctions	= array_keys($permissions); #Key same as code
+		$allowFunctions	= array_values($permissions); #Key same as code
 		
 		return in_array($functionKey, $allowFunctions);
 	}
