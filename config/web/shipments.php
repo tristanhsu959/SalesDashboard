@@ -8,20 +8,20 @@ return [
 		Brand::BAFANG->value => [
 			'enabled' => [
 				'A', 'A2', 'A3', 'B',
-				'D', 'E', 'G'
+				'D', 'E', 'F', 'G'
 			],
 			'except' => [
-				'F', 'H', 'I', 'Z'
+				'H', 'I', 'Z'
 			]
 		],
 		
 		Brand::BUYGOOD->value => [
 			'enabled' => [
 				'A', 'A2', 'A3',
-				'D', 'E', 'G'
+				'D', 'E', 'F', 'G'
 			],
 			'except' => [
-				'F', 'H', 'I', 'Z'
+				'H', 'I', 'Z'
 			]
 		],
 	],

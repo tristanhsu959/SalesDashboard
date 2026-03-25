@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
@@ -23,17 +23,16 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #當主Service
-class ShipmentsService
+class ShipmentsByNameService
 {
-	const MODE_NAME			= 'Name';
-	const MODE_TYPE			= 'Type';
+	const MODE = 'Name';
 	
 	private $_statistics	= [];
    
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'mode'			=> '',
+			'mode'			=> self::MODE,
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
@@ -45,70 +44,6 @@ class ShipmentsService
 		];
 	}
 	
-	/* Parsing brand from url segment
-	 * @params: string
-	 * @return: string
-	 */
-	public function parsingBrand($segments)
-	{
-		$brand = $segments[0];
-		return Brand::tryFromCode($brand);
-	}
-	
-	/* Parsing function by brand
-	 * @params: enums
-	 * @return: string
-	 */
-	public function parsingFunction($brand)
-	{
-		return match ($brand) 
-		{
-			Brand::BAFANG	=> Functions::BF_SHIPMENTS, 
-			Brand::BUYGOOD	=> Functions::BG_SHIPMENTS,
-        };
-	}
-	
-	/* 取分類by brand
-	 * @params: int
-	 * @return: string
-	 */
-	public function getProductTypes($brandId)
-	{
-		$result = $this->_repository->getProductTypes($brandId);
-		
-		$result = collect($result)->mapWithKeys(function($item, $key){
-			return [$item['No'] => $item['Name']];
-		})->toArray();
-		
-		return $result;
-	}
-	
-	/* 取分類及產品by brand
-	 * @params: int
-	 * @return: string
-	 */
-	public function getCategoryAndProduct($brandId)
-	{
-		$result = $this->_repository->getProductWithType($brandId);
-		$result = collect($result)->groupBy('catNo');
-		
-		#Build category
-		$category = $result->map(function($item, $no){
-			return $item->pluck('catName')->first();
-		});
-		
-		#Build product mapping
-		$products = $result->map(function($items, $no){
-			$items = $items->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			})->toArray();
-			
-			return $items;
-		});
-		
-		return [$category, $products];
-	}
-	
 	/* ====================== 主流程 By Name ====================== */
 	/* Search data
 	 * @params: enum
@@ -117,15 +52,14 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchProductName)
+	public function getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName)
 	{
 		try
 		{
 			#Check cache
-			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, self::MODE_NAME, $searchStDate, $searchEndDate]);
-			
+			$cacheKey = implode(':', [$function->value, self::MODE, $searchStDate, $searchEndDate]);
+			dd($cacheKey);
 			if (Cache::has($cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get shipments data (By Name) from cache');
@@ -157,7 +91,7 @@ class ShipmentsService
 			}
 		}
 		catch(Exception $e)
-		{
+		{dd($e->getMessage());
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}

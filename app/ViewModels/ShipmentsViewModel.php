@@ -49,18 +49,18 @@ class ShipmentsViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$modes = [
-			'date'		=> '依日/月統計', 
-			'area' 		=> '依區域統計',
-			'factory' 	=> '依工廠統計',
-			'shop' 		=> '依門店統計',
+		$mode = [
+			'name'	=> '產品名稱', 
+			'type'	=> '產品類別',
 		];
 		
-		$this->set('options.modes', $modes);
+		$this->set('options.mode', $mode);
 		
-		list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
-		$this->set('options.category', $category);
-		$this->set('options.products', $products);
+		$productTypes = $this->_service->getProductTypes($this->brand->value);
+		$this->set('options.productTypes', $productTypes);
+		
+		#list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
+		#$this->set('options.products', $products);
 	}
 	
 	/* Form submit action
@@ -84,16 +84,38 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @params: string
 	 * @params: string
+	 * @return: array
+	 */
+	public function keepSearchDataByName($searchStDate, $searchEndDate, $searchProductName)
+    {
+		$this->keepSearchData('name', $searchStDate, $searchEndDate, '', $searchProductName);
+	}
+	
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchMode = 'date', $searchStDate = '', $searchEndDate = '', $searchCatNo = 0, $searchProductNos = [])
+	public function keepSearchDataByType($searchStDate, $searchEndDate, $searchProductType)
+    {
+		$this->keepSearchData('type', $searchStDate, $searchEndDate, $searchProductType, '');
+	}
+	
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: array
+	 */
+	public function keepSearchData($searchMode = 'name', $searchStDate = '', $searchEndDate = '', $searchProductType = '', $searchProductName = '')
     {
 		$this->set('search.mode', $searchMode);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.catNo', $searchCatNo);
-		$this->set('search.productNos', $searchProductNos);
+		$this->set('search.productType', $searchProductType);
+		$this->set('search.productName', $searchProductName);
 		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
 	}
 	

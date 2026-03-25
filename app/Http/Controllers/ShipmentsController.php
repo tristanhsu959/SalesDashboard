@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\ShipmentsService;
+use App\Services\Shipments\ShipmentsByNameService;
 use App\ViewModels\ShipmentsViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
@@ -42,15 +43,38 @@ class ShipmentsController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
+		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData(); #先init一次
+		
 		#query params
-		$searchReleaseId= $request->integer('searchReleaseId');
-		$searchStDate	= $request->input('searchStDate');
-		$searchEndDate	= $request->input('searchEndDate');
+		$searchMode		= $request->input('searchMode', NULL);
+		
+		if ($searchMode == 'name')
+			$this->_searchByName($request, $brand, $function);
+		else if ($searchMode == 'type')
+			$this->_searchByType($request);
+		else
+		{
+			$this->_viewModel->fail('查詢參數錯誤');
+			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+		}
+			
+		
+	}
+	
+	private function _searchByName(Request $request, $brand, $function)
+	{
+		$service = app(ShipmentsByNameService::class);
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchReleaseId, $searchStDate, $searchEndDate);
-	
-		$response = $this->_service->getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate);
+		
+		$searchStDate		= $request->input('searchStDate');
+		$searchEndDate		= $request->input('searchEndDate');
+		$searchProductName	= $request->input('searchProductName');
+		
+		$this->_viewModel->keepSearchDataByName($searchStDate, $searchEndDate, $searchProductName);
+		
+		$response = $service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -59,7 +83,27 @@ class ShipmentsController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
+	}
+	
+	private function _searchByType(Request $request)
+	{
+		$searchStDate		= $request->input('searchStDate');
+		$searchEndDate		= $request->input('searchEndDate');
+		$searchProductType	= $request->input('searchProductType');
+		
+		$this->_viewModel->keepSearchDataByType($searchStDate, $searchEndDate, $searchProductType);
+		
+		$response = $this->_service->getStatisticsByType($this->_viewModel->brand, $searchStDate, $searchEndDate, $searchProductType);
+		
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+			$this->_viewModel->success();
+		
+		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
+		
+		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
 	}
 	
 	/* Export

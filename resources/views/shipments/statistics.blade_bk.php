@@ -18,7 +18,7 @@
 		
 		<div class="field middle-align">
 			<nav class="wrap">
-				<template x-for="(name, id) in options.mode" :key="id">
+				<template x-for="(name, id) in options.modes" :key="id">
 					<label class="radio field-light-blue">
 						<input type="radio" name="searchMode" x-model="searchData.mode" :value="id">
 						<span x-text="name"></span>
@@ -28,39 +28,53 @@
 		</div>
 		
 		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
+		<div class="field label border round field-light-blue s2" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
 		</div>
 		
 		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
+		<div class="field label border round field-light-blue s2" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
 		
-		<div x-show="searchData.mode == 'name'">
-			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'productName')">
-				<input type="text" name="searchProductName" maxlength="30" x-model="searchData.productName" x-ref="searchProductName" @input="errors.delete('productName')">
-				<label>產品名稱</label>
-			</div>
+		<div class="space"></div>
+		<div class="field label suffix round border field-light-blue s4" :class="Helper.hasError(errors, 'catNo')">
+			<select x-model="searchData.catNo" name="searchCatNo" @change="changeProducts($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.catNo)">
+				<option value="0">請選擇</option>
+				<template x-for="(name, no) in options.category" :key="no">
+					<option x-text="name" :value="no"></option>
+				</template>
+			</select>
+			<label>類別</label>
+			<i>arrow_drop_down</i>
 		</div>
 		
-		<div x-show="searchData.mode == 'type'">
+		<div x-show="searchData.mode == 'day' || searchData.mode == 'month'">
 			<div class="space"></div>
-			<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'productType')">
-				<select x-model="searchData.productType" name="searchProductType">
+			<div class="field label suffix round border field-light-blue s4" :class="Helper.hasError(errors, 'productNo')">
+				<select x-model="searchData.productNos" name="searchProductNos">
 					<option value="0">請選擇</option>
-					<template x-for="(name, no) in options.productTypes" :key="no">
+					<template x-for="(name, no) in options.products[searchData.catNo]" :key="no">
 						<option x-text="name" :value="no"></option>
 					</template>
 				</select>
-				<label>類別</label>
+				<label>產品</label>
 				<i>arrow_drop_down</i>
 			</div>
 		</div>
 		
+		<fieldset x-show="searchData.mode != 'day' && searchData.mode != 'month'" class="light-blue-border light-blue-text field-light-blue" x-show="searchData.mode != 'date'">
+			<legend>產品</legend>
+			<nav>
+				<label class="checkbox">
+					<input type="checkbox">
+					<span>Item 1</span>
+				</label>
+		  </nav>
+		</fieldset>
+
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

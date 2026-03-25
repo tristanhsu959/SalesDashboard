@@ -19,45 +19,6 @@ class ShipmentsRepository extends Repository
 		
 	}
 	
-	/* 取產品設定
-	 * @params: int
-	 * @return: array
-	 */
-	public function getProductWithType($brandId)
-	{
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Product as a')
-			->join('ProductType as b', 'b.Id', '=', 'a.ProductTypeId')
-			->join('Stocks as c', 'c.ProductId', '=', 'a.Id')
-			->select('a.OldNo as productNo', 'a.Name as productName', 'b.No as catNo', 'b.Name as catName')
-			->where('a.OldNo', '!=', '')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as a1')
-					->whereColumn('a1.Id', 'a.OperationCenterId')
-					->whereIn('a1.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Brand as c1')
-					->whereColumn('c1.Id', 'c.BrandId')
-					->where('c1.No',  $this->getBrandNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as c2')
-					->whereColumn('c2.Id', 'c.FactoryId')
-					->whereIn('c2.No',  $this->getFactoryNo($brandId));
-			})
-			->whereNotIn('b.No', config("web.shipments.productType.{$brandId}.except"))
-			->groupBy('a.OldNo', 'a.Name', 'b.No', 'b.Name')
-			->get()
-			->toArray(); 
-		
-		return $result;
-	}
-	
 	/* 取新品設定相關條件(暫保留)
 	 * @params: int
 	 * @return: array
