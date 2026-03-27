@@ -57,6 +57,7 @@ trait OrderTrait
 			})
 			->whereIn('f.No', $this->getFactoryNo($brandId))
 			->where('f.IsEnable', '=', 1)
+			->orderBy('f.Id')
 			->get()
 			->toArray();
 		

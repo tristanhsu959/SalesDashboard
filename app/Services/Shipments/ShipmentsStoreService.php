@@ -315,45 +315,28 @@ class ShipmentsStoreService
 	}
 	
 	/* Export data
-	 * @params: enum
-	 * @params: date
-	 * @params: date
+	 * @params: array
 	 * @return: array
 	 */
-	public function export($token)
+	public function export($sourceData)
 	{
-		#取資料邏輯共用
-		$cacheKey = hex2bin($token);
-		
-		if (! Cache::has($cacheKey))
-			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
-		
-		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
-		
 		try
 		{
-			$sourceData = Cache::get($cacheKey);
-			
 			#Build export data for sheets
-			$export['區域彙總'] 		= $this->_buildExportArea($sourceData['area']);
-			$export['店別明細'] 		= $this->_buildExportShop($sourceData['dayHeader'], $sourceData['shop']);
-			$export['當日銷售前10名'] = $this->_buildExportRanking($sourceData['endDate'], $sourceData['top']);
-			$export['當日銷售後10名']	= $this->_buildExportRanking($sourceData['endDate'], $sourceData['last']);
+			$export = $this->_buildExportData($sourceData['header'], $sourceData['data']);
 			
 			#Write export to file
-#			$fileName = Str::replace(':', '_', $cacheKey); 
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['productName'], $sourceData['startDate'], $sourceData['endDate']], '?_新品_?_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_出貨總量_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
-			#$writer->openToBrowser($fileName);
 			$writer->openToFile($filePath);
 			
+			$index = 0;
 			foreach($export as $sheetName => $sheetData)
 			{
-				$sheet = ($sheetName == '區域彙總') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
+				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
 				$sheet->setName($sheetName);
 				
 				foreach($sheetData as $data)
@@ -361,6 +344,7 @@ class ShipmentsStoreService
 					$row =  Row::fromValues($data);
 					$writer->addRow($row);
 				}
+				$index++;
 			}
 			
 			$writer->close();
@@ -377,78 +361,35 @@ class ShipmentsStoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportArea($areaData)
+	private function _buildExportData($header, $data)
 	{
-		$export[] = ['區域', '店家數', '銷售總量', '平均日銷售量', '每店平均銷量', '每店平均日銷量'];
-		
-		foreach($areaData as $areaId => $data)
+		$export = [];
+		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
+		dd($export);
+		#每個product要一個sheet
+		foreach($header['productList'] as $erpNo => $productName)
 		{
-			$areaName = ($areaId == 'total') ? 'Total' : Area::tryFrom(intval($areaId))->label();
+			$factoryData = data_get($data, $erpNo, []);
 			
-			$row = [];
-			$row[] = $areaName;
-			$row[] = $data['shopCount'];
-			$row[] = $data['totalQty'];
-			$row[] = $data['avgDayQty'];
-			$row[] = $data['avgShopQty'];
-			$row[] = $data['avgDayShopQty'];
+			if (empty($factoryData))
+				continue;
 			
-			$export[]= $row;
-		}
-		
-		return $export;
-	}
-	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportShop($header, $shopData)
-	{
-		$export[] = array_merge(['區域', '門店代號', '門店名稱'], $header, ['銷售總量', '平均銷售數量']);
-		
-		foreach($shopData as $shopId => $data)
-		{
-			$row = [];
-			$row[] = $data['areaName'];
-			$row[] = $shopId;
-			$row[] = $data['shopName'];
+			$export[$productName] = [];
+			$export[$productName][] = $outputHeader;
 			
-			foreach($header as $date)
-			{
-				$row[] = data_get($data, "dayQty.{$date}", 0);
-			}
-			
-			$row[] = $data['totalQty'];
-			$row[] = $data['totalAvg'];
-			
-			$export[]= $row;
-		}
-		
-		return $export;
-	}
-	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportRanking($targeDate, $rankingData)
-	{
-		$export[] = array_merge(['區域', '門店代號', '門店名稱'], [$targeDate], ['排名']);
-		
-		foreach($rankingData as $ranking => $shopList)
-		{
-			#同一排名會有重複
-			foreach($shopList as $shopId => $data)
+			#使用header來控制顯示順序,先TP後KH
+			foreach($header['factoryList'] as $factoryNo => $factoryName)
 			{
 				$row = [];
-				$row[] = $data['areaName'];
-				$row[] = $data['shopId'];
-				$row[] = $data['shopName'];
-				$row[] = $data['qty'];
-				$row[] = $ranking + 1;
+				$row[] = $factoryName;
 				
-				$export[]= $row;
+				#要按Header的順序
+				foreach($header['dateList'] as $date)
+				{
+					$row[] = data_get($factoryData, "{$factoryNo}.{$date}.qty", 0);
+				}
+				
+				$export[$productName][] = $row;
 			}
 		}
 		

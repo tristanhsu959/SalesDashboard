@@ -140,7 +140,7 @@ class ShipmentsService
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= $searchProductName;
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -172,5 +172,32 @@ class ShipmentsService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* Export data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function export($token)
+	{
+		$cacheKey = hex2bin($token);
+		
+		if (! Cache::has($cacheKey))
+			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
+		
+		$currentUser = AppManager::getCurrentUser();
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
+		
+		$sourceData = Cache::get($cacheKey);
+		$modeType = $sourceData['modeType'];
+		
+		if ($modeType == 'store')
+			$service = app(ShipmentsStoreService::class);
+		else
+			$service = app(ShipmentsFactoryService::class);
+		
+		return $service->export($sourceData);
 	}
 }

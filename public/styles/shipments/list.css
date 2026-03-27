@@ -24,10 +24,78 @@ form {
 /* Data */
 .page {
 	padding: 1rem;
-	/* 區域彙總 */
-	.grid.header div {
-		font-weight: bold;
+	 
+	/* 工廠 */
+	.statistics-factory {
+		--table-bg: #fffbff;
+		
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 220px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: #666 var(--table-bg); /*thumb - track*/
+		margin: 0;
+				
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: auto;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			
+			thead {
+				tr {
+					th {
+						position: sticky;
+						top: 0;
+						z-index: 5;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						min-width: 100px;
+						color: rgba(0, 0, 0, .87);
+						padding-top: 1rem;
+						
+						&:nth-child(1) {
+							width: 100px;
+							position: sticky;
+							left: 0;
+							z-index: 6;
+						}
+					}
+				}
+			}
+			
+			tbody {
+				tr {
+					th {
+						position: sticky;
+						font-weight: bold;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						z-index: 5;
+						
+						&:nth-child(1) {
+							left: 0;
+							background-color: var(--table-bg);
+						}
+					}
+					
+					td {
+						color: #424242;
+						/* 總計 
+						&:nth-last-child(-n + 2) {
+							color: #f44336;
+						}*/
+					}
+				}
+			}
+		}
 	}
+	
+	
 	
 	/* 門市 */
 	.statistics-store {
@@ -68,6 +136,48 @@ form {
 				background-color: var(--table-stripes);
 			}
 			
+			thead th, tbody th {
+				position: sticky;
+				top: 0;
+				z-index: 5;
+				word-break: keep-all;
+			}
+			
+			thead th {
+				color: rgba(0, 0, 0, .87);
+				background-color: var(--table-bg);
+				padding-top: 1rem;
+				z-index: 6;
+			}
+			
+			tbody th {
+				font-weight: normal;
+				color: var(--table-fixed-color);
+			}
+				
+			thead th, tbody th {
+				&:nth-child(1) {
+					min-width: 80px;
+					max-width: 80px;
+					left: 0;
+				}
+				&:nth-child(2) {
+					min-width: 100px;
+					max-width: 100px;
+					left: 80px;
+				}
+				&:nth-child(3) {
+					min-width: 100px;
+					max-width: 100px;
+					left: 180px;
+				}
+				&:nth-child(4) {
+					min-width: 120px;
+					max-width: 120px;
+					left: 280px;
+				}
+			}
+			/*			
 			thead {
 				tr {
 					th {
@@ -77,46 +187,32 @@ form {
 						word-break: keep-all;
 						background-color: var(--table-bg);
 						min-width: 80px;
+						width: 120px;
 						color: rgba(0, 0, 0, .87);
 						padding-top: 1rem;
 						
-						&.col-date span {
-							display: inline-flex;
-							flex-direction: column;
-							justify-content: center;
-							
-							&:first-child {
-								/* font-size: .9rem; */
-								background-color: #e91e63;
-								border-radius: 4px;
-								color: rgba(255, 255, 255, .87);
-								font-weight: 400;
-								padding: 0 .25rem;
-							}
-						}
-						
 						&:nth-child(1) {
-							width: 100px;
+							width: 120px;
 							position: sticky;
 							left: 0;
 							z-index: 6;
 						}
 						&:nth-child(2) {
-							width: 80px;
+							max-width: 100px;
 							position: sticky;
-							left: 100px;
+							left: 120px;
 							z-index: 6;
 						}
 						&:nth-child(3) {
 							width: 80px;
 							position: sticky;
-							left: 180px;
+							left: 220px;
 							z-index: 6;
 						}
 						&:nth-child(4) {
 							width: 160px;
 							position: sticky;
-							left: 260px;
+							left: 300px;
 							z-index: 6;
 						}
 					}
@@ -129,36 +225,33 @@ form {
 						position: sticky;
 						font-weight: normal;
 						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
-						/* border-bottom-width: 0; */
+						color: var(--table-fixed-color);
 						
 						&:nth-child(1) {
 							left: 0;
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(2) {
-							left: 100px;
+							left: 120px;
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(3) {
-							left: 180px;
+							left: 220px;
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(4) {
-							left: 260px;
+							left: 300px;
 							background-color: var(--table-fixed-bg);
 						}
 					}
 					
 					td {
 						color: #424242;
-						/* 總計 
-						&:nth-last-child(-n + 2) {
-							color: #f44336;
-						}*/
+						
 					}
 				}
 			}
+			*/
 		}
 	}
 

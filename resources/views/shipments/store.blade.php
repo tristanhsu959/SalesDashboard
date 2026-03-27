@@ -20,8 +20,8 @@
 					<table class="stripes">
 						<thead>
 							<tr>
-								<th>區域</th>
 								<th>POS ID</th>
+								<th>區域</th>
 								<th>門店代號</th>
 								<th>門店名稱</th>
 								<template x-for="(name, id) in statistics.header.dateList" :key="id">
@@ -32,8 +32,8 @@
 						<tbody>
 							<template x-for="(store, storeId) in statistics.header['storeList']" :key="storeId">
 							<tr>
-								<th x-text="store.area"></th>
 								<th x-text="store.postId"></th>
+								<th x-text="store.area"></th>
 								<th x-text="store.storeNo"></th>
 								<th x-text="store.storeName"></th>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">

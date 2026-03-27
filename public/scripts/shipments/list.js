@@ -80,7 +80,7 @@ document.addEventListener('alpine:init', () => {
 		statistics: {...data},
 		activeProduct: '',
 		
-		init() { console.log(this.statistics.header.storeList);
+		init() { 
 			const keys = Object.keys(this.statistics.header.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];

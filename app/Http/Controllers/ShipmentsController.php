@@ -86,7 +86,6 @@ class ShipmentsController extends Controller
 	{
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
-		//$token 	= $request->query('token');
 		
 		$this->_viewModel->initialize($brand, $function);
 		
@@ -105,8 +104,6 @@ class ShipmentsController extends Controller
 			if (file_exists($filePath)) {
 				return response()->download($filePath)->deleteFileAfterSend();
 			}
-			#return Storage::disk('export')->download($fileName)->deleteFileAfterSend();
-			#return response()->download($fileName);
 		}
 	}
 }

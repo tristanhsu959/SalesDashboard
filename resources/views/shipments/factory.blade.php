@@ -16,22 +16,28 @@
 			
 			<!-- 工廠 -->
 			<div class="page padding active">
-				<section>
-					<div class="grid header">
-						<div class="s2">出貨工廠</div>
-						<template x-for="(name, id) in statistics.header['dateList']" :key="id">
-							<div class="s2" x-text="name"></div>
-						</template>
-					</div>
-					
-					<template x-for="(factoryName, factoryId) in statistics.header['factoryList']" :key="factoryId">
-						<div class="grid data">
-							<div class="s2" x-text="factoryName"></div>
-							<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-								<div class="s2" x-text="statistics.data[activeProduct]?.[factoryId]?.[date]?.['qty'] ?? 0"></div>
+				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
+					<table>
+						<thead>
+							<tr>
+								<th>出貨工廠</th>
+								<template x-for="(name, id) in statistics.header['dateList']" :key="id">
+									<th x-text="name"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(factoryName, factoryId) in statistics.header['factoryList']" :key="factoryId">
+							<tr>
+								<th x-text="factoryName"></th>
+								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
+									<td x-text="statistics.data[activeProduct]?.[factoryId]?.[date]?.['qty'] ?? 0"></td>
+								</template>
+							</tr>
 							</template>
-						</div>
-					</template>
+								
+						</tbody>
+					</table>
 				</section>
 			</div>
 		</div>
