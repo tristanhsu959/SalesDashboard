@@ -62,5 +62,29 @@ document.addEventListener('alpine:init', () => {
 			this.errors.clear();
 		},
     }));
+	
+	//Factory
+	Alpine.data('statisticsFactory', (data) => ({
+		statistics: {...data},
+		activeProduct: '',
+		
+		init() { 
+			const keys = Object.keys(this.statistics.header.productList);
+			if (keys.length > 0)
+				this.activeProduct = keys[0];
+		},
+    }));
+	
+	//Store
+	Alpine.data('statisticsStore', (data) => ({
+		statistics: {...data},
+		activeProduct: '',
+		
+		init() { console.log(this.statistics.header.storeList);
+			const keys = Object.keys(this.statistics.header.productList);
+			if (keys.length > 0)
+				this.activeProduct = keys[0];
+		},
+    }));
 });
 

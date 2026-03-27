@@ -39,7 +39,7 @@ class ShipmentsByNameService
 			'productIds'	=> [],
 			'header'		=> [],
 			'shop' 			=> [],
-			'area' 			=> [],
+			'factory'		=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
@@ -115,17 +115,15 @@ class ShipmentsByNameService
 			$this->_statistics['productIds'] = $productIds;
 			
 			#3. Get store list
-			$storeList = $this->_repository->getStoreList($brand->value);
-			dd($storeList);
+			$storeList = $this->_getStoreList($brand->value);
+			
 			#4. Get Order data
 			$orderData = $this->_getDataFromDB($brand, $stDate, $endDate, $productIds);
 			
 			#5. Build base data
-			#會有false的無效array, 用array_filter去除
-			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
-			unset($saleData);
+			#$baseData = $this->_buildBaseData(array_filter($orderData));
 			
-			return $this->_outputReport($baseData);
+			return $this->_outputReport($orderData);
 		}
 		catch(Exception $e)
 		{
@@ -165,11 +163,51 @@ class ShipmentsByNameService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $productIds)
+	private function _getStoreList($brandId)
 	{
 		try
 		{
-			$orderData = $this->_repository->getOrderDataById($brand->value, $stDate, $endDate, $productIds);
+			$stores = $this->_repository->getStoreList($brandId);
+			
+			#To key-value
+			$stores = collect($stores)->mapWithKeys(function($item, $key){
+				return [$item['storeId'] => $item];
+			})->toArray();
+				
+			return $stores;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料失敗');
+		}
+	}
+	
+	/* Get order data
+	 * @params: enums
+	 * @params: date
+	 * @params: date
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getDataFromDB($brand, $stDate, $endDate, $productIds)
+	{
+		/*0 => array:9 [
+			"expectedDate" => "2026-03-25"
+			"area" => "中彰投-八方"
+			"storeId" => "156"
+			"factoryNo" => "TW_KH"
+			"factoryName" => "高雄工廠"
+			"qty" => "2"
+			"amount" => "500.000000"
+			"productName" => "紅燒帶骨牛小排調理包"
+			"erpNo" => "PR00313063"
+		  ]
+		*/
+	
+		try
+		{
+			$orderData = $this->_repository->getOrderDataByProductId($brand->value, $stDate, $endDate, $productIds);
 				
 			return $orderData;
 		}
@@ -184,7 +222,7 @@ class ShipmentsByNameService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($shopList, $saleData)
+	private function _buildBaseData($orderData)
 	{
 		/*
 		[
@@ -196,13 +234,22 @@ class ShipmentsByNameService
 			"areaId" => 3
 			"areaName" => "桃竹苗區"
 		]
+		"expectedDate" => "2026-03-25"
+			"area" => "中彰投-八方"
+			"storeId" => "156"
+			"factoryNo" => "TW_KH"
+			"factoryName" => "高雄工廠"
+			"qty" => "2"
+			"amount" => "500.000000"
+			"productName" => "紅燒帶骨牛小排調理包"
+			"erpNo" => "PR00313063"
 		*/
 		
-		#要改成所有店家統計
-		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		$groupShopList = collect($shopList)->groupBy('shopId');
 		
-		$baseData = collect($saleData)->map(function($item, $key) use($groupShopList) {
+		$baseData = collect($orderData)->groupBy('expectedDate')->map(function($items, $key) {
+			dd($items);
+			$temp['month'] = Carbon::parse($items['expectedDate'])->format('Y-m');
+			dd($temp);
 			$shop = $groupShopList->get($item['shopId']);
 			
 			$item['shopName'] 	= $shop->pluck('shopName')->first();
@@ -243,19 +290,20 @@ class ShipmentsByNameService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($baseData)
+	private function _outputReport($orderData)
 	{
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['dayHeader'] = $this->_buildDayHeader();
-			$totalDays = count($this->_statistics['dayHeader']);
+			$this->_statistics['header'] = $this->_buildHeader($orderData);
+			
+			#2.區域彙總
+			$this->_statistics['factory'] = $this->_parsingByFactory($orderData);
+			dd($this->_statistics['factory']);
 			
 			#2.店別每日銷售
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData, $totalDays);
+			$this->_statistics['shop'] = $this->_parsingByShop($orderData);
 			
-			#3.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData, $totalDays);
 							
 			#4.當日銷售前10名
 			#5.當日銷售後10名
@@ -275,23 +323,115 @@ class ShipmentsByNameService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildDayHeader()
+	private function _buildHeader($orderData)
 	{
 		$st 		= Carbon::create($this->_statistics['startDate']);
 		$end 		= Carbon::create($this->_statistics['endDate']);
-		$period 	= CarbonPeriod::create($st, $end);
+		$header 	= [];
 		
-		$dateList = [];
-
+		#By day
+		$period 	= CarbonPeriod::create($st, $end);
 		foreach ($period as $date) 
 		{
-			$dateList[] = $date->format('Y-m-d');
+			$header['days'][] = $date->format('Y-m-d');
 		}
 		
-		return $dateList;
+		#By month
+		$st = Carbon::parse($this->_statistics['startDate'])->startOfMonth();
+		$end = Carbon::parse($this->_statistics['endDate'])->startOfMonth();
+		
+		$period = CarbonPeriod::create($st, '1 month', $end);
+		foreach ($period as $date) 
+		{
+			$header['months'][] = $date->format('Y-m');
+		}
+		
+		#product
+		$product = collect($orderData)->mapWithKeys(function($items, $key){
+			return [$items['erpNo'] => $items['productName']];
+		})->toArray();
+		
+		$header['products'] = $product;
+		
+		return $header;
 	}
 	
-	
+	/* 依工廠
+	 * @params: array
+	 * @return: array
+	 */
+	private function _parsingByFactory($orderData)
+	{
+		/*
+		"areaId" => [
+			"大台北區" => [
+				"shopCount" => 101
+				"totalQty" => 22208
+				"avgDayQty" => 965.6
+				"avgShopQty" => 219.9
+				"avgDayShopQty" => 9.6
+			]
+			"大高雄區" => array:5 []
+			"宜蘭區" => array:5 []
+			"中彰投區" => array:5 []
+			"雲嘉南區" => array:5 []
+			"桃竹苗區" => array:5 []
+		]
+		array:9 [
+			"expectedDate" => "2026-03-25"
+			"area" => "中彰投-八方"
+			"storeId" => "156"
+			"factoryNo" => "TW_KH"
+			"factoryName" => "高雄工廠"
+			"qty" => "2"
+			"amount" => "500.000000"
+			"productName" => "紅燒帶骨牛小排調理包"
+			"erpNo" => "PR00313063"
+		  ]
+		*/
+		if (empty($orderData))
+			return [];
+		
+		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) {
+			$temp = $items->groupBy('factoryNo')->map(function($items, $key) {
+				$day = $items->groupBy('expectedDate')->map(function($items, $key) {
+					$temp['qty'] 	= $items->pluck('qty')->sum();
+					$temp['amount'] = $items->pluck('amount')->sum();
+					return $temp;
+				});
+				
+				$month = $items->groupBy(function ($item) {
+					return substr($item['expectedDate'], 0, 7); 
+				})->map(function ($group) {
+					$temp['qty'] 	= $group->pluck('qty')->sum();
+					$temp['amount'] = $group->pluck('amount')->sum();
+					
+					return $temp;
+				});
+				
+				return $day->merge($month)->toArray();
+			});
+			
+			/* $temp['areaName']		= $items->pluck('areaName')->first();
+			$temp['shopCount']		= $items->pluck('shopId')->unique()->count(); #店家數
+			$temp['totalQty'] 		= intval($items->pluck('qty')->sum()); #區域銷售總量
+			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
+			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
+			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $totalDays / $temp['shopCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數
+			 */
+			return $temp;
+		})->sortKeys()->toArray();
+		
+		dd($result);
+		#這裏是依header
+		$result['total']['shopCount'] 		= collect($result)->pluck('shopCount')->sum(); 
+		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
+		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
+		$result['total']['avgShopQty'] 		= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
+		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
+		
+		return $result;
+	}
 	
 	/* 店別每日銷售
 	 * @params: array
@@ -342,95 +482,6 @@ class ShipmentsByNameService
 		return $result;
 	}
 	
-	/* 區域彙總
-	 * @params: array
-	 * @params: int
-	 * @return: array
-	 */
-	private function _parsingByArea($baseData, $totalDays)
-	{
-		/*
-		"areaId" => [
-			"大台北區" => [
-				"shopCount" => 101
-				"totalQty" => 22208
-				"avgDayQty" => 965.6
-				"avgShopQty" => 219.9
-				"avgDayShopQty" => 9.6
-			]
-			"大高雄區" => array:5 []
-			"宜蘭區" => array:5 []
-			"中彰投區" => array:5 []
-			"雲嘉南區" => array:5 []
-			"桃竹苗區" => array:5 []
-		]
-		*/
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [];
-		
-		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) use($totalDays) {
-			$temp['areaName']		= $items->pluck('areaName')->first();
-			$temp['shopCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-			$temp['totalQty'] 		= intval($items->pluck('qty')->sum()); #區域銷售總量
-			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
-			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
-			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $totalDays / $temp['shopCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數
-			
-			return $temp;
-		})->sortKeys()->toArray();
-		
-		#這裏是依header
-		$result['total']['shopCount'] 		= collect($result)->pluck('shopCount')->sum(); 
-		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
-		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
-		$result['total']['avgShopQty'] 		= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
-		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
-		
-		return $result;
-	}
-	
-	/* 當日銷售前10名
-	 * @params: array
-	 * @params: date
-	 * @return: array
-	 */
-	private function _parsingByRanking($baseData, $endDate)
-	{
-		/* 以銷售量來group shop
-		[
-			"103001" => [
-				"shopId" => "103001"
-				"shopName" => "御廚民生承德直營店"
-				"area" => "大台北區"
-				"saleDate" => '2026-01-01'
-				"qty" => 29
-			]
-		]
-		*/
-		
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [[], []];
-		
-		#排名是依最後一天的值
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) use($endDate) {
-			#需考量沒有訂單的狀況
-			$dayData = $items->groupBy('saleDate')->get($endDate, collect([]))->first();
-			
-			$temp = $items->first(); #當基底資料
-			#$temp['saleDate'] 	= $endDate;
-			$temp['qty']		= intval(data_get($dayData, 'qty', 0)); 
-			unset($temp['saleDate'], $temp['areaId']);
-			
-			return $temp;
-		});
-		
-		$top = $result->sortByDesc('qty')->groupBy('qty')->take(10)->values()->toArray();
-		$last = $result->sortBy('qty')->groupBy('qty')->take(10)->values()->toArray();
-		
-		return [$top, $last];
-	}
 	
 	
 	/* Export data

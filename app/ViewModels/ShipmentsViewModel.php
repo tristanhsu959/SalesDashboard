@@ -49,18 +49,38 @@ class ShipmentsViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$mode = [
-			'name'	=> '產品名稱', 
-			'type'	=> '產品類別',
-		];
-		
-		$this->set('options.mode', $mode);
+		$this->_setSearchMode();
 		
 		$productTypes = $this->_service->getProductTypes($this->brand->value);
 		$this->set('options.productTypes', $productTypes);
 		
 		#list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
 		#$this->set('options.products', $products);
+	}
+	
+	/* 查詢選項
+	 * @params:  
+	 * @return: void
+	 */
+	private function _setSearchMode()
+	{
+		$type = [
+			'store'		=> '依門市', 
+			'factory'	=> '依工廠',
+		];
+		$this->set('options.mode.type', $type);
+		
+		$calc = [
+			'day'	=> '以日計算', 
+			'month'	=> '以月計算',
+		];
+		$this->set('options.mode.calc', $calc);
+
+		/* $unit = [
+			'qty'	=> '統計數量', 
+			'amount'=> '統計金額',
+		];
+		$this->set('options.mode.unit', $unit); */
 	}
 	
 	/* Form submit action
@@ -84,39 +104,32 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @params: string
 	 * @params: string
-	 * @return: array
-	 */
-	public function keepSearchDataByName($searchStDate, $searchEndDate, $searchProductName)
-    {
-		$this->keepSearchData('name', $searchStDate, $searchEndDate, '', $searchProductName);
-	}
-	
-	/* Keep search data of form
-	 * @params: string
-	 * @params: string
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchDataByType($searchStDate, $searchEndDate, $searchProductType)
+	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchProductName = '', $searchType = 'store', $searchCalc = 'day')
     {
-		$this->keepSearchData('type', $searchStDate, $searchEndDate, $searchProductType, '');
-	}
-	
-	/* Keep search data of form
-	 * @params: string
-	 * @params: string
-	 * @params: string
-	 * @params: string
-	 * @return: array
-	 */
-	public function keepSearchData($searchMode = 'name', $searchStDate = '', $searchEndDate = '', $searchProductType = '', $searchProductName = '')
-    {
-		$this->set('search.mode', $searchMode);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.productType', $searchProductType);
 		$this->set('search.productName', $searchProductName);
+		$this->set('search.type', $searchType);
+		$this->set('search.calc', $searchCalc);
 		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
+	}
+	
+	/* Partial view
+	 * @params: string
+	 * @return: string
+	 */
+	public function getPartialView()
+	{
+		$type = $this->get('search.type', NULL);
+		
+		return match($type)
+		{
+			'store'		=> 'shipments.store',
+			'factory'	=> 'shipments.factory',	 
+		};
 	}
 	
 	public function isDataEmpty()
@@ -125,29 +138,6 @@ class ShipmentsViewModel extends Fluent
 			return TRUE;
 		else
 			return FALSE;
-	}
-	
-	/* public function getAreaName($id)
-	{
-		return Area::tryFrom($id)->label();
-	} */
-	
-	/* 時間Header, 顯示方式不同
-	 * @params: boolean #default desc
-	 * @return: array
-	 */
-	public function showHeaderYear($year)
-	{
-		$lastYear = $this->get('lastYear', NULL);
-		
-		if ($lastYear == $year)
-			return '';
-		else
-		{
-			$this->set('lastYear', $year);
-			return $year;
-		}
-		
 	}
 	
 	public function hasExportData()

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ShipmentsController extends Controller
 {
@@ -43,63 +44,36 @@ class ShipmentsController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
+		$searchStDate		= $request->input('searchStDate');
+		$searchEndDate		= $request->input('searchEndDate');
+		$searchProductName	= $request->input('searchProductName');
+		$searchType			= $request->input('searchType');
+		$searchCalc			= $request->input('searchCalc');
+		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData(); #先init一次
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc); 
 		
-		#query params
-		$searchMode		= $request->input('searchMode', NULL);
-		
-		if ($searchMode == 'name')
-			$this->_searchByName($request, $brand, $function);
-		else if ($searchMode == 'type')
-			$this->_searchByType($request);
-		else
+		#validate input
+		$validator = Validator::make($request->all(), [
+			'searchStDate' 	=> 'required|date_format:Y-m-d',
+			'searchEndDate'	=> 'required|date_format:Y-m-d',
+            'searchProductName' => 'required|max:30',
+        ]);
+ 
+        if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
-	}
-	
-	private function _searchByName(Request $request, $brand, $function)
-	{
-		$service = app(ShipmentsByNameService::class);
 		
-		$this->_viewModel->initialize($brand, $function);
-		
-		$searchStDate		= $request->input('searchStDate');
-		$searchEndDate		= $request->input('searchEndDate');
-		$searchProductName	= $request->input('searchProductName');
-		
-		$this->_viewModel->keepSearchDataByName($searchStDate, $searchEndDate, $searchProductName);
-		
-		$response = $service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName);
+		$response = $this->_service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
 		else
 			$this->_viewModel->success();
 		
-		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
-		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
-	}
-	
-	private function _searchByType(Request $request)
-	{
-		$searchStDate		= $request->input('searchStDate');
-		$searchEndDate		= $request->input('searchEndDate');
-		$searchProductType	= $request->input('searchProductType');
-		
-		$this->_viewModel->keepSearchDataByType($searchStDate, $searchEndDate, $searchProductType);
-		
-		$response = $this->_service->getStatisticsByType($this->_viewModel->brand, $searchStDate, $searchEndDate, $searchProductType);
-		
-		if ($response->status === FALSE)
-			$this->_viewModel->fail($response->msg);
-		else
-			$this->_viewModel->success();
-		
-		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
+		$this->_viewModel->statistics = $response->data; 
 		
 		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
 	}

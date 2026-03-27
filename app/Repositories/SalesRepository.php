@@ -115,7 +115,7 @@ class SalesRepository extends Repository
 		
 		$db = $this->connectBFPosErp();
 		$authAreaIds = Area::toBafangId($userAreaIds);
-		$dualBrandedShopIds = config('web.shop.dualBrandedId');
+		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
 				
 		$query = $db
 				->table('zs_sd_order as a')

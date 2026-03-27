@@ -2,7 +2,7 @@
 
 use App\Enums\Brand;
 
-#Product category
+#Product setting category
 return [
 	Brand::BAFANG->value => [
 		1 => '鍋貼',

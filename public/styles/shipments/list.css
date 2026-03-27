@@ -9,25 +9,28 @@ form {
 
 #searchPanel {
 	max-width: 400px;
+	
+	.mode-group {
+		.field {
+			margin-block-start: 0;
+			
+			&:first-child {
+				margin-block-start: 1rem;
+			}
+		}
+	}
 }
 
 /* Data */
 .page {
 	padding: 1rem;
 	/* 區域彙總 */
-	.statistics-area {
-		
-		.grid.header div {
-			font-weight: bold;
-		}
-		
-		.grid.data:last-child {
-			color: red;
-		}
+	.grid.header div {
+		font-weight: bold;
 	}
 	
 	/* 門市 */
-	.statistics-shop {
+	.statistics-store {
 		&.bafang {
 			--table-bg: #4fc3f7; 			/* light-2 */
 			--table-bg-dark: #0288d1; 		/* dark-2 */
@@ -93,21 +96,27 @@ form {
 						}
 						
 						&:nth-child(1) {
-							min-width: 80px;
+							width: 100px;
 							position: sticky;
 							left: 0;
 							z-index: 6;
 						}
 						&:nth-child(2) {
-							min-width: 80px;
+							width: 80px;
 							position: sticky;
-							left: 80px;
+							left: 100px;
 							z-index: 6;
 						}
 						&:nth-child(3) {
-							min-width: 160px;
+							width: 80px;
 							position: sticky;
-							left: 160px;
+							left: 180px;
+							z-index: 6;
+						}
+						&:nth-child(4) {
+							width: 160px;
+							position: sticky;
+							left: 260px;
 							z-index: 6;
 						}
 					}
@@ -128,55 +137,29 @@ form {
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(2) {
-							left: 80px;
+							left: 100px;
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(3) {
-							left: 160px;
+							left: 180px;
+							background-color: var(--table-fixed-bg);
+						}
+						&:nth-child(4) {
+							left: 260px;
 							background-color: var(--table-fixed-bg);
 						}
 					}
 					
 					td {
 						color: #424242;
-						/* 總計 */
+						/* 總計 
 						&:nth-last-child(-n + 2) {
 							color: #f44336;
-						}
+						}*/
 					}
 				}
 			}
 		}
 	}
 
-	/* Top10 | Last10 */
-	.statistics-ranking {
-		max-height: calc(100vh - 220px);
-		overflow-y: auto;
-		
-		.ranking {
-			width: 64px;
-			height: 64px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 2rem;
-			
-			border-radius: .5rem;
-		}
-		
-		.ranking-top .ranking {
-			color: #fafafa;
-			background-color: #f44336;
-		}
-		.ranking-last .ranking {
-			color: #fafafa;
-			background-color: #263238;
-		}
-		
-		ul li label {
-			font-size: 1rem;
-			font-weight: bold;
-		}
-	}
 }

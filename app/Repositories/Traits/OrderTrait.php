@@ -39,6 +39,30 @@ trait OrderTrait
 			return [Factory::TS->value, Factory::RL->value];
 	}
 	
+	/* 取工廠清單
+	 * @params: int
+	 * @return: array
+	 */
+	public function getFactoryList($brandId)
+	{
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Factory as f')
+			->select('f.No as factoryNo', 'f.Name as factoryName')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'f.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereIn('f.No', $this->getFactoryNo($brandId))
+			->where('f.IsEnable', '=', 1)
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
 	/* 取門店清單
 	 * @params: int
 	 * @return: array
@@ -50,7 +74,7 @@ trait OrderTrait
 			->table('Store as s')
 			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->select('ar.Name as area', 's.Id', 's.No as storeNo', 's.Name as storeName')
+			->select('ar.Name as area', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as postId')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
@@ -69,10 +93,12 @@ trait OrderTrait
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->whereNull('s.CloseDate')->toRawSql();
-			/* ->get()
-			->toArray(); */
-		dd($result);
+			->whereNull('s.CloseDate')
+			->whereNotIn('s.No', config("web.purchase.store.{$brandId}.except"))
+			->orderBy('ar.Id')
+			->get()
+			->toArray();
+		
 		return $result;
 	}
 	
@@ -138,36 +164,5 @@ trait OrderTrait
 		return $result;
 	}
 	
-	/* 取Product id
-	 * @params: string
-	 * @return: array
-	 */
-	public function getProductIdByName($brandId, $name)
-	{
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Product as a')
-			->join('Stocks as st', 'st.ProductId', '=', 'a.Id')
-			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			->where('a.IsStop', '=', 0)
-			->where('a.Name', 'like', "%{$name}%")
-			->groupBy('a.Id')
-			->get()
-			->pluck('Id')
-			->toArray();
-		
-		return $result;
-	}
+	
 }

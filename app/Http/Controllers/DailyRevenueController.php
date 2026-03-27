@@ -45,7 +45,7 @@ class DailyRevenueController extends Controller
 		#query params
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
-		$searchShopType	= $request->input('searchShopType', array_keys(config('web.shop.type'))); #未選取查全部
+		$searchShopType	= $request->input('searchShopType', array_keys(config('web.sales.shop.type'))); #未選取查全部
 		
 		$this->_viewModel->initialize($brand, $function);
 		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchShopType);

@@ -140,7 +140,7 @@ class NewReleaseRepository extends Repository
 			->implode(','); */
 			
 		$configCode = $brand->code();
-		$excepts = config("web.shop.except.{$configCode}");
+		$excepts = config("web.sales.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
 		{
@@ -195,7 +195,7 @@ class NewReleaseRepository extends Repository
 		
 		$db = $this->connectBFPosErp();
 		$authAreaIds = Area::toBafangId($userAreaIds);
-		$dualBrandedShopIds = config('web.shop.dualBrandedId');
+		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
 				
 		/* $caseShopId = "CASE ";
 		foreach ($dualBrandedShopIds as $bfId => $bgId) 
@@ -257,7 +257,7 @@ class NewReleaseRepository extends Repository
 		{
 			#御廚才有複合店情境
 			$db = $this->connectBGPosErp();
-			$dualBrandedShopIds = config('web.shop.dualBrandedId');
+			$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
 		}
 			
 		$primaryQuery 		= $this->_getPrimaryQuery($db, $stDate, $endDate, $primaryIds, $tastes);

@@ -17,7 +17,7 @@ trait PosTrait
 	public function getShopList($brand, $userAreaIds = [])
 	{
 		$configCode = $brand->code();
-		$excepts = config("web.shop.except.{$configCode}");
+		$excepts = config("web.sales.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
 		{
@@ -55,7 +55,7 @@ trait PosTrait
 	public function getHptransShopList($brand, $userAreaIds)
 	{
 		$configCode = $brand->code();
-		$excepts = config("web.shop.except.{$configCode}");
+		$excepts = config("web.sales.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
 		{

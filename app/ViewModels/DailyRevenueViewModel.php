@@ -49,7 +49,7 @@ class DailyRevenueViewModel extends Fluent
 	private function _setOptions()
 	{
 		#根據poserp.shop_kind
-		$this->set('options.shopType', config('web.shop.type'));
+		$this->set('options.shopType', config('web.sales.shop.type'));
 	}
 	
 	/* Form submit action
