@@ -364,29 +364,32 @@ class ShipmentsStoreService
 	private function _buildExportData($header, $data)
 	{
 		$export = [];
-		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
-		dd($export);
+		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $header['dateList']);
+		
 		#每個product要一個sheet
 		foreach($header['productList'] as $erpNo => $productName)
 		{
-			$factoryData = data_get($data, $erpNo, []);
+			$storeData = data_get($data, $erpNo, []);
 			
-			if (empty($factoryData))
+			if (empty($storeData))
 				continue;
 			
 			$export[$productName] = [];
 			$export[$productName][] = $outputHeader;
 			
 			#使用header來控制顯示順序,先TP後KH
-			foreach($header['factoryList'] as $factoryNo => $factoryName)
+			foreach($header['storeList'] as $storeNo => $store)
 			{
 				$row = [];
-				$row[] = $factoryName;
+				$row[] = $store['postId'];
+				$row[] = $store['area'];
+				$row[] = $store['storeNo'];
+				$row[] = $store['storeName'];
 				
 				#要按Header的順序
 				foreach($header['dateList'] as $date)
 				{
-					$row[] = data_get($factoryData, "{$factoryNo}.{$date}.qty", 0);
+					$row[] = data_get($storeData, "{$storeNo}.{$date}.qty", 0);
 				}
 				
 				$export[$productName][] = $row;

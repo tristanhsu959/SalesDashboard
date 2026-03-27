@@ -140,7 +140,7 @@ class ShipmentsService
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= $searchProductName;
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(1));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
