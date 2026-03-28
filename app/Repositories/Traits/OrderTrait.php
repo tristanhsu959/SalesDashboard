@@ -95,7 +95,7 @@ trait OrderTrait
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
 			->whereNull('s.CloseDate')
-			->whereNotIn('s.No', config("web.purchase.store.{$brandId}.except"))
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))
 			->orderBy('ar.Id')
 			->get()
 			->toArray();
@@ -115,7 +115,7 @@ trait OrderTrait
 			->select('a.No', 'a.Name')
 			->where('a.OperationCenterId', '=', 1) #取op=1
 			->where('a.IsEnable', '=', 1)
-			->whereNotIn('a.No', config("web.shipments.productType.{$brandId}.except"))
+			->whereNotIn('a.No', config("web.purchase.product_type.except.{$brandId}"))
 			->groupBy('a.No', 'a.Name')
 			->orderBy('a.No')
 			->get()
@@ -155,7 +155,7 @@ trait OrderTrait
 					->whereColumn('ft.Id', 'st.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->whereNotIn('pt.No', config("web.shipments.productType.{$brandId}.except"))
+			->whereNotIn('pt.No', config("web.purchase.product_type.except.{$brandId}"))
 			->groupBy('a.OldNo', 'a.Name', 'pt.No', 'pt.Name')
 			->orderBy('pt.No')
 			->orderBy('a.OldNo')

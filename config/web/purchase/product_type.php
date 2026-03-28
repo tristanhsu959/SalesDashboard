@@ -4,26 +4,25 @@ use App\Enums\Brand;
 
 #Product category
 return [
-	'productType' => [
+	'enabled' => [
 		Brand::BAFANG->value => [
-			'enabled' => [
-				'A', 'A2', 'A3', 'B',
-				'D', 'E', 'F', 'G'
-			],
-			'except' => [
-				'H', 'I', 'Z'
-			]
+			'A', 'A2', 'A3', 'B',
+			'D', 'E', 'F', 'G'
 		],
 		
 		Brand::BUYGOOD->value => [
-			'enabled' => [
-				'A', 'A2', 'A3',
-				'D', 'E', 'F', 'G'
-			],
-			'except' => [
-				'H', 'I', 'Z'
-			]
+			'A', 'A2', 'A3',
+			'D', 'E', 'F', 'G'
 		],
+	],
+	'except' => [
+		Brand::BAFANG->value => [
+			'H', 'I', 'Z'
+		],
+	
+		Brand::BUYGOOD->value => [
+			'H', 'I', 'Z'
+		]
 	],
 ];
 

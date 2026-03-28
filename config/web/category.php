@@ -2,6 +2,7 @@
 
 use App\Enums\Brand;
 
+#Dashboard的product
 #Product setting category
 return [
 	Brand::BAFANG->value => [

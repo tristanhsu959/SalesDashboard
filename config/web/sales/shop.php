@@ -1,4 +1,5 @@
 <?php
+use App\Enums\Brand;
 
 #銷售POS Shop
 #複合店
@@ -12,7 +13,7 @@ return [
 	
 	#排除門店
 	'except' => [
-		'bafang' => [
+		Brand::BAFANG->code() => [
 			'0000',	'0030', '9999', 'M0020', 'M0023', 
 			'M0024', '8WAYB0', '9999', 'KK-SP', 'KK003', 
 			'KK004', 'KK005', 'KK006', 'M0002', 'M0003', 
@@ -24,7 +25,7 @@ return [
 			'0124',  '1053',  '1189',
 			'9901', '9902', '9903', 
 		],
-		'buygood' => [
+		Brand::BUYGOOD->code() => [
 			'000030', 'KK-CB', 'KK-T22', 'Test1', '9999', 'Chop',
 			'KK-F', 'KK-K22', 'KK-NS', 'KK-SP', 'KK-TN1',
 			'Normal', 'Q001', 'TEST2', '100901', '100902', 
