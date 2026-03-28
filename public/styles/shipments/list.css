@@ -136,28 +136,29 @@ form {
 				background-color: var(--table-stripes);
 			}
 			
-			thead th, tbody th {
+			thead th, tbody th { /* , tbody th */
 				position: sticky;
-				top: 0;
 				z-index: 5;
 				word-break: keep-all;
 			}
 			
 			thead th {
+				top: 0;
 				color: rgba(0, 0, 0, .87);
 				background-color: var(--table-bg);
 				padding-top: 1rem;
+				
 				&:nth-child(1) {
-					z-index: 6;
+					z-index: 10;
 				}
+				/* &:nth-child(2) {
+					z-index: 10;
+				} */
 				&:nth-child(2) {
-					z-index: 6;
+					z-index: 10;
 				}
 				&:nth-child(3) {
-					z-index: 6;
-				}
-				&:nth-child(4) {
-					z-index: 6;
+					z-index: 10;
 				}
 			}
 			
@@ -165,29 +166,29 @@ form {
 				font-weight: normal;
 				color: var(--table-fixed-color);
 				background-color: var(--table-fixed-bg);
-				z-index: 5;
+				z-index: 8;
 			}
 				
-			thead th, tbody th {
+			thead th, tbody th { /* , tbody th */
 				&:nth-child(1) {
 					min-width: 80px;
 					max-width: 80px;
 					left: 0;
 				}
+				/* &:nth-child(2) {
+					min-width: 100px;
+					max-width: 100px;
+					left: 80px;
+				} */
 				&:nth-child(2) {
 					min-width: 100px;
 					max-width: 100px;
 					left: 80px;
 				}
 				&:nth-child(3) {
-					min-width: 100px;
-					max-width: 100px;
-					left: 180px;
-				}
-				&:nth-child(4) {
 					min-width: 160px;
 					max-width: 160px;
-					left: 280px;
+					left: 180px;
 				}
 			}
 		}

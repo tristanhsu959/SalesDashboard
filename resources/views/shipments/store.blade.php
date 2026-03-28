@@ -22,7 +22,7 @@
 							<tr>
 								<th>POS ID</th>
 								<th>區域</th>
-								<th>門店代號</th>
+								<!--th>門店代號</th-->
 								<th>門店名稱</th>
 								<template x-for="(name, id) in statistics.header.dateList" :key="id">
 									<th x-text="name"></th>
@@ -34,7 +34,7 @@
 							<tr>
 								<th x-text="store.postId"></th>
 								<th x-text="store.area"></th>
-								<th x-text="store.storeNo"></th>
+								<!--th x-text="store.storeNo"></th-->
 								<th x-text="store.storeName"></th>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
 									<td x-text="statistics.data[activeProduct]?.[storeId]?.[date]?.['qty'] ?? 0"></td>

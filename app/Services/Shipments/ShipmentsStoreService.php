@@ -236,6 +236,9 @@ class ShipmentsStoreService
 				if (is_null($item['postId']) OR $item['postId'] == 'null')
 					$item['postId'] =  '';
 				
+				$item['area'] = Str::replace('-八方', '', $item['area']);
+				$item['area'] = Str::replace('-御廚', '', $item['area']);
+				
 				return [$item['storeId'] => $item];
 			})->toArray();
 			
