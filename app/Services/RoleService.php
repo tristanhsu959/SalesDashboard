@@ -47,6 +47,9 @@ class RoleService
 	{
 		try
 		{
+			$permission = empty($permission) ? [] : $permission;
+			$area 		= empty($area) ? [] : $area;
+			
 			$this->_repository->insert($name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
@@ -89,6 +92,9 @@ class RoleService
 	{
 		try
 		{
+			$permission = empty($permission) ? [] : $permission;
+			$area 		= empty($area) ? [] : $area;
+			
 			$this->_repository->update($id, $name, $group, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
