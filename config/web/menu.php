@@ -33,7 +33,12 @@ return [
 			'style' 	=> ['icon' => 'local_shipping', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
 		],
-		
+		[
+			'name' 		=> Functions::BF_MONTHLY_FILLING->label(), #出貨查詢,
+			'code'		=> Functions::BF_MONTHLY_FILLING->value,
+			'style' 	=> ['icon' => 'summarize', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.monthly_filling'),
+		],
 	],
 	
 	MenuGroup::BUYGOOD->value => [

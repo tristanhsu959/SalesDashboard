@@ -19,6 +19,7 @@ enum Functions : string
 	case BF_DAILY_REVENUE		= 'bafang:daily_revenue';
 	case BF_PURCHASE			= 'bafang:purchase';
 	case BF_SHIPMENTS			= 'bafang:shipments';
+	case BF_MONTHLY_FILLING		= 'bafang:monthly_filling';
 		
 	#Buygood	
 	case BG_NEW_RELEASE			= 'buygood:new_releases';
@@ -45,6 +46,7 @@ enum Functions : string
 			self::BF_PURCHASE 			=> '出貨統計',
 			self::BF_SALES 				=> '銷售統計',
 			self::BF_DAILY_REVENUE		=> '門店營收',
+			self::BF_MONTHLY_FILLING	=> '月初報表',
 			
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',

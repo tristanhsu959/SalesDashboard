@@ -7,6 +7,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
+use App\Http\Controllers\MonthlyFillingController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -50,5 +51,10 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
 	});	
 	
-	
+	/* 月初報表 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_MONTHLY_FILLING->value, ':')])->group(function(){
+		Route::get('monthly_filling', [MonthlyFillingController::class, 'showSearch'])->name('monthly_filling');
+		Route::post('monthly_filling/search', [MonthlyFillingController::class, 'search'])->name('monthly_filling.search');
+		Route::get('monthly_filling/export/{token}', [MonthlyFillingController::class, 'export'])->name('monthly_filling.export');
+	});	
 });

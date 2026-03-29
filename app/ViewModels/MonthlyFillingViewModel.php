@@ -2,7 +2,6 @@
 
 namespace App\ViewModels;
 
-use App\Services\ShipmentsService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -16,11 +15,11 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
-class ShipmentsViewModel extends Fluent
+class MonthlyFillingViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct(protected ShipmentsService $_service)
+	public function __construct()
 	{
 		$this->function		= NULL;
 		$this->action 		= FormAction::LIST; 
@@ -50,12 +49,6 @@ class ShipmentsViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->_setSearchMode();
-		
-		$productTypes = $this->_service->getProductTypes($this->brand->value);
-		$this->set('options.productTypes', $productTypes);
-		
-		#list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
-		#$this->set('options.products', $products);
 	}
 	
 	/* 查詢選項
@@ -69,18 +62,6 @@ class ShipmentsViewModel extends Fluent
 			'factory'	=> '依工廠',
 		];
 		$this->set('options.mode.type', $type);
-		
-		$calc = [
-			'day'	=> '以日計算', 
-			'month'	=> '以月計算',
-		];
-		$this->set('options.mode.calc', $calc);
-
-		/* $unit = [
-			'qty'	=> '統計數量', 
-			'amount'=> '統計金額',
-		];
-		$this->set('options.mode.unit', $unit); */
 	}
 	
 	/* Form submit action
@@ -95,8 +76,8 @@ class ShipmentsViewModel extends Fluent
 		
 		return match($action)
 		{
-			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.shipments.search')),
-			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.shipments.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.monthly_filling.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.monthly_filling.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -104,17 +85,14 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @params: string
 	 * @params: string
-	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchProductName = '', $searchType = 'store', $searchCalc = 'day')
+	public function keepSearchData($searchStMonth = '', $searchEndMonth = '', $searchType = 'store')
     {
-		$this->set('search.stDate', $searchStDate);
-		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.productName', $searchProductName);
+		$this->set('search.stMonth', $searchStMonth);
+		$this->set('search.endMonth', $searchEndMonth);
 		$this->set('search.type', $searchType);
-		$this->set('search.calc', $searchCalc);
-		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
+		$this->set('search.currentMonth', Carbon::now()->format('Y-m')); 
 	}
 	
 	/* Partial view

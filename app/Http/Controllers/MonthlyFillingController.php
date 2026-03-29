@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\ShipmentsService;
-use App\ViewModels\ShipmentsViewModel;
+use App\Services\MonthlyFillingService;
+use App\ViewModels\MonthlyFillingViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
@@ -14,9 +14,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ShipmentsController extends Controller
+class MonthlyFillingController extends Controller
 {
-	public function __construct(protected ShipmentsService $_service, protected ShipmentsViewModel $_viewModel)
+	public function __construct(protected MonthlyFillingService $_service, protected MonthlyFillingViewModel $_viewModel)
 	{
 	}
 	
@@ -31,7 +31,7 @@ class ShipmentsController extends Controller
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+		return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -43,29 +43,26 @@ class ShipmentsController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		$searchStDate		= $request->input('searchStDate');
-		$searchEndDate		= $request->input('searchEndDate');
-		$searchProductName	= $request->input('searchProductName');
 		$searchType			= $request->input('searchType');
-		$searchCalc			= $request->input('searchCalc');
+		$searchStMonth		= $request->input('searchStMonth');
+		$searchEndMonth		= $request->input('searchEndMonth');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc); 
+		$this->_viewModel->keepSearchData($searchStMonth, $searchEndMonth, $searchType); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-			'searchStDate' 	=> 'required|date_format:Y-m-d',
-			'searchEndDate'	=> 'required|date_format:Y-m-d',
-            'searchProductName' => 'required|max:30',
+			'searchStMonth' 	=> 'required|date_format:Y-m',
+			'searchEndMonth'	=> 'required|date_format:Y-m',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');
-			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc);
+		$response = $this->_service->getStatistics($brand, $function, $searchStMonth, $searchEndMonth, $searchType);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -74,7 +71,7 @@ class ShipmentsController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; 
 		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
+		return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel); 
 	}
 	
 	/* Export
@@ -93,7 +90,7 @@ class ShipmentsController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{
