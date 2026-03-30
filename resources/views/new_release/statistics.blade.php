@@ -190,6 +190,10 @@
 		</div>
 		@endif
 	</section>
+	@else
+	<section class="container">
+		<pre>點擊查詢按鈕執行查詢</pre>
+	</section>
 	@endif
 @endif
 
