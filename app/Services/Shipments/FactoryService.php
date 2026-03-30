@@ -23,7 +23,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class ShipmentsStoreService
+class FactoryService
 {
 	const MODE = 'Name';
 	
@@ -67,6 +67,7 @@ class ShipmentsStoreService
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeCalc']	= $searchCalc; 
+			#$this->_statistics['modeUnit']	= $searchUnit; 
 			$this->_statistics['brandId']	= $brandId; 
 			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
@@ -162,8 +163,8 @@ class ShipmentsStoreService
 			#1.計算查詢範圍總天數 (use Date not DateTime)
 			$this->_statistics['header'] = $this->_buildHeader($orderData);
 			
-			#2.By門店
-			$this->_statistics['data'] = $this->_parsingByStore($orderData);
+			#2.By工廠
+			$this->_statistics['data'] = $this->_parsingByFactory($orderData);
 			
 			return TRUE;
 		}
@@ -212,8 +213,8 @@ class ShipmentsStoreService
 			return [$items['erpNo'] => $items['productName']];
 		})->toArray();
 		
-		$header['storeList'] = $this->_getStoreList();
-
+		$header['factoryList'] = $this->_getFactoryList();
+		
 		return $header;
 	}
 	
@@ -224,25 +225,19 @@ class ShipmentsStoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getStoreList()
+	private function _getFactoryList()
 	{
 		try
 		{
 			$brandId = $this->_statistics['brandId'];
-			$store = $this->_repository->getStoreList($brandId);
+			$factory = $this->_repository->getFactoryList($brandId);
 			
 			#To key-value
-			$store = collect($store)->mapWithKeys(function($item, $key){
-				if (is_null($item['postId']) OR $item['postId'] == 'null')
-					$item['postId'] =  '';
-				
-				$item['area'] = Str::replace('-八方', '', $item['area']);
-				$item['area'] = Str::replace('-御廚', '', $item['area']);
-				
-				return [$item['storeId'] => $item];
+			$factory = collect($factory)->mapWithKeys(function($item, $key){
+				return [$item['factoryNo'] => $item['factoryName']];
 			})->toArray();
 			
-			return $store;
+			return $factory;
 		}
 		catch(Exception $e)
 		{
@@ -255,7 +250,7 @@ class ShipmentsStoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _parsingByStore($orderData)
+	private function _parsingByFactory($orderData)
 	{
 		/*
 		"PR00313063" => array:2 [
@@ -274,7 +269,7 @@ class ShipmentsStoreService
 		$modeCalc = $this->_statistics['modeCalc'];
 		
 		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
-			$temp = $items->groupBy('storeId')->map(function($items, $key) use($modeCalc) {
+			$temp = $items->groupBy('factoryNo')->map(function($items, $key) use($modeCalc) {
 				
 				if ($modeCalc == 'day')
 				{
@@ -367,32 +362,29 @@ class ShipmentsStoreService
 	private function _buildExportData($header, $data)
 	{
 		$export = [];
-		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $header['dateList']);
+		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
 		
 		#每個product要一個sheet
 		foreach($header['productList'] as $erpNo => $productName)
 		{
-			$storeData = data_get($data, $erpNo, []);
+			$factoryData = data_get($data, $erpNo, []);
 			
-			if (empty($storeData))
+			if (empty($factoryData))
 				continue;
 			
 			$export[$productName] = [];
 			$export[$productName][] = $outputHeader;
 			
 			#使用header來控制顯示順序,先TP後KH
-			foreach($header['storeList'] as $storeNo => $store)
+			foreach($header['factoryList'] as $factoryNo => $factoryName)
 			{
 				$row = [];
-				$row[] = $store['postId'];
-				$row[] = $store['area'];
-				$row[] = $store['storeNo'];
-				$row[] = $store['storeName'];
+				$row[] = $factoryName;
 				
 				#要按Header的順序
 				foreach($header['dateList'] as $date)
 				{
-					$row[] = data_get($storeData, "{$storeNo}.{$date}.qty", 0);
+					$row[] = data_get($factoryData, "{$factoryNo}.{$date}.qty", 0);
 				}
 				
 				$export[$productName][] = $row;

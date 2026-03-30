@@ -1,0 +1,197 @@
+/* New Release Style */
+body main.app {
+	overflow-y: hidden !important;
+}
+
+form {
+	margin-block-start: 0;
+}
+
+#searchPanel {
+	max-width: 400px;
+	
+	.mode-group {
+		.field {
+			margin-block-start: 0;
+			
+			&:first-child {
+				margin-block-start: 1rem;
+			}
+		}
+	}
+}
+
+/* Data */
+.page {
+	padding: 1rem;
+	 
+	/* 工廠 */
+	.statistics-factory {
+		--table-bg: #fffbff;
+		
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 220px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: #666 var(--table-bg); /*thumb - track*/
+		margin: 0;
+				
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: auto;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			
+			thead {
+				tr {
+					th {
+						position: sticky;
+						top: 0;
+						z-index: 5;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						min-width: 100px;
+						color: rgba(0, 0, 0, .87);
+						padding-top: 1rem;
+						
+						&:nth-child(1) {
+							width: 100px;
+							position: sticky;
+							left: 0;
+							z-index: 6;
+						}
+					}
+				}
+			}
+			
+			tbody {
+				tr {
+					th {
+						position: sticky;
+						font-weight: bold;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						z-index: 5;
+						
+						&:nth-child(1) {
+							left: 0;
+							background-color: var(--table-bg);
+						}
+					}
+					
+					td {
+						color: #424242;
+						/* 總計 
+						&:nth-last-child(-n + 2) {
+							color: #f44336;
+						}*/
+					}
+				}
+			}
+		}
+	}
+	
+	
+	
+	/* 門市 */
+	.statistics-store {
+		&.bafang {
+			--table-bg: #4fc3f7; 			/* light-2 */
+			--table-bg-dark: #0288d1; 		/* dark-2 */
+			--table-fixed-bg: #b3e5fc; 		/* light-4 */
+			--table-fixed-color: #01579b;	/* dark-4 */
+			--table-stripes: #e1f5fe;		/* light-5 */
+		}
+		&.buygood {
+			--table-bg: #80deea;
+			--table-bg-dark: #0097a7;
+			--table-fixed-bg: #b2ebf2;
+			--table-fixed-color: #01579b;
+			--table-stripes: #e0f7fa; 
+		}
+		
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 220px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		margin: 0;
+		border: 1px solid var(--table-bg-dark);
+		
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: auto;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			
+			&.stripes tbody tr:nth-child(odd) {
+				background-color: var(--table-stripes);
+			}
+			
+			thead th, tbody th { /* , tbody th */
+				position: sticky;
+				z-index: 5;
+				word-break: keep-all;
+			}
+			
+			thead th {
+				top: 0;
+				color: rgba(0, 0, 0, .87);
+				background-color: var(--table-bg);
+				padding-top: 1rem;
+				
+				&:nth-child(1) {
+					z-index: 10;
+				}
+				/* &:nth-child(2) {
+					z-index: 10;
+				} */
+				&:nth-child(2) {
+					z-index: 10;
+				}
+				&:nth-child(3) {
+					z-index: 10;
+				}
+			}
+			
+			tbody th {
+				font-weight: normal;
+				color: var(--table-fixed-color);
+				background-color: var(--table-fixed-bg);
+				z-index: 8;
+			}
+				
+			thead th, tbody th { /* , tbody th */
+				&:nth-child(1) {
+					min-width: 80px;
+					max-width: 80px;
+					left: 0;
+				}
+				/* &:nth-child(2) {
+					min-width: 100px;
+					max-width: 100px;
+					left: 80px;
+				} */
+				&:nth-child(2) {
+					min-width: 100px;
+					max-width: 100px;
+					left: 80px;
+				}
+				&:nth-child(3) {
+					min-width: 160px;
+					max-width: 160px;
+					left: 180px;
+				}
+			}
+		}
+	}
+
+}

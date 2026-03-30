@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Services\Shipments\ShipmentsFactoryService;
-use App\Services\Shipments\ShipmentsStoreService;
+use App\Services\Shipments\FactoryService;
+use App\Services\Shipments\StoreService;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ShopLib;
@@ -112,7 +112,7 @@ class ShipmentsService
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchProductName]);
+			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc]);
 			
 			if (Cache::has($cacheKey))
 			{
@@ -126,9 +126,9 @@ class ShipmentsService
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
 				if ($searchType == 'store')
-					$service = app(ShipmentsStoreService::class);
+					$service = app(StoreService::class);
 				else
-					$service = app(ShipmentsFactoryService::class);
+					$service = app(FactoryService::class);
 				
 				$productIds = $this->_getProductIdByName($brand->value, $searchProductName);
 				
@@ -194,9 +194,9 @@ class ShipmentsService
 		$modeType = $sourceData['modeType'];
 		
 		if ($modeType == 'store')
-			$service = app(ShipmentsStoreService::class);
+			$service = app(StoreService::class);
 		else
-			$service = app(ShipmentsFactoryService::class);
+			$service = app(FactoryService::class);
 		
 		return $service->export($sourceData);
 	}

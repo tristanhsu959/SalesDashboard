@@ -44,16 +44,17 @@ class MonthlyFillingController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType			= $request->input('searchType');
-		$searchStMonth		= $request->input('searchStMonth');
-		$searchEndMonth		= $request->input('searchEndMonth');
+		$searchRange		= $request->input('searchRange'); #日or月條件
+		$searchStDate		= $request->input('searchStDate');
+		$searchEndDate		= $request->input('searchEndDate');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStMonth, $searchEndMonth, $searchType); 
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchType); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-			'searchStMonth' 	=> 'required|date_format:Y-m',
-			'searchEndMonth'	=> 'required|date_format:Y-m',
+			'searchStDate' 	=> 'required',
+			'searchEndDate'	=> 'required',
         ]);
  
         if ($validator->fails()) 
@@ -62,7 +63,7 @@ class MonthlyFillingController extends Controller
 			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $function, $searchStMonth, $searchEndMonth, $searchType);
+		$response = $this->_service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchType, $searchRange);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

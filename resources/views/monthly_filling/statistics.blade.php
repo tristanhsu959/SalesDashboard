@@ -27,17 +27,27 @@
 					</template>
 				</nav>
 			</div>
+			<div class="field middle-align">
+				<nav class="wrap">
+					<template x-for="(name, id) in options.mode.range" :key="id">
+						<label class="radio field-light-blue">
+							<input type="radio" name="searchRange" x-model="searchData.range" :value="id" @change="changeDateInput()">
+							<span x-text="name"></span>
+						</label>
+					</template>
+				</nav>
+			</div>
 		</div>
 		
 		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stMonth')">
-			<input type="month" name="searchStMonth" maxlength="7" x-model="searchData.stMonth" x-ref="searchStMonth" @input="errors.delete('stMonth')" :max="searchData.currentMonth">
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
+			<input type="month" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.currentDate">
 			<label>開始日期</label>
 		</div>
 		
 		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endMonth')">
-			<input type="month" name="searchEndMonth" maxlength="7" x-model="searchData.endMonth" x-ref="searchEndMonth" @input="errors.delete('endMonth')" :max="searchData.currentMonth">
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
+			<input type="month" name="searchEndDate" maxlength="7" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.currentDate">
 			<label>結束日期</label>
 		</div>
 		
@@ -65,6 +75,10 @@
 @if($viewModel->status() === TRUE)	
 	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
 		@include($viewModel->getPartialView())
+	@else
+	<section class="container">
+		<pre>點擊查詢按鈕執行查詢</pre>
+	</section>
 	@endif
 @endif
 

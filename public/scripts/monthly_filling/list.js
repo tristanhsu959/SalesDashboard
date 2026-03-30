@@ -7,22 +7,29 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			
+			this.changeDateInput();
+		},
+		
+		changeDateInput(){
+			this.$refs.searchStDate.type = this.searchData.range;
+			this.$refs.searchEndDate.type = this.searchData.range;
+			this.searchData.stDate = '';
+			this.searchData.endDate = '';
 		},
 		
 		search() {
 			this.errors.clear();
 			
-			if (this.searchData.stMonth == '')
-				this.errors.add('stMonth');
-			if (this.searchData.endMonth == '')
-				this.errors.add('endMonth');
+			if (this.searchData.stDate == '')
+				this.errors.add('stDate');
+			if (this.searchData.endDate == '')
+				this.errors.add('endDate');
 			
-			if (this.searchData.stMonth && this.searchData.endMonth)
+			if (this.searchData.stDate && this.searchData.endDate)
 			{
-				if (new Date(this.searchData.stMonth) > new Date(this.searchData.endMonth))
+				if (new Date(this.searchData.stDate) > new Date(this.searchData.endDate))
 				{
-					this.errors.add('endMonth');
+					this.errors.add('endDate');
 					Alpine.store('toast').notify('結束日期不可小於開始日期');
 				}
 			}
@@ -42,8 +49,9 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = Object.keys(this.options.mode.type)[0];
-			this.searchData.stMonth = '';
-			this.searchData.endMonth = '';
+			this.searchData.range = Object.keys(this.options.mode.range)[0];
+			this.searchData.stDate = '';
+			this.searchData.endDate = '';
 			this.errors.clear();
 		},
     }));

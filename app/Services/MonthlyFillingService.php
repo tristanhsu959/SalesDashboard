@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Services\Shipments\ShipmentsFactoryService;
-use App\Services\Shipments\ShipmentsStoreService;
+use App\Services\MonthlyFilling\MonthlyFillingFactoryService;
+use App\Services\MonthlyFilling\StoreService;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ShopLib;
@@ -99,40 +99,47 @@ class MonthlyFillingService
 	/* ====================== 主流程 By Name ====================== */
 	/* Search data
 	 * @params: enum
+	 * @params: enum
 	 * @params: date
 	 * @params: date
 	 * @params: string
+	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc)
+	public function getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchType, $searchRange)
 	{
 		try
 		{
+			#轉換日期
+			if ($searchRange == 'month')
+			{
+				$searchStDate = Carbon::createFromFormat('!Y-m', $searchStDate)->toDateString();
+				$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
+			}
+			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchProductName]);
+			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate]);
 			
 			if (Cache::has($cacheKey))
 			{
-				Log::channel('appServiceLog')->info('Get shipments data from cache');
+				Log::channel('appServiceLog')->info('Get monthly filling data from cache');
 				
 				$statistics = Cache::get($cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
-				Log::channel('appServiceLog')->info('Get shipments data from db');
+				Log::channel('appServiceLog')->info('Get monthly filling data from db');
 				
 				if ($searchType == 'store')
-					$service = app(ShipmentsStoreService::class);
+					$service = app(MonthlyFillingStoreService::class);
 				else
-					$service = app(ShipmentsFactoryService::class);
-				
-				$productIds = $this->_getProductIdByName($brand->value, $searchProductName);
+					$service = app(MonthlyFillingFactoryService::class);
 				
 				#執行統計
-				$this->_statistics = $service->analysis($brand->value, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc);
+				$this->_statistics = $service->analysis($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
 				
 				#無值不cache
 				if (! empty($this->_statistics['data']))
@@ -193,9 +200,9 @@ class MonthlyFillingService
 		$modeType = $sourceData['modeType'];
 		
 		if ($modeType == 'store')
-			$service = app(ShipmentsStoreService::class);
+			$service = app(StoreService::class);
 		else
-			$service = app(ShipmentsFactoryService::class);
+			$service = app(FactoryService::class);
 		
 		return $service->export($sourceData);
 	}

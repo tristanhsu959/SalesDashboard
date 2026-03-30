@@ -62,6 +62,13 @@ class MonthlyFillingViewModel extends Fluent
 			'factory'	=> '依工廠',
 		];
 		$this->set('options.mode.type', $type);
+		
+		#查詢區間
+		$range = [
+			'month'		=> '月區間', 
+			'date'		=> '日區間',
+		];
+		$this->set('options.mode.range', $range);
 	}
 	
 	/* Form submit action
@@ -87,12 +94,13 @@ class MonthlyFillingViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchStMonth = '', $searchEndMonth = '', $searchType = 'store')
+	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchType = 'store', $searchRange = 'month')
     {
-		$this->set('search.stMonth', $searchStMonth);
-		$this->set('search.endMonth', $searchEndMonth);
+		$this->set('search.stDate', $searchStDate);
+		$this->set('search.endDate', $searchEndDate);
 		$this->set('search.type', $searchType);
-		$this->set('search.currentMonth', Carbon::now()->format('Y-m')); 
+		$this->set('search.range', $searchRange);
+		$this->set('search.currentDate', Carbon::now()->format('Y-m-d')); 
 	}
 	
 	/* Partial view
@@ -105,8 +113,8 @@ class MonthlyFillingViewModel extends Fluent
 		
 		return match($type)
 		{
-			'store'		=> 'shipments.store',
-			'factory'	=> 'shipments.factory',	 
+			'store'		=> 'monthly_filling.store',
+			'factory'	=> 'monthly_filling.factory',	 
 		};
 	}
 	
