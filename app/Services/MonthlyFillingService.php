@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Services\MonthlyFilling\MonthlyFillingFactoryService;
+use App\Services\MonthlyFilling\FactoryService;
 use App\Services\MonthlyFilling\StoreService;
 use App\Facades\AppManager;
-use App\Repositories\ShipmentsRepository;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -29,7 +28,7 @@ class MonthlyFillingService
 {
 	private $_statistics = [];
 	
-	public function __construct(protected ShipmentsRepository $_repository)
+	public function __construct()
 	{
 	}
 	
@@ -53,47 +52,6 @@ class MonthlyFillingService
 		{
 			Brand::BAFANG	=> Functions::BF_MONTHLY_FILLING, 
         };
-	}
-	
-	/* 取分類by brand
-	 * @params: int
-	 * @return: string
-	 */
-	public function getProductTypes($brandId)
-	{
-		$result = $this->_repository->getProductTypes($brandId);
-		
-		$result = collect($result)->mapWithKeys(function($item, $key){
-			return [$item['No'] => $item['Name']];
-		})->toArray();
-		
-		return $result;
-	}
-	
-	/* 取分類及產品by brand
-	 * @params: int
-	 * @return: string
-	 */
-	public function getCategoryAndProduct($brandId)
-	{
-		$result = $this->_repository->getProductWithType($brandId);
-		$result = collect($result)->groupBy('catNo');
-		
-		#Build category
-		$category = $result->map(function($item, $no){
-			return $item->pluck('catName')->first();
-		});
-		
-		#Build product mapping
-		$products = $result->map(function($items, $no){
-			$items = $items->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			})->toArray();
-			
-			return $items;
-		});
-		
-		return [$category, $products];
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
@@ -120,7 +78,7 @@ class MonthlyFillingService
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate]);
+			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchType, $searchRange]);
 			
 			if (Cache::has($cacheKey))
 			{
@@ -134,9 +92,9 @@ class MonthlyFillingService
 				Log::channel('appServiceLog')->info('Get monthly filling data from db');
 				
 				if ($searchType == 'store')
-					$service = app(MonthlyFillingStoreService::class);
+					$service = app(StoreService::class);
 				else
-					$service = app(MonthlyFillingFactoryService::class);
+					$service = app(FactoryService::class);
 				
 				#執行統計
 				$this->_statistics = $service->analysis($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
@@ -155,28 +113,6 @@ class MonthlyFillingService
 		catch(Exception $e)
 		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
-		}
-	}
-	
-	/* Name to proudct id
-	 * @params: int
-	 * @return: array
-	 */
-	private function _getProductIdByName($brandId, $productName)
-	{
-		try
-		{
-			$ids = $this->_repository->getProductIdByName($brandId, $productName);
-			
-			if (empty($ids))
-				throw new Exception('無此產品名稱');
-			
-			return $ids;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception($e->getMessage());
 		}
 	}
 	

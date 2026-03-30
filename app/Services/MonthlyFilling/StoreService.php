@@ -23,7 +23,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class MonthlyFillingStoreService
+class StoreService
 {
 	const MODE = 'Name';
 	
@@ -33,8 +33,7 @@ class MonthlyFillingStoreService
 	{
 		$this->_statistics = [
 			'modeType'		=> '',
-			'modeCalc'		=> '',
-			#'modeUnit'		=> '',
+			'modeRange'		=> '',
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
@@ -51,26 +50,19 @@ class MonthlyFillingStoreService
 	 * @params: int
 	 * @params: date
 	 * @params: date
-	 * @params: array
-	 * @params: string
-	 * @params: string
 	 * @params: string
 	 * @params: string
 	 * @return: array
 	 */
-	public function analysis($brandId, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
+	public function analysis($brandId, $searchStDate, $searchEndDate, $searchType, $searchRange)
 	{
 		try
 		{
-			#Check cache
-			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			
 			$this->_statistics['modeType']	= $searchType;
-			$this->_statistics['modeCalc']	= $searchCalc; 
+			$this->_statistics['modeRange']	= $searchRange; 
 			$this->_statistics['brandId']	= $brandId; 
-			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
-			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
-			$this->_statistics['productIds']= $productIds;
+			$this->_statistics['startDate'] = $searchStDate; 
+			$this->_statistics['endDate'] 	= $searchEndDate;
 			
 			#執行統計
 			$this->_analysisStatisticsData();

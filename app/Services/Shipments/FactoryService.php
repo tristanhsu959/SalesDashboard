@@ -93,11 +93,7 @@ class FactoryService
 	{
 		try
 		{
-			#1. Calc time
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
-			
-			#2. Get Order data
+			#Get Order data
 			$orderData = $this->_getDataFromDB();
 			
 			return $this->_outputReport($orderData);
@@ -135,8 +131,8 @@ class FactoryService
 		try
 		{
 			$brandId 	= $this->_statistics['brandId'];
-			$stDate		= $this->_statistics['startDate'];
-			$endDate	= $this->_statistics['endDate'];
+			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			$productIds	= $this->_statistics['productIds'];
 			
 			$orderData = $this->_repository->getOrderDataByProductId($brandId, $stDate, $endDate, $productIds);
