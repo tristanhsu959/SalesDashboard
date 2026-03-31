@@ -23,7 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+		#預設會濾除空白字元
+        $middleware->trimStrings(except: [
+			'adPassword',
+		]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (TokenMismatchException $e, Request $request) {
