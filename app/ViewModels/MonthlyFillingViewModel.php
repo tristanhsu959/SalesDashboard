@@ -65,6 +65,7 @@ class MonthlyFillingViewModel extends Fluent
 		
 		#查詢區間
 		$range = [
+			'year'		=> '本年度', 
 			'month'		=> '月區間', 
 			'date'		=> '日區間',
 		];
@@ -94,7 +95,7 @@ class MonthlyFillingViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchType = 'store', $searchRange = 'month')
+	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchType = 'store', $searchRange = 'year')
     {
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);

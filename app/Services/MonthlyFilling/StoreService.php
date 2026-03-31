@@ -4,7 +4,6 @@ namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
 use App\Repositories\MonthlyFillingRepository;
-use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
@@ -37,7 +36,6 @@ class StoreService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'productIds'	=> [],
 			'header'		=> [],
 			'data'			=> [],
 			'exportName'	=> '', #export
@@ -84,12 +82,11 @@ class StoreService
 	{
 		try
 		{
-			#1. Calc time
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
+			#1. 取餡料product id
+			$productIds = $this->_getProductIdByCode();
 			
 			#2. Get Order data
-			$orderData = $this->_getDataFromDB();
+			$orderData = $this->_getDataFromDB($productIds);
 			
 			return $this->_outputReport($orderData);
 		}
@@ -99,38 +96,61 @@ class StoreService
 			throw new Exception($e->getMessage());
 		}
 	}
+	
+	/* Short code to proudct id
+	 * @params: int
+	 * @return: array
+	 */
+	private function _getProductIdByCode()
+	{
+		try
+		{
+			$brandId 	= $this->_statistics['brandId'];
+			$codes		= array_keys(config('web.purchase.monthly_filling.totalCount.code'));
+			$codes = collect($codes)->map(function ($value, $key) {
+				return Str::after($value, '_');
+			})->all();
+			
+			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
+			$ids = collect($ids)->map(function($item, $key){
+				return (int)$item;
+			})->toArray();
+			
+			if (empty($ids))
+				throw new Exception('查無參照的產品');
+			
+			return $ids;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
 	/* ====================== 主流程 End ====================== */
 	
 	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB()
+	private function _getDataFromDB($productIds)
 	{
-		/*0 => array:9 [
-			"expectedDate" => "2026-03-25"
-			"area" => "中彰投-八方"
-			"storeId" => "156"
-			"factoryNo" => "TW_KH"
-			"factoryName" => "高雄工廠"
-			"qty" => "2"
-			"amount" => "500.000000"
-			"productName" => "紅燒帶骨牛小排調理包"
-			"erpNo" => "PR00313063"
-		  ]
+		/* [
+			"expectedDate" => "2026-03"
+			"qty" => "310"
+			"storeId" => "1911"
+			"shortCode" => "0003"
+		]
 		*/
 	
 		try
 		{
 			$brandId 	= $this->_statistics['brandId'];
-			$stDate		= $this->_statistics['startDate'];
-			$endDate	= $this->_statistics['endDate'];
-			$productIds	= $this->_statistics['productIds'];
+			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			$orderData = $this->_repository->getOrderDataByProductId($brandId, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByStore($brandId, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -151,8 +171,8 @@ class StoreService
 	{
 		try
 		{
-			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['header'] = $this->_buildHeader($orderData);
+			#1.Build header data
+			$this->_statistics['header'] = $this->_buildHeader();
 			
 			#2.By門店
 			$this->_statistics['data'] = $this->_parsingByStore($orderData);
@@ -170,39 +190,22 @@ class StoreService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader($orderData)
+	private function _buildHeader()
 	{
-		$st 		= Carbon::create($this->_statistics['startDate']);
-		$end 		= Carbon::create($this->_statistics['endDate']);
-		$modeCalc 	= $this->_statistics['modeCalc'];
 		$header 	= [];
 		
-		if ($modeCalc == 'day')
-		{
-			#By day
-			$period 	= CarbonPeriod::create($st, $end);
-			foreach ($period as $date) 
-			{
-				$header['dateList'][] = $date->format('Y-m-d');
-			}
-		}
-		else
-		{
-			#By month
-			$st = Carbon::parse($this->_statistics['startDate'])->startOfMonth();
-			$end = Carbon::parse($this->_statistics['endDate'])->startOfMonth();
+		#By month
+		$st 	= Carbon::parse($this->_statistics['startDate'])->startOfMonth();
+		$end	= Carbon::parse($this->_statistics['endDate'])->startOfMonth();
 			
-			$period = CarbonPeriod::create($st, '1 month', $end);
-			foreach ($period as $date) 
-			{
-				$header['dateList'][] = $date->format('Y-m');
-			}
+		$period = CarbonPeriod::create($st, '1 month', $end);
+		foreach ($period as $month) 
+		{
+			$header['monthList'][] = $month->format('Y-m');
 		}
 		
 		#productList
-		$header['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
-		})->toArray();
+		$header['productList']  = config('web.purchase.monthly_filling.totalCount.group');
 		
 		$header['storeList'] = $this->_getStoreList();
 
@@ -232,7 +235,7 @@ class StoreService
 				$item['area'] = Str::replace('-御廚', '', $item['area']);
 				
 				return [$item['storeId'] => $item];
-			})->toArray();
+			})->sortBy('area')->toArray();
 			
 			return $store;
 		}
@@ -250,60 +253,40 @@ class StoreService
 	private function _parsingByStore($orderData)
 	{
 		/*
-		"PR00313063" => array:2 [
-			"TW_KH" => array:2 [
-				"2026-03-25" => array:1 [
-					"qty" => 116
+		"g1" => array:1063 [
+			"1911" => array:2 [
+				"2026-03" => array:1 [
+					"qty" => 1590
 				]
-				"2026-03-26" => array:1 []
+				"2026-02" => array:1 [...]
 			]
-			"TW_TP" => array:2 []
 		]
 		*/
 		if (empty($orderData))
 			return [];
 		
-		$modeCalc = $this->_statistics['modeCalc'];
+		$groups = config('web.purchase.monthly_filling.totalCount.group');
 		
-		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
-			$temp = $items->groupBy('storeId')->map(function($items, $key) use($modeCalc) {
+		#先依定義的餡分群
+		$result = collect($orderData)->groupBy(function($item, $key) use($groups){
+			foreach($groups as $groupKey => $group)
+			{
+				$groupCodes = $group['code'];
+				if (in_array($item['shortCode'], $groupCodes))
+					return $groupKey;
+			}
+		})->map(function($items, $key) {
+			
+			return $items->groupBy('storeId')->map(function($items, $key) {
 				
-				if ($modeCalc == 'day')
-				{
-					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
-						$temp['qty'] = $items->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $items->pluck('qty')->sum();
-						else
-							$temp['amount'] = $items->pluck('amount')->sum(); */
-						
-						return $temp;
-					});
+				return $items->groupBy('expectedDate')->map(function($items, $key) {
 					
-					return $day->toArray();	
-				}
-				
-				if ($modeCalc == 'month')
-				{
-					$month = $items->groupBy(function ($item) {
-						return substr($item['expectedDate'], 0, 7); 
-					})->map(function ($group) {
-						$temp['qty'] = $group->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $group->pluck('qty')->sum();
-						else
-							$temp['amount'] = $group->pluck('amount')->sum(); */
-						
-						return $temp;
-					});
+					$temp['qty'] = $items->pluck('qty')->sum();
+					return $temp;
 					
-					return $month->toArray();	
-				}
-				
-				#return $day->merge($month)->toArray();
+				})->toArray();
 			});
 			
-			return $temp;
 		})->sortKeys()->toArray();
 		
 		return $result;

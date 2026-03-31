@@ -7,22 +7,36 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			this.changeDateInput();
+			this.initDateInput();
 		},
 		
 		changeDateInput(){
-			this.$refs.searchStDate.type = this.searchData.range;
-			this.$refs.searchEndDate.type = this.searchData.range;
+			this.initDateInput();
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
+		},
+		
+		initDateInput(){
+			if (this.searchData.range == 'year')
+			{
+				this.$refs.searchStDate.disabled  = true;
+				this.$refs.searchEndDate.disabled  = true;
+			}
+			else
+			{
+				this.$refs.searchStDate.disabled  = false;
+				this.$refs.searchEndDate.disabled  = false;
+				this.$refs.searchStDate.type = this.searchData.range;
+				this.$refs.searchEndDate.type = this.searchData.range;
+			}
 		},
 		
 		search() {
 			this.errors.clear();
 			
-			if (this.searchData.stDate == '')
+			if (this.searchData.range != 'year' && this.searchData.stDate == '')
 				this.errors.add('stDate');
-			if (this.searchData.endDate == '')
+			if (this.searchData.range != 'year' && this.searchData.endDate == '')
 				this.errors.add('endDate');
 			
 			if (this.searchData.stDate && this.searchData.endDate)
@@ -50,8 +64,7 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.type = Object.keys(this.options.mode.type)[0];
 			this.searchData.range = Object.keys(this.options.mode.range)[0];
-			this.searchData.stDate = '';
-			this.searchData.endDate = '';
+			this.changeDateInput();
 			this.errors.clear();
 		},
     }));
@@ -59,12 +72,17 @@ document.addEventListener('alpine:init', () => {
 	//Factory
 	Alpine.data('statisticsFactory', (data) => ({
 		statistics: {...data},
-		activeProduct: '',
+		activeProduct: 'qty',
 		
 		init() { 
-			const keys = Object.keys(this.statistics.header.productList);
-			if (keys.length > 0)
-				this.activeProduct = keys[0];
+			this.activeProduct = 'qty';
+			this.$nextTick(() => ui('#page-qty'));
+		},
+		
+		getValue(factoryNo, month, productCode) {
+			console.log(factoryNo);
+			const record = this.statistics.data?.[factoryNo]?.[month]?.[productCode];
+			return record?.[this.activeProduct] ?? 0;
 		},
     }));
 	
@@ -77,6 +95,8 @@ document.addEventListener('alpine:init', () => {
 			const keys = Object.keys(this.statistics.header.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
+			
+			this.$nextTick(() => ui(`#page-${this.activeProduct}`));
 		},
     }));
 });

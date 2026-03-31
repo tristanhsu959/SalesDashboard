@@ -69,7 +69,13 @@ class MonthlyFillingService
 		try
 		{
 			#轉換日期
-			if ($searchRange == 'month')
+			if ($searchRange == 'year')
+			{
+				$year = Carbon::now()->year;
+				$searchStDate 	= Carbon::create($year)->startOfYear()->toDateString();
+				$searchEndDate 	= Carbon::create($year)->endOfYear()->toDateString();
+			}
+			else if ($searchRange == 'month')
 			{
 				$searchStDate = Carbon::createFromFormat('!Y-m', $searchStDate)->toDateString();
 				$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
@@ -77,7 +83,6 @@ class MonthlyFillingService
 			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
-			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchType, $searchRange]);
 			
 			if (Cache::has($cacheKey))
@@ -97,14 +102,14 @@ class MonthlyFillingService
 					$service = app(FactoryService::class);
 				
 				#執行統計
-				$this->_statistics = $service->analysis($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
+				$this->_statistics = $service->analysisStatisticsData($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
 				
 				#無值不cache
 				if (! empty($this->_statistics['data']))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					$this->_statistics['exportName']	= $searchProductName;
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(1));
+					#$this->_statistics['exportName']	= '';
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();

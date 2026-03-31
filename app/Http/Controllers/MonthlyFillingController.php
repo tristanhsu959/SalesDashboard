@@ -49,7 +49,7 @@ class MonthlyFillingController extends Controller
 		$searchEndDate		= $request->input('searchEndDate');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchType); 
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchType, $searchRange); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -57,7 +57,7 @@ class MonthlyFillingController extends Controller
 			'searchEndDate'	=> 'required',
         ]);
  
-        if ($validator->fails()) 
+        if ($searchRange != 'year' && $validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');
 			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);

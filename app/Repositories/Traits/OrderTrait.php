@@ -96,6 +96,7 @@ trait OrderTrait
 			})
 			->whereNull('s.CloseDate')
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))
+			->orderBy('s.OperationCenterId')
 			->orderBy('ar.Id')
 			->get()
 			->toArray();

@@ -9,13 +9,14 @@
 		@else
 		<div class="store-content">
 			<div class="tabs cyan-text">
-				<template x-for="(name, id) in statistics.header.productList" :key="id">
-					<a x-text="name" @click="activeProduct = id" :class="{ 'active': activeProduct === id }"></a>
+				<template x-for="(item, id) in statistics.header.productList" :key="id">
+					<a x-text="item.name" @click="activeProduct = id" :data-ui="`#page-${id}`" :class="activeProduct == id ? 'active':''"></a>
 				</template>
 			</div>
 			
 			<!-- 門店 -->
-			<div class="page padding active">
+			<template x-for="(item, pid) in statistics.header.productList" :key="pid">
+			<div class="page padding" :id="`page-${pid}`" >
 				<section class="statistics-store scrollbar {{$viewModel->getBrandCode()}}">
 					<table class="stripes">
 						<thead>
@@ -24,8 +25,8 @@
 								<th>區域</th>
 								<!--th>門店代號</th-->
 								<th>門店名稱</th>
-								<template x-for="(name, id) in statistics.header.dateList" :key="id">
-									<th x-text="name"></th>
+								<template x-for="(month, id) in statistics.header.monthList" :key="id">
+									<th x-text="month"></th>
 								</template>
 							</tr>
 						</thead>
@@ -36,16 +37,16 @@
 								<th x-text="store.area"></th>
 								<!--th x-text="store.storeNo"></th-->
 								<th x-text="store.storeName"></th>
-								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-									<td x-text="statistics.data[activeProduct]?.[storeId]?.[date]?.['qty'] ?? 0"></td>
+								<template x-for="(month, idx) in statistics.header.monthList" :key="idx">
+									<td x-text="statistics.data[pid]?.[storeId]?.[month]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>
-								
 						</tbody>
 					</table>
 				</section>
 			</div>
+			</template>
 		</div>
 		@endif
 	</section>
