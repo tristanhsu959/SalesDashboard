@@ -131,7 +131,7 @@ class DailyRevenueService
 			#2. 檢查區域權限
 			$currentUser = AppManager::getCurrentUser();
 			$userAreaIds = $currentUser['roleArea']; 
-				
+			
 			#3. Get all shops with area permission
 			$shopList = $this->_getShopList($brand, $shopType, $userAreaIds);
 			
@@ -163,7 +163,7 @@ class DailyRevenueService
 		{
 			#目前先不Filter區域權限
 			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
-			
+			dd($shopList);
 			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
 			});
