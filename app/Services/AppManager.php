@@ -101,6 +101,9 @@ class AppManager
 					$authMenu[$keyName][] = $item;
 				}
 			}
+			
+			if (empty($authMenu[$keyName]))
+				unset($authMenu[$keyName]);
 		}
 		
 		session()->put(self::SESS_AUTH_MENU, $authMenu);
