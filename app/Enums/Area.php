@@ -69,11 +69,9 @@ enum Area : int
 	#To Bafang shopgroup gid
 	public static function toBafangId($srcIds): array
 	{
-		$srcIds = collect($srcIds)->map(function($item, $key){
-			return intval($item);
-		});
-		
 		return collect($srcIds)->map(function ($value, int $key) {
+			$value = intval($value);
+			
 			return match ($value) 
 			{
 				self::TAIPEI->value		=> '1',
@@ -90,11 +88,9 @@ enum Area : int
 	#To Buygood shopgroup gid
 	public static function toBuygoodId($srcIds): array
 	{
-		$srcIds = collect($srcIds)->map(function($item, $key){
-			return intval($item);
-		});
-		
 		return collect($srcIds)->map(function ($value, int $key) {
+			$value = intval($value);
+			
 			return match ($value) 
 			{
 				self::TAIPEI->value		=> 'A01',

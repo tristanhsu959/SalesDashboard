@@ -22,9 +22,9 @@
 			</p>
 			<p>
 				<span>管理區域</span>
-				<span x-show="!profile.roleArea" class="text-danger">未設定</span>
+				<span x-show="profile.roleArea.length <= 0 " class="text-danger">未設定</span>
 			</p>
-			<p x-show="profile.roleArea" class="row wrap auth-area">
+			<p x-show="profile.roleArea.length > 0" class="row wrap auth-area">
 				<template x-for="area in profile.roleArea">
 					<a class="chip border orange white-text" x-text="areaOptions[area]"></a>
 				</template>
