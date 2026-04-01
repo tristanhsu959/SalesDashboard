@@ -163,7 +163,7 @@ class DailyRevenueService
 		{
 			#目前先不Filter區域權限
 			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
-			dd($shopList);
+			
 			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
 			});
