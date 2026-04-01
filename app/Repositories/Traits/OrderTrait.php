@@ -99,7 +99,7 @@ trait OrderTrait
 			->orderBy('s.OperationCenterId')
 			->orderBy('ar.Id')
 			->get()
-			->toArray();
+			->toArray(); 
 		
 		return $result;
 	}

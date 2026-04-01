@@ -14,34 +14,31 @@
 			</div>
 			
 			<!-- 工廠 -->
-			<div class="page padding active" id="page-qty">
+			<template x-for="(data, type) in statistics.data" :key="type">
+			<div class="page padding active" :id="`page-${type}`">
 				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
 					<table>
 						<thead>
 							<tr>
-								<th>出貨工廠</th>
-								<th>年月</th>
-								<template x-for="product in statistics.header.productList">
-									<th x-text="product.name"></th>
+								<template x-for="header in statistics.header">
+									<th x-text="header"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="factory in statistics.header.factoryList" :key="factory.factoryNo">
-								<template x-for="month in statistics.header.monthList" :key="month">
-									<tr>
-										<th x-text="factory.factoryName"></th>
-										<th x-text="month"></th>
-										<template x-for="product in statistics.header.productList" :key="product.code">
-											<td x-text="statistics.data[factory.factoryNo]?.[month]?.[product.code]?.qty || 0"></td>
-										</template>
-									</tr>
-								</template>
+							<template x-for="(rows, idx) in data" :key="idx">
+								<tr>
+									<template x-for="row in rows">
+										<td x-text="row"></td>
+									</template>
+								</tr>
 							</template>
 						</tbody>
 					</table>
 				</section>
 			</div>
+			</template>
+			
 			<!--div class="page padding" id="page-avg">
 				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
 					<table>

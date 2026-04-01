@@ -52,7 +52,7 @@ class StoreService
 	 * @params: string
 	 * @return: array
 	 */
-	public function analysis($brandId, $searchStDate, $searchEndDate, $searchType, $searchRange)
+	public function analysisStatisticsData($brandId, $searchStDate, $searchEndDate, $searchType, $searchRange)
 	{
 		try
 		{
@@ -63,25 +63,6 @@ class StoreService
 			$this->_statistics['endDate'] 	= $searchEndDate;
 			
 			#執行統計
-			$this->_analysisStatisticsData();
-				
-			return $this->_statistics;
-		}
-		catch(Exception $e)
-		{
-			throw new Exception($e->getMessage());
-		}
-	}
-	
-	/* 取出貨統計By工廠
-	 * @params: integer
-	 * @params: array
-	 * @return: array
-	 */
-	private function _analysisStatisticsData()
-	{
-		try
-		{
 			#1. 取餡料product id
 			$productIds = $this->_getProductIdByCode();
 			
@@ -89,10 +70,11 @@ class StoreService
 			$orderData = $this->_getDataFromDB($productIds);
 			
 			return $this->_outputReport($orderData);
+				
+			return $this->_statistics;
 		}
 		catch(Exception $e)
 		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
 	}
@@ -171,13 +153,24 @@ class StoreService
 	{
 		try
 		{
-			#1.Build header data
+			#1.Build params
+			$this->_statistics['temp'] = $this->_buildParams();
+			dd($this->_statistics);
+			#2.Build header data
 			$this->_statistics['header'] = $this->_buildHeader();
+			dd($this->_statistics);
+			#3.By門店
+			$data = $this->_parsingByFactory($orderData);
+			$productList = $this->_statistics['temp']['productList'];
 			
-			#2.By門店
-			$this->_statistics['data'] = $this->_parsingByStore($orderData);
+			foreach($productList as $key => $product)
+			{
+				$this->_statistics['data'][$key] = $this->_parsingByStore($orderData, $product);
+			}
 			
-			return TRUE;
+			unset($this->_statistics['temp']);
+			
+			return $this->_statistics;
 		}
 		catch(Exception $e)
 		{
@@ -186,11 +179,11 @@ class StoreService
 		}
 	}
 	
-	/* 計算日期天數
+	/* 計算用參數
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader()
+	private function _buildParams()
 	{
 		$header 	= [];
 		
@@ -204,11 +197,28 @@ class StoreService
 			$header['monthList'][] = $month->format('Y-m');
 		}
 		
-		#productList
-		$header['productList']  = config('web.purchase.monthly_filling.totalCount.group');
+		$header['productList'] = config('web.purchase.monthly_filling.totalCount.group');
 		
 		$header['storeList'] = $this->_getStoreList();
-
+		
+		return $header;
+	}
+	
+	/* Header
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildHeader()
+	{
+		$monthList = $this->_statistics['temp']['monthList'];
+		
+		$header['sheet'] = collect($productList)->mapWithKeys(function($item, $key){
+			return [$key => $item['name']];
+		})->toArray();
+		
+		$header['tableHeader'] 	= array_merge(['POS ID', '區域', '門店名稱'], $header['monthList']);
+		
+		
 		return $header;
 	}
 	
@@ -227,15 +237,15 @@ class StoreService
 			$store = $this->_repository->getStoreList($brandId);
 			
 			#To key-value
-			$store = collect($store)->mapWithKeys(function($item, $key){
+			$store = collect($store)->map(function($item, $key){
 				if (is_null($item['postId']) OR $item['postId'] == 'null')
 					$item['postId'] =  '';
 				
 				$item['area'] = Str::replace('-八方', '', $item['area']);
 				$item['area'] = Str::replace('-御廚', '', $item['area']);
 				
-				return [$item['storeId'] => $item];
-			})->sortBy('area')->toArray();
+				return $item;
+			})->toArray();
 			
 			return $store;
 		}
@@ -250,7 +260,7 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _parsingByStore($orderData)
+	private function _parsingByStore($orderData, $product)
 	{
 		/*
 		"g1" => array:1063 [
@@ -265,28 +275,17 @@ class StoreService
 		if (empty($orderData))
 			return [];
 		
-		$groups = config('web.purchase.monthly_filling.totalCount.group');
+		$groups = data_get($product, 'code', []);
 		
 		#先依定義的餡分群
-		$result = collect($orderData)->groupBy(function($item, $key) use($groups){
-			foreach($groups as $groupKey => $group)
-			{
-				$groupCodes = $group['code'];
-				if (in_array($item['shortCode'], $groupCodes))
-					return $groupKey;
-			}
-		})->map(function($items, $key) {
+		$result = collect($orderData)->filter(function($item, $key) use($groups){
+			return in_array($item['shortCode'], $groups);
+		})->groupBy('storeId')->map(function($items, $key) {
 			
-			return $items->groupBy('storeId')->map(function($items, $key) {
-				
-				return $items->groupBy('expectedDate')->map(function($items, $key) {
-					
-					$temp['qty'] = $items->pluck('qty')->sum();
-					return $temp;
-					
-				})->toArray();
-			});
-			
+			return $items->groupBy('expectedDate')->map(function($items, $key) {
+				$temp['qty'] = $items->pluck('qty')->sum();
+				return $temp;
+			})->toArray();
 		})->sortKeys()->toArray();
 		
 		return $result;

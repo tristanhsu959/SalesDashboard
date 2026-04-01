@@ -148,14 +148,20 @@ class FactoryService
 	{
 		try
 		{
-			#1.Build header data
+			#1.Build params
+			$this->_statistics['temp'] = $this->_buildParams();
+			
+			#2.Build header data
 			$this->_statistics['header'] = $this->_buildHeader();
 			
-			#2.By工廠
+			#3.By工廠
 			$data = $this->_parsingByFactory($orderData);
 			
-			#3.產出成row data
-			$this->_statistics['data'] = $this->_generateOutput($data);
+			#4.產出成row data
+			$this->_statistics['data']['qty'] = $this->_generateOutput($data, 'qty');
+			$this->_statistics['data']['avg'] = $this->_generateOutput($data, 'avg');
+			
+			unset($this->_statistics['temp']);
 			
 			return $this->_statistics;
 		}
@@ -166,11 +172,11 @@ class FactoryService
 		}
 	}
 	
-	/* 計算日期天數
+	/* 計算用參數
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader()
+	private function _buildParams()
 	{
 		$header 	= [];
 		
@@ -192,6 +198,18 @@ class FactoryService
 		return $header;
 	}
 	
+	/* Header
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildHeader()
+	{
+		$productList = $this->_statistics['temp']['productList'];
+		$productList = collect($productList)->pluck('name')->toArray();
+		
+		return array_merge(['出貨工廠', '年月'], $productList);
+	}
+	
 	/* Get order data
 	 * @params: enums
 	 * @params: date
@@ -205,6 +223,9 @@ class FactoryService
 		{
 			$brandId = $this->_statistics['brandId'];
 			$factory = $this->_repository->getFactoryList($brandId);
+			$factory = collect($factory)->mapWithKeys(function($item, $key){
+				return [$item['factoryNo'] => $item['factoryName']];
+			});
 			
 			return $factory;
 		}
@@ -270,41 +291,40 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _generateOutput($data)
+	private function _generateOutput($data, $type)
 	{
-		/*
-		[
-		]
-		*/
 		if (empty($data))
 			return [];
 		
+		$productList = collect(data_get($this->_statistics, 'temp.productList', []))->pluck('name', 'code')->toArray();
+		$factoryList = data_get($this->_statistics, 'temp.factoryList', []);
+		$monthList = data_get($this->_statistics, 'temp.monthList', []);
+		
 		$rowData = [];
 		
-		$header = ['出貨工廠', '年月'];
-		$productList = collect(data_get($this->_statistics, 'header.productList', []))->pluck('name', 'code')->toArray();
-		
-		$rowData[] = array_merge($header, array_values($productList));
-		dd($rowData);
-		#分群定義不同
-		$result = collect($orderData)->groupBy('factoryNo')->map(function($items, $key) {
+		foreach($factoryList as $factoryNo => $factoryName)
+		{
+			$factoryData = data_get($data, $factoryNo);
 			
-			return $items->groupBy('expectedDate')->map(function($items, $month) {
+			if (empty($factoryData))
+				continue;
+			
+			foreach($monthList as $month)
+			{
+				$row = [];
+				$row[] = $factoryName;
+				$row[] = $month;
 				
-				return $items->groupBy('shortCode')->map(function($items, $key) use ($month){
-					
-					$days = Carbon::parse($month)->daysInMonth;
-					$temp['qty'] = $items->pluck('qty')->sum();
-					$temp['avg'] = round($temp['qty'] / $days, 2);
-					
-					return $temp;
-					
-				})->toArray();
-			});
-			
-		})->sortKeys()->toArray();
+				foreach($productList as $key => $name)
+				{
+					$row[] = data_get($factoryData, "{$month}.{$key}.{$type}");
+				}
+				
+				$rowData[] = $row;
+			}
+		}
 		
-		return $result;
+		return $rowData;
 	}
 	
 	/* Export data
