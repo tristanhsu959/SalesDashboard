@@ -62,7 +62,13 @@ form {
 							width: 100px;
 							position: sticky;
 							left: 0;
-							z-index: 6;
+							z-index: 10;
+						}
+						&:nth-child(2) {
+							width: 100px;
+							position: sticky;
+							left: 100px;
+							z-index: 10;
 						}
 					}
 				}
@@ -79,6 +85,10 @@ form {
 						
 						&:nth-child(1) {
 							left: 0;
+							background-color: var(--table-bg);
+						}
+						&:nth-child(2) {
+							left: 100px;
 							background-color: var(--table-bg);
 						}
 					}

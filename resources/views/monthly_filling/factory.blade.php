@@ -1,5 +1,5 @@
  
-	<section class="factory-list container">
+	<section x-data='statisticsFactory(@json($viewModel->statistics))' class="factory-list container">
 		@if($viewModel->isDataEmpty())
 		<article class="error-container border">
 			<div class="row">
@@ -21,27 +21,55 @@
 							<tr>
 								<th>出貨工廠</th>
 								<th>年月</th>
-								@foreach($viewModel->statistics['header']['productList'] as $product)
-									<th>{{$product['name']}}</th>
-								@endforeach
+								<template x-for="product in statistics.header.productList">
+									<th x-text="product.name"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['header']['factoryList'] as $factory)
-								<tr>
-									<th>{{$factory['factoryName']}}</th>
-									@foreach($viewModel->statistics['header']['monthList'] as $month)
-										<th>{{$month}}</th>
-										@foreach($viewModel->statistics['header']['productList'] as $product)
-											<td>{{$viewModel->statistics['data'][$factory['factoryNo']][$month][$product['code']]['qty']}}</td>
-										@endforeach
-									@endforeach
-								</tr>
-							@endforeach
+							<template x-for="factory in statistics.header.factoryList" :key="factory.factoryNo">
+								<template x-for="month in statistics.header.monthList" :key="month">
+									<tr>
+										<th x-text="factory.factoryName"></th>
+										<th x-text="month"></th>
+										<template x-for="product in statistics.header.productList" :key="product.code">
+											<td x-text="statistics.data[factory.factoryNo]?.[month]?.[product.code]?.qty || 0"></td>
+										</template>
+									</tr>
+								</template>
+							</template>
 						</tbody>
 					</table>
 				</section>
 			</div>
+			<!--div class="page padding" id="page-avg">
+				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
+					<table>
+						<thead>
+							<tr>
+								<th>出貨工廠</th>
+								<th>年月</th>
+								<template x-for="product in statistics.header.productList">
+									<th x-text="product.name"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="factory in statistics.header.factoryList" :key="factory.factoryNo">
+								<template x-for="month in statistics.header.monthList" :key="month">
+									<tr>
+										<th x-text="factory.factoryName"></th>
+										<th x-text="month"></th>
+										<template x-for="product in statistics.header.productList" :key="product.code">
+											<td x-text="statistics.data[factory.factoryNo]?.[month]?.[product.code]?.avg || 0"></td>
+										</template>
+									</tr>
+								</template>
+							</template>
+						</tbody>
+					</table>
+				</section>
+			</div-->
 		</div>
 		@endif
 	</section>

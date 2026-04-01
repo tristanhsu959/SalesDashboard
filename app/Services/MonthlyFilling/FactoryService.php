@@ -152,7 +152,10 @@ class FactoryService
 			$this->_statistics['header'] = $this->_buildHeader();
 			
 			#2.By工廠
-			$this->_statistics['data'] = $this->_parsingByFactory($orderData);
+			$data = $this->_parsingByFactory($orderData);
+			
+			#3.產出成row data
+			$this->_statistics['data'] = $this->_generateOutput($data);
 			
 			return $this->_statistics;
 		}
@@ -242,6 +245,47 @@ class FactoryService
 		if (empty($orderData))
 			return [];
 		
+		#分群定義不同
+		$result = collect($orderData)->groupBy('factoryNo')->map(function($items, $key) {
+			
+			return $items->groupBy('expectedDate')->map(function($items, $month) {
+				
+				return $items->groupBy('shortCode')->map(function($items, $key) use ($month){
+					
+					$days = Carbon::parse($month)->daysInMonth;
+					$temp['qty'] = $items->pluck('qty')->sum();
+					$temp['avg'] = round($temp['qty'] / $days, 2);
+					
+					return $temp;
+					
+				})->toArray();
+			});
+			
+		})->sortKeys()->toArray();
+		
+		return $result;
+	}
+	
+	/* 改成產出row data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _generateOutput($data)
+	{
+		/*
+		[
+		]
+		*/
+		if (empty($data))
+			return [];
+		
+		$rowData = [];
+		
+		$header = ['出貨工廠', '年月'];
+		$productList = collect(data_get($this->_statistics, 'header.productList', []))->pluck('name', 'code')->toArray();
+		
+		$rowData[] = array_merge($header, array_values($productList));
+		dd($rowData);
 		#分群定義不同
 		$result = collect($orderData)->groupBy('factoryNo')->map(function($items, $key) {
 			

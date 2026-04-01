@@ -124,7 +124,7 @@ class AuthService
 			], $msg);
 			
 			#AD單獨記錄Log
-			Log::channel('appServiceLog')->error($msg, [ __class__, __function__, __line__]);
+			Log::channel('appServiceLog')->error("使用者[{$account}]AD驗證失敗 : " + $msg, [ __class__, __function__, __line__]);
 			
 			throw new Exception('AD驗證失敗，帳號或密碼錯誤');
 		}

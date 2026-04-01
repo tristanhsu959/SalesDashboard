@@ -74,16 +74,20 @@ document.addEventListener('alpine:init', () => {
 		statistics: {...data},
 		activeProduct: 'qty',
 		
-		init() { 
+		init(data) { 
 			this.activeProduct = 'qty';
 			this.$nextTick(() => ui('#page-qty'));
 		},
 		
-		getValue(factoryNo, month, productCode) {
-			console.log(factoryNo);
-			const record = this.statistics.data?.[factoryNo]?.[month]?.[productCode];
-			return record?.[this.activeProduct] ?? 0;
-		},
+		getRecord(factoryNo, month, productCode) {
+            return this.statistics.data?.[factoryNo]?.[month]?.[productCode] || null;
+        },
+
+        getValue(factoryNo, month, productCode) {
+			console.log(factoryNo, month, productCode);
+            const record = this.getRecord(factoryNo, month, productCode);
+            return record ? record[this.activeProduct] : 0;
+        },
     }));
 	
 	//Store
