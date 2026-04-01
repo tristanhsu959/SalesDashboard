@@ -62,6 +62,7 @@ enum Area : int
 			'A04'	=>  self::YCN->value,
 			'A05'	=>  self::KAOHSIUNG->value,
 			'A06'	=>  self::YILAN->value,
+			default => 'N/A',
 		};
 	}
 	
@@ -77,6 +78,7 @@ enum Area : int
 				self::YCN->value		=> '4',
 				self::YILAN->value 		=> '5',
 				self::KAOHSIUNG->value 	=> '6',
+				default => '0',
 			};
 		})->toArray();
 	}
@@ -93,6 +95,7 @@ enum Area : int
 				self::YCN->value		=> 'A04',
 				self::KAOHSIUNG->value 	=> 'A05',
 				self::YILAN->value 		=> 'A06',
+				default => '0',
 			};
 		})->toArray();
 	}
