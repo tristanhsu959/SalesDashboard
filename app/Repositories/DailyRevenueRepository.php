@@ -56,15 +56,21 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getSale00Data($brand, $stDate, $endDate, $shopType)
+	public function getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds)
 	{
 		$configCode = $brand->code();
 		$excepts = config("web.sales.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
+		{
 			$db = $this->connectBFPosErp();
+			$authAreaIds = Area::toBafangId($userAreaIds);
+		}
 		else
+		{
 			$db = $this->connectBGPosErp();
+			$authAreaIds = Area::toBuygoodId($userAreaIds);
+		}
 		
 		$query = $db
 				->table('SALE00 as a')
@@ -76,6 +82,7 @@ class DailyRevenueRepository extends Repository
 				->where('a.SALE_DATE', '<=', $endDate)
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->whereIn('b.SHOP_KIND', $shopType)
+				->whereIn('b.gid', $authAreaIds)
 				->groupByRaw('a.SHOP_ID, CAST(a.SALE_DATE AS DATE)')
 				->get()
 				->toArray();

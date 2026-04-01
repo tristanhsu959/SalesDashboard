@@ -128,17 +128,17 @@ class DailyRevenueService
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			#2. 此功能暫不檢查區域權限
-			#$currentUser = AppManager::getCurrentUser();
-			#$userAreaIds = $currentUser['roleArea']; #
-					
-			#2. Get all shops with area permission
-			$shopList = $this->_getShopList($brand, $shopType);
+			#2. 檢查區域權限
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser['roleArea']; 
 			
-			#3. Get POS data
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $shopType);
+			#3. Get all shops with area permission
+			$shopList = $this->_getShopList($brand, $shopType, $userAreaIds);
 			
-			#4. Build base data
+			#4. Get POS data
+			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds);
+			
+			#5. Build base data
 			#會有false的無效array, 用array_filter去除
 			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
 			unset($saleData);
@@ -157,12 +157,12 @@ class DailyRevenueService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _getShopList($brand, $shopType)
+	private function _getShopList($brand, $shopType, $userAreaIds)
 	{
 		try
 		{
 			#目前先不Filter區域權限
-			$shopList = $this->_repository->getShopList($brand);
+			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
 			
 			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
@@ -184,11 +184,11 @@ class DailyRevenueService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $shopType)
+	private function _getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds)
 	{
 		try
 		{
-			$saleData = $this->_repository->getSale00Data($brand, $stDate, $endDate, $shopType);
+			$saleData = $this->_repository->getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds);
 			
 			return $saleData;
 		}
