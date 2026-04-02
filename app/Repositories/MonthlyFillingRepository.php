@@ -95,7 +95,7 @@ class MonthlyFillingRepository extends Repository
 			->whereIn('b.ProductId', $productIds)
 			->groupBy(DB::RAW('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7)'), 's.Id', 'p.OldNo')
 			->get()
-			->toArray();
+			->toArray(); 
 		
 		return $result;
 	}

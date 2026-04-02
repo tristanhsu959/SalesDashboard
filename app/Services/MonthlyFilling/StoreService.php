@@ -165,10 +165,10 @@ class StoreService
 				
 			foreach($productList as $key => $product)
 			{
-				$data[$key] = $this->_parsingByStore($orderData, $product);
-				#$this->_statistics['data'][$key] = $this->_generateOutput($data);
+				$data = $this->_parsingByStore($orderData, $product);
+				$this->_statistics['data'][$key] = $this->_generateOutput($data);
 			}
-			dd($data['g2']);
+			
 			unset($this->_statistics['temp']);
 			
 			return $this->_statistics;
@@ -285,7 +285,7 @@ class StoreService
 			$coefficient = config("web.purchase.monthly_filling.totalCount.code.{$item['shortCode']}.coefficient");
 			$item['qty'] = round(floatval($item['qty']) * $coefficient, 2);
 			return $item;
-		
+		#storeId會變成int
 		})->groupBy('storeId')->map(function($items, $key) {
 			return $items->groupBy('expectedDate')->map(function($items, $key) {
 				return $items->pluck('qty')->sum();
@@ -314,7 +314,7 @@ class StoreService
 		{
 			$storeId = $store['storeId'];
 			$storeData = data_get($data, $storeId);
-						
+				
 			$row = [];
 			$row[] = data_get($store, 'postId');
 			$row[] = data_get($store, 'area');
@@ -322,7 +322,7 @@ class StoreService
 			
 			foreach($monthList as $month)
 			{
-				$row[] = data_get($data, "{$storeId}.{$month}", 22);
+				$row[] = data_get($storeData, $month, 0);
 			}			
 				
 			$rowData[] = $row;
