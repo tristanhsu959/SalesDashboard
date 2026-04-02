@@ -155,19 +155,20 @@ class StoreService
 		{
 			#1.Build params
 			$this->_statistics['temp'] = $this->_buildParams();
-			dd($this->_statistics);
+			
 			#2.Build header data
 			$this->_statistics['header'] = $this->_buildHeader();
-			dd($this->_statistics);
-			#3.By門店
-			$data = $this->_parsingByFactory($orderData);
-			$productList = $this->_statistics['temp']['productList'];
 			
+			#3.By門店
+			$productList = $this->_statistics['temp']['productList'];
+			$data = [];
+				
 			foreach($productList as $key => $product)
 			{
-				$this->_statistics['data'][$key] = $this->_parsingByStore($orderData, $product);
+				$data[$key] = $this->_parsingByStore($orderData, $product);
+				#$this->_statistics['data'][$key] = $this->_generateOutput($data);
 			}
-			
+			dd($data['g2']);
 			unset($this->_statistics['temp']);
 			
 			return $this->_statistics;
@@ -211,13 +212,13 @@ class StoreService
 	private function _buildHeader()
 	{
 		$monthList = $this->_statistics['temp']['monthList'];
+		$productList = $this->_statistics['temp']['productList'];
 		
 		$header['sheet'] = collect($productList)->mapWithKeys(function($item, $key){
 			return [$key => $item['name']];
 		})->toArray();
 		
-		$header['tableHeader'] 	= array_merge(['POS ID', '區域', '門店名稱'], $header['monthList']);
-		
+		$header['tableHeader'] 	= array_merge(['POS ID', '區域', '門店名稱'], $monthList);
 		
 		return $header;
 	}
@@ -256,7 +257,7 @@ class StoreService
 		}
 	}
 	
-	/* 依工廠
+	/* 依門店
 	 * @params: array
 	 * @return: array
 	 */
@@ -265,8 +266,7 @@ class StoreService
 		/*
 		"g1" => array:1063 [
 			"1911" => array:2 [
-				"2026-03" => array:1 [
-					"qty" => 1590
+				"2026-03" => 1590
 				]
 				"2026-02" => array:1 [...]
 			]
@@ -280,15 +280,55 @@ class StoreService
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groups){
 			return in_array($item['shortCode'], $groups);
+		
+		})->map(function($item, $key){
+			$coefficient = config("web.purchase.monthly_filling.totalCount.code.{$item['shortCode']}.coefficient");
+			$item['qty'] = round(floatval($item['qty']) * $coefficient, 2);
+			return $item;
+		
 		})->groupBy('storeId')->map(function($items, $key) {
-			
 			return $items->groupBy('expectedDate')->map(function($items, $key) {
-				$temp['qty'] = $items->pluck('qty')->sum();
-				return $temp;
+				return $items->pluck('qty')->sum();
 			})->toArray();
-		})->sortKeys()->toArray();
+		
+		})->toArray();
 		
 		return $result;
+	}
+	
+	/* 改成產出row data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _generateOutput($data)
+	{
+		if (empty($data))
+			return [];
+		
+		$storeList = data_get($this->_statistics, 'temp.storeList', []);
+		$monthList = data_get($this->_statistics, 'temp.monthList', []);
+		
+		$rowData = [];
+		
+		foreach($storeList as $store)
+		{
+			$storeId = $store['storeId'];
+			$storeData = data_get($data, $storeId);
+						
+			$row = [];
+			$row[] = data_get($store, 'postId');
+			$row[] = data_get($store, 'area');
+			$row[] = data_get($store, 'storeName');
+			
+			foreach($monthList as $month)
+			{
+				$row[] = data_get($data, "{$storeId}.{$month}", 22);
+			}			
+				
+			$rowData[] = $row;
+		}
+		
+		return $rowData;
 	}
 	
 	/* Export data

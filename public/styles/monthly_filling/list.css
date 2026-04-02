@@ -144,13 +144,10 @@ form {
 				background-color: var(--table-stripes);
 			}
 			
-			thead th, tbody th { /* , tbody th */
-				position: sticky;
-				z-index: 5;
-				word-break: keep-all;
-			}
-			
 			thead th {
+				position: sticky;
+				z-index: 8;
+				word-break: keep-all;
 				top: 0;
 				color: rgba(0, 0, 0, .87);
 				background-color: var(--table-bg);
@@ -170,14 +167,30 @@ form {
 				}
 			}
 			
-			tbody th {
+			tbody td {
 				font-weight: normal;
 				color: var(--table-fixed-color);
 				background-color: var(--table-fixed-bg);
-				z-index: 8;
+				z-index: 5;
+				
+				&:nth-of-type(1) {
+					position: sticky;
+					z-index: 8;
+					word-break: keep-all;
+				}
+				&:nth-of-type(2) {
+					position: sticky;
+					z-index: 8;
+					word-break: keep-all;
+				}
+				&:nth-of-type(3) {
+					position: sticky;
+					z-index: 8;
+					word-break: keep-all;
+				}
 			}
 				
-			thead th, tbody th { /* , tbody th */
+			thead th, tbody td { /* , tbody th */
 				&:nth-of-type(1) {
 					min-width: 80px;
 					max-width: 80px;

@@ -21,19 +21,16 @@
 					<table class="stripes">
 						<thead>
 							<tr>
-								<template x-for="(header, idx) in statistics.header.storeHeader" :key="idx">
+								<template x-for="(header, idx) in statistics.header.tableHeader" :key="idx">
 									<th x-text="header"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(store, storeId) in statistics.header['storeList']" :key="storeId">
+							<template x-for="(rowData, rowDataIndex) in statistics.data[groupId]" :key="rowDataIndex">
 							<tr>
-								<th x-text="store.postId"></th>
-								<th x-text="store.area"></th>
-								<th x-text="store.storeName"></th>
-								<template x-for="(month, idx) in statistics.header.monthList" :key="idx">
-									<td x-text="statistics.data[groupId]?.[storeId]?.[month]?.['qty'] ?? 0"></td>
+								<template x-for="(row, idx) in rowData" :key="idx">
+									<td x-text="row"></td>
 								</template>
 							</tr>
 							</template>
