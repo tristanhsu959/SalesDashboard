@@ -24,11 +24,18 @@ trait PosTrait
 			$db = $this->connectBFPosErp();
 			$authAreaIds = Area::toBafangId($userAreaIds);
 		}
-		else
+		else if ($brand == Brand::BUYGOOD)
 		{
 			$db = $this->connectBGPosErp();
 			$authAreaIds = Area::toBuygoodId($userAreaIds);
 		}
+		else if ($brand == Brand::FJVEGGIE)
+		{
+			$db = $this->connectFJPosErp();
+			$authAreaIds = Area::toFjVeggieId($userAreaIds);
+		}
+		else
+			return [];
 		
 		$result = $db->table('SHOP00 as a')
 			->join('shop_kind as b', 'b.sk_id', '=', 'a.shop_kind')
@@ -38,7 +45,6 @@ trait PosTrait
 			->when(! empty($authAreaIds), function ($db) use ($authAreaIds) {
 				$db->whereIn('a.gid', $authAreaIds);
 			})
-			#->whereIn('a.gid', $authAreaIds)
 			->whereNotIn('a.SHOP_ID', $excepts)
 			->orderBy('a.SHOP_ID')
 			->get()
@@ -62,22 +68,33 @@ trait PosTrait
 			$db = $this->connectBFPosErp();
 			$authAreaIds = Area::toBafangId($userAreaIds);
 		}
-		else
+		else if ($brand == Brand::BUYGOOD)
 		{
 			$db = $this->connectBGPosErp();
 			$authAreaIds = Area::toBuygoodId($userAreaIds);
 		}
+		else if ($brand == Brand::FJVEGGIE)
+		{
+			$db = $this->connectFJPosErp();
+			$authAreaIds = Area::toFjVeggieId($userAreaIds);
+		}
+		else
+			return [];
 			
-		$result = $db->table('hptrans_shop as a')
-			->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.hptrs_shop')
-			->select('b.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
-			->where('b.closedown', '=', 0)
-			->whereIn('b.gid', $authAreaIds)
-			->whereNotIn('b.SHOP_ID', $excepts)
-			->orderBy('b.SHOP_ID')
+		$result = $db->table('hptrans_shop as h')
+			->join('SHOP00 as a', 'a.SHOP_ID', '=', 'h.hptrs_shop')
+			->join('shop_kind as b', 'b.sk_id', '=', 'a.shop_kind')
+			->select('a.SHOP_ID as shopId', 'a.SHOP_NAME as shopName', 'a.gid as areaId')
+			->addSelect('b.sk_id as typeId', 'b.Sk_name as typeName')
+			->where('a.closedown', '=', 0)
+			->when(! empty($authAreaIds), function ($db) use ($authAreaIds) {
+				$db->whereIn('a.gid', $authAreaIds);
+			})
+			->whereNotIn('a.SHOP_ID', $excepts)
+			->orderBy('a.SHOP_ID')
 			->get()
 			->toArray();
-	
+			
 		return $result;
 	}
 }

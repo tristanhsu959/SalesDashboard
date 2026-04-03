@@ -18,7 +18,7 @@ class DailyRevenueRepository extends Repository
 		
 	}
 	
-	/* 取營收資料
+	/* 取新品營收資料
 	 * @params: enums
 	 * @params: datetime
 	 * @params: datetime
@@ -66,11 +66,18 @@ class DailyRevenueRepository extends Repository
 			$db = $this->connectBFPosErp();
 			$authAreaIds = Area::toBafangId($userAreaIds);
 		}
-		else
+		else if ($brand == Brand::BUYGOOD)
 		{
 			$db = $this->connectBGPosErp();
 			$authAreaIds = Area::toBuygoodId($userAreaIds);
 		}
+		else if ($brand == Brand::FJVEGGIE)
+		{
+			$db = $this->connectFJPosErp();
+			$authAreaIds = Area::toFjVeggieId($userAreaIds);
+		}
+		else
+			return [];
 		
 		$query = $db
 				->table('SALE00 as a')

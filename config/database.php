@@ -63,6 +63,22 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
 			'collation' => 'Chinese_PRC_CI_AS', 
         ],
+		#芳珍
+		'FJPosErp' => [
+            'driver' => 'sqlsrv',
+            #'url' => env('DATABASE_URL'),
+            'host' => env('FJ_DB_HOST', '65.52.163.96'),
+            'port' => env('FJ_DB_PORT', '1433'),
+            'database' => env('FJ_DB_DATABASE', 'poserp_Vegetable'),
+            'username' => env('FJ_DB_USERNAME', 'sa'),
+            'password' => env('FJ_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+			'collation' => 'Chinese_PRC_CI_AS', 
+        ],
 		
 		'SalesDashboard' => [
             'driver' => 'mysql',

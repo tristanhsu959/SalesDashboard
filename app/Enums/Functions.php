@@ -28,6 +28,9 @@ enum Functions : string
 	case BG_PURCHASE			= 'buygood:purchase';
 	case BG_SHIPMENTS			= 'buygood:shipments';
 	
+	#FjVeggie	
+	case FJ_DAILY_REVENUE		= 'fjVeggie:daily_revenue';
+	
 	
 	public function label() : string
     {
@@ -54,6 +57,9 @@ enum Functions : string
 			self::BG_PURCHASE 			=> '出貨統計',
 			self::BG_SALES 				=> '銷售統計',
 			self::BG_DAILY_REVENUE		=> '門店營收',
+			
+			#芳珍
+			self::FJ_DAILY_REVENUE		=> '門店營收',
         };
     }
 }

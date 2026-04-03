@@ -103,4 +103,23 @@ enum Area : int
 			};
 		})->toArray();
 	}
+	
+	#To Fj shopgroup gid(同bafang)
+	public static function toFjVeggieId($srcIds): array
+	{
+		return collect($srcIds)->map(function ($value, int $key) {
+			$value = intval($value);
+			
+			return match ($value) 
+			{
+				self::TAIPEI->value		=> '1',
+				self::TCM->value		=> '2',
+				self::CCT->value 		=> '3',
+				self::YCN->value		=> '4',
+				self::YILAN->value 		=> '5',
+				self::KAOHSIUNG->value 	=> '6',
+				default => '0',
+			};
+		})->toArray();
+	}
 }
