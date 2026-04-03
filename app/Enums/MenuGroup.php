@@ -6,6 +6,7 @@ enum MenuGroup : int
 {
 	case BAFANG		= 1;
     case BUYGOOD 	= 2;
+	case FJVEGGIE 	= 3;
 	case SYSTEM		= 90;
 	case MANAGE		= 99;
 	
@@ -15,6 +16,7 @@ enum MenuGroup : int
 		{
 			self::BAFANG	=> '八方',
 			self::BUYGOOD 	=> '御廚',
+			self::FJVEGGIE 	=> '芳珍',
 			self::SYSTEM 	=> '系統設定',
 			self::MANAGE 	=> '權限管理',
         };

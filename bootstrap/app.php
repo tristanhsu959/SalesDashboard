@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('buygood')
                 ->name('buygood.')
                 ->group(base_path('routes/buygood.php'));
+				
+			Route::middleware('web')
+                ->prefix('fjveggie')
+                ->name('fjveggie.')
+                ->group(base_path('routes/fjveggie.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware) {

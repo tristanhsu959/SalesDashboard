@@ -6,22 +6,31 @@ use Illuminate\Support\Facades\DB;
 
 class Repository
 {
+	#八方
 	protected function connectBFPosErp($table = NULL)
 	{
-		#八方
 		if (empty($table))
 			return DB::connection('BFPosErp');
 		else
 			return DB::connection('BFPosErp')->table($table);
 	}
 	
+	#梁社漢
 	protected function connectBGPosErp($table = NULL)
 	{
-		#梁社漢
 		if (empty($table))
 			return DB::connection('BGPosErp');
 		else
 			return DB::connection('BGPosErp')->table($table);
+	}
+	
+	#芳珍
+	protected function connectFJPosErp($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('FJPosErp');
+		else
+			return DB::connection('FJPosErp')->table($table);
 	}
 	
 	/* Local Sale[s]_Dashboard */

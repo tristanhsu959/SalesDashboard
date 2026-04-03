@@ -6,6 +6,7 @@ enum Brand : int
 {
 	case BAFANG		= 1;
 	case BUYGOOD 	= 2;
+	case FJVEGGIE 	= 3;
     
 	public function label() : string
     {
@@ -13,6 +14,7 @@ enum Brand : int
 		{
 			self::BAFANG	=> '八方',
 			self::BUYGOOD	=> '御廚',
+			self::FJVEGGIE	=> '芳珍',
 		};
     }
 	
@@ -22,6 +24,7 @@ enum Brand : int
 		{
 			self::BAFANG	=> 'bafang',
 			self::BUYGOOD	=> 'buygood',
+			self::FJVEGGIE	=> 'fjveggie',
         };
 	}
 
@@ -31,6 +34,7 @@ enum Brand : int
 		{
 			self::BAFANG	=> 'BF',
 			self::BUYGOOD	=> 'BG',
+			self::FJVEGGIE	=> 'FJ',
         };
 	} 	
 	
@@ -40,6 +44,7 @@ enum Brand : int
 		{
 			self::BAFANG->code()	=> self::BAFANG,
 			self::BUYGOOD->code()	=> self::BUYGOOD,
+			self::FJVEGGIE->code()	=> self::FJVEGGIE,
         };
 	}
 	
@@ -47,6 +52,9 @@ enum Brand : int
 	{
         return collect(self::cases())->mapWithKeys(function ($case) {
             return [$case->value => $case->label()];
-        })->all();
+        })->filter(function($value, $key){
+			return $key != self::FJVEGGIE->value;
+		})
+		->all();
     }
 }

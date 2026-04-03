@@ -88,7 +88,7 @@ class DailyRevenueViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics)))
+		if (empty(Arr::collapse($this->statistics['shop'])))
 			return TRUE;
 		else
 			return FALSE;

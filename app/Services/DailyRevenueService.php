@@ -59,6 +59,7 @@ class DailyRevenueService
 		{
 			Brand::BAFANG	=> Functions::BF_DAILY_REVENUE, 
 			Brand::BUYGOOD	=> Functions::BG_DAILY_REVENUE,
+			Brand::FJVEGGIE	=> Functions::FJ_DAILY_REVENUE,
         };
 	}
 	
@@ -162,7 +163,7 @@ class DailyRevenueService
 		try
 		{
 			#目前先不Filter區域權限
-			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
+			$shopList = $this->_repository->getHptransShopList($brand, $userAreaIds);
 			
 			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
@@ -219,8 +220,7 @@ class DailyRevenueService
 		]
 		*/
 		
-		#要改成所有店家統計
-		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
+		#即時營收取有效店家即可
 		$groupShopList = collect($shopList)->groupBy('shopId');
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($groupShopList) {

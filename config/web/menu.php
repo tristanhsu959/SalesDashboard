@@ -75,6 +75,15 @@ return [
 		
 	],
 	
+	MenuGroup::FJVEGGIE->value => [
+		[
+			'name' 		=> Functions::FJ_DAILY_REVENUE->label(), #本日銷售
+			'code'		=> Functions::FJ_DAILY_REVENUE->value,
+			'style' 	=> ['icon' => 'storefront', 'color' => 'light-green-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::FJVEGGIE->code()], '?.daily_revenue'),
+		],
+	],
+	
 	MenuGroup::SYSTEM->value => [
 		[
 			'name' 		=> Functions::PRODUCT->label(), #產品基本資料,
