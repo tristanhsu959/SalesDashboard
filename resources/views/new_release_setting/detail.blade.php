@@ -34,6 +34,7 @@
 			<i class="small red-text">asterisk</i>
 			<input type="text" name="name" maxlength="20" x-model="formData.name" @input="errors.delete('name')">
 			<label>新品名稱</label>
+			<output class="red-text">綁定多個產品的群組名稱</output>
 		</div>
 		
 		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'saleDate')">
