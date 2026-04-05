@@ -36,11 +36,11 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	});
 	
 	/* 出貨報表 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_PURCHASE->value, ':')])->group(function(){
+	/*Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_PURCHASE->value, ':')])->group(function(){
 		Route::get('purchase', [PurchaseController::class, 'showSearch'])->name('purchase');
 		Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
 		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
-	});
+	});*/
 	
 	/* 出貨總量查詢 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_SHIPMENTS->value, ':')])->group(function(){
