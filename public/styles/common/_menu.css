@@ -57,7 +57,7 @@ nav.menu {
 					border-radius: 2rem;
 					transition: background-color 0.2s;
 					
-					&:hover {
+					&.active, &:hover {
 						background-color: #455a64;
 					}
 				}

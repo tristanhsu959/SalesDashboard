@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewReleaseSettingController;
 use App\Http\Controllers\SalesSettingController;
+use App\Http\Controllers\PurchaseProductController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -36,24 +37,32 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	/***** 新品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::NEW_RELEASE_SETTING->value, ':')])->group(function(){
-		Route::get('new_release_setting', [NewReleaseSettingController::class, 'list'])->name('new_release_setting');
-		Route::get('new_release_setting/list', [NewReleaseSettingController::class, 'list'])->name('new_release_setting.list');
-		Route::get('new_release_setting/create', [NewReleaseSettingController::class, 'showCreate'])->name('new_release_setting.create');
-		Route::post('new_release_setting/create', [NewReleaseSettingController::class, 'create'])->name('new_release_setting.create.post');
-		Route::get('new_release_setting/update/{id}', [NewReleaseSettingController::class, 'showUpdate'])->name('new_release_setting.update');
-		Route::post('new_release_setting/update', [NewReleaseSettingController::class, 'update'])->name('new_release_setting.update.post');
-		Route::post('new_release_setting/delete/{id}', [NewReleaseSettingController::class, 'delete'])->name('new_release_setting.delete');
+		Route::get('new_release/setting', [NewReleaseSettingController::class, 'list'])->name('new_release_setting');
+		Route::get('new_release/setting/list', [NewReleaseSettingController::class, 'list'])->name('new_release_setting.list');
+		Route::get('new_release/setting/create', [NewReleaseSettingController::class, 'showCreate'])->name('new_release_setting.create');
+		Route::post('new_release/setting/create', [NewReleaseSettingController::class, 'create'])->name('new_release_setting.create.post');
+		Route::get('new_release/setting/update/{id}', [NewReleaseSettingController::class, 'showUpdate'])->name('new_release_setting.update');
+		Route::post('new_release/setting/update', [NewReleaseSettingController::class, 'update'])->name('new_release_setting.update.post');
+		Route::post('new_release/setting/delete/{id}', [NewReleaseSettingController::class, 'delete'])->name('new_release_setting.delete');
 	});
 	
 	/***** 銷售設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::SALES_SETTING->value, ':')])->group(function(){
-		Route::get('sales_setting', [SalesSettingController::class, 'list'])->name('sales_setting');
-		Route::get('sales_setting/list', [SalesSettingController::class, 'list'])->name('sales_setting.list');
-		Route::get('sales_setting/create', [SalesSettingController::class, 'showCreate'])->name('sales_setting.create');
-		Route::post('sales_setting/create', [SalesSettingController::class, 'create'])->name('sales_setting.create.post');
-		Route::get('sales_setting/update/{id}', [SalesSettingController::class, 'showUpdate'])->name('sales_setting.update');
-		Route::post('sales_setting/update', [SalesSettingController::class, 'update'])->name('sales_setting.update.post');
-		Route::post('sales_setting/delete/{id}', [SalesSettingController::class, 'delete'])->name('sales_setting.delete');
+		Route::get('sales/setting', [SalesSettingController::class, 'list'])->name('sales_setting');
+		Route::get('sales/setting/list', [SalesSettingController::class, 'list'])->name('sales_setting.list');
+		Route::get('sales/setting/create', [SalesSettingController::class, 'showCreate'])->name('sales_setting.create');
+		Route::post('sales/setting/create', [SalesSettingController::class, 'create'])->name('sales_setting.create.post');
+		Route::get('sales/setting/update/{id}', [SalesSettingController::class, 'showUpdate'])->name('sales_setting.update');
+		Route::post('sales/setting/update', [SalesSettingController::class, 'update'])->name('sales_setting.update.post');
+		Route::post('sales/setting/delete/{id}', [SalesSettingController::class, 'delete'])->name('sales_setting.delete');
+	});
+	
+	/***** 訂貨產品設定 *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PURCHASE_PRODUCT->value, ':')])->group(function(){
+		Route::get('purchase/product', [PurchaseProductController::class, 'list'])->name('purchase_product');
+		Route::get('purchase/product/list', [PurchaseProductController::class, 'list'])->name('purchase_product.list');
+		Route::get('purchase/product/setting', [PurchaseProductController::class, 'showSetting'])->name('purchase_product.setting');
+		Route::post('purchase/product/setting', [PurchaseProductController::class, 'setting'])->name('purchase_product.setting.post');
 	});
 	
 	/***** 身份管理 *****/

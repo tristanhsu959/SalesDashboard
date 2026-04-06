@@ -84,7 +84,7 @@ return [
 		],
 	],
 	
-	MenuGroup::SYSTEM->value => [
+	MenuGroup::PRODUCT->value => [
 		[
 			'name' 		=> Functions::PRODUCT->label(), #產品基本資料,
 			'code'		=> Functions::PRODUCT->value,
@@ -102,6 +102,12 @@ return [
 			'code'		=> Functions::SALES_SETTING->value,
 			'style' 	=> ['icon' => 'settings_applications', 'color' => 'light-blue-text'],
 			'url' 		=> 'sales_setting', 
+		],
+		[
+			'name' 		=> Functions::PURCHASE_PRODUCT->label(), #訂貨產品設定,
+			'code'		=> Functions::PURCHASE_PRODUCT->value,
+			'style' 	=> ['icon' => 'package_2', 'color' => 'light-blue-text'],
+			'url' 		=> 'purchase_product', 
 		],
 	],
 	

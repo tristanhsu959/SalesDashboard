@@ -8,10 +8,11 @@ enum Functions : string
 	case USER					= 'user';
 	case ROLE 					= 'role';
 		
-	#System	
+	#Product	
 	case PRODUCT 				= 'product';
 	case NEW_RELEASE_SETTING	= 'new_releases_setting';
 	case SALES_SETTING			= 'sales_setting';
+	case PURCHASE_PRODUCT		= 'purchase_product';
 		
 	#Bafang	
 	case BF_NEW_RELEASE			= 'bafang:new_releases';
@@ -42,6 +43,7 @@ enum Functions : string
 			self::PRODUCT 				=> '產品料號設定',
 			self::NEW_RELEASE_SETTING	=> '新品設定',
 			self::SALES_SETTING			=> '銷售設定',
+			self::PURCHASE_PRODUCT		=> '出貨產品設定',
 			
 			#八方
 			self::BF_NEW_RELEASE		=> '新品銷售',
