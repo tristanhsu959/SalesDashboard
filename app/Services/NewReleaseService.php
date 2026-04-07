@@ -150,14 +150,14 @@ class NewReleaseService
 			$userAreaIds = $currentUser['roleArea']; #
 					
 			#3. Get all shops with area permission
-			$shopList = $this->_getShopList($brand, $userAreaIds);
+			list($shopList, $activeShopList) = $this->_getShopList($brand, $userAreaIds);
 			
 			#4. Get POS data
 			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
 			
 			#5. Build base data
 			#會有false的無效array, 用array_filter去除
-			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
+			$baseData = $this->_buildBaseData($shopList, $activeShopList, array_filter($saleData));
 			unset($saleData);
 			
 			return $this->_outputReport($baseData);
@@ -209,8 +209,9 @@ class NewReleaseService
 		{
 			#會Filter區域權限
 			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
+			$activeShopList = $this->_repository->getHptransShopList($brand, $userAreaIds);
 		
-			return $shopList;
+			return [$shopList, $activeShopList];
 		}
 		catch(Exception $e)
 		{
@@ -247,7 +248,7 @@ class NewReleaseService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($shopList, $saleData)
+	private function _buildBaseData($shopList, $activeShopList, $saleData)
 	{
 		/*
 		[
@@ -261,10 +262,12 @@ class NewReleaseService
 		]
 		*/
 		
-		#要改成所有店家統計
+		#要改成所有店家統計(含閉店)
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
 		$groupShopList = collect($shopList)->groupBy('shopId');
+		$groupActiveShopList = collect($activeShopList)->groupBy('shopId');
 		
+		#因有不同的gid定義, 故無法直接寫在sql
 		$baseData = collect($saleData)->map(function($item, $key) use($groupShopList) {
 			$shop = $groupShopList->get($item['shopId']);
 			
@@ -278,9 +281,11 @@ class NewReleaseService
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
 		
-		$filterShops = $groupShopList->filter(function($item, $key) use($saleShopIds){
+		#改成補全時, 只取有效店家
+		$filterShops = $groupActiveShopList->filter(function($item, $key) use($saleShopIds){
 			#過濾出無銷售且為active門店
-			return ! in_array($item->pluck('shopId')->first(), $saleShopIds) && ($item->pluck('closedown')->first() == 0);
+			return ! in_array($item->pluck('shopId')->first(), $saleShopIds);
+			#&& ($item->pluck('closedown')->first() == 0);
 		});
 		
 		#重建
