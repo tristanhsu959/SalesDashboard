@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\PurchaseProductRepository;
 use App\Libraries\ResponseLib;
+use App\Enums\Brand;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -17,27 +18,7 @@ class PurchaseProductService
 	{
 	}
 	
-	/* 取設定清單(Get ALL)
-	 * @params: 
-	 * @return: array
-	 */
-	public function getSetting()
-	{
-		try
-		{
-			$list = $this->_repository->getSetting();
-			$list = collect($list)->groupBy('salesBrandId')->toArray();
-			
-			return ResponseLib::initialize($list)->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取銷售設定清單發生錯誤');
-		}
-	}
-	
-	/* Get product for options
+	/* Get product for options from new order system
 	 * @params: int
 	 * @return: array
 	 */
@@ -45,7 +26,10 @@ class PurchaseProductService
 	{
 		try
 		{
-			$list = $this->_repository->getProductList();
+			$bfBrandId = Brand::BAFANG;
+			$bgBrandId = Brand::BUYGOOD;
+			$list = $this->_repository->getProductShortCode($bfBrandId);
+			dd($list);
 			$list = collect($list)->groupBy('productBrandId')->map(function($items, $key){
 				return $items->groupBy('productCategory')->map(function($items, $key){
 					return $items->map(function($item, $key){
@@ -68,6 +52,28 @@ class PurchaseProductService
 			return [];
 		}
 	}
+	
+	/* 取設定清單(Get ALL)
+	 * @params: 
+	 * @return: array
+	 */
+	public function getSetting()
+	{
+		try
+		{
+			$list = $this->_repository->getSetting();
+			$list = collect($list)->groupBy('salesBrandId')->toArray();
+			
+			return ResponseLib::initialize($list)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('讀取銷售設定清單發生錯誤');
+		}
+	}
+	
+	
 	
 	/* Create new item
 	 * @params: string

@@ -61,8 +61,8 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PURCHASE_PRODUCT->value, ':')])->group(function(){
 		Route::get('purchase/product', [PurchaseProductController::class, 'list'])->name('purchase_product');
 		Route::get('purchase/product/list', [PurchaseProductController::class, 'list'])->name('purchase_product.list');
-		Route::get('purchase/product/setting', [PurchaseProductController::class, 'showSetting'])->name('purchase_product.setting');
-		Route::post('purchase/product/setting', [PurchaseProductController::class, 'setting'])->name('purchase_product.setting.post');
+		Route::get('purchase/product/setting', [PurchaseProductController::class, 'showUpdate'])->name('purchase_product.update');
+		Route::post('purchase/product/setting', [PurchaseProductController::class, 'update'])->name('purchase_product.update.post');
 	});
 	
 	/***** 身份管理 *****/

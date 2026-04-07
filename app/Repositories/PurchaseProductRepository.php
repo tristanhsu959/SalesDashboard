@@ -2,12 +2,14 @@
 
 namespace App\Repositories;
 
+use App\Repositories\Traits\OrderTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Exception;
 
 class PurchaseProductRepository extends Repository
 {
+	use OrderTrait;
 	
 	public function __construct()
 	{
@@ -30,22 +32,6 @@ class PurchaseProductRepository extends Repository
 		return $result;
 	}
 	
-	/* Get product settings from new order
-	 * @params: 
-	 * @return: array
-	 */
-	public function getProductList()
-	{
-		#不判別product status, 是否啟用由新品設定決定
-		$db = $this->connectSalesDashboard('product');
-			
-		$result = $db
-			->select('productId', 'productBrandId', 'productName', 'productCategory')
-			->get()
-			->toArray();
-			
-		return $result;
-	}
 	
 	/* Create new item
 	 * @params: int

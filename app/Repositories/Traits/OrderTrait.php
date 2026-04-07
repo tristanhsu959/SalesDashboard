@@ -116,7 +116,7 @@ trait OrderTrait
 			->select('a.No', 'a.Name')
 			->where('a.OperationCenterId', '=', 1) #取op=1
 			->where('a.IsEnable', '=', 1)
-			->whereNotIn('a.No', config("web.purchase.product_type.except.{$brandId}"))
+			->whereNotIn('a.No', config("web.purchase.product_type.typeNo.except.{$brandId}"))
 			->groupBy('a.No', 'a.Name')
 			->orderBy('a.No')
 			->get()
@@ -156,7 +156,7 @@ trait OrderTrait
 					->whereColumn('ft.Id', 'st.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->whereNotIn('pt.No', config("web.purchase.product_type.except.{$brandId}"))
+			->whereNotIn('pt.No', config("web.purchase.product_type.typeNo.except.{$brandId}"))
 			->groupBy('a.OldNo', 'a.Name', 'pt.No', 'pt.Name')
 			->orderBy('pt.No')
 			->orderBy('a.OldNo')
@@ -166,5 +166,44 @@ trait OrderTrait
 		return $result;
 	}
 	
-	
+	/* 取產品設定及代碼
+	 * @params: int
+	 * @return: array
+	 */
+	public function getProductShortCode($brandId)
+	{
+		$enableCodes = config('web.purchase.product_type.shortCode.enabled');
+		
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Stocks as a')
+			->join('Product as p', 'p.Id', '=', 'a.ProductId')
+			->select('p.OldNo as productNo', 'p.Name as productName')
+			->where('a.ShelfStatus', '=', 1)
+			->whereAny(['p.OldNo'], 'like', $enableCodes)
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as op')
+					->whereColumn('op.Id', 'a.OperationCenterId')
+					->whereIn('op.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 'st.BrandId')
+					->where('bd.No',  $this->getBrandNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'st.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->groupBy('a.OldNo', 'a.Name')
+			->orderBy('a.OldNo')->toRawSql();
+			#->get()
+			#->toArray(); 
+		dd($result);
+		return $result;
+	}
 }

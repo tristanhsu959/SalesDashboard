@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Services\PurchaseProductService;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\Enums\Brand;
@@ -15,7 +16,7 @@ class PurchaseProductViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct()
+	public function __construct(protected PurchaseProductService $_service)
 	{
 		$this->function		= Functions::PURCHASE_PRODUCT;
 		$this->action 		= FormAction::LIST; 
@@ -32,20 +33,20 @@ class PurchaseProductViewModel extends Fluent
 		#初始化各參數及Form Options
 		$this->action	= $action;
 		$this->success();
-		#$this->_setOptions();
+		$this->_setOptions();
 	}
 	
 	/* Form所屬的參數選項
 	 * @params:  
 	 * @return: void
 	 */
-	/* private function _setOptions()
+	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
 		
 		if ($this->action != FormAction::LIST)
 			$this->set('options.products', $this->_service->getProductList()); 
-	} */
+	}
 	
 	/* Form submit action
 	 * @params: 
@@ -55,7 +56,7 @@ class PurchaseProductViewModel extends Fluent
     {
 		return match($this->action)
 		{
-			FormAction::UPDATE => route('purchase_product.setting.post'),
+			FormAction::UPDATE => route('purchase_product.update.post'),
 		};
 	}
 	

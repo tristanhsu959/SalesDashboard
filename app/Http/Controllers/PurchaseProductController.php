@@ -25,32 +25,17 @@ class PurchaseProductController extends Controller
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
 		
-		$response = $this->_service->getList();
+		//$response = $this->_service->getList();
 		
-		if ($response->status === FALSE)
+		/* if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
 		else
 		{
 			$this->_viewModel->success();
 			$this->_viewModel->list = $response->data;
-		}
+		} */
 		
 		return view('purchase_product/list')->with('viewModel', $this->_viewModel);
-	}
-	
-	
-	/* Setting Form
-	 * @params: request
-	 * @return: view
-	 */
-	public function showSetting(Request $request)
-	{
-		#initialize
-		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData(); #init
-		$this->_viewModel->success();
-		
-		return view('purchase_product/setting')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 編輯Form
@@ -58,7 +43,7 @@ class PurchaseProductController extends Controller
 	 * @params: int	id
 	 * @return: view
 	 */
-	public function showSetting(Request $request)
+	public function showUpdate(Request $request)
 	{
 		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE);
