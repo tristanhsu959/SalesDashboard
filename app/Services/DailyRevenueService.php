@@ -162,8 +162,9 @@ class DailyRevenueService
 	{
 		try
 		{
-			#目前先不Filter區域權限
+			#這裏取有效的shop
 			$shopList = $this->_repository->getHptransShopList($brand, $userAreaIds);
+			#$shopList = $this->_repository->getShopList($brand, $userAreaIds);
 			
 			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
@@ -223,15 +224,27 @@ class DailyRevenueService
 		#即時營收取有效店家即可
 		$groupShopList = collect($shopList)->groupBy('shopId');
 		
-		$baseData = collect($saleData)->map(function($item, $key) use($groupShopList) {
-			$shop = $groupShopList->get($item['shopId']);
-			
+		/*
+		$baseData = collect($saleData)->map(function($item, $key) {
 			$item['shopName'] 		= $shop->pluck('shopName')->first();
 			$item['shopType'] 		= $shop->pluck('typeId')->first();
 			$item['shopTypeName']	= $shop->pluck('typeName')->first();
 			$item['areaId'] 		= Area::toId($shop->pluck('areaId')->first());
 			$item['areaName']		= (Area::tryFrom($item['areaId']))->label();
 
+			return $item; 
+		});
+		*/
+		
+		#改成Shop資料來自DB,避免閉店沒有關聯到(不用$groupShopList來取)
+		$baseData = collect($saleData)->map(function($item, $key) {
+			$item['shopType'] 		= $item['typeId'];
+			$item['shopTypeName']	= $item['typeName'];
+			$item['areaId'] 		= Area::toId($item['areaId']);
+			$item['areaName']		= (Area::tryFrom($item['areaId']))->label();
+			
+			unset($item['typeId'], $item['typeName']);
+			
 			return $item; 
 		});
 		
@@ -257,7 +270,7 @@ class DailyRevenueService
 			return $temp;
 		});
 		
-		$baseData = $baseData->merge($filterShops)->toArray();
+		$baseData = $baseData->merge($filterShops)->sortBy('areaId')->toArray();
 		
 		return $baseData;
 	}

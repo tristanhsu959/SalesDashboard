@@ -83,14 +83,16 @@ class DailyRevenueRepository extends Repository
 				->table('SALE00 as a')
 				->fromRaw('SALE00 as a WITH(NOLOCK)')
 				->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.SHOP_ID')
-				->select('a.SHOP_ID as shopId')
+				->join('shop_kind as c', 'c.sk_id', '=', 'b.shop_kind')
+				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
+				->addSelect('c.sk_id as typeId', 'c.Sk_name as typeName')
 				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.TOT_SALES) as amount')
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<=', $endDate)
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
-				->groupByRaw('a.SHOP_ID, CAST(a.SALE_DATE AS DATE)')
+				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
 				->get()
 				->toArray();
 		
