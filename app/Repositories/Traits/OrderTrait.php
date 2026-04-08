@@ -180,30 +180,35 @@ trait OrderTrait
 			->join('Product as p', 'p.Id', '=', 'a.ProductId')
 			->select('p.OldNo as productNo', 'p.Name as productName')
 			->where('a.ShelfStatus', '=', 1)
-			->whereAny(['p.OldNo'], 'like', $enableCodes)
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as op')
-					->whereColumn('op.Id', 'a.OperationCenterId')
+					->whereColumn('op.Id', 'p.OperationCenterId')
 					->whereIn('op.No', $this->getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
-					->whereColumn('bd.Id', 'st.BrandId')
+					->whereColumn('bd.Id', 'a.BrandId')
 					->where('bd.No',  $this->getBrandNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
-					->whereColumn('ft.Id', 'st.FactoryId')
+					->whereColumn('ft.Id', 'a.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->groupBy('a.OldNo', 'a.Name')
-			->orderBy('a.OldNo')->toRawSql();
-			#->get()
-			#->toArray(); 
-		dd($result);
+			->where(function ($query) use ($enableCodes) {
+				foreach ($enableCodes as $pattern) 
+				{
+					$query->orWhere('p.OldNo', 'like', $pattern);
+				}
+			})
+			->groupBy('p.OldNo', 'p.Name')
+			->orderBy('p.OldNo')
+			->get()
+			->toArray(); 
+		
 		return $result;
 	}
 }

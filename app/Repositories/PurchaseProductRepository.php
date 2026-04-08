@@ -16,47 +16,36 @@ class PurchaseProductRepository extends Repository
 		
 	}
 	
-	/* Get product list from DB 
+	/* Get product setting from DB 
 	 * @params: 
 	 * @return: array
 	 */
-	public function getList()
+	public function getSetting()
 	{
-		$db = $this->connectSalesDashboard('sales_setting');
+		$db = $this->connectSalesDashboard('purchase_product_setting');
 			
 		$result = $db
-			->select('salesId', 'salesBrandId', 'salesName', 'salesStatus', 'updateAt')
+			->select('purchaseBrandId as brandId', 'purchaseProductCode as productCode')
 			->get()
 			->toArray();
 			
 		return $result;
 	}
 	
-	
 	/* Create new item
 	 * @params: int
-	 * @params: string
-	 * @params: boolean
 	 * @params: array
 	 * @return: array
 	 */
-	public function insert($brandId, $name, $status, $productIds)
+	public function update($productCodes)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
 		
 		try 
 		{
-			$data['salesBrandId']	= $brandId;
-			$data['salesName'] 		= $name;
-			$data['salesStatus'] 	= $status;
-			$data['createAt'] 		= now()->format('Y-m-d H:i:s');
-			$data['updateAt'] 		= $data['createAt'];
-			
-			$db = $this->connectSalesDashboard();
-			$insertId = $db->table('sales_setting')->insertGetId($data);
-			
-			$this->_insertProducts($insertId, $productIds);
+			$this->_removeProduct();
+			$this->_insertProduct($productCodes);
 			
 			$db->commit();
 
@@ -73,126 +62,38 @@ class PurchaseProductRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	private function _insertProducts($parentId, $productIds)
+	private function _insertProduct($productCodes)
 	{
 		$items = [];
 		
-		foreach($productIds as $id)
+		foreach($productCodes as $brandId => $products)
 		{
-			$data['parentId']	= $parentId;
-			$data['productId']	= $id;
-			
-			$items[] = $data;
+			foreach($products as $code)
+			{
+				$data['purchaseBrandId']	= $brandId;
+				$data['purchaseProductCode']= $code;
+				
+				$items[] = $data;
+			}
 		}
 		
 		$db = $this->connectSalesDashboard();
-		$db->table('sales_product')
-			->where('parentId', '=', $parentId)
-			->delete();
-			
-		$db->table('sales_product')->insert($items);
+		$db->table('purchase_product_setting')
+			->insert($items);
 		
 		return TRUE;
 	}
 	
-	/* Get product by id
-	 * @params: int
-	 * @return: array
-	 */
-	public function getById($id)
-	{
-		$db = $this->connectSalesDashboard('sales_setting');
-			
-		$result = $db->select('salesId', 'salesBrandId', 'salesName', 'salesStatus', 'updateAt', 'productId')
-					->leftJoin('sales_product', 'parentId', '=', 'salesId')
-					->where('salesId', '=', $id)
-					->get()
-					->toArray();
-		
-		return $result;
-	}
-	
-	/* Update new item
-	 * @params: int
-	 * @params: int
-	 * @params: string
-	 * @params: boolean
-	 * @params: array
-	 * @return: boolean
-	 */
-	public function update($id, $brandId, $name, $status, $productIds)
-	{
-		$db = $this->connectSalesDashboard();
-		$db->beginTransaction();
-		
-		try 
-		{
-			$data['salesBrandId']	= $brandId;
-			$data['salesName'] 		= $name;
-			$data['salesStatus'] 	= $status;
-			$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
-			
-			$db = $this->connectSalesDashboard();
-			$db->table('sales_setting')
-					->where('salesId', '=', $id)
-					->update($data);
-					
-			$this->_insertProducts($id, $productIds);
-			
-			$db->commit();
-
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw new Exception($e->getMessage());
-		}
-	}
-	
-	/* Remove new item
+	/* Remove item
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function remove($id)
+	public function _removeProduct()
 	{
 		$db = $this->connectSalesDashboard();
-		$db->beginTransaction();
-		
-		try 
-		{
-			$db = $this->connectSalesDashboard();
-			$db->table('sales_setting')
-				->where('salesId', '=', $id)
-				->delete();
-			
-			$db->table('sales_product')
-				->where('parentId', '=', $id)
-				->delete();
-					
-			$db->commit();
-
-			return TRUE;
-		} 
-		catch (Exception $e) 
-		{
-			$db->rollBack();
-			throw new Exception($e->getMessage());
-		}
-	}
-	
-	/* Update status when product removed
-	 * @params: int
-	 * @return: array
-	 */
-	public function updateStatus($productId)
-	{
-		$db = $this->connectSalesDashboard();
-		$db->reconnect(); 
-		$result = $db->table('sales_product')
-			->where('productId', '=', $productId)
+		$db->table('purchase_product_setting')
 			->delete();
-		 
+			
 		return TRUE;
 	}
 }

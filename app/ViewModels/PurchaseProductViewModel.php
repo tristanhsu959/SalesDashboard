@@ -43,9 +43,7 @@ class PurchaseProductViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
-		
-		if ($this->action != FormAction::LIST)
-			$this->set('options.products', $this->_service->getProductList()); 
+		$this->set('options.products', $this->_service->getProductList()); 
 	}
 	
 	/* Form submit action
@@ -68,10 +66,10 @@ class PurchaseProductViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($productCodes = [], $updateAt = '')
+	public function keepFormData($productCodes = [])
     {
 		#不分brand
+		$this->set('formData.brandId', Brand::BAFANG); #default brand
 		$this->set('formData.productCodes', $productCodes);
-		$this->set('formData.updateAt', $updateAt);
 	}
 }

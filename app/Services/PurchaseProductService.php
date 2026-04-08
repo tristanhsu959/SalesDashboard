@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\Traits\Purchase\ProductTrait;
 use App\Repositories\PurchaseProductRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -13,9 +14,38 @@ use Log;
 
 class PurchaseProductService
 {
+	use ProductTrait;
 	
 	public function __construct(protected PurchaseProductRepository $_repository)
 	{
+	}
+	
+	/* 取設定清單(要整合Name)
+	 * @params: 
+	 * @return: array
+	 */
+	public function getList()
+	{
+		try
+		{
+			$productMapping = $this->getProductListByShortCode();
+			$list = $this->_repository->getSetting();
+			
+			$list = collect($list)->groupBy('brandId')->map(function($items, $key) use($productMapping) {
+				return $items->map(function($item, $key) use($productMapping){
+					$item['productName'] = data_get($productMapping, "{$item['brandId']}.{$item['productCode']}", '');
+					unset($item['brandId']);
+					return $item;
+				});
+			})->toArray();
+			
+			return ResponseLib::initialize($list)->success();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
+		}
 	}
 	
 	/* Get product for options from new order system
@@ -26,22 +56,26 @@ class PurchaseProductService
 	{
 		try
 		{
-			$bfBrandId = Brand::BAFANG;
-			$bgBrandId = Brand::BUYGOOD;
-			$list = $this->_repository->getProductShortCode($bfBrandId);
-			dd($list);
-			$list = collect($list)->groupBy('productBrandId')->map(function($items, $key){
-				return $items->groupBy('productCategory')->map(function($items, $key){
-					return $items->map(function($item, $key){
-						$brandId = $item['productBrandId'];
-						$catId = $item['productCategory'];
-						$item['categoryName'] = config("web.category.{$brandId}.{$catId}");
-						return $item;
-					});
-					return $items;
+			$bfBrandId = Brand::BAFANG->value;
+			$bgBrandId = Brand::BUYGOOD->value;
+			
+			
+			#要分開取, 因short code是不分brand
+			$list[$bfBrandId] = $this->_repository->getProductShortCode($bfBrandId);
+			$list[$bgBrandId] = $this->_repository->getProductShortCode($bgBrandId);
+			
+			$list = collect($list)->map(function($items, $key) {
+				return collect($items)->unique('productNo')->map(function($item, $key){
+					$group = $this->getGroupByShortCode($item['productNo']);
+					return array_merge($item, $group);
+				})->groupBy('groupId')->map(function($items, $key){
+					$temp['groupName'] 	= $items->pluck('groupName')->first();
+					$temp['products']	= $items->mapWithKeys(function($item, $key) {
+						return [$item['productNo'] => $item['productName']];
+					})->toArray();
+					
+					return $temp;
 				});
-				
-				return $items;
 			})->toArray();
 			
 			return $list;
@@ -53,7 +87,36 @@ class PurchaseProductService
 		}
 	}
 	
-	/* 取設定清單(Get ALL)
+	/* Get product list with short code key
+	 * @params: int
+	 * @return: array
+	 */
+	public function getProductListByShortCode()
+	{
+		try
+		{
+			$bfBrandId = Brand::BAFANG->value;
+			$bgBrandId = Brand::BUYGOOD->value;
+			
+			$list[$bfBrandId] = $this->_repository->getProductShortCode($bfBrandId);
+			$list[$bgBrandId] = $this->_repository->getProductShortCode($bgBrandId);
+			
+			$list = collect($list)->map(function($items, $brand) {
+				return collect($items)->mapWithKeys(function($items, $brand) {
+					return [$items['productNo'] => $items['productName']];
+				});
+			})->toArray();
+			
+			return $list;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return [];
+		}
+	}
+	
+	/* 取設定(Get ALL)
 	 * @params: 
 	 * @return: array
 	 */
@@ -62,111 +125,42 @@ class PurchaseProductService
 		try
 		{
 			$list = $this->_repository->getSetting();
-			$list = collect($list)->groupBy('salesBrandId')->toArray();
+			$list = collect($list)->groupBy('brandId')->map(function($items, $key){
+				return $items->pluck('productCode');
+			})->toArray();
+			
+			if (empty($list))
+			{
+				$list[Brand::BAFANG->value] = [];
+				$list[Brand::BUYGOOD->value] = [];
+			}
 			
 			return ResponseLib::initialize($list)->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取銷售設定清單發生錯誤');
+			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
 		}
 	}
 	
-	
-	
-	/* Create new item
-	 * @params: string
+	/* Update product
 	 * @params: int
-	 * @params: array
 	 * @params: array
 	 * @return: array
 	 */
-	public function createSetting($id, $brandId, $name, $status, $productIds)
+	public function updateSetting($productCodes)
 	{
 		try
 		{
-			$this->_repository->insert($brandId, $name, $status, $productIds);
+			$this->_repository->update($productCodes);
 			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('銷售設定新增失敗');
+			return ResponseLib::initialize()->fail('出貨產品設定失敗');
 		}
 	}
-	
-	/* Get setting by id
-	 * @params: int
-	 * @return: array
-	 */
-	public function getSettingById($id)
-	{
-		try
-		{
-			$data = $this->_repository->getById($id);
-			$data = collect($data)->groupBy('salesId')->map(function($items, $key){
-				$items = collect($items);
-				
-				$temp['salesId'] 		= $items->pluck('salesId')->first();
-				$temp['salesBrandId'] 	= $items->pluck('salesBrandId')->first();
-				$temp['salesName'] 		= $items->pluck('salesName')->first();
-				$temp['salesStatus'] 	= $items->pluck('salesStatus')->first();
-				$temp['updateAt'] 		= $items->pluck('updateAt')->first();
-				$temp['productIds'] 	= $items->pluck('productId')->values()->filter()->toArray();
-				
-				return $temp;
-			})->first();
-			
-			return ResponseLib::initialize($data)->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取銷售設定時發生錯誤');
-		}
-	}
-	
-	/* Update Role
-	 * @params: int
-	 * @params: int
-	 * @params: string
-	 * @params: boolean
-	 * @params: array
-	 * @return: array
-	 */
-	public function updateSetting($id, $brandId, $name, $status, $productIds)
-	{
-		try
-		{
-			$this->_repository->update($id, $brandId, $name, $status, $productIds);
-			
-			return ResponseLib::initialize()->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯銷售設定失敗');
-		}
-	}
-	
-	/* Remove Role
-	 * @params: int
-	 * @return: array
-	 */
-	public function deleteSetting($id)
-	{
-		try
-		{
-			$this->_repository->remove($id);
-			return ResponseLib::initialize()->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('刪除銷售設定失敗');
-		}
-	}
-	
 }

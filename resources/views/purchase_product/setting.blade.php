@@ -5,22 +5,19 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/sales_setting/detail.js') }}" defer></script>
+    <script src="{{ asset('scripts/purchase_product/setting.js') }}" defer></script>
 @endpush
 
 @section('content')
 
-<form x-data='salesSettingForm(@json($viewModel->formData), @json($viewModel->options))' 
+<form x-data='purchaseSettingForm(@json($viewModel->formData), @json($viewModel->options))' 
 	action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
 	@csrf
 	
 	<section class="sales-setting-data container">
-		@if(! empty($viewModel->formData['id']))
-			<label class="large-text" x-text="'更新時間：' + formData.updateAt"></label>
-		@endif
 		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
-			<select x-model="formData.brandId" name="brandId" @change="errors.delete('brandId'); updateProducts();">
+			<select x-model="formData.brandId" name="brandId" @change="errors.delete('brandId');">
 				<template x-for="(name, id) in options.brands" :key="id">
 					<option :value="id" x-text="name" :selected="formData.brandId == id"></option>
 				</template>
@@ -29,38 +26,29 @@
 			<i>arrow_drop_down</i>
 		</div>
 		
-		<div class="field label border field-dark-blue w30 prefix" :class="Helper.hasError(errors, 'name')">
-			<i class="small red-text">asterisk</i>
-			<input type="text" name="name" maxlength="20" x-model="formData.name" @input="errors.delete('name')">
-			<label>產品名稱</label>
-		</div>
-		
-		<fieldset class="field-dark-blue fieldset">
-			<legend><i class="small red-text">asterisk</i>選擇對應產品料號</legend>
-			<template x-for="cat in products">
-				<div class="grid">
-					<template x-for="(item, idx) in cat" :key="idx">
-					<label class="checkbox large s2 check-amber">
-						<input type="checkbox" name="productIds[]" x-model="formData.productIds" :value="item.productId">
-						<span x-text="item.productName"></span>
-					</label>
-					</template>
-					<div class="space s12"></div>
-				</div>
+		<p class="medium-text red-text">請勾選啟用產品</p>
+		<template x-for="(group, brand) in options.products" :key="brand">
+		<div>
+			<template x-for="(item, idx) in group" :key="idx">
+			<fieldset class="field-dark-blue fieldset" x-show="brand == formData.brandId">
+				<legend><i class="small red-text">asterisk</i><span x-text="item.groupName"></span></legend>
+					<div class="grid">
+						<template x-for="(name, code) in item.products" :key="code">
+						<label class="checkbox large s3 check-amber">
+							<input type="checkbox" :name="`productCodes[${brand}][]`" x-model="formData.productCodes[brand]" :value="code">
+							<span x-text="name"></span>
+						</label>
+						</template>
+						<div class="space s12"></div>
+					</div>
+			</fieldset>
 			</template>
-		</fieldset>
-		
-		<div class="row">
-			<label class="switch field-light-green">
-				<input x-model="formData.status" :checked="formData.status == 1" @change="formData.status = $el.checked ? 1 : 0" type="checkbox" name="status" value="1">
-				<span></span>
-				<i class="output">啟用</i>
-			</label>
 		</div>
+		</template>
 		
 		<div class="space"></div>
 		<nav class="toolbar">
-			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
+			<button type="submit" class="button btn-save btn-primary slow-ripple">儲存設定</button>
 			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 		</nav>
 	</section>
