@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Repositories\Traits\PosTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -62,22 +63,15 @@ class DailyRevenueRepository extends Repository
 		$excepts = config("web.sales.shop.except.{$configCode}");
 		
 		if ($brand == Brand::BAFANG)
-		{
 			$db = $this->connectBFPosErp();
-			$authAreaIds = Area::toBafangId($userAreaIds);
-		}
 		else if ($brand == Brand::BUYGOOD)
-		{
 			$db = $this->connectBGPosErp();
-			$authAreaIds = Area::toBuygoodId($userAreaIds);
-		}
 		else if ($brand == Brand::FJVEGGIE)
-		{
 			$db = $this->connectFJPosErp();
-			$authAreaIds = Area::toFjVeggieId($userAreaIds);
-		}
 		else
 			return [];
+		
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
 		$query = $db
 				->table('SALE00 as a')

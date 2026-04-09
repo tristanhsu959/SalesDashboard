@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Repositories\Traits\PosTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Log;
@@ -69,15 +70,13 @@ class SalesRepository extends Repository
 	private function _getPrimaryData($brand, $stDate, $endDate, $erpNos, $userAreaIds)
 	{
 		if ($brand == Brand::BAFANG)
-		{
 			$db = $this->connectBFPosErp();
-			$authAreaIds = Area::toBafangId($userAreaIds);
-		}
-		else
-		{
+		else if ($brand == Brand::BUYGOOD)
 			$db = $this->connectBGPosErp();
-			$authAreaIds = Area::toBuygoodId($userAreaIds);
-		}
+		else
+			return [];
+		
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
 		$query = $db
 				->table('zs_sd_order as a')
@@ -114,7 +113,7 @@ class SalesRepository extends Repository
 		
 		
 		$db = $this->connectBFPosErp();
-		$authAreaIds = Area::toBafangId($userAreaIds);
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
 				
 		$query = $db

@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Repositories\NewReleaseRepository;
-use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -272,7 +272,7 @@ class NewReleaseService
 			$shop = $groupShopList->get($item['shopId']);
 			
 			$item['shopName'] 	= $shop->pluck('shopName')->first();
-			$item['areaId'] 	= Area::toId($shop->pluck('areaId')->first());
+			$item['areaId'] 	= AreaLib::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
 
 			return $item; 
@@ -294,7 +294,7 @@ class NewReleaseService
 			$temp['saleDate'] 	= $this->_statistics['endDate'];
 			$temp['qty'] 		= 0;
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
-			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
+			$temp['areaId'] 	= AreaLib::toId($item->pluck('areaId')->first());
 			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
 			
 			return $temp;

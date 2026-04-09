@@ -9,6 +9,7 @@ use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -240,7 +241,7 @@ class DailyRevenueService
 		$baseData = collect($saleData)->map(function($item, $key) {
 			$item['shopType'] 		= $item['typeId'];
 			$item['shopTypeName']	= $item['typeName'];
-			$item['areaId'] 		= Area::toId($item['areaId']);
+			$item['areaId'] 		= AreaLib::toId($item['areaId']);
 			$item['areaName']		= (Area::tryFrom($item['areaId']))->label();
 			
 			unset($item['typeId'], $item['typeName']);
@@ -262,7 +263,7 @@ class DailyRevenueService
 			$temp['shopName'] 		= $item->pluck('shopName')->first();
 			$temp['shopType'] 		= $item->pluck('typeId')->first();
 			$temp['shopTypeName']	= $item->pluck('typeName')->first();
-			$temp['areaId'] 		= Area::toId($item->pluck('areaId')->first());
+			$temp['areaId'] 		= AreaLib::toId($item->pluck('areaId')->first());
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
 			$temp['saleDate'] 		= $this->_statistics['endDate'];
 			$temp['amount'] 		= 0;
@@ -352,6 +353,7 @@ class DailyRevenueService
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
 			$temp['shopName'] 		= $item->pluck('shopName')->first();
 			$temp['shopTypeName'] 	= $item->pluck('shopTypeName')->first();
+			$temp['areaId'] 		= $item->pluck('areaId')->first();
 			$temp['areaName'] 		= $item->pluck('areaName')->first();
 			
 			#整理Amount成Daily形式
@@ -363,7 +365,7 @@ class DailyRevenueService
 			})->toArray();
 			
 			return $temp; 
-		})->sortKeys()->toArray();
+		})->sortBy('areaId')->toArray();
 		
 		$result['總計']['shopName'] 		= ''; 
 		$result['總計']['shopTypeName'] 	= ''; 

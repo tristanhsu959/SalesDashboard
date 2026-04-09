@@ -45,8 +45,7 @@ enum Area : int
 		})->toArray();
 	}
 	
-	#======== Sales Area ========#
-	/* #Bafang|Buygood shopgroup gid to brand id : toId
+	#Bafang|Buygood shopgroup gid to brand id
 	public static function toId($srcId): int
 	{
 		return match ($srcId) 
@@ -67,7 +66,7 @@ enum Area : int
 		};
 	}
 	
-	#To Bafang shopgroup gid : toBafangId
+	#To Bafang shopgroup gid
 	public static function toBafangId($srcIds): array
 	{
 		return collect($srcIds)->map(function ($value, int $key) {
@@ -86,7 +85,7 @@ enum Area : int
 		})->toArray();
 	}
 	
-	#To Buygood shopgroup gid : toBuygoodId
+	#To Buygood shopgroup gid
 	public static function toBuygoodId($srcIds): array
 	{
 		return collect($srcIds)->map(function ($value, int $key) {
@@ -105,7 +104,7 @@ enum Area : int
 		})->toArray();
 	}
 	
-	#To Fj shopgroup gid(同bafang):toFjVeggieId
+	#To Fj shopgroup gid(同bafang)
 	public static function toFjVeggieId($srcIds): array
 	{
 		return collect($srcIds)->map(function ($value, int $key) {
@@ -122,7 +121,5 @@ enum Area : int
 				default => '0',
 			};
 		})->toArray();
-	} */
-	
-	#======== Purchase Area ========#
+	}
 }

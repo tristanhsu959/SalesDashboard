@@ -4,12 +4,12 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Repositories\SalesRepository;
-use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -275,7 +275,7 @@ class SalesService
 			$product = data_get($productList, $item['erpNo'], NULL);
 			
 			$item['shopName'] 	= $shop->pluck('shopName')->first();
-			$item['areaId'] 	= Area::toId($shop->pluck('areaId')->first());
+			$item['areaId'] 	= AreaLib::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
 			
 			#轉換成系統設定Id and Name
@@ -300,7 +300,7 @@ class SalesService
 			$temp['erpNo'] 		= '';
 			$temp['price_sum'] 	= 0;
 			$temp['qty_sum'] 	= 0;
-			$temp['areaId'] 	= Area::toId($item->pluck('areaId')->first());
+			$temp['areaId'] 	= AreaLib::toId($item->pluck('areaId')->first());
 			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
 			$temp['productId'] 	= 0;
 			$temp['productName']= '';
@@ -406,7 +406,7 @@ class SalesService
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
 			#$temp['shopId'] 	= $item->pluck('shopId')->get(0);
 			$temp['shopName'] 	= $item->pluck('shopName')->get(0);
-			#$temp['areaId'] 	= $item->pluck('areaId')->get(0);
+			$temp['areaId'] 	= $item->pluck('areaId')->get(0);
 			$temp['areaName'] 	= $item->pluck('areaName')->get(0);
 				
 			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
@@ -419,7 +419,7 @@ class SalesService
 			})->toArray();
 				
 			return $temp;	
-		})->sortKeys()->toArray();
+		})->sortBy('areaId')->toArray();
 	
 		return $result;
 	}
