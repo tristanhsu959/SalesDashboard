@@ -25,7 +25,7 @@ class AreaLib
 			'A04'	=>  Area::YCN->value,
 			'A05'	=>  Area::KAOHSIUNG->value,
 			'A06'	=>  Area::YILAN->value,
-			default => 'N/A',
+			default => 0,
 		};
 	}
 	

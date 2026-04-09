@@ -26,7 +26,7 @@
 					<template x-for="(brand, key) in brands" :key="key">
 						<a :data-ui="'#page-' + key" :class="activeTab == key ? 'active':''" @click="$store.product.tabIndex = key" class="tab-pink">
 							<span x-text="brand"></span>
-							<span x-text="products[key].length" class="chip"></span>
+							<span x-text="products[key].length" class="chip round fill"></span>
 						</a>
 					</template>
 				</div>
