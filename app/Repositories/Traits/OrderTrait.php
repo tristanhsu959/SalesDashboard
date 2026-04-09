@@ -198,12 +198,14 @@ trait OrderTrait
 					->whereColumn('ft.Id', 'a.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->where(function ($query) use ($enableCodes) {
+			#先全抓
+			/* ->where(function ($query) use ($enableCodes) {
 				foreach ($enableCodes as $pattern) 
 				{
 					$query->orWhere('p.OldNo', 'like', $pattern);
 				}
-			})
+			}) */
+			->where('p.OldNo', '!=', '')
 			->groupBy('p.OldNo', 'p.Name')
 			->orderBy('p.OldNo')
 			->get()

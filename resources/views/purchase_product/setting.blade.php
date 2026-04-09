@@ -36,7 +36,7 @@
 						<template x-for="(name, code) in item.products" :key="code">
 						<label class="checkbox large s3 check-amber">
 							<input type="checkbox" :name="`productCodes[${brand}][]`" x-model="formData.productCodes[brand]" :value="code">
-							<span x-text="name"></span>
+							<span x-text="code + name"></span>
 						</label>
 						</template>
 						<div class="space s12"></div>

@@ -6,7 +6,7 @@ document.addEventListener('alpine:init', () => {
 		options: options,
 		activeTab: 1,
 		
-		init() {console.log(this.options);
+		init() {
 			this.activeTab = 1;
 		},
     }));

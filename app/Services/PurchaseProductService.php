@@ -129,11 +129,12 @@ class PurchaseProductService
 				return $items->pluck('productCode');
 			})->toArray();
 			
-			if (empty($list))
-			{
+			#default init
+			if (empty($list[Brand::BAFANG->value]))
 				$list[Brand::BAFANG->value] = [];
+			
+			if (empty($list[Brand::BUYGOOD->value]))
 				$list[Brand::BUYGOOD->value] = [];
-			}
 			
 			return ResponseLib::initialize($list)->success();
 		}

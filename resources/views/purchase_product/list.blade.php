@@ -1,8 +1,7 @@
 @extends('layouts.app')
-@use('App\Enums\Brand')
 
 @push('styles')
-    <!-- href="{{ asset('styles/purchase_product/list.css') }}" rel="stylesheet"-->
+    <link href="{{ asset('styles/purchase_product/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
