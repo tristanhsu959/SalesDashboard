@@ -128,6 +128,6 @@ class AreaLib
 				default => [],
 			};
 			
-		})->toArray();
+		})->collapse()->toArray();
 	}
 }
