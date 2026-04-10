@@ -26,6 +26,20 @@ class AppManager
 		return empty($this->getCurrentUser()) ? FALSE : TRUE;
 	}
 	
+	/* has Area Auth(區域權限)
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function hasAreaAuth()
+	{
+		$currentUser = $this->getCurrentUser();
+		
+		if ($currentUser->isSupervisor())
+			return TRUE;
+		
+		return empty($currentUser['roleArea']) ? FALSE : TRUE;
+	}
+	
 	/* 清除登入資訊|Menu
 	 * @params: 
 	 * @return: boolean

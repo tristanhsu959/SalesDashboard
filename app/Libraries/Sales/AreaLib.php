@@ -8,6 +8,26 @@ use App\Enums\Area;
 
 class AreaLib
 {
+	public static function toArea($srcId)
+	{
+		return match ($srcId) 
+		{
+			'1'		=> 	Area::TAIPEI,
+			'2'		=> 	Area::TCM,
+			'3'		=> 	Area::CCT,
+			'4'		=> 	Area::YCN,
+			'5'		=> 	Area::YILAN,
+			'6'	 	=> 	Area::KAOHSIUNG,
+			'A01'	=>  Area::TAIPEI,	
+			'A02'	=>  Area::TCM,	
+			'A03'	=>  Area::CCT,		
+			'A04'	=>  Area::YCN,
+			'A05'	=>  Area::KAOHSIUNG,
+			'A06'	=>  Area::YILAN,
+			default => Area::NONE,
+		};
+	}
+	
 	#Bafang|Buygood shopgroup gid to my area id
 	public static function toId($srcId): int
 	{
@@ -25,7 +45,7 @@ class AreaLib
 			'A04'	=>  Area::YCN->value,
 			'A05'	=>  Area::KAOHSIUNG->value,
 			'A06'	=>  Area::YILAN->value,
-			default => 0,
+			default => Area::NONE->value,
 		};
 	}
 	

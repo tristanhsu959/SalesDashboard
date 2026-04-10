@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Sales;
+namespace App\Libraries\Purchase;
 
 use Illuminate\Support\Str;
 use App\Enums\Brand;
@@ -9,6 +9,40 @@ use App\Enums\Area;
 #Purchase order
 class AreaLib
 {
+	public static function toArea($srcId)
+	{
+		return match ($srcId) 
+		{
+			1		=> 	Area::TAIPEI, #BF
+			2		=> 	Area::TAIPEI, #BF
+			3		=> 	Area::TAIPEI, #BF
+			4		=> 	Area::TAIPEI,
+			10002	=> 	Area::TAIPEI, #BF
+			10003	=> 	Area::TAIPEI, #BF
+			6		=> 	Area::TCM, #BF
+			10004	=> 	Area::TCM, #BF
+			7		=> 	Area::TCM,
+			20		=> 	Area::TCM,
+			9		=> 	Area::CCT, #BF
+			21		=> 	Area::CCT, #BF
+			10005	=> 	Area::CCT, #BF
+			10		=> 	Area::CCT,
+			22		=> 	Area::CCT,
+			12		=> 	Area::YCN, #BF
+			24		=> 	Area::YCN, #BF
+			13		=> 	Area::YCN,
+			25		=> 	Area::YCN,
+			18		=> 	Area::YILAN, #BF
+			15	 	=> 	Area::KAOHSIUNG, #BF
+			27	 	=> 	Area::KAOHSIUNG, #BF
+			16	 	=> 	Area::KAOHSIUNG,
+			28	 	=> 	Area::KAOHSIUNG,
+			19	 	=> 	Area::KAOHSIUNG, #BF
+			30	 	=> 	Area::KAOHSIUNG, #BF
+			default => Area::NONE,
+		};
+	}
+	
 	#Bafang|Buygood area id to my area id
 	public static function toId($srcId): int
 	{
@@ -40,7 +74,7 @@ class AreaLib
 			28	 	=> 	Area::KAOHSIUNG->value,
 			19	 	=> 	Area::KAOHSIUNG->value, #BF
 			30	 	=> 	Area::KAOHSIUNG->value, #BF
-			default => 0,
+			default => Area::NONE->value,
 		};
 	}
 	
@@ -71,10 +105,10 @@ class AreaLib
 				Area::YCN->value		=> [12, 24],
 				Area::YILAN->value 		=> [18],
 				Area::KAOHSIUNG->value 	=> [15, 27, 19, 30],
-				default => '0',
+				default => [],
 			};
 			
-		})->toArray();
+		})->collapse()->toArray();
 	}
 	
 	#To Buygood shopgroup gid : toBuygoodId
@@ -91,29 +125,9 @@ class AreaLib
 				Area::YCN->value		=> [13, 25],
 				Area::KAOHSIUNG->value 	=> [16, 28],
 				#Area::YILAN->value 		=> [],
-				default => '0',
+				default => [],
 			};
 			
 		})->toArray();
 	}
-	
-	#To Fj shopgroup gid(同bafang):toFjVeggieId
-	/* public static function toFjVeggieId($srcIds): array
-	{
-		return collect($srcIds)->map(function ($value, int $key) {
-			$value = intval($value);
-			
-			return match ($value) 
-			{
-				Area::TAIPEI->value		=> '1',
-				Area::TCM->value		=> '2',
-				Area::CCT->value 		=> '3',
-				Area::YCN->value		=> '4',
-				Area::YILAN->value 		=> '5',
-				Area::KAOHSIUNG->value 	=> '6',
-				default => '0',
-			};
-			
-		})->toArray();
-	} */
 }

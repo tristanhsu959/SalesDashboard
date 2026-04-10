@@ -26,6 +26,8 @@ class FactoryService
 {
 	const MODE = 'Name';
 	
+	private $_brand;
+	private $_userAreaIds	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected ShipmentsRepository $_repository)
@@ -47,7 +49,7 @@ class FactoryService
 	
 	/* ====================== 主流程 By Name ====================== */
 	/* Search data
-	 * @params: int
+	 * @params: enum
 	 * @params: date
 	 * @params: date
 	 * @params: array
@@ -57,17 +59,22 @@ class FactoryService
 	 * @params: string
 	 * @return: array
 	 */
-	public function analysis($brandId, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
+	public function analysis($brand, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
 	{
 		try
 		{
+			$this->_brand = $brand;
+			
+			$currentUser = AppManager::getCurrentUser();
+			$this->_userAreaIds = $currentUser['roleArea'];
+			
 			#Check cache
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeCalc']	= $searchCalc; 
 			#$this->_statistics['modeUnit']	= $searchUnit; 
-			$this->_statistics['brandId']	= $brandId; 
+			$this->_statistics['brandId']	= $brand->value; 
 			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			$this->_statistics['productIds']= $productIds;
@@ -84,8 +91,7 @@ class FactoryService
 	}
 	
 	/* 取出貨統計By工廠
-	 * @params: integer
-	 * @params: array
+	 * @params: enum
 	 * @return: array
 	 */
 	private function _analysisStatisticsData()
@@ -129,12 +135,11 @@ class FactoryService
 	
 		try
 		{
-			$brandId 	= $this->_statistics['brandId'];
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			$productIds	= $this->_statistics['productIds'];
 			
-			$orderData = $this->_repository->getOrderDataByProductId($brandId, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByProductId($this->_brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
 			
 			return $orderData;
 		}
@@ -155,10 +160,18 @@ class FactoryService
 	{
 		try
 		{
-			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['header'] = $this->_buildHeader($orderData);
+			#1.Build header
+			$this->_statistics['header']['dateList'] = $this->_buildDateHeader();
 			
-			#2.By工廠
+			#2.productList
+			$this->_statistics['header']['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
+				return [$items['erpNo'] => $items['productName']];
+			})->toArray();
+		
+			#3.factory list
+			$this->_statistics['header']['factoryList'] = $this->_getFactoryList();
+			
+			#4.analysis by 工廠
 			$this->_statistics['data'] = $this->_parsingByFactory($orderData);
 			
 			return TRUE;
@@ -174,7 +187,7 @@ class FactoryService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader($orderData)
+	private function _buildDateHeader()
 	{
 		$st 		= Carbon::create($this->_statistics['startDate']);
 		$end 		= Carbon::create($this->_statistics['endDate']);
@@ -187,7 +200,7 @@ class FactoryService
 			$period 	= CarbonPeriod::create($st, $end);
 			foreach ($period as $date) 
 			{
-				$header['dateList'][] = $date->format('Y-m-d');
+				$header[] = $date->format('Y-m-d');
 			}
 		}
 		else
@@ -199,16 +212,9 @@ class FactoryService
 			$period = CarbonPeriod::create($st, '1 month', $end);
 			foreach ($period as $date) 
 			{
-				$header['dateList'][] = $date->format('Y-m');
+				$header[] = $date->format('Y-m');
 			}
 		}
-		
-		#productList
-		$header['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
-		})->toArray();
-		
-		$header['factoryList'] = $this->_getFactoryList();
 		
 		return $header;
 	}
@@ -224,7 +230,7 @@ class FactoryService
 	{
 		try
 		{
-			$brandId = $this->_statistics['brandId'];
+			$brandId = $this->_brand->value;
 			$factory = $this->_repository->getFactoryList($brandId);
 			
 			#To key-value
@@ -237,7 +243,7 @@ class FactoryService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料失敗');
+			throw new Exception('讀取工廠資料失敗');
 		}
 	}
 	

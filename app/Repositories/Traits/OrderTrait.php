@@ -5,6 +5,7 @@ namespace App\Repositories\Traits;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
+use App\Libraries\Purchase\AreaLib;
 use Illuminate\Support\Facades\DB;
 
 /* nOrder DB Common */
@@ -68,14 +69,17 @@ trait OrderTrait
 	 * @params: int
 	 * @return: array
 	 */
-	public function getStoreList($brandId)
+	public function getStoreList($brand, $userAreaIds)
 	{
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Store as s')
 			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->select('ar.Name as area', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as postId')
+			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as postId')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
@@ -95,9 +99,10 @@ trait OrderTrait
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
 			->whereNull('s.CloseDate')
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))
-			->orderBy('s.OperationCenterId')
-			->orderBy('ar.Id')
+			->whereIn('s.AreaId', $authAreaIds)
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
+			#->orderBy('s.OperationCenterId')
+			#->orderBy('ar.Id')
 			->get()
 			->toArray(); 
 		

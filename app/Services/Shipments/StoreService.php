@@ -5,6 +5,7 @@ namespace App\Services\Shipments;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -26,6 +27,8 @@ class StoreService
 {
 	const MODE = 'Name';
 	
+	private $_brand;
+	private $_userAreaIds	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected ShipmentsRepository $_repository)
@@ -57,16 +60,21 @@ class StoreService
 	 * @params: string
 	 * @return: array
 	 */
-	public function analysis($brandId, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
+	public function analysis($brand, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
 	{
 		try
 		{
+			$this->_brand = $brand;
+			
+			$currentUser = AppManager::getCurrentUser();
+			$this->_userAreaIds = $currentUser['roleArea'];
+			
 			#Check cache
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeCalc']	= $searchCalc; 
-			$this->_statistics['brandId']	= $brandId; 
+			$this->_statistics['brandId']	= $brand->value; 
 			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
 			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 			$this->_statistics['productIds']= $productIds;
@@ -92,7 +100,7 @@ class StoreService
 		try
 		{
 			#Get Order data
-			$orderData = $this->_getDataFromDB();
+			$orderData = $this->_getDataFromDB($this->_brand, $this->_userAreaIds);
 			
 			return $this->_outputReport($orderData);
 		}
@@ -111,7 +119,7 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB()
+	private function _getDataFromDB($brand, $userAreaIds)
 	{
 		/*0 => array:9 [
 			"expectedDate" => "2026-03-25"
@@ -128,12 +136,11 @@ class StoreService
 	
 		try
 		{
-			$brandId 	= $this->_statistics['brandId'];
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			$productIds	= $this->_statistics['productIds'];
 			
-			$orderData = $this->_repository->getOrderDataByProductId($brandId, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $userAreaIds);
 			
 			return $orderData;
 		}
@@ -155,9 +162,17 @@ class StoreService
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['header'] = $this->_buildHeader($orderData);
+			$this->_statistics['header']['dateList'] = $this->_buildDateHeader();
 			
-			#2.By門店
+			#2.Build productList
+			$this->_statistics['header']['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
+				return [$items['erpNo'] => $items['productName']];
+			})->toArray();
+		
+			#3.Get store list
+			$this->_statistics['header']['storeList'] = $this->_getStoreList($this->_brand, $this->_userAreaIds);
+
+			#4. analysis by 門店
 			$this->_statistics['data'] = $this->_parsingByStore($orderData);
 			
 			return TRUE;
@@ -173,7 +188,7 @@ class StoreService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader($orderData)
+	private function _buildDateHeader()
 	{
 		$st 		= Carbon::create($this->_statistics['startDate']);
 		$end 		= Carbon::create($this->_statistics['endDate']);
@@ -186,7 +201,7 @@ class StoreService
 			$period 	= CarbonPeriod::create($st, $end);
 			foreach ($period as $date) 
 			{
-				$header['dateList'][] = $date->format('Y-m-d');
+				$header[] = $date->format('Y-m-d');
 			}
 		}
 		else
@@ -198,17 +213,10 @@ class StoreService
 			$period = CarbonPeriod::create($st, '1 month', $end);
 			foreach ($period as $date) 
 			{
-				$header['dateList'][] = $date->format('Y-m');
+				$header[] = $date->format('Y-m');
 			}
 		}
 		
-		#productList
-		$header['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
-		})->toArray();
-		
-		$header['storeList'] = $this->_getStoreList();
-
 		return $header;
 	}
 	
@@ -219,20 +227,24 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getStoreList()
+	private function _getStoreList($brand, $userAreaIds)
 	{
 		try
 		{
-			$brandId = $this->_statistics['brandId'];
-			$store = $this->_repository->getStoreList($brandId);
+			$brandId = $brand->value;
+			$store = $this->_repository->getStoreList($brand, $userAreaIds);
 			
 			#To key-value:store list沒有包含蘿蔔
 			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
+				
 				if (is_null($item['postId']) OR $item['postId'] == 'null')
 					$item['postId'] =  '';
 				
-				$item['area'] = Str::replace('-八方', '', $item['area']);
-				$item['area'] = Str::replace('-御廚', '', $item['area']);
+				$area = AreaLib::toArea(intval($item['areaId']));
+				$item['areaId']		= $area->value;
+				$item['areaName'] 	= $area->label();
+				#$item['area'] = Str::replace('-八方', '', $item['area']);
+				#$item['area'] = Str::replace('-御廚', '', $item['area']);
 				
 				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
 				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
@@ -242,7 +254,7 @@ class StoreService
 					$storeKey = $item['storeNo'];
 				
 				return [$storeKey => $item];
-			})->toArray();
+			})->sortBy('areaId')->toArray();
 			
 			return $store;
 		}
@@ -379,7 +391,7 @@ class StoreService
 			{
 				$row = [];
 				$row[] = $store['postId'];
-				$row[] = $store['area'];
+				$row[] = $store['areaName'];
 				$row[] = $store['storeNo'];
 				$row[] = $store['storeName'];
 				

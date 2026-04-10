@@ -108,6 +108,9 @@ class ShipmentsService
 	{
 		try
 		{
+			if (AppManager::hasAreaAuth() === FALSE)
+				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
+			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
@@ -132,7 +135,7 @@ class ShipmentsService
 				$productIds = $this->_getProductIdByName($brand->value, $searchProductName);
 				
 				#執行統計
-				$this->_statistics = $service->analysis($brand->value, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc);
+				$this->_statistics = $service->analysis($brand, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc);
 				
 				#無值不cache
 				if (! empty($this->_statistics['data']))

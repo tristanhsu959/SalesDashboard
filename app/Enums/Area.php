@@ -9,7 +9,8 @@ enum Area : int
 	case TCM 		= 3; #Taoyuan, Hsinchu, and Miaoli 
 	case CCT 		= 4; #Taichung, Changhua, Nantou
 	case YCN  		= 5; #Yunlin, Chiayi, Tainan
-	case KAOHSIUNG  = 6; 
+	case KAOHSIUNG  = 6;
+	case NONE		= 0;
 	
 	public function label() : string
     {
@@ -21,6 +22,7 @@ enum Area : int
 			self::CCT 		=> '中彰投區',
 			self::YCN		=> '雲嘉南區',
 			self::KAOHSIUNG => '大高雄區',
+			self::NONE 		=> 'N/A',
         };
     }
 	

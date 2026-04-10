@@ -33,7 +33,7 @@
 							<template x-for="(store, storeId) in statistics.header['storeList']" :key="storeId">
 							<tr>
 								<th x-text="store.postId"></th>
-								<th x-text="store.area"></th>
+								<th x-text="store.areaName"></th>
 								<!--th x-text="store.storeNo"></th-->
 								<th x-text="store.storeName"></th>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Repositories\Traits\OrderTrait;
+use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -60,11 +61,13 @@ class ShipmentsRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByProductId($brandId, $stDate, $endDate, $productIds)
+	public function getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $userAreaIds)
 	{
 		#to UTC Time
-		$stDate	= (new Carbon($stDate))->utc();
-		$endDate= (new Carbon($endDate))->utc();
+		$stDate		= (new Carbon($stDate))->utc();
+		$endDate	= (new Carbon($endDate))->utc();
+		$brandId 	= $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -97,7 +100,8 @@ class ShipmentsRepository extends Repository
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->where('p.ErpNo', '!=', '')
-			->whereIn('b.ProductId', $productIds)
+			->whereIn('s.AreaId', $authAreaIds)
+			->whereIn('b.ProductId', $productIds)#->toRawSql();
 			->get()
 			->toArray();
 		
