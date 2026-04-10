@@ -143,7 +143,7 @@
 	</section>
 	@else
 	<section class="container">
-		<pre>點擊查詢按鈕執行查詢</pre>
+		<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
 	</section>
 	@endif
 	
