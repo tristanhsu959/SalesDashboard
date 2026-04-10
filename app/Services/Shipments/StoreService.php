@@ -226,15 +226,22 @@ class StoreService
 			$brandId = $this->_statistics['brandId'];
 			$store = $this->_repository->getStoreList($brandId);
 			
-			#To key-value
-			$store = collect($store)->mapWithKeys(function($item, $key){
+			#To key-value:store list沒有包含蘿蔔
+			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
 				if (is_null($item['postId']) OR $item['postId'] == 'null')
 					$item['postId'] =  '';
 				
 				$item['area'] = Str::replace('-八方', '', $item['area']);
 				$item['area'] = Str::replace('-御廚', '', $item['area']);
 				
-				return [$item['storeId'] => $item];
+				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
+				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
+				if ($brandId == Brand::BAFANG->value)
+					$storeKey = Str::take($item['storeNo'], 9);
+				else
+					$storeKey = $item['storeNo'];
+				
+				return [$storeKey => $item];
 			})->toArray();
 			
 			return $store;
@@ -269,17 +276,14 @@ class StoreService
 		$modeCalc = $this->_statistics['modeCalc'];
 		
 		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
-			$temp = $items->groupBy('storeId')->map(function($items, $key) use($modeCalc) {
+			$temp = $items->groupBy(function($item, $key){
+				return Str::take($item['storeNo'], 9);
+			})->map(function($items, $key) use($modeCalc) {
 				
 				if ($modeCalc == 'day')
 				{
 					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
 						$temp['qty'] = $items->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $items->pluck('qty')->sum();
-						else
-							$temp['amount'] = $items->pluck('amount')->sum(); */
-						
 						return $temp;
 					});
 					
@@ -292,11 +296,6 @@ class StoreService
 						return substr($item['expectedDate'], 0, 7); 
 					})->map(function ($group) {
 						$temp['qty'] = $group->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $group->pluck('qty')->sum();
-						else
-							$temp['amount'] = $group->pluck('amount')->sum(); */
-						
 						return $temp;
 					});
 					
@@ -304,7 +303,7 @@ class StoreService
 				}
 				
 				#return $day->merge($month)->toArray();
-			});
+			}); 
 			
 			return $temp;
 		})->sortKeys()->toArray();
