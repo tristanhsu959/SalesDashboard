@@ -76,7 +76,7 @@ class ShipmentsRepository extends Repository
 			->join('StoreCar as sc', 'sc.StoreId', '=', 'a.StoreId')
 			->join('Factory as f', 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE) as expectedDate')
-			->addSelect('ar.Name as area', 's.Id as storeId')
+			->addSelect('ar.Name as area', 's.Id as storeId', 's.No as storeNo')
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.ErpNo as erpNo')
