@@ -12,13 +12,89 @@ form {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
+		--table-bg: #ffffff; 			/* light-2 */
+		--table-bg-dark: #424242; 		/* dark-2 */
+		--table-fixed-bg: #ffffff; 		/* light-4 */
+		--table-fixed-color: #424242;	/* dark-4 */
+		--table-stripes: #ffffff;		/* light-5 */
 		
-		.grid.header div {
-			font-weight: bold;
-		}
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 220px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		margin: 0;
+		border: 1px solid var(--table-bg-dark);
+		background-color: var(--table-bg);
 		
-		.grid.data:last-child {
-			color: red;
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: max-content;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			
+			&.stripes tbody tr:nth-child(odd) {
+				background-color: var(--table-stripes);
+			}
+			
+			thead {
+				tr {
+					th {
+						position: sticky;
+						top: 0;
+						z-index: 5;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						width: 120px;
+						color: rgba(0, 0, 0, .87);
+						padding-top: 1rem;
+						
+						&:nth-child(1) {
+							min-width: 120px;
+							width: 120px;
+							position: sticky;
+							left: 0;
+							z-index: 6;
+						}
+						&:nth-child(2) {
+							min-width: 120px;
+							width: 120px;
+							position: sticky;
+							left: 120px;
+							z-index: 6;
+						}
+					}
+				}
+			}
+			
+			tbody {
+				tr {
+					th {
+						position: sticky;
+						font-weight: normal;
+						z-index: 5;
+						color: var(--table-fixed-color); /*#1b3823;*/
+						
+						&:nth-child(1) {
+							left: 0;
+							background-color: var(--table-fixed-bg);
+						}
+						&:nth-child(2) {
+							left: 120px;
+							background-color: var(--table-fixed-bg);
+						}
+					}
+					
+					td {
+						background-color: var(--table-bg);
+						color: #424242;
+					}
+				}
+			}
 		}
 	}
 	
@@ -51,7 +127,7 @@ form {
 		table {
 			table-layout: fixed;
 			min-width: 100%;
-			width: auto;
+			width: max-content;
 			overflow: unset;
 			padding: 0;
 			margin: 0;
@@ -69,27 +145,12 @@ form {
 						z-index: 5;
 						word-break: keep-all;
 						background-color: var(--table-bg);
-						min-width: 80px;
+						width: 120px;
 						color: rgba(0, 0, 0, .87);
 						padding-top: 1rem;
 						
-						&.col-date span {
-							display: inline-flex;
-							flex-direction: column;
-							justify-content: center;
-							
-							&:first-child {
-								/* font-size: .9rem; */
-								background-color: #e91e63;
-								border-radius: 4px;
-								color: rgba(255, 255, 255, .87);
-								font-weight: 400;
-								padding: 0 .25rem;
-							}
-						}
-						
 						&:nth-child(1) {
-							min-width: 80px;
+							/* min-width: 80px; */
 							width: 80px;
 							position: sticky;
 							left: 0;
@@ -150,9 +211,9 @@ form {
 					td {
 						color: #424242;
 						/* 總計 */
-						&:nth-last-child(-n + 2) {
+						/* &:nth-last-child(-n + 2) {
 							color: #f44336;
-						}
+						} */
 					}
 				}
 			}
