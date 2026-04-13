@@ -105,7 +105,7 @@ class DailyRevenueService
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(20));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();

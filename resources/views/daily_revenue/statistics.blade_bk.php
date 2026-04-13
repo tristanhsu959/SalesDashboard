@@ -82,7 +82,7 @@
 			<!-- 區域彙總 -->
 			<div class="page padding active" id="tab-area">
 				<section class="statistics-area">
-					<table class="">
+					<table class="stripes">
 						<thead>
 							<tr>
 								<th>區域</th>
@@ -104,6 +104,24 @@
 							@endforeach
 						</tbody>
 					</table>
+					<div class="grid header">
+						<div class="s2">區域</div>
+						<div class="s2">店家數</div>
+						@foreach($viewModel->statistics['header'] as $date)
+						<div class="s2">{{$date}}</div>
+						@endforeach
+
+					</div>
+					
+					@foreach($viewModel->statistics['area'] as $id => $area)
+					<div class="grid data">
+						<div class="s2">{{ data_get($area, 'areaName', '') }}</div>
+						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
+						@foreach($viewModel->statistics['header'] as $date)
+						<div class="s2">{{ Number::currency(data_get($area, "dayAmount.$date", 0), precision: 0) }}</div>
+						@endforeach
+					</div>
+					@endforeach
 				</section>
 			</div>
 			
