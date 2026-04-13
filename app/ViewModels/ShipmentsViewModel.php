@@ -76,11 +76,11 @@ class ShipmentsViewModel extends Fluent
 		];
 		$this->set('options.mode.calc', $calc);
 
-		/* $unit = [
-			'qty'	=> '統計數量', 
-			'amount'=> '統計金額',
+		$condition = [
+			'cat'		=> '分類查詢', 
+			'keyword'	=> '關鍵字查詢',
 		];
-		$this->set('options.mode.unit', $unit); */
+		$this->set('options.mode.condition', $condition);
 	}
 	
 	/* Form submit action

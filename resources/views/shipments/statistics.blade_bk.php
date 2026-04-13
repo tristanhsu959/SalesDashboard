@@ -49,40 +49,41 @@
 			</div>
 		</div>
 		
-		<div class="date-group">
+		<div class="field-group">
+			<div class="space"></div>
 			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 				<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 				<label>開始日期</label>
 			</div>
 			
+			<div class="space"></div>
 			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 				<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 				<label>結束日期</label>
 			</div>
 		</div>
 		
-		<div class="condition-group">
-			<div class="space"></div>
-			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'productName')">
-				<input type="text" name="searchProductName" maxlength="30" x-model="searchData.productName" x-ref="searchProductName" @input="errors.delete('productName')">
-				<label>產品名稱</label>
-			</div>
-		
-			<div x-show="searchData.mode == 'type'">
-				<div class="space"></div>
-				<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'productType')">
-					<select x-model="searchData.productType" name="searchProductType">
-						<option value="0">請選擇</option>
-						<template x-for="(name, no) in options.productTypes" :key="no">
-							<option x-text="name" :value="no"></option>
-						</template>
-					</select>
-					<label>類別</label>
-					<i>arrow_drop_down</i>
-				</div>
-			</div>
+		<div>
+		<div class="space"></div>
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'productName')">
+			<input type="text" name="searchProductName" maxlength="30" x-model="searchData.productName" x-ref="searchProductName" @input="errors.delete('productName')">
+			<label>產品名稱</label>
 		</div>
 		
+		<!--div x-show="searchData.mode == 'type'">
+			<div class="space"></div>
+			<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'productType')">
+				<select x-model="searchData.productType" name="searchProductType">
+					<option value="0">請選擇</option>
+					<template x-for="(name, no) in options.productTypes" :key="no">
+						<option x-text="name" :value="no"></option>
+					</template>
+				</select>
+				<label>類別</label>
+				<i>arrow_drop_down</i>
+			</div>
+		</div-->
+		</div>
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

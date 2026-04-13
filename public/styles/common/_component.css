@@ -6,10 +6,10 @@ button, a {
 	}
 	/* Search */
 	&.btn-show-search {
-		--primary: #81d4fa;
+		--primary: #4fc3f7;/* #81d4fa; */
 	}
 	&.btn-search {
-		--primary: #81d4fa;
+		--primary: #4fc3f7;
 		font-size: 1rem;
 	}
 	&.btn-search-reset {
