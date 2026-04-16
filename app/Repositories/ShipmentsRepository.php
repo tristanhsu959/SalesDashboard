@@ -21,6 +21,24 @@ class ShipmentsRepository extends Repository
 		
 	}
 	
+	/* 取Product setting
+	 * @params: string
+	 * @return: array
+	 */
+	public function getEnableProducts($brandId)
+	{
+		#取後台的enabled product
+		$db = $this->connectSalesDashboard();
+		$result = $db
+			->table('purchase_product_setting as p')
+			->select('p.purchaseBrandId as brandId', 'p.purchaseProductCode as shortCode')
+			->where('p.purchaseBrandId', '=', $brandId)
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
 	/* 取Product id
 	 * @params: string
 	 * @return: array

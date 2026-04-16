@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\Shipments\FactoryService;
 use App\Services\Shipments\StoreService;
+use App\Services\Traits\Purchase\ProductTrait;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
@@ -26,6 +27,7 @@ use OpenSpout\Common\Entity\Row;
 #當主Service
 class ShipmentsService
 {
+	use ProductTrait;
 	private $_statistics = [];
 	
 	public function __construct(protected ShipmentsRepository $_repository)
@@ -55,43 +57,59 @@ class ShipmentsService
         };
 	}
 	
-	/* 取分類by brand
+	/* 取分類設定 - from purchase product setting(後台設定)
 	 * @params: int
 	 * @return: string
 	 */
-	public function getProductTypes($brandId)
+	public function getEnableProducts($brandId)
 	{
-		$result = $this->_repository->getProductTypes($brandId);
-		
-		$result = collect($result)->mapWithKeys(function($item, $key){
-			return [$item['No'] => $item['Name']];
-		})->toArray();
-		
-		return $result;
-	}
-	
-	/* 取分類及產品by brand
-	 * @params: int
-	 * @return: string
-	 */
-	public function getCategoryAndProduct($brandId)
-	{
-		$result = $this->_repository->getProductWithType($brandId);
-		$result = collect($result)->groupBy('catNo');
-		
-		#Build category
-		$category = $result->map(function($item, $no){
-			return $item->pluck('catName')->first();
-		});
+		$enableProducts = $this->_repository->getEnableProducts($brandId);
 		
 		#Build product mapping
-		$products = $result->map(function($items, $no){
-			$items = $items->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			})->toArray();
+		$productMapping = $this->_repository->getProductShortCode($brandId);
+		$productMapping = collect($productMapping)->mapWithKeys(function($item, $key){
+			return [$item['productNo'] => $item['productName']];
+		})->toArray();
+		
+		#Build options
+		/*array:4 [
+			"shortCode" => "0001"
+			"productName" => "招牌餡"
+			"groupId" => 1
+			"groupName" => "餡類"
+		]
+		*/
+		$list = collect($enableProducts)->map(function($item, $key) use($productMapping) {
+			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
+			
+			$category = $this->getGroupByShortCode($item['shortCode']);
+			$item['groupId']	= $category['groupId'];
+			$item['groupName'] 	= $category['groupName'];
+			unset($item['brandId']);
+			return $item;
+		})->toArray();
+			
+		#要分成category & product對應
+		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
+			$temp['catId'] = $items->pluck('groupId')->unique()->first();
+			$temp['catName'] = $items->pluck('groupName')->unique()->first();
+			
+			return $temp;
+		})->mapWithKeys(function($item, $key){
+			return [$item['catId'] => $item['catName']];
+		})->toArray();
+		
+		#Build product
+		$products = collect($list)->groupBy('groupId')->map(function($items, $key){
+			return $items->map(function($item, $key){
+				unset($item['groupId']);
+				unset($item['groupName']);
+				
+				return $item;
+			});
 			
 			return $items;
-		});
+		})->toArray();
 		
 		return [$category, $products];
 	}

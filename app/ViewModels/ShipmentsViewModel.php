@@ -51,11 +51,9 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
-		$productTypes = $this->_service->getProductTypes($this->brand->value);
-		$this->set('options.productTypes', $productTypes);
-		
-		#list($category, $products) = $this->_service->getCategoryAndProduct($this->brand->value);
-		#$this->set('options.products', $products);
+		list($category, $products) = $this->_service->getEnableProducts($this->brand->value);
+		$this->set('options.category', $category);
+		$this->set('options.products', $products); 
 	}
 	
 	/* 查詢選項
@@ -76,11 +74,11 @@ class ShipmentsViewModel extends Fluent
 		];
 		$this->set('options.mode.calc', $calc);
 
-		$condition = [
-			'cat'		=> '分類查詢', 
+		$by = [
 			'keyword'	=> '關鍵字查詢',
+			'category'	=> '分類查詢', 
 		];
-		$this->set('options.mode.condition', $condition);
+		$this->set('options.mode.by', $by);
 	}
 	
 	/* Form submit action
@@ -107,13 +105,16 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchProductName = '', $searchType = 'store', $searchCalc = 'day')
+	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchKeyword = '', $searchCategory = '0', $searchShortCodes = [], $searchType = 'store', $searchCalc = 'day', $searchBy='keyword')
     {
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.productName', $searchProductName);
+		$this->set('search.keyword', $searchKeyword);
+		$this->set('search.category', $searchCategory);
+		$this->set('search.shortCodes', $searchShortCodes);
 		$this->set('search.type', $searchType);
 		$this->set('search.calc', $searchCalc);
+		$this->set('search.by', $searchBy);
 		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
 	}
 	

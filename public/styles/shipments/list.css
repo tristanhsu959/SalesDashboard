@@ -8,26 +8,19 @@ form {
 }
 
 #searchPanel {
-	/* max-width: 400px; */
-	
-	.mode-group {
+	.search-condition {
 		display: flex;
-		margin-block-start: 1rem;
+		flex-direction: column;
 		
-		.field {
-			margin-block-start: 0;
-		}
-	}
-	
-	.date-group {
-		display: flex;
-		margin-block-start: 1rem;
-		
-		.field {
-			width: 240px;
-			margin-block-start: 0;
-			&:first-child {
-				margin-right: 1rem;
+		.fieldset {
+			/* height: calc(100vh - 72px);
+			border-radius: .25rem; */
+			/* margin-left: 1rem;
+			padding: 1rem;
+			 *//* background-color: #eceff1; */
+			
+			.row:first-of-type {
+				margin-block-start: 0;
 			}
 		}
 	}

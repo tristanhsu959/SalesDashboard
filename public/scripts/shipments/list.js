@@ -4,20 +4,11 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('searchShipments', (searchData, options) => ({
 		searchData: {...searchData},
 		options: {...options},
-		/* mode: {...options.mode},
-		category: {...options.category},
-		products: {...options.products}, */
 		errors: new Set(),
 		
 		init() {
 			
 		},
-		
-		/* changeProducts(catNo) {
-			this.searchData.catNo = catNo;
-			this.errors.delete('catNo');
-			this.errors.delete('productNo');
-		}, */
 		
 		search() {
 			this.errors.clear();
@@ -36,8 +27,14 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.productName == '')
-				this.errors.add('productName');
+			if (this.searchData.by == 'keyword' && this.searchData.keyword == '')
+				this.errors.add('keyword');
+			
+			if (this.searchData.by == 'category' && this.searchData.shortCodes.length == 0)
+			{
+				this.errors.add('shortCodes');
+				Alpine.store('toast').notify('請勾選產品');
+			}
 			
 			if (this.errors.size == 0)
 			{
@@ -55,10 +52,13 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = Object.keys(this.options.mode.type)[0];
-			this.searchData.calc = Object.keys(this.options.mode.calc)[0];;
+			this.searchData.calc = Object.keys(this.options.mode.calc)[0];
+			this.searchData.by = Object.keys(this.options.mode.by)[0];
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
-			this.searchData.productName = '';
+			this.searchData.keyword = '';
+			this.searchData.category = '';
+			this.searchData.shortCodes = [];
 			this.errors.clear();
 		},
     }));
