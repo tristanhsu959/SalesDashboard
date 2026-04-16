@@ -187,7 +187,7 @@ class ShipmentsService
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= ($params['searchBy'] == 'keyword') ? $params['searchKeyword'] : '分類';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(1));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
