@@ -15,7 +15,8 @@
 			</div>
 			
 			<!-- 工廠 -->
-			<div class="page padding active">
+			<template x-for="(name, productId) in statistics.header['productList']" :key="productId">
+			<div class="page padding" :class="{ 'active': activeProduct === productId }">
 				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
 					<table>
 						<thead>
@@ -31,7 +32,7 @@
 							<tr>
 								<th x-text="factoryName"></th>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-									<td x-text="statistics.data[activeProduct]?.[factoryId]?.[date]?.['qty'] ?? 0"></td>
+									<td x-text="statistics.data[productId]?.[factoryId]?.[date]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>
@@ -40,6 +41,7 @@
 					</table>
 				</section>
 			</div>
+			</template>
 		</div>
 		@endif
 	</section>

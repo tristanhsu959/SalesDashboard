@@ -24,65 +24,30 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
-	const MODE = 'Name';
+	private $_userAreaIds = FALSE;
+	private $_statistics = [];
 	
-	private $_brand;
-	private $_userAreaIds	= FALSE;
-	private $_statistics	= [];
-   
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
-		$this->_statistics = [
-			'modeType'		=> '',
-			'modeCalc'		=> '',
-			#'modeUnit'		=> '',
-			'brandId'		=> '', #export
-			'startDate'		=> '', #Y-m-d
-            'endDate'   	=> '',
-			'productIds'	=> [],
-			'header'		=> [],
-			'data'			=> [],
-			'exportName'	=> '', #export
-			'exportToken'	=> '', #export
-		];
+		
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
 	/* Search data
-	 * @params: enum
-	 * @params: date
-	 * @params: date
 	 * @params: array
-	 * @params: string
-	 * @params: string
-	 * @params: string
-	 * @params: string
 	 * @return: array
 	 */
-	public function analysis($brand, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc)
+	public function analysis($params)
 	{
 		try
 		{
-			$this->_brand = $brand;
-			
 			$currentUser = AppManager::getCurrentUser();
 			$this->_userAreaIds = $currentUser['roleArea'];
-			
-			#Check cache
-			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			
-			$this->_statistics['modeType']	= $searchType;
-			$this->_statistics['modeCalc']	= $searchCalc; 
-			#$this->_statistics['modeUnit']	= $searchUnit; 
-			$this->_statistics['brandId']	= $brand->value; 
-			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
-			$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
-			$this->_statistics['productIds']= $productIds;
+			$this->_statistics = $params;
 			
 			#執行統計
-			$this->_analysisStatisticsData();
-				
-			return $this->_statistics;
+			$orderData = $this->_getDataFromDB();
+			return $this->_outputReport($orderData);
 		}
 		catch(Exception $e)
 		{
@@ -90,25 +55,6 @@ class FactoryService
 		}
 	}
 	
-	/* 取出貨統計By工廠
-	 * @params: enum
-	 * @return: array
-	 */
-	private function _analysisStatisticsData()
-	{
-		try
-		{
-			#Get Order data
-			$orderData = $this->_getDataFromDB();
-			
-			return $this->_outputReport($orderData);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception($e->getMessage());
-		}
-	}
 	/* ====================== 主流程 End ====================== */
 	
 	/* Get order data
@@ -139,14 +85,16 @@ class FactoryService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			$productIds	= $this->_statistics['productIds'];
 			
-			$orderData = $this->_repository->getOrderDataByProductId($this->_brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
+			$brand = Brand::tryFrom($this->_statistics['brandId']);
+			
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
 			
 			return $orderData;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取訂貨資料失敗');
+			throw new Exception('讀取訂貨資料失敗(工廠)');
 		}
 	}
 	
@@ -164,9 +112,7 @@ class FactoryService
 			$this->_statistics['header']['dateList'] = $this->_buildDateHeader();
 			
 			#2.productList
-			$this->_statistics['header']['productList']  = collect($orderData)->mapWithKeys(function($items, $key){
-				return [$items['erpNo'] => $items['productName']];
-			})->toArray();
+			$this->_statistics['header']['productList']  = $this->_getProductList($orderData);
 		
 			#3.factory list
 			$this->_statistics['header']['factoryList'] = $this->_getFactoryList();
@@ -174,7 +120,7 @@ class FactoryService
 			#4.analysis by 工廠
 			$this->_statistics['data'] = $this->_parsingByFactory($orderData);
 			
-			return TRUE;
+			return $this->_statistics;
 		}
 		catch(Exception $e)
 		{
@@ -220,6 +166,17 @@ class FactoryService
 	}
 	
 	/* Get order data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getProductList($orderData)
+	{
+		return collect($orderData)->mapWithKeys(function($items, $key){
+			return [$items['erpNo'] => $items['productName']];
+		})->toArray();
+	}
+	
+	/* Get order data
 	 * @params: enums
 	 * @params: date
 	 * @params: date
@@ -230,7 +187,7 @@ class FactoryService
 	{
 		try
 		{
-			$brandId = $this->_brand->value;
+			$brandId = $this->_statistics['brandId'];
 			$factory = $this->_repository->getFactoryList($brandId);
 			
 			#To key-value
@@ -276,11 +233,6 @@ class FactoryService
 				{
 					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
 						$temp['qty'] = $items->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $items->pluck('qty')->sum();
-						else
-							$temp['amount'] = $items->pluck('amount')->sum(); */
-						
 						return $temp;
 					});
 					
@@ -293,11 +245,6 @@ class FactoryService
 						return substr($item['expectedDate'], 0, 7); 
 					})->map(function ($group) {
 						$temp['qty'] = $group->pluck('qty')->sum();
-						/* if ($modeUnit == 'qty')
-							$temp['qty'] 	= $group->pluck('qty')->sum();
-						else
-							$temp['amount'] = $group->pluck('amount')->sum(); */
-						
 						return $temp;
 					});
 					

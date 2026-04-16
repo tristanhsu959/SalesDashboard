@@ -40,6 +40,7 @@ class ShipmentsRepository extends Repository
 	}
 	
 	/* 取Product id
+	 * @params: int
 	 * @params: string
 	 * @return: array
 	 */
@@ -64,6 +65,40 @@ class ShipmentsRepository extends Repository
 			})
 			->where('a.IsStop', '=', 0)
 			->where('a.Name', 'like', "%{$name}%")
+			->groupBy('a.Id')
+			->get()
+			->pluck('Id')
+			->toArray();
+		
+		return $result;
+	}
+	
+	/* 取Product id - short code
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getProductIdByShortCode($brandId, $shortCodes)
+	{
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Product as a')
+			->join('Stocks as st', 'st.ProductId', '=', 'a.Id')
+			->select('a.Id')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'a.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'st.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->where('a.IsStop', '=', 0)
+			->whereIn('a.OldNo', $shortCodes)
 			->groupBy('a.Id')
 			->get()
 			->pluck('Id')

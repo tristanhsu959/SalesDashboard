@@ -15,7 +15,8 @@
 			</div>
 			
 			<!-- 門店 -->
-			<div class="page padding active">
+			<template x-for="(name, productId) in statistics.header.productList" :key="productId">
+			<div class="page paddin" :class="{ 'active': activeProduct === productId }">
 				<section class="statistics-store scrollbar {{$viewModel->getBrandCode()}}">
 					<table class="stripes">
 						<thead>
@@ -37,7 +38,7 @@
 								<!--th x-text="store.storeNo"></th-->
 								<th x-text="store.storeName"></th>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-									<td x-text="statistics.data[activeProduct]?.[storeId]?.[date]?.['qty'] ?? 0"></td>
+									<td x-text="statistics.data[productId]?.[storeId]?.[date]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>
@@ -46,6 +47,7 @@
 					</table>
 				</section>
 			</div>
+			</template>
 		</div>
 		@endif
 	</section>

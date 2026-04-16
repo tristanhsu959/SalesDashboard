@@ -105,16 +105,16 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchStDate = '', $searchEndDate = '', $searchKeyword = '', $searchCategory = '0', $searchShortCodes = [], $searchType = 'store', $searchCalc = 'day', $searchBy='keyword')
+	public function keepSearchData($params = [])
     {
-		$this->set('search.stDate', $searchStDate);
-		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.keyword', $searchKeyword);
-		$this->set('search.category', $searchCategory);
-		$this->set('search.shortCodes', $searchShortCodes);
-		$this->set('search.type', $searchType);
-		$this->set('search.calc', $searchCalc);
-		$this->set('search.by', $searchBy);
+		$this->set('search.stDate', data_get($params, 'searchStDate', ''));
+		$this->set('search.endDate', data_get($params, 'searchEndDate', ''));
+		$this->set('search.keyword', data_get($params, 'searchKeyword', ''));
+		$this->set('search.category', data_get($params, 'searchCategory', ''));
+		$this->set('search.shortCodes', data_get($params, 'searchShortCodes', []));
+		$this->set('search.type', data_get($params, 'searchType', 'store'));
+		$this->set('search.calc', data_get($params, 'searchCalc', 'day'));
+		$this->set('search.by', data_get($params, 'searchBy', 'keyword'));
 		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
 	}
 	

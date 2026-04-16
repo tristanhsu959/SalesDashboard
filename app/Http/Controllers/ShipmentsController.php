@@ -43,20 +43,17 @@ class ShipmentsController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		$searchStDate		= $request->input('searchStDate');
-		$searchEndDate		= $request->input('searchEndDate');
-		$searchProductName	= $request->input('searchProductName');
-		$searchType			= $request->input('searchType');
-		$searchCalc			= $request->input('searchCalc');
+		$params = $request->all();
+		$params['searchShortCodes'] = $request->array('searchShortCodes');
+		unset($params['_token']);
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc); 
+		$this->_viewModel->keepSearchData($params); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
 			'searchStDate' 	=> 'required|date_format:Y-m-d',
 			'searchEndDate'	=> 'required|date_format:Y-m-d',
-            'searchProductName' => 'required|max:30',
         ]);
  
         if ($validator->fails()) 
@@ -65,7 +62,14 @@ class ShipmentsController extends Controller
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc);
+		if (($params['searchBy'] == 'keyword' && empty($params['searchKeyword'])) 
+				OR ($params['searchBy'] == 'category' && empty($params['searchShortCodes'])))
+		{
+			$this->_viewModel->fail('查詢產品參數錯誤');
+			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+		}
+		
+		$response = $this->_service->getStatistics($brand, $function, $params);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

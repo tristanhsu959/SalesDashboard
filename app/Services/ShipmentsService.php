@@ -32,6 +32,19 @@ class ShipmentsService
 	
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
+		$this->_statistics = [
+			'modeType'		=> '',
+			'modeCalc'		=> '',
+			'modeBy'		=> '',
+			'brandId'		=> '', #export
+			'startDate'		=> '', #Y-m-d
+            'endDate'   	=> '',
+			'productIds'	=> [],
+			'header'		=> [],
+			'data'			=> [],
+			'exportName'	=> '', #export
+			'exportToken'	=> '', #export
+		];
 	}
 	
 	/* Parsing brand from url segment
@@ -122,7 +135,7 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc)
+	public function getStatistics($brand, $function, $params)
 	{
 		try
 		{
@@ -132,8 +145,19 @@ class ShipmentsService
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchProductName, $searchType, $searchCalc]);
 			
+			$this->_statistics['modeType']	= $params['searchType'];
+			$this->_statistics['modeCalc']	= $params['searchCalc']; 
+			$this->_statistics['modeBy']	= $params['searchBy']; 
+			$this->_statistics['brandId']	= $brand->value; 
+			$this->_statistics['startDate'] = (new Carbon($params['searchStDate']))->format('Y-m-d'); 
+			$this->_statistics['endDate'] 	= (new Carbon($params['searchEndDate']))->format('Y-m-d');
+			
+			if ($params['searchBy'] == 'keyword')
+				$cacheKey = implode(':', [$functions->value, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+			else
+				$cacheKey = implode(':', [$functions->value, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], implode('-', $params['searchShortCodes']), $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+		
 			if (Cache::has($cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from cache');
@@ -145,21 +169,24 @@ class ShipmentsService
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
-				if ($searchType == 'store')
+				if ($params['searchType'] == 'store')
 					$service = app(StoreService::class);
 				else
 					$service = app(FactoryService::class);
 				
-				$productIds = $this->_getProductIdByName($brand->value, $searchProductName);
+				if ($params['searchBy'] == 'keyword')
+					$this->_statistics['productIds'] = $this->_getProductIdByName($brand->value, $params['searchKeyword']);
+				else
+					$this->_statistics['productIds'] = $this->_getProductIdByShortCode($brand->value, $params['searchShortCodes']);
 				
 				#執行統計
-				$this->_statistics = $service->analysis($brand, $searchStDate, $searchEndDate, $productIds, $searchType, $searchCalc);
+				$this->_statistics = $service->analysis($this->_statistics);
 				
 				#無值不cache
 				if (! empty($this->_statistics['data']))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					$this->_statistics['exportName']	= $searchProductName;
+					$this->_statistics['exportName']	= ($params['searchBy'] == 'keyword') ? $params['searchKeyword'] : '分類';
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(1));
 				}
 				
@@ -176,14 +203,39 @@ class ShipmentsService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _getProductIdByName($brandId, $productName)
+	private function _getProductIdByName($brandId, $keyword)
 	{
 		try
 		{
-			$ids = $this->_repository->getProductIdByName($brandId, $productName);
+			$ids = $this->_repository->getProductIdByName($brandId, $keyword);
 			
 			if (empty($ids))
 				throw new Exception('無此產品名稱');
+			
+			return $ids;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
+	/* Name to proudct id
+	 * @params: int
+	 * @return: array
+	 */
+	private function _getProductIdByShortCode($brandId, $shortCodes)
+	{
+		try
+		{
+			if (empty($shortCodes))
+				return [];
+			
+			$ids = $this->_repository->getProductIdByShortCode($brandId, $shortCodes);
+			
+			if (empty($ids))
+				throw new Exception('無對應的產品');
 			
 			return $ids;
 		}
@@ -208,7 +260,7 @@ class ShipmentsService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export shipment data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];

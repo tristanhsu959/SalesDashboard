@@ -13,12 +13,6 @@ form {
 		flex-direction: column;
 		
 		.fieldset {
-			/* height: calc(100vh - 72px);
-			border-radius: .25rem; */
-			/* margin-left: 1rem;
-			padding: 1rem;
-			 *//* background-color: #eceff1; */
-			
 			.row:first-of-type {
 				margin-block-start: 0;
 			}
