@@ -98,7 +98,7 @@ trait OrderTrait
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->whereNull('s.CloseDate')
+			#->whereNull('s.CloseDate')
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
 			#->orderBy('s.OperationCenterId')
