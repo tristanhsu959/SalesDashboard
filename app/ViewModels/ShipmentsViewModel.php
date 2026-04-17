@@ -114,7 +114,7 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.productName', $searchProductName);
 		$this->set('search.type', $searchType);
 		$this->set('search.calc', $searchCalc);
-		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
+		$this->set('search.today', Carbon::tomorrow()->format('Y-m-d'));
 	}
 	
 	/* Partial view
