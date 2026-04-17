@@ -74,7 +74,7 @@
 			
 			<template x-for="(products, catId) in options.products" :key="catId">
 				<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="field-dark-blue fieldset">
-					<legend><i class="small red-text">asterisk</i><span>請勾選啟用產品</span></legend>
+					<legend><i class="small red-text">asterisk</i><span>請勾選產品</span></legend>
 					<template x-for="(item, idx) in products" :key="idx">
 						<div class="row">
 							<label class="checkbox large s3 check-amber">
