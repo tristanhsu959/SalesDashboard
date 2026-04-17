@@ -115,7 +115,7 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.type', data_get($params, 'searchType', 'store'));
 		$this->set('search.calc', data_get($params, 'searchCalc', 'day'));
 		$this->set('search.by', data_get($params, 'searchBy', 'keyword'));
-		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
+		$this->set('search.today', Carbon::tomorrow()->format('Y-m-d'));
 	}
 	
 	/* Partial view
