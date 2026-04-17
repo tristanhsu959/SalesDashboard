@@ -56,7 +56,8 @@ class MonthlyFillingController extends Controller
 			'searchStDate' 	=> 'required',
 			'searchEndDate'	=> 'required',
         ]);
- 
+		
+		#年度不用檢查起迄
         if ($searchRange != 'year' && $validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');

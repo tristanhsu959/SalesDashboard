@@ -24,8 +24,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
-	const MODE = 'Name';
-	
 	private $_statistics	= [];
    
 	public function __construct(protected MonthlyFillingRepository $_repository)
@@ -155,7 +153,7 @@ class StoreService
 		{
 			#1.Build params
 			$this->_statistics['temp'] = $this->_buildParams();
-			
+			dd($this->_statistics);
 			#2.Build header data
 			$this->_statistics['header'] = $this->_buildHeader();
 			

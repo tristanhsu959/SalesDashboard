@@ -107,7 +107,7 @@ class MonthlyFillingService
 				if (! empty($this->_statistics['data']))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					#$this->_statistics['exportName']	= '';
+					$this->_statistics['exportName']	= '月初報表';
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
 				}
 				
@@ -134,7 +134,7 @@ class MonthlyFillingService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export monthly filling data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];

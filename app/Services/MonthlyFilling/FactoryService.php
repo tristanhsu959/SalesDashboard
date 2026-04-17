@@ -24,6 +24,7 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
+	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected MonthlyFillingRepository $_repository)
@@ -54,6 +55,9 @@ class FactoryService
 	{
 		try
 		{
+			$currentUser = AppManager::getCurrentUser();
+			$this->_userAreaIds = $currentUser['roleArea'];
+			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeRange']	= $searchRange; 
 			$this->_statistics['brandId']	= $brandId; 
@@ -125,7 +129,9 @@ class FactoryService
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			$orderData = $this->_repository->getOrderDataByFactory($brandId, $stDate, $endDate, $productIds);
+			$brand = Brand::tryFrom($this->_statistics['brandId']);
+			
+			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
 			
 			return $orderData;
 		}
@@ -340,16 +346,17 @@ class FactoryService
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_出貨總量_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
 			$index = 0;
-			foreach($export as $sheetName => $sheetData)
+			foreach($export as $sheetKey => $sheetData)
 			{
 				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
+				$sheetName = ($sheetKey == 'qty') ? '月總量' : '月均量';
 				$sheet->setName($sheetName);
 				
 				foreach($sheetData as $data)
@@ -376,33 +383,16 @@ class FactoryService
 	 */
 	private function _buildExportData($header, $data)
 	{
-		$export = [];
-		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
+		#Header row
+		$export['qty'][] = $header;
+		$export['avg'][] = $header;
 		
-		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $productName)
+		#只需要$key值
+		foreach($export as $key => &$row)
 		{
-			$factoryData = data_get($data, $erpNo, []);
-			
-			if (empty($factoryData))
-				continue;
-			
-			$export[$productName] = [];
-			$export[$productName][] = $outputHeader;
-			
-			#使用header來控制顯示順序,先TP後KH
-			foreach($header['factoryList'] as $factoryNo => $factoryName)
+			foreach($data[$key] as $rowData)
 			{
-				$row = [];
-				$row[] = $factoryName;
-				
-				#要按Header的順序
-				foreach($header['dateList'] as $date)
-				{
-					$row[] = data_get($factoryData, "{$factoryNo}.{$date}.qty", 0);
-				}
-				
-				$export[$productName][] = $row;
+				$row[] = $rowData;
 			}
 		}
 		

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Repositories\Traits\OrderTrait;
+use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -107,11 +108,14 @@ class MonthlyFillingRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByFactory($brandId, $stDate, $endDate, $productIds)
+	public function getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $userAreaIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc();
 		$endDate= (new Carbon($endDate))->utc();
+		
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -119,6 +123,7 @@ class MonthlyFillingRepository extends Repository
 			->join('OrderSub as b', 'b.OrderId', '=', 'a.Id')
 			->join('Product as p', 'p.Id', '=', 'b.ProductId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 'a.StoreId')
+			->join('Store as s', 's.Id', '=', 'sc.StoreId')
 			->join('Factory as f', 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
@@ -139,6 +144,7 @@ class MonthlyFillingRepository extends Repository
 			->where('a.ExpectedDate', '<=', $endDate)
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
+			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)
 			->groupBy(DB::RAW('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7)'), 'f.No', 'p.OldNo')
 			->get()
