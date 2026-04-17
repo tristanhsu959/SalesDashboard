@@ -5,6 +5,7 @@ namespace App\Services\MonthlyFilling;
 use App\Facades\AppManager;
 use App\Repositories\MonthlyFillingRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -24,6 +25,7 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
+	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected MonthlyFillingRepository $_repository)
@@ -54,6 +56,9 @@ class StoreService
 	{
 		try
 		{
+			$currentUser = AppManager::getCurrentUser();
+			$this->_userAreaIds = $currentUser['roleArea'];
+			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeRange']	= $searchRange; 
 			$this->_statistics['brandId']	= $brandId; 
@@ -126,11 +131,11 @@ class StoreService
 	
 		try
 		{
-			$brandId 	= $this->_statistics['brandId'];
+			$brand 		= Brand::tryFrom($this->_statistics['brandId']);
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			$orderData = $this->_repository->getOrderDataByStore($brandId, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByStore($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
 			
 			return $orderData;
 		}
@@ -153,14 +158,15 @@ class StoreService
 		{
 			#1.Build params
 			$this->_statistics['temp'] = $this->_buildParams();
-			dd($this->_statistics);
+			
 			#2.Build header data
 			$this->_statistics['header'] = $this->_buildHeader();
 			
 			#3.By門店
 			$productList = $this->_statistics['temp']['productList'];
 			$data = [];
-				
+			
+			#依產品產生一個sheet
 			foreach($productList as $key => $product)
 			{
 				$data = $this->_parsingByStore($orderData, $product);
@@ -216,7 +222,7 @@ class StoreService
 			return [$key => $item['name']];
 		})->toArray();
 		
-		$header['tableHeader'] 	= array_merge(['POS ID', '區域', '門店名稱'], $monthList);
+		$header['tableHeader'] 	= array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $monthList);
 		
 		return $header;
 	}
@@ -232,19 +238,30 @@ class StoreService
 	{
 		try
 		{
-			$brandId = $this->_statistics['brandId'];
-			$store = $this->_repository->getStoreList($brandId);
+			$brand = Brand::tryFrom($this->_statistics['brandId']);
+			$store = $this->_repository->getStoreList($brand, $this->_userAreaIds);
 			
 			#To key-value
-			$store = collect($store)->map(function($item, $key){
+			$store = collect($store)->mapWithKeys(function($item, $key) use($brand) {
+				
 				if (is_null($item['postId']) OR $item['postId'] == 'null')
 					$item['postId'] =  '';
 				
-				$item['area'] = Str::replace('-八方', '', $item['area']);
-				$item['area'] = Str::replace('-御廚', '', $item['area']);
+				$area = AreaLib::toArea(intval($item['areaId']));
+				$item['areaId']		= $area->value;
+				$item['areaName'] 	= $area->label();
+				#$item['area'] = Str::replace('-八方', '', $item['area']);
+				#$item['area'] = Str::replace('-御廚', '', $item['area']);
 				
-				return $item;
-			})->toArray();
+				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
+				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
+				if ($brand == Brand::BAFANG)
+					$storeKey = Str::take($item['storeNo'], 9);
+				else
+					$storeKey = $item['storeNo'];
+				
+				return [$storeKey => $item];
+			})->sortBy('areaId')->toArray();
 			
 			return $store;
 		}
@@ -277,18 +294,22 @@ class StoreService
 		
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groups){
-			return in_array($item['shortCode'], $groups);
 		
+			return in_array($item['shortCode'], $groups);
 		})->map(function($item, $key){
+			
 			$coefficient = config("web.purchase.monthly_filling.totalCount.code.{$item['shortCode']}.coefficient");
 			$item['qty'] = round(floatval($item['qty']) * $coefficient, 2);
 			return $item;
 		#storeId會變成int
-		})->groupBy('storeId')->map(function($items, $key) {
+		})->groupBy(function($item, $key){
+			
+			return Str::take($item['storeNo'], 9);
+		})->map(function($items, $key) {
+			
 			return $items->groupBy('expectedDate')->map(function($items, $key) {
 				return $items->pluck('qty')->sum();
 			})->toArray();
-		
 		})->toArray();
 		
 		return $result;
@@ -308,14 +329,15 @@ class StoreService
 		
 		$rowData = [];
 		
-		foreach($storeList as $store)
+		foreach($storeList as $key => $store)
 		{
-			$storeId = $store['storeId'];
-			$storeData = data_get($data, $storeId);
+			#$storeId = $store['storeId'];
+			$storeData = data_get($data, $key);
 				
 			$row = [];
 			$row[] = data_get($store, 'postId');
-			$row[] = data_get($store, 'area');
+			$row[] = data_get($store, 'areaName');
+			$row[] = data_get($store, 'storeNo');
 			$row[] = data_get($store, 'storeName');
 			
 			foreach($monthList as $month)
@@ -378,36 +400,37 @@ class StoreService
 	 */
 	private function _buildExportData($header, $data)
 	{
+		/*
+		"sheet" => array:4 [
+			"g1" => "餡"
+			"g2" => "粗細麵"
+			"g3" => "菜肉餡"
+			"g4" => "餛飩餡"
+		]
+		"tableHeader" => array:5 [
+			0 => "POS ID"
+			1 => "區域"
+			2 => "門店代號"
+			3 => "門店名稱"
+			4 => "2026-03"
+		]
+		*/
 		$export = [];
-		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $header['dateList']);
 		
 		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $productName)
+		foreach($header['sheet'] as $key => $sheetName)
 		{
-			$storeData = data_get($data, $erpNo, []);
+			$export[$sheetName] = [];
+			$export[$sheetName][] = $header['tableHeader'];
+			
+			$storeData = data_get($data, $key, []);
 			
 			if (empty($storeData))
 				continue;
 			
-			$export[$productName] = [];
-			$export[$productName][] = $outputHeader;
-			
-			#使用header來控制顯示順序,先TP後KH
-			foreach($header['storeList'] as $storeNo => $store)
+			foreach($storeData as $rowData)
 			{
-				$row = [];
-				$row[] = $store['postId'];
-				$row[] = $store['area'];
-				$row[] = $store['storeNo'];
-				$row[] = $store['storeName'];
-				
-				#要按Header的順序
-				foreach($header['dateList'] as $date)
-				{
-					$row[] = data_get($storeData, "{$storeNo}.{$date}.qty", 0);
-				}
-				
-				$export[$productName][] = $row;
+				$export[$sheetName][] = $rowData;
 			}
 		}
 		

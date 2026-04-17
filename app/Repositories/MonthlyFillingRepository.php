@@ -61,11 +61,14 @@ class MonthlyFillingRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByStore($brandId, $stDate, $endDate, $productIds)
+	public function getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc();
 		$endDate= (new Carbon($endDate))->utc();
+		
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -76,7 +79,7 @@ class MonthlyFillingRepository extends Repository
 			->join('StoreCar as sc', 'sc.StoreId', '=', 'a.StoreId')
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
-			->addSelect('s.Id as storeId', 'p.OldNo as shortCode')
+			->addSelect('s.Id as storeId', 's.No as storeNo', 'p.OldNo as shortCode')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
@@ -93,10 +96,11 @@ class MonthlyFillingRepository extends Repository
 			->where('a.ExpectedDate', '<=', $endDate)
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
+			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)
-			->groupBy(DB::RAW('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7)'), 's.Id', 'p.OldNo')
+			->groupBy(DB::RAW('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7)'), 's.Id', 's.No', 'p.OldNo')
 			->get()
-			->toArray(); 
+			->toArray();
 		
 		return $result;
 	}

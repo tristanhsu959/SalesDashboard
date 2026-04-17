@@ -125,11 +125,9 @@ class FactoryService
 	
 		try
 		{
-			$brandId 	= $this->_statistics['brandId'];
+			$brand 		= Brand::tryFrom($this->_statistics['brandId']);
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
-			
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
 			
 			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
 			
