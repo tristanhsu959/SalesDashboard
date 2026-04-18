@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Services\SalesProductService;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\Enums\Brand;
@@ -11,15 +12,15 @@ use App\ViewModels\Attributes\attrAllowAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Fluent;
 
-class ProductViewModel extends Fluent
+class SalesProductViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct()
+	public function __construct(protected SalesProductService $_service)
 	{
-		$this->function		= Functions::PRODUCT;
+		$this->function		= Functions::SALES_PRODUCT;
 		$this->action 		= FormAction::LIST; 
-		$this->backRoute 	= 'products';
+		$this->backRoute 	= 'sales_product';
 		$this->success();
 	}
 	
@@ -32,7 +33,6 @@ class ProductViewModel extends Fluent
 		#初始化各參數及Form Options
 		$this->action	= $action;
 		$this->success();
-		
 		$this->_setOptions();
 	}
 	
@@ -42,8 +42,8 @@ class ProductViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.brands', Brand::toArray());
-		$this->set('options.categories', config('web.sales.category'));
+		$this->set('options.brands', Brand::toArray()); 
+		$this->set('options.products', $this->_service->getProductList()); 
 	}
 	
 	/* Form submit action
@@ -54,30 +54,23 @@ class ProductViewModel extends Fluent
     {
 		return match($this->action)
 		{
-			FormAction::CREATE => route('product.create.post'),
-			FormAction::UPDATE => route('product.update.post'),
+			FormAction::UPDATE => route('sales_product.update.post'),
 		};
 	}
 	
 	/* Keep form data
+	 * @params: int
 	 * @params: int
 	 * @params: string
 	 * @params: string
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $brandId = 0, $category = 0, $name = '', $primaryNo = '', $secondaryNo = '')
+	public function keepFormData($productIds = [])
     {
-		$primaryNo	= is_array($primaryNo) ? Arr::join($primaryNo, "\r\n") : $primaryNo;
-		$secondaryNo= is_array($secondaryNo) ? Arr::join($secondaryNo, "\r\n") : $secondaryNo;
-		
-		$this->set('formData.id', $id);
-		$this->set('formData.brandId', $brandId);
-		$this->set('formData.category', $category);
-		$this->set('formData.name', $name);
-		$this->set('formData.primaryNo', $primaryNo);
-		$this->set('formData.secondaryNo', $secondaryNo);
-		$this->set('formData.buygoodId', Brand::BUYGOOD->value); #給js用
+		#不分brand
+		$this->set('formData.brandId', Brand::BAFANG); #default brand
+		$this->set('formData.productIds', $productIds);
 	}
 	
 	public function isDataEmpty()

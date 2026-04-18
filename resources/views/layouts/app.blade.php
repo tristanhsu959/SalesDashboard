@@ -12,6 +12,7 @@
 		<link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
 		
 		<!-- Styles & Font -->
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet" />
 		<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
 		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">

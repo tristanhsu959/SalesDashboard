@@ -63,7 +63,7 @@ class NewReleaseSettingService
 					return $items->map(function($item, $key){
 						$brandId = $item['productBrandId'];
 						$catId = $item['productCategory'];
-						$item['categoryName'] = config("web.category.{$brandId}.{$catId}");
+						$item['categoryName'] = config("web.sales.category.{$brandId}.{$catId}");
 						return $item;
 					});
 					return $items;

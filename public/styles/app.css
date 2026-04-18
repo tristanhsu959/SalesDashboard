@@ -65,8 +65,10 @@ body {
 			margin: 0;
 			margin-block-start: 0 !important;
 		}
-			
 		
+		.error-container.list-msg {
+			margin: 0 1rem;
+		}
 		/* #searchPanel {
 			.field.round, nav {
 				margin-top: 1.5rem;

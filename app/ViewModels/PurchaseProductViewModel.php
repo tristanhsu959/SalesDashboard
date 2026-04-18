@@ -72,4 +72,12 @@ class PurchaseProductViewModel extends Fluent
 		$this->set('formData.brandId', Brand::BAFANG); #default brand
 		$this->set('formData.productCodes', $productCodes);
 	}
+	
+	public function isDataEmpty()
+	{
+		if (empty(Arr::collapse($this->list)))
+			return TRUE;
+		else
+			return FALSE;
+	}
 }

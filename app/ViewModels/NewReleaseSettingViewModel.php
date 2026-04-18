@@ -86,4 +86,12 @@ class NewReleaseSettingViewModel extends Fluent
 		$this->set('formData.status', $status);
 		$this->set('formData.updateAt', $updateAt);
 	}
+	
+	public function isDataEmpty()
+	{
+		if (empty(Arr::collapse($this->list)))
+			return TRUE;
+		else
+			return FALSE;
+	}
 }

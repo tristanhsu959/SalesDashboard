@@ -11,7 +11,8 @@ enum Functions : string
 	#Product	
 	case PRODUCT 				= 'product';
 	case NEW_RELEASE_SETTING	= 'new_releases_setting';
-	case SALES_SETTING			= 'sales_setting';
+	case SALES_SETTING			= 'sales_setting'; #deprecated
+	case SALES_PRODUCT			= 'sales_product';
 	case PURCHASE_PRODUCT		= 'purchase_product';
 		
 	#Bafang	
@@ -43,6 +44,7 @@ enum Functions : string
 			self::PRODUCT 				=> '產品料號設定',
 			self::NEW_RELEASE_SETTING	=> '新品設定',
 			self::SALES_SETTING			=> '銷售設定',
+			self::SALES_PRODUCT			=> '銷售產品設定',
 			self::PURCHASE_PRODUCT		=> '出貨產品設定',
 			
 			#八方

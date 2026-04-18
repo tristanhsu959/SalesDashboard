@@ -7,7 +7,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewReleaseSettingController;
-use App\Http\Controllers\SalesSettingController;
+#use App\Http\Controllers\SalesSettingController;
+use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
 
 use App\Http\Middleware\AuthMiddleware;
@@ -47,7 +48,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	});
 	
 	/***** 銷售設定 *****/
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::SALES_SETTING->value, ':')])->group(function(){
+	/* Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::SALES_SETTING->value, ':')])->group(function(){
 		Route::get('sales/setting', [SalesSettingController::class, 'list'])->name('sales_setting');
 		Route::get('sales/setting/list', [SalesSettingController::class, 'list'])->name('sales_setting.list');
 		Route::get('sales/setting/create', [SalesSettingController::class, 'showCreate'])->name('sales_setting.create');
@@ -55,6 +56,14 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('sales/setting/update/{id}', [SalesSettingController::class, 'showUpdate'])->name('sales_setting.update');
 		Route::post('sales/setting/update', [SalesSettingController::class, 'update'])->name('sales_setting.update.post');
 		Route::post('sales/setting/delete/{id}', [SalesSettingController::class, 'delete'])->name('sales_setting.delete');
+	}); */
+	
+	/***** 銷售產品設定 *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::SALES_PRODUCT->value, ':')])->group(function(){
+		Route::get('sales/product', [SalesProductController::class, 'list'])->name('sales_product');
+		Route::get('sales/product/list', [SalesProductController::class, 'list'])->name('sales_product.list');
+		Route::get('sales/product/setting', [SalesProductController::class, 'showUpdate'])->name('sales_product.update');
+		Route::post('sales/product/setting', [SalesProductController::class, 'update'])->name('sales_product.update.post');
 	});
 	
 	/***** 訂貨產品設定 *****/

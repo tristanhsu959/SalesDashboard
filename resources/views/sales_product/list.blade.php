@@ -12,7 +12,7 @@
 <!-- Content -->
 	<header class="page-nav">
 		<nav>
-			<a href="{{ route('purchase_product.update') }}" class="btn-create button circle"><i>settings</i></a>
+			<a href="{{ route('sales_product.update') }}" class="btn-create button circle"><i>settings</i></a>
 		</nav>
 	</header>
 	

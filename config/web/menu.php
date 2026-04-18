@@ -97,11 +97,17 @@ return [
 			'style' 	=> ['icon' => 'fiber_new', 'color' => 'light-blue-text'],
 			'url' 		=> 'new_release_setting', 
 		],
-		[
+		/* [
 			'name' 		=> Functions::SALES_SETTING->label(), #銷售設定,
 			'code'		=> Functions::SALES_SETTING->value,
 			'style' 	=> ['icon' => 'settings_applications', 'color' => 'light-blue-text'],
 			'url' 		=> 'sales_setting', 
+		], */
+		[
+			'name' 		=> Functions::SALES_PRODUCT->label(), #銷售產品設定,
+			'code'		=> Functions::SALES_PRODUCT->value,
+			'style' 	=> ['icon' => 'settings_applications', 'color' => 'light-blue-text'],
+			'url' 		=> 'sales_product', 
 		],
 		[
 			'name' 		=> Functions::PURCHASE_PRODUCT->label(), #訂貨產品設定,

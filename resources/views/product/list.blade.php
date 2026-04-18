@@ -18,6 +18,13 @@
 	</header>
 	
 @if($viewModel->status() === TRUE)	
+	@if($viewModel->isDataEmpty())
+	<article class="error-container border list-msg">
+		<div class="row">
+			<i>info</i><div class="max">尚無產品料號設定</div>
+		</div>
+	</article>
+	@else
 	<form x-data='productList(@json($viewModel->list),@json($viewModel->options["brands"]) )' action="" method="post" x-ref="productListForm">
 		@csrf
 		<section class="product-list container">
@@ -57,6 +64,7 @@
 			</div>
 		</section>
 	</form>
+	@endif
 @endif
 <!-- Content -->
 @endsection
