@@ -87,5 +87,13 @@
 		--primary: #ff9800; 
 		--on-primary: #ffffff;
 	}
+	&.check-pink {
+		--primary: #e91e63; 
+		--on-primary: #ffffff;
+	}
+	&.check-blue {
+		--primary: #0d47a1; 
+		--on-primary: #ffffff;
+	}
 }
 

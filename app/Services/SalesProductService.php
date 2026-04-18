@@ -51,24 +51,35 @@ class SalesProductService
 			#取產品料號有設定的產品清單
 			$list = $this->_repository->getErpProductList();
 			
-			$list = collect($list)->groupBy('brandId')->map(function($items, $key) {
-				return $items->groupBy('categoryId');
-			})->toArray();
-			dd($list);
-			$list = collect($list)->map(function($items, $key) {
-				return collect($items)->unique('productNo')->map(function($item, $key){
-					$group = $this->getGroupByShortCode($item['productNo']);
-					return array_merge($item, $group);
-				})->groupBy('groupId')->map(function($items, $key){
-					$temp['groupName'] 	= $items->pluck('groupName')->first();
-					$temp['products']	= $items->mapWithKeys(function($item, $key) {
-						return [$item['productNo'] => $item['productName']];
+			$list = collect($list)->groupBy('brandId')->map(function($items, $brandId) {
+				
+				return $items->groupBy('categoryId')->map(function($items, $catId) use($brandId) {
+					$temp['catName'] = config("web.sales.category.{$brandId}.{$catId}");
+					$temp['products'] = $items->map(function($item, $key) {
+						unset($item['brandId']);
+						unset($item['categoryId']);
+						
+						return $item;
 					})->toArray();
 					
 					return $temp;
-				});
+				})->sortKeys();
+				
 			})->toArray();
 			
+			/* $list = collect($list)->groupBy('brandId')->map(function($items, $key) {
+				return $items->groupBy(function($item, $key){
+						return config("web.sales.category.{$item['brandId']}.{$item['categoryId']}");
+					})->map(function($items, $key) {
+						return $items->map(function($item, $key){
+							unset($item['brandId']);
+							unset($item['categoryId']);
+						
+							return $item;
+						});
+					});
+				
+			})->toArray(); */
 			return $list;
 		}
 		catch(Exception $e)

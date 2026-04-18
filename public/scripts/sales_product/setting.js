@@ -8,6 +8,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
+			
 		},
 		
 		validate() {

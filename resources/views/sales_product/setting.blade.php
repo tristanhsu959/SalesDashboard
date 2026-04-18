@@ -27,19 +27,18 @@
 		</div>
 		
 		<p class="medium-text red-text">請勾選啟用產品</p>
-		<template x-for="(group, brand) in options.products" :key="brand">
+		<template x-for="(groupList, brandId) in options.products" :key="brandId">
 		<div>
-			<template x-for="(item, idx) in group" :key="idx">
-			<fieldset class="field-dark-blue fieldset" x-show="brand == formData.brandId">
-				<legend><i class="small red-text">asterisk</i><span x-text="item.groupName"></span></legend>
+			<template x-for="(group, groupId) in groupList" :key="groupId">
+			<fieldset class="field-dark-blue fieldset" x-show="brandId == formData.brandId">
+				<legend><i class="small red-text">asterisk</i><span x-text="group.catName"></span></legend>
 					<div class="grid">
-						<template x-for="(name, code) in item.products" :key="code">
-						<label class="checkbox large s3 check-amber">
-							<input type="checkbox" :name="`productCodes[${brand}][]`" x-model="formData.productCodes[brand]" :value="code">
-							<span x-text="code + name"></span>
+						<template x-for="(product, idx) in group.products" :key="idx">
+						<label class="checkbox large s3 check-pink">
+							<input type="checkbox" :name="`productIds[${brandId}][]`" x-model="formData.productIds[brandId]" :value="product.id">
+							<span x-text="product.name"></span>
 						</label>
 						</template>
-						<div class="space s12"></div>
 					</div>
 			</fieldset>
 			</template>
