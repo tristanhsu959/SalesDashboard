@@ -28,7 +28,12 @@ class SalesProductService
 			$list = $this->_repository->getSetting();
 			
 			$list = collect($list)->groupBy('brandId')->map(function($items, $key) {
-				return $items->groupBy('category');
+				return $items->map(function($item, $key){
+					$temp['category'] 	= config("web.sales.category.{$item['brandId']}.{$item['category']}");
+					$temp['name']		= $item['productName'];
+					
+					return $temp;
+				});
 			})->toArray();
 			
 			return ResponseLib::initialize($list)->success();
@@ -123,11 +128,11 @@ class SalesProductService
 	 * @params: array
 	 * @return: array
 	 */
-	public function updateSetting($productCodes)
+	public function updateSetting($productIds)
 	{
 		try
 		{
-			$this->_repository->update($productCodes);
+			$this->_repository->update($productIds);
 			
 			return ResponseLib::initialize()->success();
 		}

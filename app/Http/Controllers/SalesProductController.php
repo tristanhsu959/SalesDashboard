@@ -70,12 +70,12 @@ class SalesProductController extends Controller
 	public function update(Request $request)
 	{
 		#設定所有brand, 故不用取brandId
-		$productCodes	= $request->array('productCodes');
+		$productIds	= $request->array('productIds');
 		
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($productCodes);
+		$this->_viewModel->keepFormData($productIds);
 		
-		$response = $this->_service->updateSetting($productCodes);
+		$response = $this->_service->updateSetting($productIds);
 		
 		if ($response->status === FALSE)
 		{

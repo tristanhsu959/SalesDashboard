@@ -54,7 +54,7 @@ class SalesProductRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function update($productCodes)
+	public function update($productIds)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
@@ -62,7 +62,7 @@ class SalesProductRepository extends Repository
 		try 
 		{
 			$this->_removeProduct();
-			$this->_insertProduct($productCodes);
+			$this->_insertProduct($productIds);
 			
 			$db->commit();
 
@@ -79,23 +79,23 @@ class SalesProductRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	private function _insertProduct($productCodes)
+	private function _insertProduct($productIds)
 	{
 		$items = [];
 		
-		foreach($productCodes as $brandId => $products)
+		foreach($productIds as $brandId => $products)
 		{
-			foreach($products as $code)
+			foreach($products as $id)
 			{
-				$data['purchaseBrandId']	= $brandId;
-				$data['purchaseProductCode']= $code;
+				$data['salesBrandId']	= $brandId;
+				$data['salesProductId']	= $id;
 				
 				$items[] = $data;
 			}
 		}
 		
 		$db = $this->connectSalesDashboard();
-		$db->table('purchase_product_setting')
+		$db->table('sales_product_setting')
 			->insert($items);
 		
 		return TRUE;
@@ -108,7 +108,7 @@ class SalesProductRepository extends Repository
 	public function _removeProduct()
 	{
 		$db = $this->connectSalesDashboard();
-		$db->table('purchase_product_setting')
+		$db->table('sales_product_setting')
 			->delete();
 			
 		return TRUE;
