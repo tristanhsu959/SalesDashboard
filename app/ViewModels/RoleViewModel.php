@@ -45,7 +45,7 @@ class RoleViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.functions', AppManager::getMenu());
-		$this->set('options.areas', Area::cases()); 
+		$this->set('options.areas', Area::caseWithKey()); 
 	}
 	
 	/* Keep user form data

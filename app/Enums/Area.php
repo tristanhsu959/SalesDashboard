@@ -40,6 +40,18 @@ enum Area : int
 		return $list;
 	}
 	
+	public static function caseWithKey(): array
+	{
+		$list = [];
+		foreach(self::cases() as $case)
+		{
+			if ($case->value > 0)
+				$list[] = $case;
+		}
+		
+		return $list;
+	}
+	
 	public static function options(): array
 	{
 		return collect(self::cases())->mapWithKeys(function ($case) {

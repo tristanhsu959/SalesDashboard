@@ -44,7 +44,7 @@ class UserViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.roleList', $this->_service->getRoleOptions());
-		$this->set('options.areas', Area::cases()); 
+		$this->set('options.areas', Area::caseWithKey()); 
 	}
 	
 	/* Keep search data of form
