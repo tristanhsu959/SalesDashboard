@@ -106,13 +106,13 @@ return [
 		[
 			'name' 		=> Functions::SALES_PRODUCT->label(), #銷售產品設定,
 			'code'		=> Functions::SALES_PRODUCT->value,
-			'style' 	=> ['icon' => 'settings_applications', 'color' => 'light-blue-text'],
+			'style' 	=> ['icon' => 'washoku', 'color' => 'light-blue-text'],
 			'url' 		=> 'sales_product', 
 		],
 		[
 			'name' 		=> Functions::PURCHASE_PRODUCT->label(), #訂貨產品設定,
 			'code'		=> Functions::PURCHASE_PRODUCT->value,
-			'style' 	=> ['icon' => 'package_2', 'color' => 'light-blue-text'],
+			'style' 	=> ['icon' => 'warehouse', 'color' => 'light-blue-text'],
 			'url' 		=> 'purchase_product', 
 		],
 	],
