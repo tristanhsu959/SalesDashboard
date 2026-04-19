@@ -136,7 +136,7 @@ class FactoryService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取訂貨資料失敗');
+			throw new Exception('讀取訂貨系統訂單資料失敗');
 		}
 	}
 	/* ====================== 主流程 End ====================== */
@@ -236,7 +236,7 @@ class FactoryService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取工廠資料失敗');
+			throw new Exception('讀取出貨工廠資料失敗');
 		}
 	}
 	

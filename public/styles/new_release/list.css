@@ -89,21 +89,21 @@ form {
 						}
 						
 						&:nth-child(1) {
-							min-width: 80px;
+							min-width: 100px;
 							position: sticky;
 							left: 0;
 							z-index: 6;
 						}
 						&:nth-child(2) {
-							min-width: 80px;
+							min-width: 100px;
 							position: sticky;
-							left: 80px;
+							left: 100px;
 							z-index: 6;
 						}
 						&:nth-child(3) {
 							min-width: 160px;
 							position: sticky;
-							left: 160px;
+							left: 200px;
 							z-index: 6;
 						}
 					}
@@ -124,11 +124,11 @@ form {
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(2) {
-							left: 80px;
+							left: 100px;
 							background-color: var(--table-fixed-bg);
 						}
 						&:nth-child(3) {
-							left: 160px;
+							left: 200px;
 							background-color: var(--table-fixed-bg);
 						}
 					}

@@ -117,7 +117,7 @@ class NewReleaseService
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(20));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -238,7 +238,7 @@ class NewReleaseService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取POS DB資料失敗');
+			throw new Exception('讀取POS系統訂單資料失敗');
 		}
 	}
 	

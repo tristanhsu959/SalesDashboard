@@ -108,7 +108,7 @@ class ProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取產品料號設定發生錯誤');
+			return ResponseLib::initialize()->fail('讀取產品料號設定時發生錯誤');
 		}
 	}
 	

@@ -104,7 +104,7 @@ class NewReleaseSettingService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新品新增失敗');
+			return ResponseLib::initialize()->fail('新品設定新增失敗');
 		}
 	}
 	
@@ -137,7 +137,7 @@ class NewReleaseSettingService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取新品設定時資料發生錯誤');
+			return ResponseLib::initialize()->fail('讀取新品設定時發生錯誤');
 		}
 	}
 	
@@ -165,7 +165,7 @@ class NewReleaseSettingService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯新品失敗');
+			return ResponseLib::initialize()->fail('編輯新品設定失敗');
 		}
 	}
 	
@@ -183,7 +183,7 @@ class NewReleaseSettingService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('刪除新品失敗');
+			return ResponseLib::initialize()->fail('刪除新品設定失敗');
 		}
 	}
 	

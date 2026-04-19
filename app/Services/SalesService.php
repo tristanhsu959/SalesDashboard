@@ -276,7 +276,7 @@ class SalesService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取DB資料失敗');
+			throw new Exception('讀取POS系統訂單資料失敗');
 		}
 	}
 	

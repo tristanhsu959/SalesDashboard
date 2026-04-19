@@ -91,7 +91,7 @@ class StoreService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取訂貨資料失敗(門店)');
+			throw new Exception('讀取訂貨系統訂單資料失敗');
 		}
 	}
 	

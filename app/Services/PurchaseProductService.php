@@ -44,7 +44,7 @@ class PurchaseProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
+			return ResponseLib::initialize()->fail('讀取出貨產品設定清單發生錯誤');
 		}
 	}
 	
@@ -141,7 +141,7 @@ class PurchaseProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
+			return ResponseLib::initialize()->fail('讀取出貨產品設定清單時發生錯誤');
 		}
 	}
 	

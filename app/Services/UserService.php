@@ -53,7 +53,7 @@ class UserService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('查詢時發生錯誤');
+			return ResponseLib::initialize()->fail('執行查詢時發生錯誤');
 		}
 	}
 	

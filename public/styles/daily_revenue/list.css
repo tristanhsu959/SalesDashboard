@@ -93,6 +93,10 @@ form {
 						background-color: var(--table-bg);
 						color: #424242;
 					}
+					
+					&:last-child th, &:last-child td {
+						color: red;
+					}
 				}
 			}
 		}
@@ -214,6 +218,10 @@ form {
 						/* &:nth-last-child(-n + 2) {
 							color: #f44336;
 						} */
+					}
+					
+					&:last-child th, &:last-child td {
+						color: red;
 					}
 				}
 			}

@@ -41,7 +41,7 @@ class SalesProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
+			return ResponseLib::initialize()->fail('讀取銷售產品設定清單時發生錯誤');
 		}
 	}
 	
@@ -119,7 +119,7 @@ class SalesProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('讀取產品設定清單發生錯誤');
+			return ResponseLib::initialize()->fail('讀取銷售產品設定清單時發生錯誤');
 		}
 	}
 	
@@ -139,7 +139,7 @@ class SalesProductService
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('出貨產品設定失敗');
+			return ResponseLib::initialize()->fail('銷售產品設定失敗');
 		}
 	}
 }

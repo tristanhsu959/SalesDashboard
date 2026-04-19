@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Exception;
 use Log;
 
+#20260419: deprecated, replace by sales product setting
 class SalesSettingService
 {
 	
