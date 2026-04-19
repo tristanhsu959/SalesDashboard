@@ -18,20 +18,37 @@ class SalesRepository extends Repository
 	{
 	}
 	
-	/* 取產品設定相關條件
+	/* 取產品設定相關條件-查詢條件Options
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductList($brandId)
+	public function getEnableProducts($brandId)
 	{
 		$db = $this->connectSalesDashboard();
 		$result = $db
-			->table('sales_setting as a')
-			->select('a.salesId', 'a.salesBrandId', 'a.salesName', 'c.erpNo', 'c.isPrimary')
-			->join('sales_product as b', 'b.parentId', '=', 'a.salesId')
-			->join('product_no as c', 'c.parentId', '=', 'b.productId')
-			->where('a.salesBrandId', '=', $brandId)
-			->where('a.salesStatus', '=', TRUE)
+			->table('sales_product_setting as s')
+			->join('product as p', 'p.productId', '=', 's.salesProductId')
+			->select('s.salesProductId as productId', 'p.productName', 'p.productCategory as categoryId')
+			->where('s.salesBrandId', '=', $brandId)
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
+	/* 取查詢產品對應的erp no
+	 * @params: int
+	 * @return: array
+	 */
+	public function getProductByIds($productIds)
+	{
+		#product id是唯一的, 故可不需要brand id
+		$db = $this->connectSalesDashboard();
+		$result = $db
+			->table('product as p')
+			->select('p.productId', 'p.productBrandId', 'p.productName', 'pn.erpNo', 'pn.isPrimary')
+			->join('product_no as pn', 'pn.parentId', '=', 'p.productId')
+			->whereIn('p.productId', $productIds)
 			->get()
 			->toArray();
 		

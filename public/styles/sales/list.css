@@ -7,6 +7,14 @@ form {
 	margin-block-start: 0;
 }
 
+#searchPanel {
+	.fieldset {
+		.row:first-of-type {
+				margin-block-start: 0;
+		}
+	}
+}
+
 /* Data */
 .page {
 	padding: 1rem;

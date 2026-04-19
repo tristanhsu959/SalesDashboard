@@ -11,7 +11,7 @@
 
 @section('content')
 <!-- Search panel -->
-<form x-data='searchSales(@json($viewModel->search))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+<form x-data='searchSales(@json($viewModel->search), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
 	@csrf
 
 	<dialog id="searchPanel" class="right">
@@ -28,6 +28,32 @@
 			<label>結束日期</label>
 		</div>
 		
+		<div class="space"></div>
+		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
+			<select x-model="searchData.category" name="searchCategory" @change="searchData.productIds = []">
+				<option value="">請選擇</option>
+				<template x-for="(name, catId) in options.category" :key="catId">
+					<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
+				</template>
+			</select>
+			<label>類別</label>
+			<i>arrow_drop_down</i>
+		</div>
+		
+		<template x-for="(products, catId) in options.products" :key="catId">
+			<fieldset x-show="searchData.category == catId" class="field-dark-blue fieldset">
+				<legend><i class="small red-text">asterisk</i><span>請勾選產品</span></legend>
+				<template x-for="(item, idx) in products" :key="idx">
+					<div class="row">
+						<label class="checkbox large s3 check-amber">
+							<input type="checkbox" :name="`searchProductIds[]`" x-model="searchData.productIds" :value="item.id">
+							<span x-text="item.name"></span>
+						</label>
+					</div>
+				</template>
+			</fieldset>
+		</template>
+			
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

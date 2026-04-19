@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Services\SalesService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -14,11 +15,12 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
+#銷售統計
 class SalesViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;
 	
-	public function __construct()
+	public function __construct(protected SalesService $_service)
 	{
 		$this->function		= NULL;
 		$this->action 		= FormAction::LIST; 
@@ -38,7 +40,19 @@ class SalesViewModel extends Fluent
 		$this->function = $function;
 		$this->statistics = [];
 		
-		$this->keepSearchData();
+		$this->_setOptions();
+	}
+	
+	/* Form所屬的參數選項
+	 * @params:  
+	 * @return: void
+	 */
+	private function _setOptions()
+	{
+		list($category, $products) = $this->_service->getEnableProducts($this->brand->value);
+		
+		$this->set('options.category', $category);
+		$this->set('options.products', $products); 
 	}
 	
 	/* Form submit action
@@ -64,12 +78,14 @@ class SalesViewModel extends Fluent
 	 * @params: date
 	 * @return: void
 	 */
-	public function keepSearchData($searchStDate = NULL, $searchEndDate = NULL)
+	public function keepSearchData($searchStDate = NULL, $searchEndDate = NULL, $searchCategory = '', $searchProductIds = [])
     {
 		$today = now()->format('Y-m-d');
 		
 		$this->set('search.stDate', $searchStDate ?? $today); 
 		$this->set('search.endDate', $searchEndDate ?? $today);
+		$this->set('search.category', $searchCategory);
+		$this->set('search.productIds', $searchProductIds);
 		$this->set('search.today', $today);
 	}
 	

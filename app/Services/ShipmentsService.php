@@ -70,7 +70,7 @@ class ShipmentsService
         };
 	}
 	
-	/* 取分類設定 - from purchase product setting(後台設定)
+	/* 取出貨產品設定, 有啟用的產品清單 - purchase product setting(後台設定)
 	 * @params: int
 	 * @return: string
 	 */

@@ -67,20 +67,54 @@ class SalesService
         };
 	}
 	
+	/* 取銷售產品設定, 有啟用的產品清單 - sales product setting
+	 * @params: int
+	 * @return: string
+	 */
+	public function getEnableProducts($brandId)
+	{
+		/*0 => array:3 [
+			"productId" => 1
+			"productName" => "招牌鍋貼"
+			"categoryId" => 1
+		]*/
+		$enableProducts = $this->_repository->getEnableProducts($brandId);
+		
+		#Build category & product mapping
+		#Category list
+		$category = collect($enableProducts)->pluck('categoryId')->unique()->mapWithKeys(function($item, $key) use($brandId){
+			$name = config("web.sales.category.{$brandId}.$item");
+			return [$item => $name];
+		})->toArray();
+		
+		#Product list
+		$products = collect($enableProducts)->groupBy('categoryId')->map(function($items, $key){
+			return $items->map(function($item, $key){
+				$temp['id']		= $item['productId'];
+				$temp['name'] 	= $item['productName'];
+				return $temp;
+			});
+			
+			return $items;
+		})->toArray();
+		
+		return [$category, $products];
+	}
+	
 	/* Search data
 	 * @params: enum
 	 * @params: date
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds)
 	{
 		try
 		{
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate]);
+			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchCategory, implode('-', $searchProductIds)]);
 			
 			if (Cache::has($cacheKey))
 			{
@@ -98,7 +132,7 @@ class SalesService
 				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
 				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
 				
-				$response = $this->_analysisStatisticsData($brand); #true/false
+				$response = $this->_analysisStatisticsData($brand, $searchProductIds); #true/false
 				
 				#destroy var
 				unset($this->_statistics['productList']);
@@ -107,7 +141,7 @@ class SalesService
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(60));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -123,7 +157,7 @@ class SalesService
 	 * @params: enum
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand)
+	private function _analysisStatisticsData($brand, $productIds)
 	{
 		try
 		{
@@ -132,7 +166,7 @@ class SalesService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			#2. Get product list
-			list($productList, $primaryIds, $secondaryIds) = $this->_getParams($brand);
+			list($productList, $primaryIds, $secondaryIds) = $this->_getParams($productIds);
 			$this->_statistics['productList'] = $productList;
 			
 			$currentUser = AppManager::getCurrentUser();
@@ -143,9 +177,6 @@ class SalesService
 			
 			#4. Get data from DB
 			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
-			
-			#5-1.Filter by product : 排除不統計的項目
-			#$baseData = $this->_filterByProduct($baseData);
 			
 			#5.build to base data
 			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
@@ -165,21 +196,25 @@ class SalesService
 	 * @params: eunums
 	 * @return: array
 	 */
-	private function _getParams($brand)
+	private function _getParams($productIds)
 	{
 		try
 		{
-			$productList = $this->_repository->getProductList($brand->value);
+			$productList = $this->_repository->getProductByIds($productIds);
 			
-			#for primary secondary
-			$idType 		= collect($productList)->groupBy('isPrimary');
-			$primaryIds		= $idType[1]->pluck('erpNo')->toArray();
-			$secondaryIds 	= empty($idType[0]) ? [] : $idType[0]->pluck('erpNo')->toArray();
+			#分開primary & secondary
+			$primaryIds = collect($productList)->filter(function($item, $key){
+				return $item['isPrimary'];
+			})->pluck('erpNo')->toArray();
 			
-			#重整product list為key-value by erpNo
+			$secondaryIds = collect($productList)->filter(function($item, $key){
+				return ! $item['isPrimary'];
+			})->pluck('erpNo')->toArray();
+			
+			#建立product list為key-value by erpNo, 做為取回資料mapping用
 			$productList = collect($productList)->groupBy('erpNo')->map(function($item, $key) {
-				$temp['salesId'] 	= $item->pluck('salesId')->first();
-				$temp['salesName'] 	= $item->pluck('salesName')->first();
+				$temp['productId'] 	= $item->pluck('productId')->first();
+				$temp['productName']= $item->pluck('productName')->first();
 				
 				return $temp;
 			})->toArray();
@@ -274,13 +309,13 @@ class SalesService
 			$shop = $groupShopList->get($item['shopId']); 
 			$product = data_get($productList, $item['erpNo'], NULL);
 			
-			$item['shopName'] 	= $shop->pluck('shopName')->first();
+			$item['shopName'] 	= $shop->pluck('shopName')->first(); #因group後是array故用pluck
 			$item['areaId'] 	= AreaLib::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
 			
 			#轉換成系統設定Id and Name
-			$item['productId']	= empty($product) ? 0 : $product['salesId'];
-			$item['productName']= empty($product) ? '' : $product['salesName'];
+			$item['productId']	= empty($product) ? 0 : $product['productId'];
+			$item['productName']= empty($product) ? '' : $product['productName'];
 			
 			return $item;
 		});
@@ -363,7 +398,7 @@ class SalesService
 	private function _buildHeader()
 	{
 		/*
-		[ salesId => salesName
+		[ productId => productName
 			2 => "橙汁排骨"
 			3 => "蕃茄牛三寶"
 			4 => "老皮嫩肉"
@@ -373,8 +408,8 @@ class SalesService
 		*/
 		
 		#是以DB product table有設定的產品為基礎
-		$header =  collect($this->_statistics['productList'])->groupBy('salesId')->map(function ($item, $id) {
-			return $item->pluck('salesName')->first();
+		$header =  collect($this->_statistics['productList'])->groupBy('productId')->map(function ($item, $id) {
+			return $item->pluck('productName')->first();
 		})->toArray();
 		
 		return $header;
@@ -410,7 +445,7 @@ class SalesService
 			$temp['areaName'] 	= $item->pluck('areaName')->get(0);
 				
 			$temp['products'] 	= $item->groupBy('productId')->map(function($item, $key){
-				#$temp['productId'] 		= $item->pluck('productId')->get(0);
+				#$temp['productId'] 	= $item->pluck('productId')->get(0);
 				#$temp['productName'] 	= $item->pluck('productName')->get(0);
 				$temp['totalQty'] 		= $item->sum('qty_sum');
 				$temp['totalAmount'] 	= $item->sum('price_sum');

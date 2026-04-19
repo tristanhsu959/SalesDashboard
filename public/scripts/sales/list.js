@@ -10,8 +10,9 @@ document.addEventListener('alpine:init', () => {
         }
 	});
 	
-	Alpine.data('searchSales', (searchData) => ({
-		searchData: searchData,
+	Alpine.data('searchSales', (searchData, options) => ({
+		searchData: {...searchData},
+		options: {...options},
 		errors: new Set(),
 		
 		init() {
@@ -25,11 +26,19 @@ document.addEventListener('alpine:init', () => {
 				this.errors.add('stDate');
 			
 			if (this.searchData.stDate && this.searchData.endDate)
+			{
 				if (new Date(this.searchData.stDate) > new Date(this.searchData.endDate))
 				{
 					this.errors.add('endDate');
 					Alpine.store('toast').notify('結束日期不可小於開始日期');
 				}
+			}
+			
+			if (this.searchData.productIds.length == 0)
+			{
+				this.errors.add('productIds');
+				Alpine.store('toast').notify('請勾選欲查詢產品');
+			}
 				
 			if (this.errors.size == 0)
 			{
@@ -46,6 +55,8 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
+			this.searchData.category = '';
+			this.searchData.productIds = [];
 			this.errors.clear();
 		},
     }));
