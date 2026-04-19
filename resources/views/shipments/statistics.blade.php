@@ -62,10 +62,10 @@
 			</div>
 			
 			<div x-show="searchData.by == 'category'" class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
-				<select x-model="searchData.category" name="searchCategory">
+				<select x-model="searchData.category" name="searchCategory" @change="searchData.shortCodes = []">
 					<option value="">請選擇</option>
 					<template x-for="(name, catId) in options.category" :key="catId">
-						<option x-text="name" :value="catId"></option>
+						<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
 					</template>
 				</select>
 				<label>類別</label>
