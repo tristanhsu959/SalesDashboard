@@ -29,25 +29,25 @@
 			<label>身份名稱</label>
 		</div>
 		
-		@foreach($viewModel->options['functions'] as $title => $groups)
+		<template x-for="(groups, groupName) in options.functions" :key="groupName">
 		<fieldset class="role-permission field-purple fieldset required">
-			<legend>{{$title}}</legend>
+			<legend x-text="groupName"></legend>
 			<ul class="list border">
-				@foreach($groups as $item)
+				<template x-for="(item, idx) in groups" :key="idx">
 				<li class="">
 					<div class="max">
 						<h6 class="small"></h6>
-						<div>{{$item['name']}}</div>
+						<div x-text="item.name"></div>
 					</div>
 					<label class="switch field-dark-blue">
-						<input x-model="formData.permission" type="checkbox" name="permission[]" value="{{$item['code']}}" @checked(in_array($item['code'], $viewModel->formData['permission']))>
+						<input x-model="formData.permission" type="checkbox" name="permission[]" :value="item.code">
 						<span></span>
 					</label>
 				</li>
-				@endforeach
+				</template>
 			</ul>
 		</fieldset>
-		@endforeach
+		</template>
 		
 		<fieldset class="role-area field-blue fieldset required">
 			<legend>管理區域</legend>
