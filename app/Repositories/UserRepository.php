@@ -42,7 +42,7 @@ class UserRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('user as a');
 			
-		$result = $db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'b.roleArea')
+		$result = $db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'rolePermission', 'b.roleArea')
 			->join('role as b', 'b.roleId', '=', 'a.userRoleId')
 			->when($searchAd, function ($query, $searchAd) {
 				return $query->where('a.userAd', 'like', "%{$searchAd}%");
@@ -56,7 +56,8 @@ class UserRepository extends Repository
 			->get()->toArray();
 		
 		$result = Arr::map($result, function ($item, string $key) {
-			$item['roleArea'] = empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
+			$item['rolePermission']	= empty($item['rolePermission']) ? [] : json_decode($item['rolePermission'], TRUE);
+			$item['roleArea'] 		= empty($item['roleArea']) ? [] : json_decode($item['roleArea'], TRUE);
 			return $item;
 		});
 			

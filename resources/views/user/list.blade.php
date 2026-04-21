@@ -12,7 +12,7 @@
 @section('content')
 <!-- Content -->
 	<!-- Search panel -->
-	<form x-data='searchUser(@json($viewModel->search))' action="{{ route('user.search') }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+	<form x-data='searchUser(@json($viewModel->search), @json($viewModel->options))' action="{{ route('user.search') }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
 		@csrf
 		<dialog id="searchPanel" class="right">
 			<h5>查詢</h5>
@@ -27,9 +27,9 @@
 			<div class="field label suffix round border field-light-blue">
 				<select x-model="searchData.roleId" name="searchRoleId">
 					<option value="">請選擇</option>
-					@foreach($viewModel->options['roleList'] as $id => $name)
-						<option value="{{ $id }}" @selected($id == $viewModel->search['roleId'])>{{ $name }}</option>
-					@endforeach
+					<template x-for="(name, roleId) in options.roleList" :key="roleId">
+						<option :value="roleId" x-text="name" :selected="searchData.roleId == roleId"></option>
+					</template>
 				</select>
 				<label>身份</label>
 				<i>arrow_drop_down</i>
@@ -43,7 +43,7 @@
 	</form>
 	<!-- Search panel end -->
 	
-	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+	<header class="page-nav">
 		<nav>
 			<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
 			<a href="{{ route('user.create') }}" class="btn-create button circle"><i>add</i></a>
@@ -51,17 +51,16 @@
 	</header>
 	
 @if($viewModel->status() === TRUE)	
-	<form x-data="userList" action="" method="post" x-ref="userListForm">
+	<form x-data='userList(@json($viewModel->list), @json($viewModel->options))' action="" method="post" x-ref="userListForm">
 		@csrf
 		<section class="user-list container">
-			@if(empty(($viewModel->list)))
-			<article class="error-container border">
+			<article x-show="list.length == 0" class="error-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
-			@else
-			<table class="stripes border odd-cyan">
+			
+			<table x-show="list.length > 0" class="stripes border odd-cyan">
 				<thead>
 					<tr>
 						<th class="min">#</th>
@@ -74,38 +73,41 @@
 					</tr>
 				</thead>
 				<tbody>
-				@foreach($viewModel->list as $idx => $user)
+				<template x-for="(user, idx) in list" :key="idx">
 					<tr>
-						<td>{{ $idx + 1 }}</td>
-						<td>{{ $user['userAd'] }}</td>
-						<td>{{ $user['userDisplayName'] }}</td>
-						<td>{{ $user['roleName'] }}</td>
+						<td x-text="idx+1"></td>
+						<td x-text="user.userAd"></td>
+						<td x-text="user.userDisplayName"></td>
+						<td x-text="user.roleName"></td>
 						<td class="col-area relative">
 							<span>查看</span>
 							<div class="tooltip max white border shadow">
-							@if (empty($user['roleArea']))
-								<div class="chip round red white-text">未設定</div>
-							@endif
 							
-							@foreach($user['roleArea'] as $area)
-								<div class="chip round cyan white-text">{{ Area::tryFrom($area)->label() }}</div>
-							@endforeach
+							<template x-if="user.roleArea.length == 0">
+								<div class="chip round red white-text">未設定</div>
+							</template>
+							
+							<template x-if="user.roleArea.length > 0" x-for="areaId in user.roleArea">
+								<div class="chip round cyan white-text" x-text="options.areas"></div>
+							</template>
 							</div>
 						</td>
-						<td class="min">{{ $user['updateAt'] }}</td>
+						<td class="min" x-text="user.updateAt"></td>
+						
 						<td class="right-align action">
-							<a href="{{ route('user.update', [$user['userId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canUpdateThisUser($user['roleGroup'])) >
+							<a :href="'{{ route('user.update', ['id' => 'USER_ID']) }}'.replace('USER_ID', user.userId)" class="btn-edit button circle small" :disabled="user.roleGroup == options.supervisorGroupId">
 								<i class="small">edit</i>
 							</a>
-							<a @click.prevent="confirmDelete($el.href)" href="{{ route('user.delete', [$user['userId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisUser($user['roleGroup'])) >
+							<a @click.prevent="confirmDelete($el.href)" :href="'{{ route('user.delete', ['id' => 'USER_ID']) }}'.replace('USER_ID', user.userId)" class="btn-delete button circle small" :disabled="user.roleGroup == options.supervisorGroupId">
 								<i class="small">delete</i>
 							</a>
 						</td>
+						
 					</tr>
-				@endforeach
+				</template>
 				</tbody>
 			</table>
-			@endif
+			
 		</section>
 	</form>
 @endif

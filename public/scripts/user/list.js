@@ -1,21 +1,26 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('searchUser', (searchData) => ({
-		searchData: searchData,
+	Alpine.data('searchUser', (searchData, options) => ({
+		searchData: {...searchData},
+		options: {...options},
 		
 		search() {
 			this.$el.submit();
 		},
 		
-		reset(url) {
+		reset() {
 			this.searchData.ad = '';
 			this.searchData.name = '';
 			this.searchData.roleId = 0;
 		}
     }));
 	
-    Alpine.data('userList', () => ({
+    Alpine.data('userList', (list, options) => ({
+		list: list,
+		options: {...options},
+		
+		init(){console.log(this.options)},
 		confirmDelete(url) {
 			Alpine.store('dialog').show('確定要刪除此帳號?', true, () => this.deleteUser(url));
 		},

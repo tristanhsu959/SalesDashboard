@@ -3,6 +3,7 @@
 namespace App\ViewModels;
 
 use App\Services\UserService;
+use App\Facades\AppManager;
 use App\Enums\FormAction;
 use App\Enums\Area;
 use App\Enums\RoleGroup;
@@ -43,8 +44,10 @@ class UserViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
+		$this->set('options.functions', AppManager::getMenu());
 		$this->set('options.roleList', $this->_service->getRoleOptions());
 		$this->set('options.areas', Area::caseWithKey()); 
+		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
 	}
 	
 	/* Keep search data of form
