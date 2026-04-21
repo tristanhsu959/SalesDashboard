@@ -1,8 +1,9 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('userForm', (formData) => ({
-		formData: formData,
+	Alpine.data('userForm', (formData, options) => ({
+		formData: {...formData},
+		options: options,
 		errors: new Set(),
 		
 		validate() {

@@ -41,9 +41,11 @@
 					<label>開始日期</label>
 				</div>
 				
+				<div class="space"></div>
 				<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 					<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 					<label>結束日期</label>
+					<output class="red-text">查詢日期為到貨日期</output>
 				</div>
 				
 				<nav class="wrap">

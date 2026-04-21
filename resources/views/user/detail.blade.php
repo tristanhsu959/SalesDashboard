@@ -10,12 +10,12 @@
 
 @section('content')
 
-<form x-data='userForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
-	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
+<form x-data='userForm(@json($viewModel->formData), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+	<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 	@csrf
 	
 	<section class="user-data container">
-		<label x-show="formData.id" class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
+		<label x-show="formData.id > 0" class="large-text" x-text="`更新時間：${formData.updateAt}`"></label>
 		
 		<div class="field label border field-purple w25 prefix" :class="Helper.hasError(errors, 'ad')">
 			<i class="small red-text">asterisk</i>
@@ -32,9 +32,9 @@
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.roleId" name="roleId"  @change="errors.delete('roleId')">
 				<option value="">請選擇</option>
-				@foreach($viewModel->options['roleList'] as $id => $name)
-					<option value="{{ $id }}">{{ $name }}</option>
-				@endforeach
+				<template x-for="(name, id) in options.roleList" :key="id">
+					<option :value="id" x-text="name"></option>
+				</template>
 			</select>
 			<label>身份</label>
 			<i>arrow_drop_down</i>

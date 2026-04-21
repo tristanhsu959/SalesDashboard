@@ -49,6 +49,7 @@
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="month" name="searchEndDate" maxlength="7" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.currentDate">
 			<label>結束日期</label>
+			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
 		<div class="space"></div>
@@ -76,7 +77,7 @@
 	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
 		@include($viewModel->getPartialView())
 	@else
-	<section class="container">
+	<section class="container hint">
 		<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
 	</section>
 	@endif

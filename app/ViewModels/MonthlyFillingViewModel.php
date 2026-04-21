@@ -101,7 +101,8 @@ class MonthlyFillingViewModel extends Fluent
 		$this->set('search.endDate', $searchEndDate);
 		$this->set('search.type', $searchType);
 		$this->set('search.range', $searchRange);
-		$this->set('search.currentDate', Carbon::now()->format('Y-m-d')); 
+		$this->set('search.currentDate', Carbon::tomorrow()->format('Y-m-d'));
+		#$this->set('search.currentDate', Carbon::now()->format('Y-m-d')); 
 	}
 	
 	/* Partial view
