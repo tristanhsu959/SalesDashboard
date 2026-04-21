@@ -47,4 +47,16 @@ enum RoleGroup : int
 		
 		return $enableList;
 	}
+	
+	#key-value array
+	public static function mapWithKeys(): array
+	{
+		$list = [];
+		foreach(self::cases() as $case)
+		{
+			$list[$case->value] = $case->label();
+		}
+		
+		return $list;
+	}
 }

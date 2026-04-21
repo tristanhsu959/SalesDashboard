@@ -19,17 +19,16 @@
 	</header>
 	
 @if($viewModel->status() === TRUE)	
-	<form x-data="roleList" action="" method="post" x-ref="roleListForm">
+	<form x-data='roleList(@json($viewModel->list), @json($viewModel->options))' action="" method="post" x-ref="roleListForm">
 		@csrf
 		<section class="role-list container">
-			@if(empty(($viewModel->list)))
-			<article class="error-container border">
+			<article x-show="list.length == 0" class="error-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
-			@else
-			<table class="stripes border odd-purple">
+			
+			<table x-show="list.length > 0" class="stripes border odd-purple">
 				<thead>
 					<tr>
 						<th class="min">#</th>
@@ -41,30 +40,30 @@
 					</tr>
 				</thead>
 				<tbody>
-				@foreach($viewModel->list as $idx => $role)
+				<template x-for="(item, idx) in list" :key="idx">
 					<tr>
-						<td>{{ $idx + 1 }}</td>
-						<td>{{ $role['roleName'] }}</td>
-						<td>{{ RoleGroup::tryFrom($role['roleGroup'])->label() }}</td>
+						<td x-text="idx + 1"></td>
+						<td x-text="item.roleName"></td>
+						<td x-text="options.roleGroup[item.roleGroup]"></td>
 						<td class="col-area">
-							@foreach($role['roleArea'] as $area)
-							<div class="chip round pink4 white-text">{{ Area::tryFrom($area)->label() }}</div>
-							@endforeach
+							<template x-for="areaId in item.roleArea" :key="areaId">
+								<div class="chip round pink4 white-text" x-text="options.areas[areaId]"></div>
+							</template>
 						</td>
-						<td>{{ $role['updateAt'] }}</td>
+						<td x-text="item.updateAt"></td>
 						<td class="right-align action">
-							<a href="{{ route('role.update', [$role['roleId']]) }}" class="btn-edit button circle small" @disabled(! $viewModel->canUpdateThisRole($role['roleGroup']))>
+							<a :href="'{{ route('role.update', ['ROLE_ID']) }}'.replace('ROLE_ID', item.roleId)" class="btn-edit button circle small" :disabled="options.supervisorGroupId == item.roleGroup">
 								<i class="small">edit</i>
 							</a>
-							<a @click.prevent="confirmDelete($el.href)" href="{{ route('role.delete', [$role['roleId']]) }}" class="btn-delete button circle small" @disabled(! $viewModel->canDeleteThisRole($role['roleGroup']))>
+							<a @click.prevent="confirmDelete($el.href)" :href="'{{ route('role.delete', ['ROLE_ID']) }}'.replace('ROLE_ID', item.roleId)" class="btn-delete button circle small" :disabled="options.supervisorGroupId == item.roleGroup">
 								<i class="small">delete</i>
 							</a>
 						</td>
 					</tr>
-				@endforeach
+				</template>
 				</tbody>
 			</table>
-			@endif
+
 		</section>
 	</form>
 @endif

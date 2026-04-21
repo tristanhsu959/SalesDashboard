@@ -41,7 +41,7 @@ enum Area : int
 	}
 	
 	#key-enum array
-	public static function caseWithKey(): array
+	public static function caseWithKeys(): array
 	{
 		$list = [];
 		foreach(self::cases() as $case)

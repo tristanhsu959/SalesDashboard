@@ -34,8 +34,7 @@ class RoleViewModel extends Fluent
 		$this->action	= $action;
 		$this->success();
 		
-		if ($action != FormAction::LIST)
-			$this->_setOptions();
+		$this->_setOptions();
 	}
 	
 	/* Form所屬的參數選項
@@ -44,8 +43,10 @@ class RoleViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->set('options.functions', AppManager::getMenu());
-		$this->set('options.areas', Area::caseWithKey()); 
+		$this->set('options.functions', AppManager::getMenu()); 
+		$this->set('options.areas', Area::mapWithKeys());
+		$this->set('options.roleGroup', RoleGroup::mapWithKeys());
+		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
 	}
 	
 	/* Keep user form data

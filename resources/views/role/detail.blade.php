@@ -13,15 +13,15 @@
 @endpush
 
 @section('content')
-<form x-data='roleForm(@json($viewModel->formData))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
-	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
-	<input type="hidden" name="group" value="{{$viewModel->formData['group']}}">
+<form x-data='roleForm(@json($viewModel->formData), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+	<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
+	<input type="hidden" name="group" :value="formData.group">
 	@csrf
 	
 	<section class="role-data container">
-		@if(! empty($viewModel->formData['id']))
-			<label class="large-text">更新時間：{{$viewModel->get('formData.updateAt', '')}}</label>
-		@endif
+		<template x-if="formData.id > 0">
+			<label class="large-text" x-text="`更新時間：${formData.updateAt}`"></label>
+		</template>
 		
 		<div class="field label border field-purple w30 prefix" :class="Helper.hasError(errors, 'name')">
 			<i class="small red-text">asterisk</i>
@@ -51,12 +51,12 @@
 		
 		<fieldset class="role-area field-blue fieldset required">
 			<legend>管理區域</legend>
-			@foreach($viewModel->options['areas'] as $idx => $area)
-			<label class="form-check-label" for="area-{{$idx}}">
-				<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" id="area-{{$idx}}" value="{{ $area->value }}"  @checked(in_array($area->value, $viewModel->formData['area']))>
-				{{ $area->label() }}
-			</label>
-			@endforeach
+			<template x-for="(areaName, areaId) in options.areas" :key="areaId">
+				<label class="form-check-label" :for="`area-${areaId}`">
+					<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" :id="`area-${areaId}`" :value="areaId">
+					<span x-text="areaName"></span>
+				</label>
+			</template>
 		</fieldset>
 	
 		<div class="space"></div>
