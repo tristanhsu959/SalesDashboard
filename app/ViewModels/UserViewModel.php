@@ -46,7 +46,8 @@ class UserViewModel extends Fluent
 	{
 		$this->set('options.functions', AppManager::getMenu());
 		$this->set('options.roleList', $this->_service->getRoleOptions());
-		$this->set('options.areas', Area::caseWithKey()); 
+		$this->set('options.areas', Area::mapWithKeys());
+		$this->set('options.functions', Functions::mapWithGroupKeys());
 		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
 	}
 	

@@ -2,12 +2,16 @@
 
 .user-list {
 	table tbody {
-		tr td.col-area .tooltip {
+		tr td .tooltip.area {
 			width: max-content !important;
 			max-width: none !important;
 			
 			.chip {
-				font-size: .75rem;
+				margin-right: .5rem;
+				
+				&:last-child {
+					margin-right: 0;
+				}
 			}
 		}
 	}

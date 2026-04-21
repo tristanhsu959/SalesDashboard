@@ -12,7 +12,7 @@
 
 @section('content')
 <!-- Content -->
-	<header class="page-nav" :class="isTop ? 'blue-grey10' : 'orange'">
+	<header class="page-nav">
 		<nav>
 			<a href="{{ route('role.create') }}" class="btn-create button circle"><i>add</i></a>
 		</nav>

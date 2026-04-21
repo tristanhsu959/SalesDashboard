@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Illuminate\Support\Str;
+
 enum Functions : string
 {
 	case HOME					= 'home';
@@ -66,4 +68,28 @@ enum Functions : string
 			self::FJ_DAILY_REVENUE		=> '門店營收',
         };
     }
+	
+	#key-value array
+	public static function mapWithGroupKeys(): array
+	{
+		$list = [];
+		foreach(self::cases() as $case)
+		{
+			if ($case->value > 0)
+			{
+				$prefix = '';
+				
+				if (Str::startsWith($case->value, 'bafang'))
+					$prefix = '八方：';
+				else if (Str::startsWith($case->value, 'buygood'))
+					$prefix = '御廚：';
+				else if (Str::startsWith($case->value, 'fjVeggie'))
+					$prefix = '芳珍：';
+					
+				$list[$case->value] = Str::start($case->label(), $prefix);
+			}
+		}
+		
+		return $list;
+	}
 }

@@ -20,7 +20,7 @@ document.addEventListener('alpine:init', () => {
 		list: list,
 		options: {...options},
 		
-		init(){console.log(this.options)},
+		init(){},
 		confirmDelete(url) {
 			Alpine.store('dialog').show('確定要刪除此帳號?', true, () => this.deleteUser(url));
 		},

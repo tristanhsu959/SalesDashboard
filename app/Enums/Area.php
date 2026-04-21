@@ -40,6 +40,7 @@ enum Area : int
 		return $list;
 	}
 	
+	#key-enum array
 	public static function caseWithKey(): array
 	{
 		$list = [];
@@ -47,6 +48,19 @@ enum Area : int
 		{
 			if ($case->value > 0)
 				$list[] = $case;
+		}
+		
+		return $list;
+	}
+	
+	#key-value array
+	public static function mapWithKeys(): array
+	{
+		$list = [];
+		foreach(self::cases() as $case)
+		{
+			if ($case->value > 0)
+				$list[$case->value] = $case->label();
 		}
 		
 		return $list;

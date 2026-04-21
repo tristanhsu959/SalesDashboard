@@ -68,6 +68,7 @@
 						<th>顯示名稱</th>
 						<th>身份</th>
 						<th>管理區域</th>
+						<th>功能權限</th>
 						<th>更新時間</th>
 						<th class="right-align">操作</th>
 					</tr>
@@ -79,17 +80,28 @@
 						<td x-text="user.userAd"></td>
 						<td x-text="user.userDisplayName"></td>
 						<td x-text="user.roleName"></td>
-						<td class="col-area relative">
+						<td class="relative">
+							<span>查看</span>
+							<div class="tooltip area max white border shadow">
+								<template x-if="user.roleArea.length == 0">
+									<div class="chip round red white-text">未設定</div>
+								</template>
+							
+								<template x-for="areaId in user.roleArea" :key="areaId">
+									<div class="chip round cyan white-text" x-text="options.areas[areaId]"></div>
+								</template>
+							</div>
+						</td>
+						<td class="relative">
 							<span>查看</span>
 							<div class="tooltip max white border shadow">
-							
-							<template x-if="user.roleArea.length == 0">
-								<div class="chip round red white-text">未設定</div>
-							</template>
-							
-							<template x-if="user.roleArea.length > 0" x-for="areaId in user.roleArea">
-								<div class="chip round cyan white-text" x-text="options.areas"></div>
-							</template>
+								<template x-if="user.rolePermission.length == 0">
+									<div class="chip round red white-text">未設定</div>
+								</template>
+								
+								<template x-for="code in user.rolePermission">
+									<div class="chip round blue white-text max" x-text="options.functions[code]"></div>
+								</template>
 							</div>
 						</td>
 						<td class="min" x-text="user.updateAt"></td>
