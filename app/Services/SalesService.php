@@ -6,6 +6,7 @@ use App\Facades\AppManager;
 use App\Repositories\SalesRepository;
 use App\Libraries\ResponseLib;
 use App\Traits\AuthTrait;
+use App\Services\Traits\Sales\ShopTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -27,7 +28,10 @@ use OpenSpout\Common\Entity\Row;
 #Service BF | BG 共用
 class SalesService
 {
+	use ShopTrait;
+	
 	private $_statistics	= [];
+	private $_shopList		= [];
     
 	public function __construct(protected SalesRepository $_repository)
 	{
@@ -165,7 +169,7 @@ class SalesService
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			#2. Get product list
+			#2. Get product id list for sql
 			list($productList, $primaryIds, $secondaryIds) = $this->_getParams($productIds);
 			$this->_statistics['productList'] = $productList;
 			
@@ -173,13 +177,13 @@ class SalesService
 			$userAreaIds = $currentUser['roleArea']; #
 					
 			#3. Get all shops with area permission
-			$shopList = $this->_getShopList($brand, $userAreaIds);
+			$this->_getShopList($brand, $userAreaIds);
 			
 			#4. Get data from DB
 			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
 			
 			#5.build to base data
-			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
+			$baseData = $this->_buildBaseData($brand, array_filter($saleData));
 			unset($saleData);
 			
 			#6. output statistics
@@ -228,25 +232,7 @@ class SalesService
 		}
 	}
 	
-	/* 取店家並過濾區域權限
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _getShopList($brand, $userAreaIds)
-	{
-		try
-		{
-			#會Filter區域權限
-			$shopList = $this->_repository->getShopList($brand, $userAreaIds);
-		
-			return $shopList;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料發生錯誤');
-		}
-	}
+	
 	
 	/* Get buy good data
 	 * @params: date
@@ -284,7 +270,7 @@ class SalesService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($shopList, $saleData)
+	private function _buildBaseData($brand, $saleData)
 	{
 		/* 重整資料格式/命名/區域
 		array:11 [
@@ -303,14 +289,16 @@ class SalesService
 		#要改成所有店家統計
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
 		$productList = $this->_statistics['productList']; 
-		$groupShopList = collect($shopList)->groupBy('shopId');
+		$allShopList = collect($this->_shopList['all'])->groupBy('shopId');
 		
-		$baseData = collect($saleData)->map(function($item, $key) use($productList, $groupShopList) {
-			$shop = $groupShopList->get($item['shopId']); 
+		$saleData = $this->_filterDataByShop($brand, $saleData);
+		
+		$baseData = collect($saleData)->map(function($item, $key) use($productList, $allShopList) {
+			$shop = $allShopList->get($item['shopId']); 
 			$product = data_get($productList, $item['erpNo'], NULL);
 			
-			$item['shopName'] 	= $shop->pluck('shopName')->first(); #因group後是array故用pluck
-			$item['areaId'] 	= AreaLib::toId($shop->pluck('areaId')->first());
+			$item['shopName'] 	= is_null($shop) ? '' : $shop->pluck('shopName')->first(); #因group後是array故用pluck
+			$item['areaId'] 	= is_null($shop) ? 0 : AreaLib::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
 			
 			#轉換成系統設定Id and Name
@@ -322,21 +310,17 @@ class SalesService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
+		$filterShops = $this->_getFillShop($saleShopIds);
 		
-		$filterShops = $groupShopList->filter(function($item, $key) use($saleShopIds){
-			#過濾出無銷售且為active門店
-			return ! in_array($item->pluck('shopId')->first(), $saleShopIds) && ($item->pluck('closedown')->first() == 0);
-		});
-		
-		#重建
-		$filterShops = $filterShops->map(function($item, $key) {
-			$temp['shopId'] 	= $item->pluck('shopId')->first();
-			$temp['shopName'] 	= $item->pluck('shopName')->first();
+		#因每個統計內容不同, 故無法寫在trait class
+		$filterShops = collect($filterShops)->map(function($item, $key) {
+			$temp['shopId'] 	= $item['shopId'];
+			$temp['shopName'] 	= $item['shopName'];
 			$temp['erpNo'] 		= '';
 			$temp['price_sum'] 	= 0;
 			$temp['qty_sum'] 	= 0;
-			$temp['areaId'] 	= AreaLib::toId($item->pluck('areaId')->first());
-			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
+			$temp['areaId'] 	= AreaLib::toId($item['areaId']);
+			$temp['areaName']	= (Area::tryFrom($item['areaId']))->label();
 			$temp['productId'] 	= 0;
 			$temp['productName']= '';
 			
