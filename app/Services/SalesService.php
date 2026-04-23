@@ -320,7 +320,7 @@ class SalesService
 			$temp['price_sum'] 	= 0;
 			$temp['qty_sum'] 	= 0;
 			$temp['areaId'] 	= AreaLib::toId($item['areaId']);
-			$temp['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
 			$temp['productId'] 	= 0;
 			$temp['productName']= '';
 			
