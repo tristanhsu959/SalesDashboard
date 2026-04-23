@@ -4,6 +4,7 @@ namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
 use App\Repositories\MonthlyFillingRepository;
+use App\Services\Traits\Purchase\ProductTrait;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
@@ -24,6 +25,8 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
+	use ProductTrait;
+	
 	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
    
@@ -89,7 +92,7 @@ class FactoryService
 		{
 			$brandId 	= $this->_statistics['brandId'];
 			$codes		= config('web.purchase.monthly_filling.monthly');
-			#非0開頭會變成int
+			#非0開頭會變成int(sql會convert error)
 			$codes = collect($codes)->pluck('code')->all();
 			
 			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
@@ -130,6 +133,12 @@ class FactoryService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
+			
+			#先處理包裝轉換
+			$orderData = collect($orderData)->map(function($item, $key){
+				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
+				return $item;
+			});
 			
 			return $orderData;
 		}
@@ -278,7 +287,7 @@ class FactoryService
 				return $items->groupBy('shortCode')->map(function($items, $key) use ($month){
 					
 					$days = Carbon::parse($month)->daysInMonth;
-					$temp['qty'] = $items->pluck('qty')->sum();
+					$temp['qty'] = round($items->pluck('qty')->sum(), 2);
 					$temp['avg'] = round($temp['qty'] / $days, 2);
 					
 					return $temp;

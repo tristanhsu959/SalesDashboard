@@ -4,6 +4,7 @@ namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
 use App\Repositories\MonthlyFillingRepository;
+use App\Services\Traits\Purchase\ProductTrait;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
@@ -25,6 +26,8 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
+	use ProductTrait;
+	
 	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
    
@@ -92,9 +95,11 @@ class StoreService
 		{
 			$brandId 	= $this->_statistics['brandId'];
 			$codes		= array_keys(config('web.purchase.monthly_filling.totalCount.code'));
-			$codes = collect($codes)->map(function ($value, $key) {
+			
+			/* $codes = collect($codes)->map(function ($value, $key) {
 				return Str::after($value, '_');
 			})->all();
+			*/
 			
 			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
 			$ids = collect($ids)->map(function($item, $key){
@@ -136,6 +141,11 @@ class StoreService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			$orderData = $this->_repository->getOrderDataByStore($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
+			#先處理包裝轉換
+			$orderData = collect($orderData)->map(function($item, $key){
+				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
+				return $item;
+			});
 			
 			return $orderData;
 		}
@@ -294,22 +304,16 @@ class StoreService
 		
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groups){
-		
 			return in_array($item['shortCode'], $groups);
-		})->map(function($item, $key){
-			
-			$coefficient = config("web.purchase.monthly_filling.totalCount.code.{$item['shortCode']}.coefficient");
-			$item['qty'] = round(floatval($item['qty']) * $coefficient, 2);
-			return $item;
-		#storeId會變成int
+		
 		})->groupBy(function($item, $key){
-			
 			return Str::take($item['storeNo'], 9);
+		
 		})->map(function($items, $key) {
-			
 			return $items->groupBy('expectedDate')->map(function($items, $key) {
 				return $items->pluck('qty')->sum();
 			})->toArray();
+		
 		})->toArray();
 		
 		return $result;
