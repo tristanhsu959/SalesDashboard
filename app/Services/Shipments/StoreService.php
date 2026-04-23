@@ -4,6 +4,7 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
+use App\Services\Traits\Purchase\ProductTrait;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
@@ -25,6 +26,8 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
+	use ProductTrait;
+	
 	private $_userAreaIds	= FALSE;
 	private $_statistics	= [];
    
@@ -85,6 +88,11 @@ class StoreService
 			$brand 		= Brand::tryFrom($this->_statistics['brandId']);
 			
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
+			#先處理包裝轉換
+			$orderData = collect($orderData)->map(function($item, $key){
+				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
+				return $item;
+			});
 			
 			return $orderData;
 		}
@@ -249,7 +257,7 @@ class StoreService
 				if ($modeCalc == 'day')
 				{
 					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
-						$temp['qty'] = $items->pluck('qty')->sum();
+						$temp['qty'] = round($items->pluck('qty')->sum(), 2);
 						return $temp;
 					});
 					
@@ -261,7 +269,7 @@ class StoreService
 					$month = $items->groupBy(function ($item) {
 						return substr($item['expectedDate'], 0, 7); 
 					})->map(function ($group) {
-						$temp['qty'] = $group->pluck('qty')->sum();
+						$temp['qty'] = round($group->pluck('qty')->sum(), 2);
 						return $temp;
 					});
 					

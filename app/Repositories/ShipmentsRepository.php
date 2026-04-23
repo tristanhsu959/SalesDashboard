@@ -135,7 +135,7 @@ class ShipmentsRepository extends Repository
 			->addSelect('ar.Name as area', 's.Id as storeId', 's.No as storeNo')
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
-			->addSelect('p.Name as productName', 'p.ErpNo as erpNo')
+			->addSelect('p.Name as productName', 'p.ErpNo as erpNo', 'p.OldNo as shortCode')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')

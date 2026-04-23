@@ -29,4 +29,14 @@ trait ProductTrait
 		return ['groupId' => '', 'groupName' => ''];
 	}
 	
+	/* 取對應的Group設定值
+	 * @params: string
+	 * @return: array
+	 */
+	public function getPackagingScale($code)
+	{
+		$config = config('web.purchase.product_type.packagingScale');
+		
+		return data_get($config, $code, 1);
+	}
 }

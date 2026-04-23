@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Repositories\DailyRevenueRepository;
+use App\Services\Traits\Sales\ShopTrait;
 use App\Libraries\ShopLib;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -25,6 +26,8 @@ use OpenSpout\Common\Entity\Row;
 
 class DailyRevenueService
 {
+	use ShopTrait;
+	
 	private $_statistics	= [];
    
 	public function __construct(protected DailyRevenueRepository $_repository)
@@ -135,14 +138,14 @@ class DailyRevenueService
 			$userAreaIds = $currentUser['roleArea']; 
 			
 			#3. Get all shops with area permission
-			$shopList = $this->_getShopList($brand, $shopType, $userAreaIds);
+			$this->_getShopListByType($brand, $userAreaIds, $shopType);
 			
 			#4. Get POS data
 			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds);
 			
 			#5. Build base data
 			#會有false的無效array, 用array_filter去除
-			$baseData = $this->_buildBaseData($shopList, array_filter($saleData));
+			$baseData = $this->_buildBaseData($brand, array_filter($saleData));
 			unset($saleData);
 			
 			return $this->_outputReport($baseData);
@@ -159,19 +162,19 @@ class DailyRevenueService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _getShopList($brand, $shopType, $userAreaIds)
+	private function _getShopListByType($brand, $userAreaIds, $shopType)
 	{
 		try
 		{
 			#這裏取有效的shop
-			$shopList = $this->_repository->getHptransShopList($brand, $userAreaIds);
+			$this->_getShopList($brand, $userAreaIds);
 			#$shopList = $this->_repository->getShopList($brand, $userAreaIds);
 			
-			$shopList = collect($shopList)->filter(function($item, $key) use($shopType) {
+			$this->_shopList['active'] = collect($this->_shopList['active'])->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
-			});
+			})->toArray();
 			
-			return $shopList;
+			return TRUE;
 		}
 		catch(Exception $e)
 		{
@@ -208,7 +211,7 @@ class DailyRevenueService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($shopList, $saleData)
+	private function _buildBaseData($brand, $saleData)
 	{
 		/*
 		[
@@ -223,19 +226,7 @@ class DailyRevenueService
 		*/
 		
 		#即時營收取有效店家即可
-		$groupShopList = collect($shopList)->groupBy('shopId');
-		
-		/*
-		$baseData = collect($saleData)->map(function($item, $key) {
-			$item['shopName'] 		= $shop->pluck('shopName')->first();
-			$item['shopType'] 		= $shop->pluck('typeId')->first();
-			$item['shopTypeName']	= $shop->pluck('typeName')->first();
-			$item['areaId'] 		= Area::toId($shop->pluck('areaId')->first());
-			$item['areaName']		= (Area::tryFrom($item['areaId']))->label();
-
-			return $item; 
-		});
-		*/
+		$saleData = $this->_filterDataByShop($brand, $saleData);
 		
 		#改成Shop資料來自DB,避免閉店沒有關聯到(不用$groupShopList來取)
 		$baseData = collect($saleData)->map(function($item, $key) {
@@ -251,19 +242,15 @@ class DailyRevenueService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		
-		$filterShops = $groupShopList->filter(function($item, $key) use($saleShopIds){
-			#過濾出無銷售且為active門店
-			return ! in_array($item->pluck('shopId')->first(), $saleShopIds) && ($item->pluck('closedown')->first() == 0);
-		});
+		$filterShops = $this->_getFillShop($saleShopIds);
 		
 		#重建
 		$filterShops = $filterShops->map(function($item, $key) {
-			$temp['shopId'] 		= $item->pluck('shopId')->first();
-			$temp['shopName'] 		= $item->pluck('shopName')->first();
-			$temp['shopType'] 		= $item->pluck('typeId')->first();
-			$temp['shopTypeName']	= $item->pluck('typeName')->first();
-			$temp['areaId'] 		= AreaLib::toId($item->pluck('areaId')->first());
+			$temp['shopId'] 		= $item['shopId'];
+			$temp['shopName'] 		= $item['shopName'];
+			$temp['shopType'] 		= $item['typeId'];
+			$temp['shopTypeName']	= $item['typeName'];
+			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
 			$temp['saleDate'] 		= $this->_statistics['endDate'];
 			$temp['amount'] 		= 0;
