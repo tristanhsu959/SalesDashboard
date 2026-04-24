@@ -51,10 +51,22 @@
 	--on-surface: #333333;  
 	--surface: #fff3e0;
 }
+/* Others */
+/* dark bg */
+.field-filter-dark {
+	--primary: #f8bbd0;
+	--outline: #f8bbd0;
+	--surface: #f8bbd0;
+	--on-surface: #f8bbd0;  
+	--on-surface-variant: #f8bbd0; 
+	&:has(input:placeholder-shown) label {
+		color: #f8bbd0;
+	}
+}
+
 /* Define End */
 
 .field {
-	
 	
 	&:has(input:not(:placeholder-shown)) label,
 	&:has(textarea:not(:placeholder-shown)) label,

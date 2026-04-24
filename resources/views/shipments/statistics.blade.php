@@ -103,11 +103,21 @@
 <header class="page-nav">
 	<nav>
 		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
-	
+		
 		@if ($viewModel->hasExportData())
 		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle red" type="button">
 			<span class="material-symbols-outlined filled-icon">download_2</span>
 		</a>
+		@endif
+		
+		@if ($viewModel->search['type'] == 'store')
+		<nav class="no-space">
+			<div class="max field label border prefix field-filter-dark">
+				<i>filter_alt</i>
+				<input type="text" x-model="$store.shipmentStore.filter">
+				<label>篩選</label>
+			</div>
+		</nav>
 		@endif
 	</nav>
 </header>

@@ -101,10 +101,10 @@ class AreaLib
 			{
 				Area::TAIPEI->value		=> [1, 2, 3, 10002, 10003],
 				Area::TCM->value		=> [6, 10004],
-				Area::CCT->value 		=> [9, 21, 10005],
+				Area::CCT->value 		=> [9, 10005], # [9, 21, 10005]
 				Area::YCN->value		=> [12, 24],
 				Area::YILAN->value 		=> [18],
-				Area::KAOHSIUNG->value 	=> [15, 27, 19, 30],
+				Area::KAOHSIUNG->value 	=> [15, 27, 19, 30, 21], #因高雄有包含部份南廠中彰投(21)
 				default => [],
 			};
 			

@@ -76,6 +76,14 @@ document.addEventListener('alpine:init', () => {
     }));
 	
 	//Store
+	Alpine.store('shipmentStore', {
+		filter: '',
+        
+		/* toggle() {
+           this.showAmount = ! this.showAmount;
+        } */
+	});
+	
 	Alpine.data('statisticsStore', (data) => ({
 		statistics: {...data},
 		activeProduct: '',
@@ -85,6 +93,22 @@ document.addEventListener('alpine:init', () => {
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
 		},
+		
+		get filterStore() {
+			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
+			
+			const list = Object.values(this.statistics.header.storeList);
+			
+			const result = list.filter(store => 
+				String(store.postId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
+	
     }));
 });
 

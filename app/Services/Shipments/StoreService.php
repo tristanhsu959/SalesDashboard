@@ -215,6 +215,9 @@ class StoreService
 				else
 					$storeKey = $item['storeNo'];
 				
+				#存下storeKey
+				$item['storeKey'] = $storeKey;
+				
 				return [$storeKey => $item];
 			})->sortBy('areaId')->toArray();
 			
