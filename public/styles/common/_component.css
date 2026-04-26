@@ -7,7 +7,7 @@ button, a {
 	/* Search */
 	&.btn-show-search {
 		--primary: #4fc3f7;/* #81d4fa; */
-	}
+	}	
 	&.btn-search {
 		--primary: #4fc3f7;
 		font-size: 1rem;
@@ -41,6 +41,23 @@ button, a {
 	}
 }
 
+/* search tool bar small button */
+.page-nav nav {
+	.button:is(.extra,.extend) {
+		/* block-size: 40px !important;
+		inline-size: 40px !important; */
+		--_size: 2.75rem;
+		
+		&.extend>:is(.responsive,i) {
+			inset-inline: calc((2.75rem - 24px) / 2);
+		}
+		&.extend>span {
+			padding: 0;
+			margin: 0;
+			margin-left: 1rem;
+		}
+	}	
+}
 
 /* Table, Grid Define */
 table {

@@ -51,7 +51,10 @@
 
 <header class="page-nav">
 	<nav>
-		<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
+		<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
+			<i>search</i>
+			<span>查詢</span>
+		</button>
 	
 	{{--
 		@if ($viewModel->hasExportData())
