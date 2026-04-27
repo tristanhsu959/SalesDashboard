@@ -7,6 +7,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
+use App\Http\Controllers\MerchantController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -49,7 +50,12 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
 	});	
 	
-	
+	/* 門店資訊 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_MERCHANT->value, ':')])->group(function(){
+		Route::get('merchant', [MerchantController::class, 'showSearch'])->name('merchant');
+		Route::post('merchant/search', [MerchantController::class, 'search'])->name('merchant.search');
+		Route::get('merchant/export/{token}', [MerchantController::class, 'export'])->name('merchant.export');
+	});	
 });
 
 

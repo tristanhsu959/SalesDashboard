@@ -25,6 +25,7 @@ class RoleRepository extends Repository
 			
 		$result = $db
 			->select('roleId', 'roleName', 'roleGroup', 'roleArea', 'updateAt')
+			->orderBy('roleName')
 			->get()
 			->toArray();
 		

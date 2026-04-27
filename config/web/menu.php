@@ -22,9 +22,9 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
 		],
 		[
-			'name' 		=> Functions::BF_DAILY_REVENUE->label(), #本日銷售
+			'name' 		=> Functions::BF_DAILY_REVENUE->label(), #門店營收
 			'code'		=> Functions::BF_DAILY_REVENUE->value,
-			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
+			'style' 	=> ['icon' => 'paid', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.daily_revenue'),
 		],
 		[
@@ -38,6 +38,12 @@ return [
 			'code'		=> Functions::BF_MONTHLY_FILLING->value,
 			'style' 	=> ['icon' => 'summarize', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.monthly_filling'),
+		],
+		[
+			'name' 		=> Functions::BF_MERCHANT->label(), #門店資訊
+			'code'		=> Functions::BF_MERCHANT->value,
+			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.merchant'),
 		],
 	],
 	
@@ -61,9 +67,9 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase'),
 		], */
 		[
-			'name' 		=> Functions::BG_DAILY_REVENUE->label(), #本日銷售
+			'name' 		=> Functions::BG_DAILY_REVENUE->label(), #門店營收
 			'code'		=> Functions::BG_DAILY_REVENUE->value,
-			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
+			'style' 	=> ['icon' => 'paid', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.daily_revenue'),
 		],
 		[
@@ -72,14 +78,20 @@ return [
 			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
 		],
+		[
+			'name' 		=> Functions::BG_MERCHANT->label(), #門店資訊
+			'code'		=> Functions::BG_MERCHANT->value,
+			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.merchant'),
+		],
 		
 	],
 	
 	MenuGroup::FJVEGGIE->value => [
 		[
-			'name' 		=> Functions::FJ_DAILY_REVENUE->label(), #本日銷售
+			'name' 		=> Functions::FJ_DAILY_REVENUE->label(), #門店營收
 			'code'		=> Functions::FJ_DAILY_REVENUE->value,
-			'style' 	=> ['icon' => 'storefront', 'color' => 'light-green-text'],
+			'style' 	=> ['icon' => 'paid', 'color' => 'light-green-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::FJVEGGIE->code()], '?.daily_revenue'),
 		],
 	],
