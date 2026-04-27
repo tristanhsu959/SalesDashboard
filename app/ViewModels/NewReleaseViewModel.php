@@ -124,7 +124,6 @@ class NewReleaseViewModel extends Fluent
 	
 	public function getBrandCode()
 	{
-		$id = $this->statistics['brandId'];
-		return (Brand::tryFrom($id))->code();
+		return $this->brand->code();
 	}
 }

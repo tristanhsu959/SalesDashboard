@@ -133,7 +133,7 @@
 			</div>
 			
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar">
+				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
 					<table class="stripes odd-cyan">
 						<thead>
 							<tr>

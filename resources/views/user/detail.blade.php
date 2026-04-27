@@ -17,18 +17,18 @@
 	<section class="user-data container">
 		<label x-show="formData.id > 0" class="large-text" x-text="`更新時間：${formData.updateAt}`"></label>
 		
-		<div class="field label border field-purple w25 prefix" :class="Helper.hasError(errors, 'ad')">
+		<div class="field label border field-purple w30 prefix" :class="Helper.hasError(errors, 'ad')">
 			<i class="small red-text">asterisk</i>
 			<input type="text" name="adAccount" maxlength="15" required x-model="formData.ad" @input="errors.delete('ad')">
 			<label>AD帳號</label>
 		</div>
 		
-		<div class="field label border field-purple w25">
+		<div class="field label border field-purple w30">
 			<input type="text" name="displayName" maxlength="15" x-model="formData.name">
 			<label>顯示名稱</label>
 		</div>
 		
-		<div class="field label suffix border field-purple w25 prefix" :class="Helper.hasError(errors, 'roleId')">
+		<div class="field label suffix border field-purple w30 prefix" :class="Helper.hasError(errors, 'roleId')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.roleId" name="roleId"  @change="errors.delete('roleId')">
 				<option value="">請選擇</option>

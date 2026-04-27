@@ -15,7 +15,7 @@
 	@csrf
 	
 	<section class="sales-setting-data container">
-		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brandId')">
+		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brandId" name="brandId" @change="errors.delete('brandId');">
 				<template x-for="(name, id) in options.brands" :key="id">
@@ -34,12 +34,12 @@
 				<legend><i class="small red-text">asterisk</i><span x-text="item.groupName"></span></legend>
 					<div class="grid">
 						<template x-for="(name, code) in item.products" :key="code">
-						<label class="checkbox large s3 check-amber">
+						<label class="checkbox large s4 check-amber">
 							<input type="checkbox" :name="`productCodes[${brand}][]`" x-model="formData.productCodes[brand]" :value="code">
 							<span x-text="code + name"></span>
 						</label>
 						</template>
-						<div class="space s12"></div>
+						<!--div class="space s12"></div-->
 					</div>
 			</fieldset>
 			</template>

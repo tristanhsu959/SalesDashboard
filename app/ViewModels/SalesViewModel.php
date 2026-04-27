@@ -104,5 +104,9 @@ class SalesViewModel extends Fluent
 		else
 			return TRUE;
 	}
-
+	
+	public function getBrandCode()
+	{
+		return $this->brand->code();
+	}
 }

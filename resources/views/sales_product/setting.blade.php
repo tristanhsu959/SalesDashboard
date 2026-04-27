@@ -15,7 +15,7 @@
 	@csrf
 	
 	<section class="sales-product-data container">
-		<div class="field label suffix border field-dark-blue w20 prefix" :class="Helper.hasError(errors, 'brandId')">
+		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brandId" name="brandId" @change="errors.delete('brandId');">
 				<template x-for="(name, id) in options.brands" :key="id">

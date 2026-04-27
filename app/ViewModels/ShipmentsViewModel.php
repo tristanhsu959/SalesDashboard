@@ -151,7 +151,11 @@ class ShipmentsViewModel extends Fluent
 	
 	public function getBrandCode()
 	{
-		$id = $this->statistics['brandId'];
-		return (Brand::tryFrom($id))->code();
+		return $this->brand->code();
+	}
+	
+	public function isBafang()
+	{
+		return $this->brand == Brand::BAFANG;
 	}
 }
