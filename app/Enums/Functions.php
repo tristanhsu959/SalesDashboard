@@ -6,9 +6,10 @@ use Illuminate\Support\Str;
 
 enum Functions : string
 {
-	case HOME					= 'home';
+	case HOME					= 'home'; #non permission
 	case USER					= 'user';
 	case ROLE 					= 'role';
+	case STORE_INFO 			= 'store_info'; #non permission
 		
 	#Product	
 	case PRODUCT 				= 'product';
@@ -41,6 +42,7 @@ enum Functions : string
         return match ($this) 
 		{
 			self::HOME					=> '首頁',
+			self::STORE_INFO			=> '門店資訊',
 			self::USER					=> '帳號管理',
 			self::ROLE 					=> '身份管理',
 			self::PRODUCT 				=> '產品料號設定',

@@ -5,6 +5,11 @@
 			<i>arrow_back</i>
 		</a>
 		<h6 class="max small" x-html="breadcrumb.join('<i>chevron_right</i>')"></h6>
+		
+		<a :href="storeInfoRoute" class="button circle transparent">
+			<i>storefront</i>
+			<span class="tooltip left">門店資訊</span>
+		</a>
 		<a :href="homeRoute" x-show="!isHome" class="button circle transparent">
 			<i>home</i>
 		</a>

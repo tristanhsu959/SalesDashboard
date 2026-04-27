@@ -52,10 +52,11 @@ trait attrActionBar
 	 */
 	public function actionBarData()
 	{
-		$data['isHome'] 	= request()->routeIs('home');
-		$data['breadcrumb'] = $this->breadcrumb();
-		$data['backUrl'] 	= $this->backUrl();
-		$data['homeRoute'] 	= route('home');
+		$data['isHome'] 		= request()->routeIs('home');
+		$data['breadcrumb'] 	= $this->breadcrumb();
+		$data['backUrl'] 		= $this->backUrl();
+		$data['homeRoute'] 		= route('home');
+		$data['storeInfoRoute'] = route('store.info');
 		
 		return $data;
 	}
