@@ -109,14 +109,15 @@ class MerchantViewModel extends Fluent
 		
 		return match($type)
 		{
-			'store'		=> 'shipments.store',
-			'factory'	=> 'shipments.factory',	 
+			'info'		=> 'merchant.info',
+			'dayOff'	=> 'merchant.dayoff',	 
 		};
 	}
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics['shop'])))
+		#改判別token即可
+		if (empty($this->statistics['exportToken']))
 			return TRUE;
 		else
 			return FALSE;

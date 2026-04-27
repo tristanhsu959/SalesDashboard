@@ -64,8 +64,8 @@ class MonthlyFillingRepository extends Repository
 	public function getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds)
 	{
 		#to UTC Time
-		$stDate	= (new Carbon($stDate))->utc();
-		$endDate= (new Carbon($endDate))->utc();
+		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
+		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
 		$brandId = $brand->value;
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);

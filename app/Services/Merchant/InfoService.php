@@ -23,7 +23,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class StoreService
+class InfoService
 {
 	private $_userAreaIds	= FALSE;
 	private $_statistics	= [];
@@ -42,13 +42,15 @@ class StoreService
 	{
 		try
 		{
+			/* 暫不判別
 			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser['roleArea'];
+			$this->_userAreaIds = $currentUser['roleArea']; */
 			$this->_statistics = $params;
-			dd($this->_statistics);
+			
 			#執行統計
-			$orderData = $this->_getDataFromDB();
-			return $this->_outputReport($orderData);
+			$infoData = $this->_getDataFromDB();
+			
+			return $this->_outputReport($infoData);
 		}
 		catch(Exception $e)
 		{
@@ -64,39 +66,32 @@ class StoreService
 	 */
 	private function _getDataFromDB()
 	{
-		/*0 => array:9 [
-			"expectedDate" => "2026-03-25"
-			"area" => "中彰投-八方"
+		/*0 => array:11 [
+			"areaId" => "21"
 			"storeId" => "156"
-			"factoryNo" => "TW_KH"
+			"storeNo" => "KH4000002"
+			"storeName" => "台中柳川店"
+			"postId" => "0388"
+			"storePhone" => "04-2223-2283"
+			"address" => "台中市中區民族路180號"
+			"vatNumber" => "72318104"
+			"salesName" => null
 			"factoryName" => "高雄工廠"
-			"qty" => "2"
-			"amount" => "500.000000"
-			"productName" => "紅燒帶骨牛小排調理包"
-			"erpNo" => "PR00313063"
-		  ]
+			"carNo" => "C3"
+  ]
 		*/
 	
 		try
 		{
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
-			$productIds	= $this->_statistics['productIds'];
-			$brand 		= Brand::tryFrom($this->_statistics['brandId']);
+			$brand = Brand::tryFrom($this->_statistics['brandId']);
+			$infoData = $this->_repository->getStoreInfoList($brand, $this->_userAreaIds);
 			
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
-			#先處理包裝轉換
-			$orderData = collect($orderData)->map(function($item, $key){
-				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
-				return $item;
-			});
-			
-			return $orderData;
+			return $infoData;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取訂貨系統訂單資料失敗');
+			throw new Exception('讀取門店資料失敗');
 		}
 	}
 	
@@ -106,22 +101,12 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($orderData)
+	private function _outputReport($infoData)
 	{
 		try
 		{
-			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['header']['dateList'] = $this->_buildDateHeader();
-			
-			#2.Build productList
-			$this->_statistics['header']['productList'] = $this->_getProductList($orderData);
-		
-			#3.Get store list
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			$this->_statistics['header']['storeList'] = $this->_getStoreList($brand, $this->_userAreaIds);
-
-			#4. analysis by 門店
-			$this->_statistics['data'] = $this->_parsingByStore($orderData);
+			#1.Build store info
+			$this->_statistics['info'] = $this->_buildInfo($infoData);
 			
 			return $this->_statistics;
 		}
@@ -132,53 +117,6 @@ class StoreService
 		}
 	}
 	
-	/* 計算日期天數
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildDateHeader()
-	{
-		$st 		= Carbon::create($this->_statistics['startDate']);
-		$end 		= Carbon::create($this->_statistics['endDate']);
-		$modeCalc 	= $this->_statistics['modeCalc'];
-		$header 	= [];
-		
-		if ($modeCalc == 'day')
-		{
-			#By day
-			$period 	= CarbonPeriod::create($st, $end);
-			foreach ($period as $date) 
-			{
-				$header[] = $date->format('Y-m-d');
-			}
-		}
-		else
-		{
-			#By month
-			$st = Carbon::parse($this->_statistics['startDate'])->startOfMonth();
-			$end = Carbon::parse($this->_statistics['endDate'])->startOfMonth();
-			
-			$period = CarbonPeriod::create($st, '1 month', $end);
-			foreach ($period as $date) 
-			{
-				$header[] = $date->format('Y-m');
-			}
-		}
-		
-		return $header;
-	}
-	
-	/* Get order data
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getProductList($orderData)
-	{
-		return collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
-		})->toArray();
-	}
-	
 	/* Get order data
 	 * @params: enums
 	 * @params: date
@@ -186,103 +124,44 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getStoreList($brand, $userAreaIds)
+	private function _buildInfo($infoData)
 	{
 		try
 		{
-			$brandId = $brand->value;
-			$store = $this->_repository->getStoreList($brand, $userAreaIds);
-			
-			#To key-value:store list沒有包含蘿蔔
-			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
-				
-				if (is_null($item['postId']) OR $item['postId'] == 'null')
-					$item['postId'] =  '';
+			#先處理area為了可以排序
+			$store = collect($infoData)->map(function($item, $key){
+				$item['postId'] 	= (is_null($item['postId']) OR $item['postId'] == 'null') ? '' : $item['postId'];
+				$item['salesName']	= (is_null($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
-				$item['areaName'] 	= $area->label();
-				#$item['area'] = Str::replace('-八方', '', $item['area']);
-				#$item['area'] = Str::replace('-御廚', '', $item['area']);
+				$item['areaName']	= $area->label();
 				
-				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
-				if ($brandId == Brand::BAFANG->value)
-					$storeKey = Str::take($item['storeNo'], 9);
-				else
-					$storeKey = $item['storeNo'];
+				return $item;
+			})->sortBy('areaId')->values()->map(function($item, $key) {
+				$temp['postId'] 	= $item['postId'];
+				$temp['areaName'] 	= $item['areaName'];
+				$temp['storeNo']	= $item['storeNo'];
+				$temp['storeName']	= $item['storeName'];
+				$temp['address']	= $item['address'];
+				$temp['storePhone']	= $item['storePhone'];
+				$temp['factoryName']= $item['factoryName'];
+				$temp['carNo']		= $item['carNo'];
+				$temp['salesName']	= $item['salesName'];
 				
-				#存下storeKey
-				$item['storeKey'] = $storeKey;
-				
-				return [$storeKey => $item];
-			})->sortBy('areaId')->toArray();
+				return $temp;
+			})->toArray(); 
 			
-			return $store;
+			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱', '地址', '電話', '出貨工廠', '車次', '督導'];
+			$info['store']	= $store;
+			
+			return $info;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料失敗');
+			throw new Exception('建立門店資料失敗');
 		}
-	}
-	
-	/* 依工廠
-	 * @params: array
-	 * @return: array
-	 */
-	private function _parsingByStore($orderData)
-	{
-		/*
-		"PR00313063" => array:2 [
-			"TW_KH" => array:2 [
-				"2026-03-25" => array:1 [
-					"qty" => 116
-				]
-				"2026-03-26" => array:1 []
-			]
-			"TW_TP" => array:2 []
-		]
-		*/
-		if (empty($orderData))
-			return [];
-		
-		$modeCalc = $this->_statistics['modeCalc'];
-		
-		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
-			$temp = $items->groupBy(function($item, $key){
-				return Str::take($item['storeNo'], 9);
-			})->map(function($items, $key) use($modeCalc) {
-				
-				if ($modeCalc == 'day')
-				{
-					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
-						$temp['qty'] = round($items->pluck('qty')->sum(), 2);
-						return $temp;
-					});
-					
-					return $day->toArray();	
-				}
-				
-				if ($modeCalc == 'month')
-				{
-					$month = $items->groupBy(function ($item) {
-						return substr($item['expectedDate'], 0, 7); 
-					})->map(function ($group) {
-						$temp['qty'] = round($group->pluck('qty')->sum(), 2);
-						return $temp;
-					});
-					
-					return $month->toArray();	
-				}
-				
-				#return $day->merge($month)->toArray();
-			}); 
-			
-			return $temp;
-		})->sortKeys()->toArray();
-		
-		return $result;
 	}
 	
 	/* Export data
@@ -294,28 +173,23 @@ class StoreService
 		try
 		{
 			#Build export data for sheets
-			$export = $this->_buildExportData($sourceData['header'], $sourceData['data']);
+			$export = collect([$sourceData['info']['header']])->merge($sourceData['info']['store'])->toArray();
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_出貨總量_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate']], '?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
-			$index = 0;
-			foreach($export as $sheetName => $sheetData)
-			{
-				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
-				$sheet->setName($sheetName);
+			$sheet = $writer->getCurrentSheet();
+			$sheet->setName($sourceData['exportName']);
 				
-				foreach($sheetData as $data)
-				{
-					$row =  Row::fromValues($data);
-					$writer->addRow($row);
-				}
-				$index++;
+			foreach($export as $key => $data)
+			{
+				$row =  Row::fromValues($data);
+				$writer->addRow($row);
 			}
 			
 			$writer->close();
@@ -326,47 +200,5 @@ class StoreService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
 		}
-	}
-	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportData($header, $data)
-	{
-		$export = [];
-		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $header['dateList']);
-		
-		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $productName)
-		{
-			$storeData = data_get($data, $erpNo, []);
-			
-			if (empty($storeData))
-				continue;
-			
-			$export[$productName] = [];
-			$export[$productName][] = $outputHeader;
-			
-			#使用header來控制顯示順序,先TP後KH
-			foreach($header['storeList'] as $storeNo => $store)
-			{
-				$row = [];
-				$row[] = $store['postId'];
-				$row[] = $store['areaName'];
-				$row[] = $store['storeNo'];
-				$row[] = $store['storeName'];
-				
-				#要按Header的順序
-				foreach($header['dateList'] as $date)
-				{
-					$row[] = data_get($storeData, "{$storeNo}.{$date}.qty", 0);
-				}
-				
-				$export[$productName][] = $row;
-			}
-		}
-		
-		return $export;
 	}
 }

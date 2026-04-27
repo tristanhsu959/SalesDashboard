@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Services\Merchant\InfoService;
+use App\Services\Merchant\DayoffService;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -32,9 +34,9 @@ class MerchantService
 			'modeType'			=> '',
 			'startDate'		=> '', #Y-m-d
 			'endDate'		=> '', #Y-m-d
-            'header'		=> [],
-			'shop' 			=> [],
-			'area' 			=> [],
+            'info' 			=> [],
+			'dayoff' 		=> [],
+			'areaDayoff'	=> [],
 			'exportToken'	=> '', #export
 		];
 	}
@@ -84,7 +86,7 @@ class MerchantService
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['brandId']	= $brand->value; 
-			$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
+			$this->_statistics['startDate'] = ($searchType == 'info') ? '' : (new Carbon($searchStDate))->format('Y-m-d'); 
 			$this->_statistics['endDate'] 	= $this->_statistics['startDate'];
 			
 			if (Cache::has($cacheKey))
@@ -107,7 +109,7 @@ class MerchantService
 				$this->_statistics = $service->analysis($this->_statistics);
 				
 				#無值不cache
-				if (! empty($this->_statistics['data']))
+				if (! empty($this->_statistics['info']) OR ! empty($this->_statistics['dayoff']))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= ($searchType == 'info') ? '門店資訊' : '店休資訊';
@@ -143,15 +145,15 @@ class MerchantService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export shipment data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];
 		
-		if ($modeType == 'store')
-			$service = app(StoreService::class);
+		if ($modeType == 'info')
+			$service = app(InfoService::class);
 		else
-			$service = app(FactoryService::class);
+			$service = app(DayoffService::class);
 		
 		return $service->export($sourceData);
 	}

@@ -8,7 +8,78 @@ form {
 }
 
 /* Data */
-.page {
+.store-content {
+	padding: 1rem;
+	/* 門市 */
+	.statistics-store {
+		&.bafang {
+			--table-bg: #4fc3f7; 			/* light-2 */
+			--table-bg-dark: #0288d1; 		/* dark-2 */
+			--table-fixed-bg: #b3e5fc; 		/* light-4 */
+			--table-fixed-color: #01579b;	/* dark-4 */
+			--table-stripes: #e1f5fe;		/* light-5 */
+		}
+		&.buygood {
+			--table-bg: #80deea;
+			--table-bg-dark: #0097a7;
+			--table-fixed-bg: #b2ebf2;
+			--table-fixed-color: #01579b;
+			--table-stripes: #e0f7fa; 
+		}
+		
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 200px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		margin: 0;
+		border: 1px solid var(--table-bg-dark);
+		
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: max-content;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			
+			&.stripes tbody tr:nth-child(odd) {
+				background-color: var(--table-stripes);
+			}
+			
+			thead {
+				tr {
+					th {
+						position: sticky;
+						top: 0;
+						z-index: 5;
+						word-break: keep-all;
+						background-color: var(--table-bg);
+						width: 120px;
+						color: rgba(0, 0, 0, .87);
+						padding-top: 1rem;
+						
+						&:nth-of-type(5) {
+							width: 280px;
+						}
+					}
+				}
+			}
+			
+			tbody {
+				tr {
+					td {
+						color: #424242;
+					}
+				}
+			}
+		}
+	}
+}
+
+.area-content {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
@@ -40,70 +111,11 @@ form {
 			&.stripes tbody tr:nth-child(odd) {
 				background-color: var(--table-stripes);
 			}
-			
-			thead {
-				tr {
-					th {
-						position: sticky;
-						top: 0;
-						z-index: 5;
-						word-break: keep-all;
-						background-color: var(--table-bg);
-						width: 120px;
-						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
-						
-						&:nth-child(1) {
-							min-width: 120px;
-							width: 120px;
-							position: sticky;
-							left: 0;
-							z-index: 6;
-						}
-						&:nth-child(2) {
-							min-width: 120px;
-							width: 120px;
-							position: sticky;
-							left: 120px;
-							z-index: 6;
-						}
-					}
-				}
-			}
-			
-			tbody {
-				tr {
-					th {
-						position: sticky;
-						font-weight: normal;
-						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
-						
-						&:nth-child(1) {
-							left: 0;
-							background-color: var(--table-fixed-bg);
-						}
-						&:nth-child(2) {
-							left: 120px;
-							background-color: var(--table-fixed-bg);
-						}
-					}
-					
-					td {
-						background-color: var(--table-bg);
-						color: #424242;
-					}
-					
-					&:last-child th, &:last-child td {
-						color: red;
-					}
-				}
-			}
 		}
 	}
 	
 	/* 門市 */
-	.statistics-shop {
+	.statistics-store {
 		&.bafang {
 			--table-bg: #4fc3f7; 			/* light-2 */
 			--table-bg-dark: #0288d1; 		/* dark-2 */
@@ -121,7 +133,7 @@ form {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 220px);
+		max-height: calc(100vh - 300px);
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
@@ -153,33 +165,8 @@ form {
 						color: rgba(0, 0, 0, .87);
 						padding-top: 1rem;
 						
-						&:nth-child(1) {
-							/* min-width: 80px; */
-							width: 80px;
-							position: sticky;
-							left: 0;
-							z-index: 6;
-						}
-						&:nth-child(2) {
-							min-width: 80px;
-							width: 80px;
-							position: sticky;
-							left: 80px;
-							z-index: 6;
-						}
-						&:nth-child(3) {
-							min-width: 160px;
-							width: 200px;
-							position: sticky;
-							left: 160px;
-							z-index: 6;
-						}
-						&:nth-child(4) {
-							min-width: 80px;
-							width: 80px;
-							position: sticky;
-							left: 360px;
-							z-index: 6;
+						&:nth-of-type(5) {
+							width: 280px;
 						}
 					}
 				}
@@ -187,41 +174,8 @@ form {
 			
 			tbody {
 				tr {
-					th {
-						position: sticky;
-						font-weight: normal;
-						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
-						/* border-bottom-width: 0; */
-						
-						&:nth-child(1) {
-							left: 0;
-							background-color: var(--table-fixed-bg);
-						}
-						&:nth-child(2) {
-							left: 80px;
-							background-color: var(--table-fixed-bg);
-						}
-						&:nth-child(3) {
-							left: 160px;
-							background-color: var(--table-fixed-bg);
-						}
-						&:nth-child(4) {
-							left: 360px;
-							background-color: var(--table-fixed-bg);
-						}
-					}
-					
 					td {
 						color: #424242;
-						/* 總計 */
-						/* &:nth-last-child(-n + 2) {
-							color: #f44336;
-						} */
-					}
-					
-					&:last-child th, &:last-child td {
-						color: red;
 					}
 				}
 			}

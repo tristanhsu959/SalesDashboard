@@ -35,5 +35,19 @@ document.addEventListener('alpine:init', () => {
 			this.errors.clear();
 		},
     }));
+	
+	Alpine.data('storeInfo', (data) => ({
+		statistics: {...data},
+		
+		init() { 
+		},
+    }));
+	
+	Alpine.data('storeDayoff', (data) => ({
+		statistics: {...data},
+		
+		init() { console.log(this.statistics);
+		},
+    }));
 });
 

@@ -48,13 +48,12 @@
 			<span>查詢</span>
 		</button>
 	
-	{{--
 		@if ($viewModel->hasExportData())
-		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle red" type="button">
-			<span class="material-symbols-outlined filled-icon">download_2</span>
+		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle extend red" type="button">
+			<i>download_2</i>
+			<span>下載</span>
 		</a>
 		@endif
-	--}}
 	</nav>
 </header>
 	

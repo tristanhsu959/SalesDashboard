@@ -2,94 +2,133 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\OrderTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
-use App\Libraries\Sales\AreaLib;
+use App\Libraries\Purchase\AreaLib;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Exception;
 
 
 class MerchantRepository extends Repository
 {
-	use PosTrait;
+	use OrderTrait;
 	
 	public function __construct()
 	{
 		
 	}
 	
-	/* 取新品營收資料
-	 * @params: enums
-	 * @params: datetime
-	 * @params: datetime
+	/* 取門店資訊, 不使用共用的trait
+	 * @params: enum
+	 * @params: array
 	 * @return: array
 	 */
-	public function getSaleData($brand, $stDate, $endDate)
+	public function getStoreInfoList($brand, $userAreaIds)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
-		if ($brand == Brand::BAFANG)
-			$db = $this->connectBFPosErp();
-		else
-			$db = $this->connectBGPosErp();
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Store as s')
+			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
+			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
+			->leftJoin('User as u', 'u.Id', '=', 's.SuperviseUserId')
+			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
+			->leftJoin('Car as c', 'c.Id', '=', 'sc.CarId')
+			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as postId')
+			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
+			->addSelect('f.Name as factoryName', 'c.Name as carNo')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->where('bd.No',  $this->getBrandNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'sc.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->whereNull('s.CloseDate')
+			->when($authAreaIds, function ($query, $authAreaIds) {
+				// 只有當 $role 為 true（或非空值）時，才會執行這裡
+				return $query->whereIn('s.AreaId', $authAreaIds);
+			})
+			#->whereIn('s.AreaId', $authAreaIds)
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
+			#->orderBy('s.OperationCenterId')
+			#->orderBy('ar.Id')
+			->get()
+			->toArray(); 
 		
-		$query = $db
-				->table('zs_sd_order as a')
-				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->select('a.shopId')
-				->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
-				->selectRaw('sum(a.price * a.qty + a.discount) as amount')
-				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
-				->whereNotIn('a.shopId', $excepts)
-				->groupByRaw('a.shopId, CAST(a.saleDate AS DATE)')
-				->get()
-				->toArray();
-		
-		return $query;
+		return $result;
 	}
 	
-	/* 取營收資料 SALE00
-	 * @params: enums
-	 * @params: datetime
-	 * @params: datetime
+	/* 取店休資訊, 不使用共用的trait共
+	 * @params: enum
+	 * @params: array
 	 * @return: array
 	 */
-	public function getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds)
+	public function getDayoffList($brand, $stDate, $endDate, $userAreaIds)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
-		if ($brand == Brand::BAFANG)
-			$db = $this->connectBFPosErp();
-		else if ($brand == Brand::BUYGOOD)
-			$db = $this->connectBGPosErp();
-		else if ($brand == Brand::FJVEGGIE)
-			$db = $this->connectFJPosErp();
-		else
-			return [];
+		#To utc
+		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
+		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
-		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Store as s')
+			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
+			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
+			->leftJoin('Order as o', function ($join) use($stDate, $endDate) {
+				$join->on('o.StoreId', '=', 's.Id')
+					->where('o.ExpectedDate', '>=', $stDate)
+					->where('o.ExpectedDate', '<=', $endDate);
+			})
+			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
+			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->where('bd.No',  $this->getBrandNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'sc.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			->whereNull('s.CloseDate') #只取有效門店
+			->when($authAreaIds, function ($query, $authAreaIds) {
+				return $query->whereIn('s.AreaId', $authAreaIds);
+			})
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
+			->whereNull('o.Money')
+			#->orderBy('s.OperationCenterId')
+			#->orderBy('ar.Id')
+			->get()
+			->toArray(); 
 		
-		$query = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
-				->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.SHOP_ID')
-				->join('shop_kind as c', 'c.sk_id', '=', 'b.shop_kind')
-				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
-				->addSelect('c.sk_id as typeId', 'c.Sk_name as typeName')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.TOT_SALES) as amount')
-				->where('a.SALE_DATE', '>=', $stDate)
-				->where('a.SALE_DATE', '<=', $endDate)
-				->whereNotIn('a.SHOP_ID', $excepts)
-				->whereIn('b.SHOP_KIND', $shopType)
-				->whereIn('b.gid', $authAreaIds)
-				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
-				->get()
-				->toArray();
-		
-		return $query;
+		return $result;
 	}
 }
