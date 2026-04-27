@@ -71,7 +71,7 @@ class InfoService
 			"storeId" => "156"
 			"storeNo" => "KH4000002"
 			"storeName" => "台中柳川店"
-			"postId" => "0388"
+			"posId" => "0388"
 			"storePhone" => "04-2223-2283"
 			"address" => "台中市中區民族路180號"
 			"vatNumber" => "72318104"
@@ -130,7 +130,7 @@ class InfoService
 		{
 			#先處理area為了可以排序
 			$store = collect($infoData)->map(function($item, $key){
-				$item['postId'] 	= (is_null($item['postId']) OR $item['postId'] == 'null') ? '' : $item['postId'];
+				$item['posId'] 		= (is_null($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
 				$item['salesName']	= (is_null($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
@@ -139,7 +139,7 @@ class InfoService
 				
 				return $item;
 			})->sortBy('areaId')->values()->map(function($item, $key) {
-				$temp['postId'] 	= $item['postId'];
+				$temp['posId'] 		= $item['posId'];
 				$temp['areaName'] 	= $item['areaName'];
 				$temp['storeNo']	= $item['storeNo'];
 				$temp['storeName']	= $item['storeName'];

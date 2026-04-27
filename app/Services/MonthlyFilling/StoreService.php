@@ -254,8 +254,8 @@ class StoreService
 			#To key-value
 			$store = collect($store)->mapWithKeys(function($item, $key) use($brand) {
 				
-				if (is_null($item['postId']) OR $item['postId'] == 'null')
-					$item['postId'] =  '';
+				if (is_null($item['posId']) OR $item['posId'] == 'null')
+					$item['posId'] =  '';
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
@@ -339,7 +339,7 @@ class StoreService
 			$storeData = data_get($data, $key);
 				
 			$row = [];
-			$row[] = data_get($store, 'postId');
+			$row[] = data_get($store, 'posId');
 			$row[] = data_get($store, 'areaName');
 			$row[] = data_get($store, 'storeNo');
 			$row[] = data_get($store, 'storeName');

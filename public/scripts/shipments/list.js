@@ -100,7 +100,7 @@ document.addEventListener('alpine:init', () => {
 			const list = Object.values(this.statistics.header.storeList);
 			
 			const result = list.filter(store => 
-				String(store.postId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
 				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
 				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
 				String(store.storeName || '').toLowerCase().includes(searchKeyword)

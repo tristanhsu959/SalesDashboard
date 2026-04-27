@@ -38,7 +38,7 @@ class MerchantRepository extends Repository
 			->leftJoin('User as u', 'u.Id', '=', 's.SuperviseUserId')
 			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
 			->leftJoin('Car as c', 'c.Id', '=', 'sc.CarId')
-			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as postId')
+			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
 			->addSelect('f.Name as factoryName', 'c.Name as carNo')
 			->whereExists(function ($query) use($brandId) {

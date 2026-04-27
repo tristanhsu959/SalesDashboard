@@ -199,8 +199,8 @@ class StoreService
 			#To key-value:store list沒有包含蘿蔔
 			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
 				
-				if (is_null($item['postId']) OR $item['postId'] == 'null')
-					$item['postId'] =  '';
+				if (is_null($item['posId']) OR $item['posId'] == 'null')
+					$item['posId'] =  '';
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
@@ -355,7 +355,7 @@ class StoreService
 			foreach($header['storeList'] as $storeNo => $store)
 			{
 				$row = [];
-				$row[] = $store['postId'];
+				$row[] = $store['posId'];
 				$row[] = $store['areaName'];
 				$row[] = $store['storeNo'];
 				$row[] = $store['storeName'];

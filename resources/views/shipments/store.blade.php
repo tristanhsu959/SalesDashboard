@@ -34,7 +34,7 @@
 							<!--template x-for="(store, storeId) in statistics.header['storeList']" :key="storeId"-->
 							<template x-for="(store, idx) in filterStore" :key="idx">
 							<tr>
-								<th x-text="store.postId"></th>
+								<th x-text="store.posId"></th>
 								<th x-text="store.areaName"></th>
 								<th x-text="store.storeNo"></th>
 								<th x-text="store.storeName"></th>
