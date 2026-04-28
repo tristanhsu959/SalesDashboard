@@ -12,7 +12,7 @@ document.addEventListener('alpine:init', () => {
 			this.updateProducts();
 		},
 		
-		changeProducts() {console.log(1);
+		changeProducts() {
 			//onchange一律清空
 			Object.keys(this.formData.productIds).forEach(key => {
 				this.formData.productIds[key] = [];

@@ -46,7 +46,7 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('storeDayoff', (data) => ({
 		statistics: {...data},
 		
-		init() { console.log(this.statistics);
+		init() { 
 		},
     }));
 });

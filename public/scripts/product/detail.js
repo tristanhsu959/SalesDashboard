@@ -10,7 +10,6 @@ document.addEventListener('alpine:init', () => {
 		
 		init() {
 			this.initErpNoInput();
-			console.log(this.initFormData);
 		},
 		
 		initErpNoInput() {

@@ -6,7 +6,9 @@ document.addEventListener('alpine:init', () => {
 		options: {...options},
 		errors: new Set(),
 		
-		init(){console.log(this.options.functions)},
+		init(){
+			
+		},
         validate() {
 			this.errors.clear();
 			
