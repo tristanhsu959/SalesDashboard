@@ -9,8 +9,11 @@
 		@else
 		<div class="factory-content">
 			<div class="tabs cyan-text">
-				<template x-for="(name, id) in statistics.header['productList']" :key="id">
-					<a x-text="name" @click="activeProduct = id" :class="{ 'active': activeProduct === id }"></a>
+				<template x-for="(item, erpNo) in statistics.header['productList']" :key="erpNo">
+					<a @click="activeProduct = erpNo" :class="{ 'active': activeProduct === erpNo }">
+						<span x-text="item.productName"></span>
+						<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
+					</a>
 				</template>
 			</div>
 			

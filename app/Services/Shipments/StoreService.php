@@ -177,9 +177,27 @@ class StoreService
 	 */
 	private function _getProductList($orderData)
 	{
-		return collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
+		#有的工廠沒有設memo,故要手動處理
+		return collect($orderData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
+			$temp['productName']= $items->pluck('productName')->first();
+			
+			#會有空格的狀況
+			$temp['memo'] = $items->pluck('memo')->filter(function($value, $key){
+				return trim($value) != '';
+			})->first();
+			
+			$temp['memo'] = empty($temp['memo']) ? '' : $temp['memo'];
+			$erpNo = $items->pluck('erpNo')->first();
+			
+			return [$erpNo => $temp];
 		})->toArray();
+		
+		/* return collect($orderData)->unique('erpNo')->mapWithKeys(function($item, $key){
+			$temp['productName']= $item['productName'];
+			$temp['memo'] 		= trim($item['memo']);
+			
+			return [$item['erpNo'] => $temp];
+		})->toArray(); */
 	}
 	
 	/* Get order data
@@ -341,9 +359,10 @@ class StoreService
 		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $header['dateList']);
 		
 		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $productName)
+		foreach($header['productList'] as $erpNo => $item)
 		{
 			$storeData = data_get($data, $erpNo, []);
+			$productName = $item['productName'];
 			
 			if (empty($storeData))
 				continue;

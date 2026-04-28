@@ -49,10 +49,9 @@ class DayoffService
 			$this->_statistics = $params;
 			
 			#執行統計
-			$areaStores = $this->_getAreaStores();
-			$dayoffData = $this->_getDataFromDB();
+			$storeData = $this->_getDataFromDB();
 			
-			return $this->_outputReport($areaStores, $dayoffData);
+			return $this->_outputReport($storeData);
 		}
 		catch(Exception $e)
 		{
@@ -61,26 +60,6 @@ class DayoffService
 	}
 	
 	/* ====================== 主流程 End ====================== */
-	
-	/* 取區域有效門店數
-	 * @params: 
-	 * @return: array
-	 */
-	private function _getAreaStores()
-	{
-		try
-		{
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			$areaStores = $this->_repository->getActiveStoreId($brand, $this->_userAreaIds);
-			
-			return $areaStores;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取店休資料失敗');
-		}
-	}
 	
 	/* Get order data
 	 * @params: 
@@ -94,6 +73,7 @@ class DayoffService
 			"storeNo" => "KH4000002"
 			"storeName" => "台中柳川店"
 			"posId" => "0388"
+			"money" => 11
 		]
 		*/
 	
@@ -103,9 +83,9 @@ class DayoffService
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			$infoData = $this->_repository->getDayoffList($brand, $stDate, $endDate, $this->_userAreaIds);
+			$data = $this->_repository->getDayoffList($brand, $stDate, $endDate, $this->_userAreaIds);
 			
-			return $infoData;
+			return $data;
 		}
 		catch(Exception $e)
 		{
@@ -121,15 +101,15 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($areaStores, $dayoffData)
+	private function _outputReport($storeData)
 	{
 		try
 		{
 			#1.Build area statistics
-			$this->_statistics['areaDayoff'] = $this->_buildAreaStores($areaStores, $dayoffData);
+			$this->_statistics['areaDayoff'] = $this->_buildDayoffByArea($storeData);
 			
 			#2.Build store info
-			$this->_statistics['dayoff'] = $this->_buildDayoff($dayoffData);
+			$this->_statistics['dayoff'] = $this->_buildDayoffByDetail($storeData);
 			
 			return $this->_statistics;
 		}
@@ -144,41 +124,32 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildAreaStores($areaStores, $dayoffData)
+	private function _buildDayoffByArea($storeData)
 	{
 		try
 		{
 			#Statistics dayoff
-			$dayoffStat = collect($dayoffData)->map(function($item, $key) {
+			$dayoffData = collect($storeData)->map(function($item, $key) {
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
 				
 				return $item;
-			})->groupBy('areaId')->map(function($items, $key) {
-				return $items->pluck('storeId')->count();
-			})->toArray();
-			
-			#須用原始data, 因需要area id
-			$areaStat = collect($areaStores)->map(function($item, $key) {
-				$area = AreaLib::toArea(intval($item['areaId']));
-				$item['areaId']		= $area->value;
-				$item['areaName']	= $area->label();
-				
-				return $item;
-			})->sortBy('areaId')->groupBy('areaId')->values()->map(function($items, $key) use($dayoffStat) {
-				$areaId 			= $items->pluck('areaId')->first();
-				
+			})->sortBy('areaId')->groupBy('areaId')->values()->map(function($items, $key) {
 				$temp['areaName']	= $items->pluck('areaName')->first();
-				$temp['total']		= $items->pluck('storeId')->count();
-				$temp['dayoffCount']= data_get($dayoffStat, $areaId, 0);
+				$temp['total']		= $items->count();
+				
+				$temp['dayoffCount']= $items->filter(function($item, $key){
+					return intval($item['money']) <= 0;
+				})->count();
+				
 				$temp['percent']	= Number::percentage(intval($temp['dayoffCount']) / intval($temp['total']) * 100, precision: 2);
 				
 				return $temp;
-			})->toArray(); 
+			})->toArray();
 			
 			$area['header'] = ['區域', '店家數', '店休數', '佔比'];
-			$area['store'] = $areaStat;
+			$area['store'] = $dayoffData;
 			
 			return $area;
 		}
@@ -193,12 +164,13 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildDayoff($dayoffData)
+	private function _buildDayoffByDetail($storeData)
 	{
 		try
 		{
-			#先處理area為了可以排序
-			$store = collect($dayoffData)->map(function($item, $key){
+			$dayoffData = collect($storeData)->filter(function($item, $key){
+					return intval($item['money']) <= 0;
+			})->map(function($item, $key){
 				$item['posId'] 	= (is_null($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
@@ -216,7 +188,7 @@ class DayoffService
 			})->toArray(); 
 			
 			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱'];
-			$info['store']	= $store;
+			$info['store']	= $dayoffData;
 			
 			return $info;
 		}

@@ -145,14 +145,16 @@ class InfoService
 				$temp['storeName']	= $item['storeName'];
 				$temp['address']	= $item['address'];
 				$temp['storePhone']	= $item['storePhone'];
+				$temp['vatNumber']	= $item['vatNumber'];
 				$temp['factoryName']= $item['factoryName'];
+				$temp['warehouse']	= $item['warehouse'];
 				$temp['carNo']		= $item['carNo'];
 				$temp['salesName']	= $item['salesName'];
 				
 				return $temp;
 			})->toArray(); 
 			
-			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱', '地址', '電話', '出貨工廠', '車次', '督導'];
+			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
 			$info['store']	= $store;
 			
 			return $info;

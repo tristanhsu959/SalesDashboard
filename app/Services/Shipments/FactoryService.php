@@ -179,9 +179,24 @@ class FactoryService
 	 */
 	private function _getProductList($orderData)
 	{
-		return collect($orderData)->mapWithKeys(function($items, $key){
-			return [$items['erpNo'] => $items['productName']];
+		return collect($orderData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
+			$temp['productName']= $items->pluck('productName')->first();
+			$temp['memo'] 		= $items->pluck('memo')->filter(function($value, $key){
+				return trim($value) != '';
+			})->first();
+			
+			$temp['memo'] = empty($temp['memo']) ? '' : $temp['memo'];
+			$erpNo = $items->pluck('erpNo')->first();
+			
+			return [$erpNo => $temp];
 		})->toArray();
+		
+		/* return collect($orderData)->unique('erpNo')->mapWithKeys(function($item, $key){
+			$temp['productName']= $item['productName'];
+			$temp['memo'] 		= trim($item['memo']);
+			
+			return [$item['erpNo'] => $temp];
+		})->toArray(); */
 	}
 	
 	/* Get order data
@@ -321,9 +336,10 @@ class FactoryService
 		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
 		
 		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $productName)
+		foreach($header['productList'] as $erpNo => $item)
 		{
 			$factoryData = data_get($data, $erpNo, []);
+			$productName = $item['productName'];
 			
 			if (empty($factoryData))
 				continue;

@@ -38,9 +38,10 @@ class MerchantRepository extends Repository
 			->leftJoin('User as u', 'u.Id', '=', 's.SuperviseUserId')
 			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
 			->leftJoin('Car as c', 'c.Id', '=', 'sc.CarId')
+			->leftJoin('Warehouse as w', 'w.Id', '=', 'sc.WarehouseId')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
-			->addSelect('f.Name as factoryName', 'c.Name as carNo')
+			->addSelect('f.Name as factoryName', 'w.Name as warehouse', 'c.Name as carNo')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
@@ -93,13 +94,16 @@ class MerchantRepository extends Repository
 			->table('Store as s')
 			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->leftJoin('Order as o', function ($join) use($stDate, $endDate) {
-				$join->on('o.StoreId', '=', 's.Id')
-					->where('o.ExpectedDate', '>=', $stDate)
-					->where('o.ExpectedDate', '<=', $endDate);
-			})
 			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			->addSelect(['money' => $db->table('Order as o')
+				->select('o.Money')
+				->whereColumn('o.StoreId', 's.Id')
+				->where('o.ExpectedDate', '>=', $stDate)
+				->where('o.ExpectedDate', '<', $endDate)
+				->where('o.State', '=', 'functionalized')
+				->limit(1)
+			])
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
@@ -123,12 +127,10 @@ class MerchantRepository extends Repository
 				return $query->whereIn('s.AreaId', $authAreaIds);
 			})
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
-			->whereNull('o.Money')
-			#->orderBy('s.OperationCenterId')
-			#->orderBy('ar.Id')
 			->get()
-			->toArray(); 
+			->toArray();
 		
 		return $result;
 	}
+
 }
