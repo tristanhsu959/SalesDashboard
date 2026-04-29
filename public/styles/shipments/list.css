@@ -140,7 +140,7 @@ form {
 		table {
 			table-layout: fixed;
 			min-width: 100%;
-			width: auto;
+			width: 100%;
 			overflow: unset;
 			padding: 0;
 			margin: 0;
@@ -150,6 +150,9 @@ form {
 				background-color: var(--table-stripes);
 			}
 			
+			thead th {
+				width: 100px;
+			}
 			thead th, tbody th { /* , tbody th */
 				position: sticky;
 				z-index: 5;
@@ -173,6 +176,7 @@ form {
 				}
 				&:nth-child(4) {
 					z-index: 10;
+					width: 220px;
 				}
 			}
 			
@@ -206,13 +210,9 @@ form {
 				}
 				*/
 				&:nth-child(3) {
-					min-width: 100px;
-					max-width: 100px;
 					left: 0;
 				}
 				&:nth-child(4) {
-					min-width: 160px;
-					max-width: 160px;
 					left: 100px;
 				}
 			}

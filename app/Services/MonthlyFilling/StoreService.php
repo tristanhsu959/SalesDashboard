@@ -337,7 +337,10 @@ class StoreService
 		{
 			#$storeId = $store['storeId'];
 			$storeData = data_get($data, $key);
-				
+			
+			if (empty($storeData))
+				continue;
+			
 			$row = [];
 			$row[] = data_get($store, 'posId');
 			$row[] = data_get($store, 'areaName');
