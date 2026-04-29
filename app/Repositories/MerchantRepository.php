@@ -122,6 +122,7 @@ class MerchantRepository extends Repository
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
+			->where('s.OpenDate', '<', $endDate) #不含未來開店
 			->whereNull('s.CloseDate') #只取有效門店
 			->when($authAreaIds, function ($query, $authAreaIds) {
 				return $query->whereIn('s.AreaId', $authAreaIds);

@@ -33,7 +33,7 @@
 			<select x-model="formData.roleId" name="roleId"  @change="errors.delete('roleId')">
 				<option value="">請選擇</option>
 				<template x-for="(name, id) in options.roleList" :key="id">
-					<option :value="id" x-text="name"></option>
+					<option :value="id" x-text="name" :selected="formData.roleId == id"></option>
 				</template>
 			</select>
 			<label>身份</label>

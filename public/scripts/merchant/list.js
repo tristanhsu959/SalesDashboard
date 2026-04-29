@@ -45,8 +45,10 @@ document.addEventListener('alpine:init', () => {
 	
 	Alpine.data('storeDayoff', (data) => ({
 		statistics: {...data},
+		activeAreaId: 0,
 		
 		init() { 
+			this.activeAreaId = 0;
 		},
     }));
 });

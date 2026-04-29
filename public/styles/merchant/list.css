@@ -84,6 +84,11 @@ form {
 
 .area-content {
 	padding: 1rem;
+	max-height: calc(100vh - 144px);
+	overflow: auto;
+	/* scrollbar-width: thin; */
+	scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		
 	/* 區域彙總 */
 	.statistics-area {
 		--table-bg: #ffffff; 			/* light-2 */
@@ -94,10 +99,6 @@ form {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 220px);
-		overflow: auto;
-		/* scrollbar-width: thin; */
-		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
 		margin: 0;
 		border: 1px solid var(--table-bg-dark);
 		background-color: var(--table-bg);
@@ -113,6 +114,11 @@ form {
 			
 			&.stripes tbody tr:nth-child(odd) {
 				background-color: var(--table-stripes);
+			}
+			
+			tr td span {
+				display: inline-block;
+				min-width: 30px;
 			}
 		}
 	}
@@ -136,10 +142,6 @@ form {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 300px);
-		overflow: auto;
-		/* scrollbar-width: thin; */
-		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
 		margin: 0;
 		border: 1px solid var(--table-bg-dark);
 		

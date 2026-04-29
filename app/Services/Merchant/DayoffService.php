@@ -136,6 +136,7 @@ class DayoffService
 				
 				return $item;
 			})->sortBy('areaId')->groupBy('areaId')->values()->map(function($items, $key) {
+				$temp['areaId']		= $items->pluck('areaId')->first();
 				$temp['areaName']	= $items->pluck('areaName')->first();
 				$temp['total']		= $items->count();
 				
@@ -143,13 +144,20 @@ class DayoffService
 					return intval($item['money']) <= 0;
 				})->count();
 				
-				$temp['percent']	= Number::percentage(intval($temp['dayoffCount']) / intval($temp['total']) * 100, precision: 2);
+				$temp['percent']	= round(intval($temp['dayoffCount']) / intval($temp['total']) * 100, 2);
 				
 				return $temp;
-			})->toArray();
+			});
+			
+			#總計
+			$summary['areaId']		= 0;
+			$summary['areaName'] 	= '總計';
+			$summary['total'] 		= $dayoffData->pluck('total')->sum();
+			$summary['dayoffCount'] = $dayoffData->pluck('dayoffCount')->sum();
+			$summary['percent'] 	= round($dayoffData->pluck('percent')->sum() / $dayoffData->count(), 2);
 			
 			$area['header'] = ['區域', '店家數', '店休數', '佔比'];
-			$area['store'] = $dayoffData;
+			$area['store'] = $dayoffData->merge([$summary])->toArray();
 			
 			return $area;
 		}
@@ -179,6 +187,7 @@ class DayoffService
 				
 				return $item;
 			})->sortBy('areaId')->values()->map(function($item, $key) {
+				$temp['areaId']		= $item['areaId'];
 				$temp['posId'] 		= $item['posId'];
 				$temp['areaName'] 	= $item['areaName'];
 				$temp['storeNo']	= $item['storeNo'];
@@ -222,6 +231,7 @@ class DayoffService
 				
 			foreach($exportArea as $key => $data)
 			{
+				unset($data['areaId']);
 				$row =  Row::fromValues($data);
 				$writer->addRow($row);
 			}
@@ -232,6 +242,7 @@ class DayoffService
 			
 			foreach($exportStore as $key => $data)
 			{
+				unset($data['areaId']);
 				$row =  Row::fromValues($data);
 				$writer->addRow($row);
 			}
