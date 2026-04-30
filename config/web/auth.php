@@ -3,7 +3,7 @@
 #Auth Config
 return [
 	
-	'ad' => [
+	'adConfig' => [
 		'hosts'				=> ['DC03.8way.com.tw'],
 		'base_dn'       	=> 'dc=8way,dc=com,dc=tw',
 		'username'			=> '', #testing : '8waytw\LDAP or LDAP' | 'cn=LDAP,dc=local,dc=com'
@@ -34,7 +34,9 @@ return [
 	],
 	
 	#my defined
-	'domain' => '8way.com.tw', 
+	'adDomain' => '8way.com.tw', 
+	
+	'adAuthEnable' => TRUE, #改為系統驗證時,可併行使用
 	
 	'supervisor' => [
 		'T2025098' => 'tristan.hsu',

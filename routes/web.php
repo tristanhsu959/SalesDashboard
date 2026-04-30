@@ -74,6 +74,18 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('purchase/product/setting', [PurchaseProductController::class, 'update'])->name('purchase_product.update.post');
 	});
 	
+	/***** 新權限管理(整併為一個功能) *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::USER->value, ':')])->group(function(){
+		Route::get('user', [UserController::class, 'list'])->name('users');
+		Route::get('user/list', [UserController::class, 'list'])->name('user.list');
+		Route::post('user/search', [UserController::class, 'search'])->name('user.search');
+		Route::get('user/create', [UserController::class, 'showCreate'])->name('user.create');
+		Route::post('user/create', [UserController::class, 'create'])->name('user.create.post');
+		Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
+		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
+		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+	});
+	
 	/***** 身份管理 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::ROLE->value, ':')])->group(function(){
 		Route::get('role', [RoleController::class, 'list'])->name('roles');
@@ -86,7 +98,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	});
 	
 	/***** 帳號管理 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::USER->value, ':')])->group(function(){
+	/* Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::USER->value, ':')])->group(function(){
 		Route::get('user', [UserController::class, 'list'])->name('users');
 		Route::get('user/list', [UserController::class, 'list'])->name('user.list');
 		Route::post('user/search', [UserController::class, 'search'])->name('user.search');
@@ -95,7 +107,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
 		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
 		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
-	});
+	}); */
 });
 
 

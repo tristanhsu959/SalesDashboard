@@ -17,28 +17,108 @@
 	<section class="user-data container">
 		<label x-show="formData.id > 0" class="large-text" x-text="`更新時間：${formData.updateAt}`"></label>
 		
-		<div class="field label border field-purple w30 prefix" :class="Helper.hasError(errors, 'ad')">
-			<i class="small red-text">asterisk</i>
-			<input type="text" name="adAccount" maxlength="15" required x-model="formData.ad" @input="errors.delete('ad')">
-			<label>AD帳號</label>
+		<div class="grid">
+			<div class="s4">
+				<div class="field label border field-purple w50 prefix" :class="Helper.hasError(errors, 'account')">
+					<i class="small red-text">asterisk</i>
+					<input type="text" name="account" maxlength="15" required x-model="formData.account" @input="errors.delete('account')">
+					<label>帳號</label>
+				</div>
+		
+				<div class="field label border field-purple w50 prefix" :class="Helper.hasError(errors, 'password')">
+					<i class="small red-text">asterisk</i>
+					<input type="text" name="password" maxlength="15" required x-model="formData.password" @input="errors.delete('password')">
+					<label>密碼</label>
+				</div>
+			</div>
+		
+			<div class="s6">
+				<div class="field label border field-purple w50">
+					<input type="text" name="displayName" maxlength="15" x-model="formData.displayName">
+					<label>顯示名稱</label>
+				</div>
+		
+				<div class="field label border field-purple w50">
+					<input type="text" name="department" maxlength="15" required x-model="formData.department">
+					<label>部門</label>
+				</div>
+		
+				<div class="field label border field-purple w100">
+					<input type="text" name="email" maxlength="50" required x-model="formData.email">
+					<label>EMail</label>
+				</div>
+			</div>
 		</div>
 		
-		<div class="field label border field-purple w30">
-			<input type="text" name="displayName" maxlength="15" x-model="formData.name">
-			<label>顯示名稱</label>
+		<div class="row">
+			<label class="switch field-light-green">
+				<input x-model="formData.isActive" :checked="formData.isActive == 1" @change="formData.isActive = $el.checked ? 1 : 0" type="checkbox" name="isActive" value="1">
+				<span></span>
+				<i class="output">啟用</i>
+			</label>
 		</div>
 		
-		<div class="field label suffix border field-purple w30 prefix" :class="Helper.hasError(errors, 'roleId')">
-			<i class="small red-text">asterisk</i>
-			<select x-model="formData.roleId" name="roleId"  @change="errors.delete('roleId')">
-				<option value="">請選擇</option>
-				<template x-for="(name, id) in options.roleList" :key="id">
-					<option :value="id" x-text="name" :selected="formData.roleId == id"></option>
+		<!-- Tabs -->
+		<div class="tabs cyan-text">
+				<template x-for="(productName, groupId) in statistics.header.sheet" :key="groupId">
+					<a x-text="productName" @click="activeProduct = groupId" :data-ui="`#page-${groupId}`" :class="activeProduct == groupId ? 'active':''"></a>
 				</template>
-			</select>
-			<label>身份</label>
-			<i>arrow_drop_down</i>
 		</div>
+		
+		<template x-for="(productName, groupId) in statistics.header.sheet" :key="groupId">
+			<div class="page padding" :id="`page-${groupId}`" >
+				<section class="statistics-store scrollbar ">
+					<table class="stripes">
+						<thead>
+							<tr>
+								<template x-for="(header, idx) in statistics.header.tableHeader" :key="idx">
+									<th x-text="header"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(rowData, rowDataIndex) in statistics.data[groupId]" :key="rowDataIndex">
+							<tr>
+								<template x-for="(row, idx) in rowData" :key="idx">
+									<td x-text="row"></td>
+								</template>
+							</tr>
+							</template>
+						</tbody>
+					</table>
+				</section>
+			</div>
+		</template>
+			
+		<template x-for="(groups, groupName) in options.functions" :key="groupName">
+		<fieldset class="role-permission field-purple fieldset required">
+			<legend x-text="groupName"></legend>
+			<ul class="list border">
+				<template x-for="(item, idx) in groups" :key="idx">
+				<li class="">
+					<div class="max">
+						<h6 class="small"></h6>
+						<div x-text="item.name"></div>
+					</div>
+					<label class="switch field-dark-blue">
+						<input x-model="formData.permission" type="checkbox" name="permission[]" :value="item.code">
+						<span></span>
+					</label>
+				</li>
+				</template>
+			</ul>
+		</fieldset>
+		</template>
+		
+		<fieldset class="role-area field-blue fieldset required">
+			<legend>管理區域</legend>
+			<template x-for="(areaName, areaId) in options.areas" :key="areaId">
+				<label class="form-check-label" :for="`area-${areaId}`">
+					<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" :id="`area-${areaId}`" :value="areaId">
+					<span x-text="areaName"></span>
+				</label>
+			</template>
+		</fieldset>
 		
 		<div class="space"></div>
 		<nav class="toolbar">
