@@ -65,7 +65,7 @@ class DailyRevenueViewModel extends Fluent
 		return match($action)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.daily_revenue.search')),
-			#FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.daily_revenue.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.daily_revenue.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -88,7 +88,7 @@ class DailyRevenueViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics['shop'])))
+		if (empty(Arr::collapse($this->statistics)))
 			return TRUE;
 		else
 			return FALSE;

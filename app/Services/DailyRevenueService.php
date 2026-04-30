@@ -107,7 +107,7 @@ class DailyRevenueService
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(5));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -470,22 +470,20 @@ class DailyRevenueService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export new release data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export daily revenue data-?'));
 		
 		try
 		{
 			$sourceData = Cache::get($cacheKey);
 			
 			#Build export data for sheets
-			$export['區域彙總'] 		= $this->_buildExportArea($sourceData['area']);
-			$export['店別明細'] 		= $this->_buildExportShop($sourceData['dayHeader'], $sourceData['shop']);
-			$export['當日銷售前10名'] = $this->_buildExportRanking($sourceData['endDate'], $sourceData['top']);
-			$export['當日銷售後10名']	= $this->_buildExportRanking($sourceData['endDate'], $sourceData['last']);
+			$export['區域彙總'] 		= $this->_buildExportArea($sourceData['header'], $sourceData['area']);
+			$export['店別明細'] 		= $this->_buildExportShop($sourceData['header'], $sourceData['shop']);
 			
 			#Write export to file
 #			$fileName = Str::replace(':', '_', $cacheKey); 
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['productName'], $sourceData['startDate'], $sourceData['endDate']], '?_新品_?_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['startDate'], $sourceData['endDate']], '?_門店營收_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
@@ -518,23 +516,28 @@ class DailyRevenueService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportArea($areaData)
+	private function _buildExportArea($header, $areaData)
 	{
-		$export[] = ['區域', '店家數', '銷售總量', '平均日銷售量', '每店平均銷量', '每店平均日銷量'];
+		$export = [];
+		$export[] = array_merge(['區域', '店家數'], $header);
 		
-		foreach($areaData as $areaId => $data)
+		#每個product要一個sheet
+		foreach($areaData as $key => $area)
 		{
-			$areaName = ($areaId == 'total') ? 'Total' : Area::tryFrom(intval($areaId))->label();
+			if (empty($area))
+				continue;
 			
 			$row = [];
-			$row[] = $areaName;
-			$row[] = $data['shopCount'];
-			$row[] = $data['totalQty'];
-			$row[] = $data['avgDayQty'];
-			$row[] = $data['avgShopQty'];
-			$row[] = $data['avgDayShopQty'];
+			$row[] = $area['areaName'];
+			$row[] = $area['shopCount'];
+				
+			#要按Header的順序
+			foreach($header as $date)
+			{
+				$row[] = data_get($area, "dayAmount.{$date}", 0);
+			}
 			
-			$export[]= $row;
+			$export[] = $row;
 		}
 		
 		return $export;
@@ -546,51 +549,22 @@ class DailyRevenueService
 	 */
 	private function _buildExportShop($header, $shopData)
 	{
-		$export[] = array_merge(['區域', '門店代號', '門店名稱'], $header, ['銷售總量', '平均銷售數量']);
+		$export[] = array_merge(['區域', '門店代號', '門店名稱', '類型'], $header);
 		
-		foreach($shopData as $shopId => $data)
+		foreach($shopData as $shopId => $shop)
 		{
 			$row = [];
-			$row[] = $data['areaName'];
+			$row[] = $shop['areaName'];
 			$row[] = $shopId;
-			$row[] = $data['shopName'];
+			$row[] = $shop['shopName'];
+			$row[] = $shop['shopTypeName'];
 			
 			foreach($header as $date)
 			{
-				$row[] = data_get($data, "dayQty.{$date}", 0);
+				$row[] = data_get($shop, "dayAmount.{$date}", 0);
 			}
-			
-			$row[] = $data['totalQty'];
-			$row[] = $data['totalAvg'];
 			
 			$export[]= $row;
-		}
-		
-		return $export;
-	}
-	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportRanking($targeDate, $rankingData)
-	{
-		$export[] = array_merge(['區域', '門店代號', '門店名稱'], [$targeDate], ['排名']);
-		
-		foreach($rankingData as $ranking => $shopList)
-		{
-			#同一排名會有重複
-			foreach($shopList as $shopId => $data)
-			{
-				$row = [];
-				$row[] = $data['areaName'];
-				$row[] = $data['shopId'];
-				$row[] = $data['shopName'];
-				$row[] = $data['qty'];
-				$row[] = $ranking + 1;
-				
-				$export[]= $row;
-			}
 		}
 		
 		return $export;

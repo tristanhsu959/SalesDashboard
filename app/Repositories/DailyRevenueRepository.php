@@ -19,7 +19,7 @@ class DailyRevenueRepository extends Repository
 		
 	}
 	
-	/* 取新品營收資料
+	/* 取新品營收資料(From zs_sd_order)
 	 * @params: enums
 	 * @params: datetime
 	 * @params: datetime
@@ -80,12 +80,16 @@ class DailyRevenueRepository extends Repository
 				->join('shop_kind as c', 'c.sk_id', '=', 'b.shop_kind')
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
 				->addSelect('c.sk_id as typeId', 'c.Sk_name as typeName')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.TOT_SALES) as amount')
+				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.amount) as amount')
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<=', $endDate)
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->when($authAreaIds, function ($query, $authAreaIds) {
+					return $query->whereIn('b.gid', $authAreaIds);
+				})
 				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
 				->get()
 				->toArray();

@@ -79,7 +79,7 @@ class DailyRevenueController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('new_release.statistics')->with('viewModel', $this->_viewModel);
+			return view('daily_revenue.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{
