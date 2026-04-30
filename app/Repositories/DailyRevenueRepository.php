@@ -87,6 +87,9 @@ class DailyRevenueRepository extends Repository
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->when($authAreaIds, function ($query, $authAreaIds) {
+					return $query->whereIn('b.gid', $authAreaIds);
+				})
 				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
 				->get()
 				->toArray();

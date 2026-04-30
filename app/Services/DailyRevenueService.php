@@ -192,7 +192,7 @@ class DailyRevenueService
 	private function _getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds)
 	{
 		try
-		{
+		{$userAreaIds=[1,2];
 			$saleData = $this->_repository->getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds);
 			
 			return $saleData;
