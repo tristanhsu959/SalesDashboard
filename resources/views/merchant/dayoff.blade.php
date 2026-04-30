@@ -8,7 +8,7 @@
 		</article>
 		@else
 		<div class="area-content scrollbar">
-			
+			<h6 x-text="statistics.startDate"></h6>
 			<!-- 區域 -->
 			<section class="statistics-area {{$viewModel->getBrandCode()}}">
 				<table class="stripes">

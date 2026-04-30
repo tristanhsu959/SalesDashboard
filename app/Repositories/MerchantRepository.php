@@ -88,6 +88,7 @@ class MerchantRepository extends Repository
 		#To utc
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
+		$orderStatus = config('web.purchase.order.status.active');
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -101,7 +102,7 @@ class MerchantRepository extends Repository
 				->whereColumn('o.StoreId', 's.Id')
 				->where('o.ExpectedDate', '>=', $stDate)
 				->where('o.ExpectedDate', '<', $endDate)
-				->where('o.State', '=', 'functionalized')
+				->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
 			->whereExists(function ($query) use($brandId) {
