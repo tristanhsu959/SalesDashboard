@@ -54,18 +54,18 @@
 		</div>
 		
 		<!-- Tabs -->
+		<hr class="red">
 		<div class="tabs cyan-text">
 			<template x-for="(groups, groupName) in options.functions" :key="groupName">
-				<a data-ui="`#page-${groupName}`" class="active" x-text="groupName"></a>
+				<a :data-ui="`#page-${groupName}`" x-text="groupName" class="inverse-primary"></a>
 			</template>
 			
-			<a data-ui="#page-area">a</a>
+			<a data-ui="#page-area">區域權限</a>
 		</div>
 		
-		<div class="page padding" id="page-permission" >
-			<template x-for="(groups, groupName) in options.functions" :key="groupName">
+		<template x-for="(groups, groupName) in options.functions" :key="`list-${groupName}`">
+		<div class="page padding" :id="`page-${groupName}`" >
 			<fieldset class="role-permission field-purple fieldset required">
-				<legend x-text="groupName"></legend>
 				<ul class="list border">
 					<template x-for="(item, idx) in groups" :key="idx">
 					<li class="">
@@ -81,9 +81,8 @@
 					</template>
 				</ul>
 			</fieldset>
-		</template>
 		</div>
-			
+		</template>
 		
 		
 		<fieldset class="role-area field-blue fieldset required">
