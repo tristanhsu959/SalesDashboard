@@ -48,6 +48,7 @@ class UserViewModel extends Fluent
 		$this->set('options.areas', Area::mapWithKeys());
 		$this->set('options.functions', Functions::mapWithGroupKeys());
 		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
+		dd($this->get(options.functions);
 	}
 	
 	/* Keep search data of form
@@ -83,12 +84,18 @@ class UserViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $roleId = 0, $updateAt = '')
+	public function keepFormData($id = 0, $account = '',  $password = '', $displayName = '', $department = '', $email = '', $isActive = TRUE, 
+									$permission = [], $area = [], $updateAt = '')
     {
 		$this->set('formData.id', $id);
-		$this->set('formData.ad', $adAccount);
-		$this->set('formData.name', $displayName);
-		$this->set('formData.roleId', $roleId);
+		$this->set('formData.account', $account);
+		$this->set('formData.password', $password);
+		$this->set('formData.displayName', $displayName);
+		$this->set('formData.department', $department);
+		$this->set('formData.email', $email);
+		$this->set('formData.isActive', $isActive);
+		$this->set('formData.permission', $permission);
+		$this->set('formData.area', $area);
 		$this->set('formData.updateAt', $updateAt);
 	}
 	/* User Data End */
