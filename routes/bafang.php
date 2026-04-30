@@ -36,6 +36,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_DAILY_REVENUE->value, ':')])->group(function(){
 		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
 		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
+		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
 	});
 	
 	/* 出貨報表 
