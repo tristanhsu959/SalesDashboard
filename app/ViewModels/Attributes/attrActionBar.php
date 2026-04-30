@@ -27,7 +27,8 @@ trait attrActionBar
 		$breadcrumb[] 	= $function->label();
 		
 		if ($action && ! in_array($action->value, $except))
-			$breadcrumb[] = $action->label();
+			if (! empty($action->label()))
+				$breadcrumb[] = $action->label();
 				
 		return $breadcrumb;
 	}

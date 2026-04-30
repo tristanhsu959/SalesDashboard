@@ -18,7 +18,7 @@ enum FormAction : int
 		{
 			self::SIGNIN	=> '登入',
 			self::HOME		=> '首頁',
-			self::LIST 		=> '列表',
+			self::LIST 		=> '',	#'列表',
 			self::CREATE	=> '新增',
 			self::UPDATE 	=> '編輯',
 			self::DELETE 	=> '刪除',
