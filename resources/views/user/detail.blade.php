@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-	<!--link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet"-->
+	<link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -20,14 +20,15 @@
 		<div class="grid">
 			<div class="field label border field-purple prefix s3" :class="Helper.hasError(errors, 'account')">
 				<i class="small red-text">asterisk</i>
-				<input type="text" name="account" maxlength="15" required x-model="formData.account" @input="errors.delete('account')">
+				<input type="text" name="account" maxlength="20" required x-model="formData.account" @input="errors.delete('account')">
 				<label>帳號</label>
 			</div>
 		
 			<div class="field label border field-purple prefix s3" :class="Helper.hasError(errors, 'password')">
 				<i class="small red-text">asterisk</i>
-				<input type="text" name="password" maxlength="15" required x-model="formData.password" @input="errors.delete('password')">
+				<input type="password" name="password" maxlength="15" required x-model="formData.password" @input="errors.delete('password')">
 				<label>密碼</label>
+				<output class="red-text">英文+數字六個字元以上</output>
 			</div>
 			<div class="s6"></div>
 			
@@ -54,46 +55,47 @@
 		</div>
 		
 		<!-- Tabs -->
-		<hr class="red">
-		<div class="tabs cyan-text">
-			<template x-for="(groups, groupName) in options.functions" :key="groupName">
-				<a :data-ui="`#page-${groupName}`" x-text="groupName" class="inverse-primary"></a>
+		<article class="border">
+			<div class="tabs cyan-text">
+				<template x-for="(groups, groupName) in options.functions" :key="groupName">
+					<a :data-ui="`#page-${groupName}`" x-text="groupName" :class="activeTab == groupName ? 'active':''" ></a>
+				</template>
+				
+				<a data-ui="#page-area" :class="activeTab == 'area' ? 'active':''">區域權限</a>
+			</div>
+			
+			<template x-for="(groups, groupName) in options.functions" :key="`list-${groupName}`">
+			<div class="page padding" :id="`page-${groupName}`" :class="activeTab == groupName ? 'active':''">
+				<fieldset class="role-permission field-blue fieldset required">
+					<ul class="list border">
+						<template x-for="(item, idx) in groups" :key="idx">
+						<li class="">
+							<div class="max">
+								<h6 class="small"></h6>
+								<div x-text="item.name"></div>
+							</div>
+							<label class="switch field-dark-blue">
+								<input x-model="formData.permission" type="checkbox" name="permission[]" :value="item.code">
+								<span></span>
+							</label>
+						</li>
+						</template>
+					</ul>
+				</fieldset>
+			</div>
 			</template>
 			
-			<a data-ui="#page-area">區域權限</a>
-		</div>
-		
-		<template x-for="(groups, groupName) in options.functions" :key="`list-${groupName}`">
-		<div class="page padding" :id="`page-${groupName}`" >
-			<fieldset class="role-permission field-purple fieldset required">
-				<ul class="list border">
-					<template x-for="(item, idx) in groups" :key="idx">
-					<li class="">
-						<div class="max">
-							<h6 class="small"></h6>
-							<div x-text="item.name"></div>
-						</div>
-						<label class="switch field-dark-blue">
-							<input x-model="formData.permission" type="checkbox" name="permission[]" :value="item.code">
-							<span></span>
+			<div class="page padding" id="page-area" :class="activeTab == 'area' ? 'active':''">
+				<fieldset class="area-permission field-blue fieldset required">
+					<template x-for="(areaName, areaId) in options.areas" :key="areaId">
+						<label class="form-check-label" :for="`area-${areaId}`">
+							<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" :id="`area-${areaId}`" :value="areaId">
+							<span x-text="areaName"></span>
 						</label>
-					</li>
 					</template>
-				</ul>
-			</fieldset>
-		</div>
-		</template>
-		
-		
-		<fieldset class="role-area field-blue fieldset required">
-			<legend>管理區域</legend>
-			<template x-for="(areaName, areaId) in options.areas" :key="areaId">
-				<label class="form-check-label" :for="`area-${areaId}`">
-					<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" :id="`area-${areaId}`" :value="areaId">
-					<span x-text="areaName"></span>
-				</label>
-			</template>
-		</fieldset>
+				</fieldset>
+			</div>	
+		</article>
 		
 		<div class="space"></div>
 		<nav class="toolbar">

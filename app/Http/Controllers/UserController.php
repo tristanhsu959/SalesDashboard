@@ -25,7 +25,6 @@ class UserController extends Controller
 	public function list(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
-		$this->_viewModel->keepSearchData();
 		
 		$response = $this->_service->getList();
 		
@@ -90,27 +89,35 @@ class UserController extends Controller
 	{
 		#fetch form data
 		$id			= $request->input('id');
-		$adAccount	= $request->input('adAccount');
+		$account	= $request->input('account');
+		$password	= $request->input('password');
 		$displayName= $request->input('displayName');
-		$roleId		= $request->input('roleId');
+		$department	= $request->input('department');
+		$email		= $request->input('email');
+		$isActive	= $request->boolean('isActive');
+		$permission	= $request->array('permission');
+		$area		= $request->array('area');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
+		$this->_viewModel->keepFormData($id, $account,  $password, $displayName, $department, 
+								$email, $isActive, $permission, $area);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-            'adAccount' => 'required|max:20',
-			'roleId' => 'required|integer',
+            'account' 	=> 'required|max:20',
+			'password' 	=> 'required|min:6',
+			'email' 	=> 'nullable|email', 
         ]);
  
         if ($validator->fails()) 
 		{
-			$this->_viewModel->fail('資料輸入不完整');
+			$this->_viewModel->fail('資料輸入不完整或輸入格式錯誤');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createUser($adAccount, $displayName, $roleId);
+		$response = $this->_service->createUser($account,  $password, $displayName, $department, 
+								$email, $isActive, $permission, $area);
 		
 		if ($response->status === FALSE)
 		{

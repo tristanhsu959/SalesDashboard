@@ -53,14 +53,26 @@
 }
 /* Others */
 /* dark bg */
-.field-filter-dark {
-	--primary: #f8bbd0;
-	--outline: #f8bbd0;
-	--surface: #f8bbd0;
-	--on-surface: #f8bbd0;  
-	--on-surface-variant: #f8bbd0; 
-	&:has(input:placeholder-shown) label {
-		color: #f8bbd0;
+.filter {
+	.field-filter-dark {
+		--primary: #f8bbd0;
+		--outline: #f8bbd0;
+		--surface: #f8bbd0;
+		--on-surface: #f8bbd0;  
+		--on-surface-variant: #f8bbd0; 
+		
+		input {
+			color: #fafafa;
+		}
+		&:has(input:placeholder-shown) label {
+			color: var(--primary);
+		}
+		i{
+			color: var(--primary);
+		}
+	}
+	button {
+		background-color: #f48fb1;
 	}
 }
 

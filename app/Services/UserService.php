@@ -8,6 +8,7 @@ use App\Enums\RoleGroup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 use Log;
 
@@ -36,46 +37,52 @@ class UserService
 		}
 	}
 	
-	/* 取帳號清單 By Query Conditions
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: array
-	 */
-	public function searchList($searchAd, $searchName, $searchRoleId)
-	{
-		try
-		{
-			$list = $this->_repository->getList($searchAd, $searchName, $searchRoleId);
-			
-			return ResponseLib::initialize($list)->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('執行查詢時發生錯誤');
-		}
-	}
-	
 	/* Create Account
 	 * @params: string
 	 * @params: string
 	 * @params: int
 	 * @return: array
 	 */
-	public function createUser($adAccount, $displayName, $roleId)
+	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area)
 	{
 		try
 		{
-			#Create data
-			$this->_repository->insert($adAccount, $displayName, $roleId);
+			#1.Check account
+			if ($this->_isAccountExist($account) === TRUE)
+				throw new Exception('此帳號已存在');
+			
+			#2.Hash password
+			$password = Hash::make($password);
+			
+			#3. Create user
+			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area);
 		
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新增帳號失敗');
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
+	}
+	
+	/* 驗證帳號
+	 * @params: string
+	 * @params: int
+	 * @return: array
+	 */
+	private function _isAccountExist($account, $exceptId = FALSE)
+	{
+		try
+		{
+			$id = $this->_repository->getIdByAccount($account, $exceptId); 
+			
+			return empty($id) ? FALSE : TRUE;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('驗證帳號發生錯誤');
 		}
 	}
 	

@@ -49,19 +49,6 @@ class UserViewModel extends Fluent
 		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
 	}
 	
-	/* Keep search data of form
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: string
-	 */
-	public function keepSearchData($adAccount = '', $displayName = '', $roleId = 0)
-    {
-		$this->set('search.ad', $adAccount);
-		$this->set('search.name', $displayName);
-		$this->set('search.roleId', $roleId);
-	}
-	
 	/* Form submit action
 	 * @params: 
 	 * @return: string

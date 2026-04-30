@@ -16,44 +16,21 @@ class UserRepository extends Repository
 		
 	}
 	
-	/* Get role list
-	 * @params: 
-	 * @return: array
-	 */
-	public function getRoleList()
-	{
-		$db = $this->connectSalesDashboard('role');
-			
-		$result = $db
-			->select('roleId', 'roleName')
-			->get()
-			->toArray();
-				
-		return $result;
-	}
-	
 	/* Get user list by query conditions
 	 * @params: string
 	 * @params: string
 	 * @params: int
 	 * @return: array
 	 */
-	public function getList($searchAd = NULL, $searchName = NULL, $searchRoleId = NULL)
+	public function getList()
 	{
 		$db = $this->connectSalesDashboard('user as a');
 			
-		$result = $db->select('a.userId', 'a.userAd', 'a.userDisplayName', 'a.userRoleId', 'a.updateAt', 'b.roleName', 'b.roleGroup', 'rolePermission', 'b.roleArea')
-			->join('role as b', 'b.roleId', '=', 'a.userRoleId')
-			->when($searchAd, function ($query, $searchAd) {
-				return $query->where('a.userAd', 'like', "%{$searchAd}%");
-			})
-			->when($searchName, function ($query, $searchName) {
-				return $query->where('a.userDisplayName', 'like', "%{$searchName}%");
-			})
-			->when($searchRoleId, function ($query, $searchRoleId) {
-				return $query->where('a.userRoleId', $searchRoleId);
-			})
-			->get()->toArray();
+		$result = $db->select('a.userId', 'a.userAccount', 'a.userDisplayName', 'a.department')
+			->addSelect('a.email', 'b.roleGroup', 'a.isActive', 'a.updateAt')
+			->leftJoin('role as b', 'b.roleUserId', '=', 'a.userId')
+			->get()
+			->toArray();
 		
 		$result = Arr::map($result, function ($item, string $key) {
 			$item['rolePermission']	= empty($item['rolePermission']) ? [] : json_decode($item['rolePermission'], TRUE);
@@ -64,23 +41,100 @@ class UserRepository extends Repository
 		return $result;
 	}
 	
+	/* Get user by account
+	 * @params: string
+	 * @return: array
+	 */
+	public function getIdByAccount($account, $exceptId)
+	{
+		$db = $this->connectSalesDashboard('user');
+			
+		$result = $db->select('userId')
+					->where('userAccount', '=', $account)
+					->when($exceptId, function($query, $exceptId){
+						return $query->where('userId', '!=', $exceptId);
+					})
+					->get()
+					->first();
+		
+		return data_get($result, 'userId', 0);
+	}
+	
 	/* Create Account
 	 * @params: string
 	 * @params: string
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function insert($adAccount, $displayName, $roleId)
+	public function insert($account, $password, $displayName, $department, $email, $isActive, $roleGroupId, $permission, $area)
 	{
-		$db = $this->connectSalesDashboard('user');
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
 		
-		$data['userAd']			= $adAccount;
+		try 
+		{
+			$insertId = $this->_insertUser($account, $password, $displayName, $department, $email, $isActive);
+			
+			$this->_insertRole($insertId, $roleGroupId, $permission, $area);
+			
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+		
+		return TRUE;
+	}
+	
+	/* Create user
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: boolean
+	 * @return: boolean
+	 */
+	private function _insertUser($account, $password, $displayName, $department, $email, $isActive)
+	{
+		$data['userAccount']	= $account;
+		$data['userPassword'] 	= $password;
 		$data['userDisplayName']= $displayName;
-		$data['userRoleId'] 	= $roleId;
+		$data['department']		= $department;
+		$data['email']			= $email;
+		$data['isActive']		= $isActive;
 		$data['createAt'] 		= now()->format('Y-m-d H:i:s');
 		$data['updateAt'] 		= $data['createAt'];
-			
-		$db->insert($data);
+		
+		$db = $this->connectSalesDashboard();
+		$insertId = $db->table('user')
+			->insertGetId($data);
+		
+		return $insertId;
+	}
+	
+	/* Create user
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: boolean
+	 * @return: boolean
+	 */
+	private function _insertRole($userId, $roleGroupId, $permission, $area)
+	{
+		$data['roleUserId']		= $userId;
+		$data['roleGroup'] 		= $roleGroupId;
+		$data['rolePermission']	= json_encode($permission);
+		$data['roleArea']		= json_encode($area);
+		
+		$db = $this->connectSalesDashboard();
+		$insertId = $db->table('role')
+			->insert($data);
+		
 		return TRUE;
 	}
 	
