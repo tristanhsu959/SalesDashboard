@@ -15,13 +15,13 @@
 			flex-direction: column;
 			justify-content: flex-start;
 			align-items: center;
-			background-color: #0288d1;
+			background-color: #0277bd;
 			border-radius: 0;
 			padding: 1rem;
 			
 			i.fill {
 				--_size: 4rem;
-				color: hsl(8, 100%, 56%);
+				color: hsl(8, 70%, 56%);
 			}
 			
 			p {
@@ -33,6 +33,12 @@
 					font-size: 1.2rem;
 					color: #fff;
 				}
+			}
+			
+			.profile-edit {
+				position: absolute;
+				right: 1rem;
+				bottom: 1rem;
 			}
 		}
 		/* Info list */
@@ -46,10 +52,12 @@
 			}
 			
 			.auth-area {
+				display: flex;
+				justify-content: flex-start;
+				
 				.chip {
 					min-width: 80px;
-					border-radius: 1rem;
-					background-color: #e1bee7;
+					padding: 0;
 				}
 			}
 		}
