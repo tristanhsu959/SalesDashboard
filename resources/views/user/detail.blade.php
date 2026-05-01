@@ -30,7 +30,10 @@
 				<label>密碼</label>
 				<output class="red-text">英文+數字六個字元以上</output>
 			</div>
-			<div class="s6"></div>
+			<div class="s6 password-hint">
+				<div x-show="formData.hasSetPassword && formData.id > 0" class="green-text"><i>check</i><span>系統密碼已設定</span></div>
+				<div x-show="! formData.hasSetPassword && formData.id > 0" class="red-text"><i>close</i><span>尚未設定系統密碼</span></div>
+			</div>
 			
 			<div class="field label border field-purple s3">
 				<input type="text" name="displayName" maxlength="15" x-model="formData.displayName">
@@ -101,6 +104,10 @@
 		<nav class="toolbar">
 			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
 			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
+			<label class="checkbox check-red">
+				<input type="checkbox" name="passwordOnly" value="1">
+				<span class="red-text">僅變更密碼</span>
+			</label>
 		</nav>
 	</section>
 </form>

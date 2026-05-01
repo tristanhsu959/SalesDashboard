@@ -94,7 +94,7 @@ class UserService
 	{
 		try
 		{
-			$result = $this->_repository->getById($id); 
+			$result = $this->_repository->getById($id);
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -111,17 +111,27 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function updateUser($userId, $adAccount, $displayName, $roleId)
+	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area)
 	{
 		try
 		{
-			$this->_repository->update($userId, $adAccount, $displayName, $roleId);
+			#1.Check account
+			if ($this->_isAccountExist($account, $id) === TRUE)
+				throw new Exception('此帳號已存在');
+			
+			#2.Hash password
+			if (! empty($password))
+				$password = Hash::make($password);
+			
+			#3. Update user
+			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area);
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯帳號失敗');
+			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
 	
@@ -146,7 +156,7 @@ class UserService
 	/* 取可設定的Role選項清單
 	 * @params: 
 	 * @return: array
-	 */
+	 *
 	public function getRoleOptions()
 	{
 		try
@@ -164,6 +174,6 @@ class UserService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return [];
 		}
-	}
+	}*/
 	
 }

@@ -17,12 +17,12 @@ document.addEventListener('alpine:init', () => {
 			
 			if (Helper.isEmpty(this.formData.account))
 				this.errors.add('account');
-			if (Helper.isEmpty(this.formData.password))
+			if (Helper.isEmpty(this.formData.password) && this.formData.id == 0)
 				this.errors.add('password');
 						
 			const pattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 			
-			if (! pattern.test(this.formData.password)) 
+			if (! Helper.isEmpty(this.formData.password) && ! pattern.test(this.formData.password)) 
 			{
 				this.errors.add('password');
 				Alpine.store('toast').notify('密碼須包含英數，6個字元以上');

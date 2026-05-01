@@ -1,5 +1,13 @@
 /* list */
 section.user-data {
+	.grid {
+		.password-hint div {
+			display: flex;
+			align-items: center;
+			min-block-size: 3rem;
+		}
+	}
+	
 	.role-permission {
 		ul.list li {
 			&:hover {

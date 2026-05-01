@@ -28,7 +28,7 @@ class UserRepository extends Repository
 			
 		$result = $db->select('a.userId', 'a.userAccount', 'a.userDisplayName', 'a.department')
 			->addSelect('a.email', 'b.roleGroup', 'a.isActive', 'a.updateAt')
-			->leftJoin('role as b', 'b.roleUserId', '=', 'a.userId')
+			->join('role as b', 'b.roleUserId', '=', 'a.userId')
 			->get()
 			->toArray();
 		
@@ -144,12 +144,18 @@ class UserRepository extends Repository
 	 */
 	public function getById($id)
 	{
-		$db = $this->connectSalesDashboard('user');
-			
-		$result = $db->select('userId', 'userAd', 'userDisplayName', 'userRoleId', 'updateAt')
-					->where('userId', '=', $id)
-					->get()->first();
+		$db = $this->connectSalesDashboard('user as a');
 		
+		$result = $db->select('a.userId', 'a.userAccount', 'a.userPassword', 'a.userDisplayName', 'a.department')
+				->addSelect('a.email', 'a.isActive', 'a.updateAt')
+				->addSelect('b.roleGroup', 'b.rolePermission', 'b.roleArea')
+				->join('role as b', 'b.roleUserId', '=', 'a.userId')
+				->where('userId', '=', $id)
+				->first();
+		
+		$result['rolePermission']	= empty($result['rolePermission']) ? [] : json_decode($result['rolePermission'], TRUE);
+		$result['roleArea'] 		= empty($result['roleArea']) ? [] : json_decode($result['roleArea'], TRUE);
+	
 		return $result;
 	}
 	
@@ -160,16 +166,80 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function update($userId, $adAccount, $displayName, $roleId)
+	public function update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area)
 	{
-		$db = $this->connectSalesDashboard('user');
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
 		
-		$data['userAd']			= $adAccount;
-		$data['userDisplayName']= $displayName;
-		$data['userRoleId'] 	= $roleId;
-		$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+		try 
+		{
+			$this->_updateUser($id, $account, $password, $displayName, $department, $email, $isActive);
 			
-		$db->where('userId', '=', $userId)->update($data);
+			$this->_updateRole($id, $permission, $area);
+			
+			$db->commit();
+
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+		
+		return TRUE;
+	}
+	
+	/* Create user
+	 * @params: int
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: boolean
+	 * @return: boolean
+	 */
+	private function _updateUser($id, $account, $password, $displayName, $department, $email, $isActive)
+	{
+		$data['userAccount']	= $account;
+		
+		if (! empty($password))
+			$data['userPassword'] 	= $password;
+		
+		$data['userDisplayName']= $displayName;
+		$data['department']		= $department;
+		$data['email']			= $email;
+		$data['isActive']		= $isActive;
+		$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+		
+		$db = $this->connectSalesDashboard();
+		
+		$db->table('user')
+			->where('userId', '=', $id)
+			->update($data);
+		
+		return TRUE;
+	}
+	
+	/* Create user
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: boolean
+	 * @return: boolean
+	 */
+	private function _updateRole($userId, $permission, $area)
+	{
+		$data['rolePermission']	= json_encode($permission);
+		$data['roleArea']		= json_encode($area);
+		
+		$db = $this->connectSalesDashboard();
+		
+		$db->table('role')
+			 ->where('roleUserId', '=', $userId)
+			 ->update($data);
+		
 		return TRUE;
 	}
 	
