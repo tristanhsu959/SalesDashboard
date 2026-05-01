@@ -3,7 +3,7 @@
 #Auth Config
 return [
 	
-	'adConfig' => [
+	'adConnection' => [
 		'hosts'				=> ['DC03.8way.com.tw'],
 		'base_dn'       	=> 'dc=8way,dc=com,dc=tw',
 		'username'			=> '', #testing : '8waytw\LDAP or LDAP' | 'cn=LDAP,dc=local,dc=com'

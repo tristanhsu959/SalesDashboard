@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Facades\AppManager;
 use App\Repositories\AuthRepository;
 use App\Libraries\ResponseLib;
+use App\Enums\Functions;
 use App\Enums\RoleGroup;
 use App\Enums\Area;
 use Illuminate\Support\Facades\App;
@@ -22,7 +23,7 @@ class AuthService
 	{
 	}
 	
-	/* 登入驗證
+	/* 登入驗證(登人Log統一都寫在weblog)
 	 * @params: string
 	 * @params: string
 	 * @params: int
@@ -32,17 +33,29 @@ class AuthService
 	{
 		try
 		{
+			Log::channel('webSysLog')->info("使用者[{$account}]登入系統：Auth start", [ __class__, __function__, __line__]);
+			
 			#1. Clear old auth session : CurrentUserTrait
 			AppManager::removeCurrentUser();
 			
-			#2. auth by AD
-			$adInfo = $this->_authenticationByAD($account, $password);
-			
-			#3. auth DB account permission
+			#2. Get user data
 			$userInfo = $this->_authAccountRegister($account);
 			
-			#4. Save to session
-			AppManager::saveCurrentUser($adInfo, $userInfo);
+			#3.Auth account
+			if ($userInfo === FALSE)
+				throw new Exception('此帳號尚未在系統註冊');
+			
+			#4.Auth password or AD(併行)
+			$isPass = $this->_authPassword($account, $userInfo['userPassword'], $password);
+			if ($isPass === FALSE)
+				throw new Exception('登入失敗，帳號密碼錯誤');
+			
+			#5.Validate user status
+			if (boolval($userInfo['isActive']) === FALSE)
+				throw new Exception('登入失敗，此帳號已停用');
+			
+			#6. Save to session
+			AppManager::saveCurrentUser($userInfo);
 			
 			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
 			
@@ -50,10 +63,66 @@ class AuthService
 		}
 		catch(Exception $e)
 		{
-			Log::channel('webSysLog')->info("使用者[{$account}]登入失敗", [ __class__, __function__, __line__]);
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
+	}
+	
+	/* 驗證帳號是否有在系統註冊
+	 * @params: string
+	 * @return: mixed
+	 */
+	private function _authAccountRegister($account)
+	{
+		try
+		{
+			$userInfo = $this->_repository->getUserByAccount($account);
+			
+			if (empty($userInfo))
+			{
+				Log::channel('webSysLog')->error("驗證帳號[{$account}]註冊狀態失敗", [ __class__, __function__, __line__]);
+				return FALSE;
+			}
+			
+			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value)
+			{
+				$userInfo['rolePermission'] = Functions::getAll();
+				$userInfo['roleArea'] 		= Area::getAll();
+			}
+			
+			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態成功", [ __class__, __function__, __line__]);
+			
+			return $userInfo;
+		}
+		catch(Exception $e)
+		{
+			$msg = $e->getMessage();
+			Log::channel('webSysLog')->error("驗證帳號[{$account}]註冊狀態，發生錯誤：{$msg}", [ __class__, __function__, __line__]);
+			
+			throw new Exception('驗證帳號註冊狀態，發生錯誤');
+		}
+	}
+	
+	/* 驗證系統密碼或AD
+	 * @params: string
+	 * @return: mixed
+	 */
+	private function _authPassword($account, $hashedPassword, $password)
+	{
+		#驗證系統密碼, 失敗才驗證AD, 只要有一個Pass即可
+		if (Hash::check($password, $hashedPassword))
+		{
+			Log::channel('webSysLog')->info("使用者[{$account}]系統驗證成功", [ __class__, __function__, __line__]);
+			return TRUE;
+		}
+		
+		Log::channel('webSysLog')->info("使用者[{$account}]系統密碼驗證失敗", [ __class__, __function__, __line__]);
+			
+		#驗證AD
+		$adInfo = $this->_authAD($account, $password);
+		if ($adInfo !== FALSE)
+			return TRUE;
+		
+		return FALSE;
 	}
 	
 	/* AD登入驗證
@@ -62,7 +131,7 @@ class AuthService
 	 * @params: int
 	 * @return: array
 	 */
-	public function _authenticationByAD($account, $password)
+	public function _authAD($account, $password)
 	{
 		#for local non ad env
 		if (env('APP_ENV_TYPE', '') == 'nonad') 
@@ -83,8 +152,8 @@ class AuthService
 		
 		$result = [];
 		
-		$domain = config('web.auth.domain');
-		$connectionConfig = config('web.auth.ad');
+		$domain = config('web.auth.adDomain');
+		$connectionConfig = config('web.auth.adConnection');
 		#必須是Distinquished Name:cn= , base dn
 		$connectionConfig['username'] = "{$account}@{$domain}"; //"cn={$account},{$connectionConfig['base_dn']}"; 
 		$connectionConfig['password'] = $password;
@@ -124,37 +193,9 @@ class AuthService
 			], $msg);
 			
 			#AD單獨記錄Log
-			Log::channel('appServiceLog')->error("使用者[{$account}]AD驗證失敗 : " . $msg, [ __class__, __function__, __line__]);
+			Log::channel('webSysLog')->error("使用者[{$account}]AD驗證失敗：{$msg}", [ __class__, __function__, __line__]);
 			
-			throw new Exception('AD驗證失敗，帳號或密碼錯誤');
-		}
-	}
-	
-	/* 驗證帳號是否有在系統註冊
-	 * @params: string
-	 * @return: mixed
-	 */
-	private function _authAccountRegister($account)
-	{
-		try
-		{
-			$userInfo = $this->_repository->getUserByAccount($account);
-			
-			if (empty($userInfo))
-				throw new Exception('驗證帳號註冊狀態失敗');
-			
-			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value) # OR $userInfo['roleGroup'] == RoleGroup::SUPERUSER->value)
-				$userInfo['roleArea'] = Area::getAll();
-			
-			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態成功", [ __class__, __function__, __line__]);
-			
-			return $userInfo;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態，發生錯誤", [ __class__, __function__, __line__]);
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('驗證帳號註冊狀態，發生錯誤');
+			return FALSE;
 		}
 	}
 	
@@ -169,7 +210,7 @@ class AuthService
 		if (empty($currentUser)) #已登出
 			return TRUE;
 			
-		$user = $currentUser->userAd;
+		$user = $currentUser->userAccount;
 		AppManager::removeCurrentUser();
 		
 		#使用者驗證/登入/登出, 統一寫在syslog

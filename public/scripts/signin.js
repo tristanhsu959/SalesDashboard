@@ -2,18 +2,17 @@
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('login', (formData) => ({
-		adAccount: formData.account,
-		adPassword: formData.password,
+		formData: {...formData},
 		errors: new Set(),
 		isLoading: false,
 		
         validate() {
 			this.errors.clear();
 			
-			if (Helper.isEmpty(this.adAccount))
-				this.errors.add('adAccount');
-			if (Helper.isEmpty(this.adPassword))
-				this.errors.add('adPassword');
+			if (Helper.isEmpty(this.formData.account))
+				this.errors.add('account');
+			if (Helper.isEmpty(this.formData.password))
+				this.errors.add('password');
 			
 			if (this.errors.size == 0)
 				this.$el.submit();
@@ -22,8 +21,8 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		reset() {
-			this.adAccount = '';
-			this.adPassword = '';
+			this.formData.account = '';
+			this.formData.password = '';
 			this.errors.clear();
 			this.isLoading = false;
 		}

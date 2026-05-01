@@ -26,11 +26,25 @@ class AppManager
 		return empty($this->getCurrentUser()) ? FALSE : TRUE;
 	}
 	
+	/* has function Auth(功能權限)
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function hasFunctionPermission()
+	{
+		$currentUser = $this->getCurrentUser();
+		
+		if ($currentUser->isSupervisor())
+			return TRUE;
+		
+		return empty($currentUser['rolePermission']) ? FALSE : TRUE;
+	}
+	
 	/* has Area Auth(區域權限)
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function hasAreaAuth()
+	public function hasAreaPermission()
 	{
 		$currentUser = $this->getCurrentUser();
 		
@@ -57,9 +71,9 @@ class AppManager
 	 * @params: array
 	 * @return: boolean
 	 */
-	public function saveCurrentUser($adInfo, $userInfo)
+	public function saveCurrentUser($userInfo, $adInfo = [])
 	{
-		$currentUser = new CurrentUser($adInfo, $userInfo);
+		$currentUser = new CurrentUser($userInfo, $adInfo);
 		session()->put(self::SESS_AUTH_USER, $currentUser);
 		
 		return TRUE;

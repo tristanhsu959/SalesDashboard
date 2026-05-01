@@ -76,7 +76,7 @@ class MerchantService
 	{
 		try
 		{
-			/* if (AppManager::hasAreaAuth() === FALSE)
+			/* if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限'); */
 			
 			#Check cache

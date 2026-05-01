@@ -13,7 +13,7 @@ class AuthViewModel extends Fluent
 	public function __construct()
 	{
 		#Default data
-		$this->action 	= FormAction::SIGNIN;
+		$this->action = FormAction::SIGNIN;
 		$this->keepFormData();
 		$this->success();	
 	}

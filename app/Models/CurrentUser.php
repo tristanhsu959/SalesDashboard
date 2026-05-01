@@ -7,7 +7,7 @@ use Illuminate\Support\Fluent;
 
 class CurrentUser extends Fluent
 {
-	/*
+	/* 20260501:之後無AD
 	[
 		"company" => "八方雲集國際股份有限公司"
 		"department" => "資訊處"
@@ -25,9 +25,10 @@ class CurrentUser extends Fluent
 	]
 	*/
   
-	public function __construct($adInfo, $userInfo)
+	public function __construct($userInfo, $adInfo)
 	{
 		$info = array_merge($adInfo, $userInfo);
+		unset($info['userPassword']);
 		$this->fill($info);
 	}
 	
@@ -75,10 +76,9 @@ class CurrentUser extends Fluent
 	 */
 	public function showAvailableName()
 	{
-		return empty($this->_data['displayName']) ? $this->_data['userAd'] : $this->_data['displayName'];
+		return empty($this->_data['userDisplayName']) ? $this->_data['userAccount'] : $this->_data['userDisplayName'];
 	}
 	
-	#deprecated
 	/* Auth permission of function by current user
 	 * @params: string
 	 * @return: boolean
@@ -99,7 +99,7 @@ class CurrentUser extends Fluent
 	 * @params: string
 	 * @params: string
 	 * @return: boolean
-	 */
+	 *
 	public function hasActionPermission($functionKey, $actionKey)
 	{
 		if ($this->isSupervisor())
@@ -109,5 +109,5 @@ class CurrentUser extends Fluent
 		$allowActions	= data_get($permissions, $functionKey, []); #array
 		
 		return in_array($actionKey, $allowActions);
-	}
+	} */
 }
