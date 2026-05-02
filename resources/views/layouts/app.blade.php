@@ -28,6 +28,7 @@
 		<script src="{{ asset('scripts/util.js') }}" defer></script>
 		<script src="{{ asset('scripts/helper.js') }}" defer></script>
 		<script src="{{ asset('scripts/app.js') }}" defer></script>
+		<script src="{{ asset('scripts/profile.js') }}" defer></script>
 		@stack('scripts')
 		@vite(['resources/js/app.js'])
 	</head>
@@ -50,7 +51,7 @@
 		</main>
 		
 		@if(AppManager::hasAuth())
-			<x-profile :profile="AppManager::getCurrentUser()->toArray()" :areaOptions="Area::options()" :signoutRoute="route('signout')"/>
+			<x-profile/>
 		@endif
 		
 		<x-dialog />

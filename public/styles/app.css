@@ -75,7 +75,13 @@ body {
 			}
 		} */
 	}
-	
+	/* .field>:is(i,img,svg,progress.circle,a) */
+	#profileEdit {
+		.dialog-body .field > i:has(.checkbox) {
+			pointer-events: auto;
+		}
+	}
+		
 	main.signin {
 		min-height: 100vh;
 		display: flex;

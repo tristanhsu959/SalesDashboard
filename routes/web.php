@@ -21,6 +21,9 @@ Route::redirect('/', '/signin');
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 
+/* User profile */
+Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
+
 Route::middleware([AuthMiddleware::class])->group(function(){
 	/***** Home *****/
 	Route::get('home', [HomeController::class, 'index'])->name('home');
