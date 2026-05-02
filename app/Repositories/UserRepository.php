@@ -249,9 +249,29 @@ class UserRepository extends Repository
 	 */
 	public function remove($userId)
 	{
-		$db = $this->connectSalesDashboard('user');
-		$db->where('userId', '=', $userId)->delete();
+		$db = $this->connectSalesDashboard();
+		$db->beginTransaction();
+		
+		try 
+		{
+			$db->table('user')
+				->where('userId', '=', $userId)
+				->delete();
+			
+			$db->table('role')
+				->where('roleUserId', '=', $userId)
+				->delete();
+				
+			$db->commit();
 
-		return FALSE;
+			return TRUE;
+		} 
+		catch (Exception $e) 
+		{
+			$db->rollBack();
+			throw new Exception($e->getMessage());
+		}
+		
+		return TRUE;
 	}
 }

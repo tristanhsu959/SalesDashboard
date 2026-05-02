@@ -139,11 +139,11 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function deleteUser($userId)
+	public function deleteUser($id)
 	{
 		try
 		{
-			$this->_repository->remove($userId);
+			$this->_repository->remove($id);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
