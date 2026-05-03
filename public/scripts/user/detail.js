@@ -6,6 +6,7 @@ document.addEventListener('alpine:init', () => {
 		options: options,
 		errors: new Set(),
 		activeTab: '',
+		showPassword: false,
 		
 		init() {
 			const tabKey = Object.keys(this.options.functions)[0];

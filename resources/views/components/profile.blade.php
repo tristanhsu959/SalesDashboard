@@ -42,11 +42,11 @@
 	</a>
 </dialog>
 
-<dialog x-data='userProfileEdit(@json($currentUser["profile"]), @json($currentUser["options"]))' class="left small active" id="profileEdit">
+<dialog x-data='userProfileEdit(@json($currentUser["profile"]), @json($currentUser["options"]))' class="left small" id="profileEdit">
 	<header>
 		<nav>
 			<h6 class="max">編輯 Profile</h6>
-			<button class="transparent circle large" data-ui="#profile"><i>close</i></button>
+			<button class="transparent circle large" data-ui="#profileEdit"><i>close</i></button>
 		</nav>
 	</header>
 	<div class="space"></div>
@@ -99,7 +99,7 @@
 					<input :type="showPassword ? 'text':'password'" name="password" maxlength="15" required x-model="formData.userPassword" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('password')">
 					<label>密碼</label>
 				</div>
-				<button type="button" class="large square" @click="showPassword = !showPassword; console.log(showPassword)" :disabled="!fieldEnabled.includes('password')">
+				<button type="button" class="large square" @click="showPassword = !showPassword" :disabled="!fieldEnabled.includes('password')">
 					<i x-show="!showPassword">visibility</i>
 					<i x-show="showPassword">visibility_off</i>
 				</button>

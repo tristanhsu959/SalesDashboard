@@ -6,6 +6,15 @@ section.user-data {
 			align-items: center;
 			min-block-size: 3rem;
 		}
+		
+		.field > i.btn-icon {
+			pointer-events: auto;
+			
+			button {
+				background-color: transparent;
+				color: #000;
+			}
+		}
 	}
 	
 	.role-permission {

@@ -24,13 +24,19 @@
 				<label>帳號</label>
 			</div>
 		
-			<div class="field label border field-purple prefix s3" :class="Helper.hasError(errors, 'password')">
+			<div class="field label border field-purple prefix suffix s4" :class="Helper.hasError(errors, 'password')">
 				<i class="small red-text">asterisk</i>
-				<input type="password" name="password" maxlength="15" required x-model="formData.password" @input="errors.delete('password')">
+				<input :type="showPassword ? 'text':'password'" name="password" maxlength="15" required x-model="formData.password" @input="errors.delete('password')">
 				<label>密碼</label>
 				<output class="red-text">英文+數字六個字元以上</output>
+				<i class="btn-icon">
+					<button type="button" class="large square" @click="showPassword = !showPassword">
+						<i x-show="!showPassword">visibility</i>
+						<i x-show="showPassword">visibility_off</i>
+					</button>
+				</i>
 			</div>
-			<div class="s6 password-hint">
+			<div class="s4 password-hint">
 				<div x-show="formData.hasSetPassword && formData.id > 0" class="green-text"><i>check</i><span>系統密碼已設定</span></div>
 				<div x-show="! formData.hasSetPassword && formData.id > 0" class="red-text"><i>close</i><span>尚未設定系統密碼</span></div>
 			</div>
@@ -40,12 +46,12 @@
 				<label>顯示名稱</label>
 			</div>
 		
-			<div class="field label border field-purple s3">
+			<div class="field label border field-purple s4">
 				<input type="text" name="department" maxlength="15" required x-model="formData.department">
 				<label>部門</label>
 			</div>
 			
-			<div class="field label border field-purple s6">
+			<div class="field label border field-purple s5">
 				<input type="text" name="email" maxlength="50" required x-model="formData.email">
 				<label>EMail</label>
 			</div>
