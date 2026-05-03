@@ -55,54 +55,61 @@
 		<form :action="options.updateRoute" method="post" novalidate @submit.prevent="validate()">
 			<input type="hidden" name="id" :value="formData.userId" x-model="formData.userId">
 			@csrf
-			<p x-text="formData.userAccount"></p>
+			<h6 x-text="formData.userAccount"></h6>
 			<div class="field label border field-purple prefix">
 				<i>
 					<label class="checkbox">
-						<input type="checkbox" value="1" x-model="fieldEnabled.displayName" :check="fieldEnabled.displayName == 1">
+						<input type="checkbox" value="displayName" x-model="fieldEnabled">
 						<span></span>
 					</label>
 				</i>
-				<input type="text" name="displayName" maxlength="15" x-model="formData.userDisplayName" :disabled="fieldEnabled.displayName == 0">
+				<input type="text" name="displayName" maxlength="15" x-model="formData.userDisplayName" :disabled="!fieldEnabled.includes('displayName')">
 				<label>顯示名稱</label>
 			</div>
 		
 			<div class="field label border field-purple prefix">
 				<i>
 					<label class="checkbox">
-						<input type="checkbox" value="1" x-model="fieldEnabled.department" :check="fieldEnabled.department == 1">
+						<input type="checkbox" value="department" x-model="fieldEnabled">
 						<span></span>
 					</label>
 				</i>
-				<input type="text" name="department" maxlength="15" required x-model="formData.department" :disabled="fieldEnabled.department == 0">
+				<input type="text" name="department" maxlength="15" required x-model="formData.department" :disabled="!fieldEnabled.includes('department')">
 				<label>部門</label>
 			</div>
 			
 			<div class="field label border field-purple prefix">
 				<i>
 					<label class="checkbox">
-						<input type="checkbox" value="1" x-model="fieldEnabled.email" :check="fieldEnabled.email == 1">
+						<input type="checkbox" value="email" x-model="fieldEnabled">
 						<span></span>
 					</label>
 				</i>
-				<input type="text" name="email" maxlength="50" required x-model="formData.email" :disabled="fieldEnabled.email == 0">
+				<input type="text" name="email" maxlength="50" required x-model="formData.email" :disabled="!fieldEnabled.includes('email')">
 				<label>EMail</label>
 			</div>
-			<div class="field label border field-purple prefix" :class="Helper.hasError(errors, 'password')">
-				<i>
-					<label class="checkbox">
-						<input type="checkbox" value="1" x-model="fieldEnabled.password" :check="fieldEnabled.password == 1">
-						<span></span>
-					</label>
-				</i>
-				<input type="password" name="password" maxlength="15" required x-model="formData.userPassword" @input="errors.delete('password')" :disabled="fieldEnabled.password == 0">
-				<label>密碼</label>
-				<output class="red-text">英文+數字六個字元以上</output>
-			</div>
+			<nav class="no-space">
+				<div class="field label border field-purple prefix max" :class="Helper.hasError(errors, 'password')">
+					<i>
+						<label class="checkbox">
+							<input type="checkbox" value="password" x-model="fieldEnabled">
+							<span></span>
+						</label>
+					</i>
+					<input :type="showPassword ? 'text':'password'" name="password" maxlength="15" required x-model="formData.userPassword" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('password')">
+					<label>密碼</label>
+				</div>
+				<button type="button" class="large square" @click="showPassword = !showPassword; console.log(showPassword)" :disabled="!fieldEnabled.includes('password')">
+					<i x-show="!showPassword">visibility</i>
+					<i x-show="showPassword">visibility_off</i>
+				</button>
+			</nav>
 			
-			<p class="red-text"><i class="small">info</i><span>請勾選要編輯的欄位</span><p/>
+			<output class="red-text medium-text">英文+數字六個字元以上</output>
+			<p class="red-text medium-text"><i class="small">info</i><span>請勾選要編輯的欄位</span></p>
+			
 			<nav class="toolbar">
-				<button type="submit" class="button btn-save btn-primary slow-ripple">儲存</button>
+				<button type="submit" class="button btn-save btn-primary slow-ripple" :disabled="fieldEnabled.length <= 0">儲存</button>
 				<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 			
 			</nav>

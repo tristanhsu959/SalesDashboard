@@ -15,16 +15,21 @@ document.addEventListener('alpine:init', () => {
 		formData: {...formData},
 		options: options,
 		errors: new Set(),
-		fieldEnabled: {},
+		fieldEnabled: [],
+		showPassword: false,
 		
 		init() {
 			this.formData.userPassword = '';
 			this.formData.passwordOnly = '';
-			
-			this.fieldEnabled.displayName = 0;
-			this.fieldEnabled.department = '';
-			this.fieldEnabled.email = '';
-			this.fieldEnabled.password = '';
+			this.showPassword = false;
+			this.initFieldEnabled();
+		},
+		
+		initFieldEnabled(){
+			this.fieldEnabled.push('displayName');
+			this.fieldEnabled.push('department');
+			this.fieldEnabled.push('email');
+			this.fieldEnabled.push('password');
 		},
 		
 		validate() {
@@ -79,7 +84,7 @@ document.addEventListener('alpine:init', () => {
 			this.formData.userDisplayName = this.profile.userDisplayName;
 			this.formData.department = this.profile.department;
 			this.formData.email = this.profile.email;
-			this.formData.passwordOnly = '';
+			this.initFieldEnabled();
 		}
     }));
 });

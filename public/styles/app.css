@@ -80,6 +80,10 @@ body {
 		.dialog-body .field > i:has(.checkbox) {
 			pointer-events: auto;
 		}
+		/*layout直接用button會有問題*/
+		.dialog-body .field > i.btn-icon {
+			pointer-events: auto;
+		}
 	}
 		
 	main.signin {
