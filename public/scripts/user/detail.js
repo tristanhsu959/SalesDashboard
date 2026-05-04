@@ -46,6 +46,7 @@ document.addEventListener('alpine:init', () => {
 			this.formData.email = '';
 			this.formData.permission = [];
 			this.formData.area = [];
+			this.formData.description = '';
 		}
     }));
 });

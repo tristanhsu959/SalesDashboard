@@ -44,7 +44,7 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area)
+	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
 	{
 		try
 		{
@@ -56,7 +56,7 @@ class UserService
 			$password = Hash::make($password);
 			
 			#3. Create user
-			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area);
+			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area, $description);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -112,7 +112,7 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area)
+	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
 	{
 		try
 		{
@@ -125,7 +125,7 @@ class UserService
 				$password = Hash::make($password);
 			
 			#3. Update user
-			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area);
+			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description);
 			
 			return ResponseLib::initialize()->success();
 		}

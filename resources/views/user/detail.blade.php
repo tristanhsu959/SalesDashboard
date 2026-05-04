@@ -36,7 +36,7 @@
 					</button>
 				</i>
 			</div>
-			<div class="s4 password-hint">
+			<div class="s5 password-hint">
 				<div x-show="formData.hasSetPassword && formData.id > 0" class="green-text"><i>check</i><span>系統密碼已設定</span></div>
 				<div x-show="! formData.hasSetPassword && formData.id > 0" class="red-text"><i>close</i><span>尚未設定系統密碼</span></div>
 			</div>
@@ -56,7 +56,12 @@
 				<label>EMail</label>
 			</div>
 			
-			<label class="switch field-light-green s3">
+			<div class="field label border field-purple s7">
+				<input type="text" name="description" maxlength="50" required x-model="formData.description">
+				<label>說明</label>
+			</div>
+			
+			<label class="switch field-light-green s2">
 				<input x-model="formData.isActive" :checked="formData.isActive == 1" @change="formData.isActive = $el.checked ? 1 : 0" type="checkbox" name="isActive" value="1">
 				<span></span>
 				<i class="output">啟用</i>
@@ -110,10 +115,10 @@
 		<nav class="toolbar">
 			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
 			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
-			<label class="checkbox check-red">
+			<!--label class="checkbox check-red">
 				<input type="checkbox" name="passwordOnly" value="1">
 				<span class="red-text">僅變更密碼</span>
-			</label>
+			</label-->
 		</nav>
 	</section>
 </form>

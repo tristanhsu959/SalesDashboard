@@ -69,8 +69,10 @@ class UserViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $account = '',  $password = '', $displayName = '', $department = '', $email = '', $isActive = TRUE, 
-									$permission = [], $area = [], $updateAt = '', $hasSetPassword = FALSE)
+	public function keepFormData($id = 0, $account = '',  $password = '', $displayName = '', 
+						$department = '', $email = '', $isActive = TRUE, 
+						$permission = [], $area = [], $description = '', 
+						$updateAt = '', $hasSetPassword = FALSE)
     {
 		$this->set('formData.id', $id);
 		$this->set('formData.account', $account);
@@ -81,6 +83,7 @@ class UserViewModel extends Fluent
 		$this->set('formData.isActive', $isActive);
 		$this->set('formData.permission', $permission);
 		$this->set('formData.area', $area);
+		$this->set('formData.description', $description);
 		$this->set('formData.updateAt', $updateAt);
 		$this->set('formData.hasSetPassword', $hasSetPassword);
 	}

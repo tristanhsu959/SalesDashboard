@@ -66,7 +66,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function insert($account, $password, $displayName, $department, $email, $isActive, $roleGroupId, $permission, $area)
+	public function insert($account, $password, $displayName, $department, $email, $isActive, $roleGroupId, $permission, $area, $description)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
@@ -75,7 +75,7 @@ class UserRepository extends Repository
 		{
 			$insertId = $this->_insertUser($account, $password, $displayName, $department, $email, $isActive);
 			
-			$this->_insertRole($insertId, $roleGroupId, $permission, $area);
+			$this->_insertRole($insertId, $roleGroupId, $permission, $area, $description);
 			
 			$db->commit();
 
@@ -124,12 +124,13 @@ class UserRepository extends Repository
 	 * @params: boolean
 	 * @return: boolean
 	 */
-	private function _insertRole($userId, $roleGroupId, $permission, $area)
+	private function _insertRole($userId, $roleGroupId, $permission, $area, $description)
 	{
 		$data['roleUserId']		= $userId;
 		$data['roleGroup'] 		= $roleGroupId;
 		$data['rolePermission']	= json_encode($permission);
 		$data['roleArea']		= json_encode($area);
+		$data['description'] 	= $description;
 		
 		$db = $this->connectSalesDashboard();
 		$insertId = $db->table('role')
@@ -148,7 +149,7 @@ class UserRepository extends Repository
 		
 		$result = $db->select('a.userId', 'a.userAccount', 'a.userPassword', 'a.userDisplayName', 'a.department')
 				->addSelect('a.email', 'a.isActive', 'a.updateAt')
-				->addSelect('b.roleGroup', 'b.rolePermission', 'b.roleArea')
+				->addSelect('b.roleGroup', 'b.rolePermission', 'b.roleArea', 'b.description')
 				->join('role as b', 'b.roleUserId', '=', 'a.userId')
 				->where('userId', '=', $id)
 				->first();
@@ -166,7 +167,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area)
+	public function update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
@@ -175,7 +176,7 @@ class UserRepository extends Repository
 		{
 			$this->_updateUser($id, $account, $password, $displayName, $department, $email, $isActive);
 			
-			$this->_updateRole($id, $permission, $area);
+			$this->_updateRole($id, $permission, $area, $description);
 			
 			$db->commit();
 
@@ -229,10 +230,11 @@ class UserRepository extends Repository
 	 * @params: boolean
 	 * @return: boolean
 	 */
-	private function _updateRole($userId, $permission, $area)
+	private function _updateRole($userId, $permission, $area, $description)
 	{
 		$data['rolePermission']	= json_encode($permission);
 		$data['roleArea']		= json_encode($area);
+		$data['description']	= $description;
 		
 		$db = $this->connectSalesDashboard();
 		
