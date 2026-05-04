@@ -161,9 +161,9 @@ form {
 			thead {
 				tr {
 					th {
-						position: sticky;
+						/* position: sticky;
 						top: 0;
-						z-index: 5;
+						z-index: 5; */
 						word-break: keep-all;
 						background-color: var(--table-bg);
 						width: 120px;
