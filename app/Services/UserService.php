@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Facades\AppManager;
 use App\Repositories\UserRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\RoleGroup;
@@ -153,27 +154,31 @@ class UserService
 		}
 	}
 	
-	/* 取可設定的Role選項清單
-	 * @params: 
+	/* User profile update
+	 * @params: int 
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
 	 * @return: array
-	 *
-	public function getRoleOptions()
+	 */
+	public function updateProfile($id, $password, $displayName, $department, $email)
 	{
 		try
 		{
-			$list = $this->_repository->getRoleList();
+			$password = empty($password) ? $password : Hash::make($password);
+			$this->_repository->updateProfile($id, $password, $displayName, $department, $email);
 			
-			$list = Arr::mapWithKeys($list, function (array $item, int $key) {
-				return [$item['roleId'] => $item['roleName']];
-			});
+			#更新同步
+			AppManager::updateCurrentUserProfile($displayName, $department, $email);
 			
-			return $list;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
+			return ResponseLib::initialize()->fail($e->getMessage());
 		}
-	}*/
+	}
 	
 }

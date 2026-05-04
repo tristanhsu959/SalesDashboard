@@ -11,7 +11,7 @@
 		<div class="info-head">
 			<i class="fill">person_pin</i>
 			<!--p x-text="profile.employeeId"></p-->
-			<p x-text="profile.userDisplayName" class="name"></p>
+			<p x-text="(profile.displayName == '') ? profile.account : profile.displayName" class="name"></p>
 			<p x-text="profile.email"></p>
 			<button data-ui="#profileEdit" class="transparent circle orange white-text profile-edit">
 				<i>person_edit</i>
@@ -53,7 +53,7 @@
 	<div class="dialog-body">
 		<div class="info-body">
 		<form :action="options.updateRoute" method="post" novalidate @submit.prevent="validate()">
-			<input type="hidden" name="id" :value="formData.userId" x-model="formData.userId">
+			<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 			@csrf
 			<h6 x-text="formData.userAccount"></h6>
 			<div class="field label border field-purple prefix">
@@ -63,7 +63,7 @@
 						<span></span>
 					</label>
 				</i>
-				<input type="text" name="displayName" maxlength="15" x-model="formData.userDisplayName" :disabled="!fieldEnabled.includes('displayName')">
+				<input type="text" name="displayName" maxlength="15" x-model="formData.displayName" :disabled="!fieldEnabled.includes('displayName')">
 				<label>顯示名稱</label>
 			</div>
 		
@@ -96,7 +96,7 @@
 							<span></span>
 						</label>
 					</i>
-					<input :type="showPassword ? 'text':'password'" name="password" maxlength="15" required x-model="formData.userPassword" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('password')">
+					<input :type="showPassword ? 'text':'password'" id="password" name="password" maxlength="15" required x-model="formData.userPassword" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('password')">
 					<label>密碼</label>
 				</div>
 				<button type="button" class="large square" @click="showPassword = !showPassword" :disabled="!fieldEnabled.includes('password')">

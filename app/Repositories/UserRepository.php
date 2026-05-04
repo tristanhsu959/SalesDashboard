@@ -274,4 +274,31 @@ class UserRepository extends Repository
 		
 		return TRUE;
 	}
+	
+	/* Create user
+	 * @params: int
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function updateProfile($id, $password, $displayName, $department, $email)
+	{
+		if (! empty($password))
+			$data['userPassword'] 	= $password;
+		
+		$data['userDisplayName']= $displayName;
+		$data['department']		= $department;
+		$data['email']			= $email;
+		$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+		
+		$db = $this->connectSalesDashboard();
+		
+		$db->table('user')
+			->where('userId', '=', $id)
+			->update($data);
+		
+		return TRUE;
+	}
 }

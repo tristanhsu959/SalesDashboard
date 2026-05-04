@@ -134,7 +134,7 @@ class DailyRevenueService
 			
 			#2. 檢查區域權限
 			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser['roleArea']; 
+			$userAreaIds =$currentUser->roleArea; 
 			
 			#3. Get all shops with area permission
 			$this->_getShopListByType($brand, $userAreaIds, $shopType);
@@ -470,7 +470,7 @@ class DailyRevenueService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export daily revenue data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export daily revenue data-?'));
 		
 		try
 		{

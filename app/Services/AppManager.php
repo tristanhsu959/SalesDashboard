@@ -66,7 +66,7 @@ class AppManager
 		return TRUE;
 	}
 	
-	/* 儲存登入資訊
+	/* 儲存登入資訊(20260504不存AD)
 	 * @params: array
 	 * @params: array
 	 * @return: boolean
@@ -89,6 +89,23 @@ class AppManager
 			return FALSE;
 		
 		return session()->get(self::SESS_AUTH_USER);
+	}
+	
+	/* 更新登入資訊
+	 * @params: array
+	 * @params: array
+	 * @return: boolean
+	 */
+	public function updateCurrentUserProfile($displayName, $department, $email)
+	{
+		$currentUser = $this->getCurrentUser();
+		$currentUser['displayName'] = $displayName;
+		$currentUser['department']	= $department;
+		$currentUser['email'] 		= $email;
+		
+		session()->put(self::SESS_AUTH_USER, $currentUser);
+		
+		return TRUE;
 	}
 	
 	/* 取已授權的Menu (登入驗後)

@@ -210,7 +210,7 @@ class AuthService
 		if (empty($currentUser)) #已登出
 			return TRUE;
 			
-		$user = $currentUser->userAccount;
+		$user = $currentUser->account;
 		AppManager::removeCurrentUser();
 		
 		#使用者驗證/登入/登出, 統一寫在syslog

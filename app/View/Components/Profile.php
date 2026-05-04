@@ -24,7 +24,7 @@ class Profile extends Component
      */
     public function render(): View|Closure|string
     {
-		$profile 	= $this->_getProfile();
+		$profile = $this->_getProfile();
 		
         return view('components.profile', ['currentUser' => $profile]);
     }

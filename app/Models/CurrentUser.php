@@ -23,12 +23,34 @@ class CurrentUser extends Fluent
 		"rolePermission" => array:7 [▶]
 		"roleArea" => array:6 [▶]
 	]
+	array:10 [▼ // app\Models\CurrentUser.php:30
+		"userId" => 1
+		"userAccount" => "tristan.hsu"
+		"userPassword" => "$2y$12$wBz9l8fTuXXeJB7QYHS2beYK2S05MV.I8kmP8PaysKQiDI5s1jH/y"
+		"userDisplayName" => "Tristan"
+		"department" => "資訊處"
+		"email" => "tristan.hsu@8way.com.tw"
+		"isActive" => 1
+		"roleGroup" => 1
+		"rolePermission" => array:22 [▶]
+		"roleArea" => array:6 [▶]
+	]
 	*/
   
 	public function __construct($userInfo, $adInfo)
 	{
-		$info = array_merge($adInfo, $userInfo);
-		unset($info['userPassword']);
+		#$info = array_merge($adInfo, $userInfo);
+		$info['id'] 			= data_get($userInfo, 'userId', 0);
+		$info['account'] 		= data_get($userInfo, 'userAccount', '');
+		$info['displayName'] 	= data_get($userInfo, 'userDisplayName', '');
+		$info['department'] 	= data_get($userInfo, 'department', '');
+		$info['email'] 			= data_get($userInfo, 'email', '');
+		
+		$info['roleGroup'] 		= data_get($userInfo, 'roleGroup', 0);
+		$info['rolePermission'] = data_get($userInfo, 'rolePermission', []);
+		$info['roleArea'] 		= data_get($userInfo, 'roleArea', []);
+		$info['hasSetPassword']	= empty($userInfo['userPassword']) ? FALSE : TRUE;
+		
 		$this->fill($info);
 	}
 	
@@ -74,9 +96,12 @@ class CurrentUser extends Fluent
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function showAvailableName()
+	public function getAvailableName()
 	{
-		return empty($this->_data['userDisplayName']) ? $this->_data['userAccount'] : $this->_data['userDisplayName'];
+		$account 	= $this->get('account');
+		$name 		= $this->get('displayName', NULL);
+		
+		return empty($name) ? $account : $name;
 	}
 	
 	/* Auth permission of function by current user
@@ -93,21 +118,4 @@ class CurrentUser extends Fluent
 		
 		return in_array($functionKey, $allowFunctions);
 	}
-	
-	#新版會廢除,權限只控一層
-	/* Auth permission of CRUD by current user
-	 * @params: string
-	 * @params: string
-	 * @return: boolean
-	 *
-	public function hasActionPermission($functionKey, $actionKey)
-	{
-		if ($this->isSupervisor())
-			return TRUE;
-		
-		$permissions	= $this->get('rolePermission', []);
-		$allowActions	= data_get($permissions, $functionKey, []); #array
-		
-		return in_array($actionKey, $allowActions);
-	} */
 }

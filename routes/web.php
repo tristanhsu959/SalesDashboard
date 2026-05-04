@@ -7,9 +7,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewReleaseSettingController;
-#use App\Http\Controllers\SalesSettingController;
 use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
+use App\Http\Controllers\ProfileController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -21,13 +21,13 @@ Route::redirect('/', '/signin');
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 
-/* User profile */
-Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
-
 Route::middleware([AuthMiddleware::class])->group(function(){
 	/***** Home *****/
 	Route::get('home', [HomeController::class, 'index'])->name('home');
 	
+	/***** User profile *****/
+	Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
+
 	/***** 產品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
 		Route::get('product', [ProductController::class, 'list'])->name('products');
