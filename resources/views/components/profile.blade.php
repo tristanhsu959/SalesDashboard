@@ -11,7 +11,7 @@
 		<div class="info-head">
 			<i class="fill">person_pin</i>
 			<!--p x-text="profile.employeeId"></p-->
-			<p x-text="(profile.displayName == '') ? profile.account : profile.displayName" class="name"></p>
+			<p x-text="profile.displayName || profile.account" class="name"></p>
 			<p x-text="profile.email"></p>
 			<button data-ui="#profileEdit" class="transparent circle orange white-text profile-edit">
 				<i>person_edit</i>
@@ -55,7 +55,7 @@
 		<form :action="options.updateRoute" method="post" novalidate @submit.prevent="validate()">
 			<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 			@csrf
-			<h6 x-text="formData.userAccount"></h6>
+			<h6 x-text="profile.displayName || profile.account"></h6>
 			<div class="field label border field-purple prefix">
 				<i>
 					<label class="checkbox">

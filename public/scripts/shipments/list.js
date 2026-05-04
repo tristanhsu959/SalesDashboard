@@ -78,10 +78,6 @@ document.addEventListener('alpine:init', () => {
 	//Store
 	Alpine.store('shipmentStore', {
 		filter: '',
-        
-		/* toggle() {
-           this.showAmount = ! this.showAmount;
-        } */
 	});
 	
 	Alpine.data('statisticsStore', (data) => ({
