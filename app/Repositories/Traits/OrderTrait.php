@@ -92,6 +92,13 @@ trait OrderTrait
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
 					->where('bd.No',  $this->getBrandNo($brandId));
+					/* 取八方+蘿蔔condition
+					->where(function ($query) use ($brandId) {
+						$query->where('bd.No', $this->getBrandNo($brandId))
+						  ->when($brandId == Brand::BAFANG->value, function ($query) {
+							  $query->orWhere('bd.No', 'LB');
+						  });
+					}); */
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
@@ -109,6 +116,52 @@ trait OrderTrait
 		
 		return $result;
 	}
+	
+	/* 取蘿蔔門店清單
+	 * @params: enum : 必須還是帶入八方brand
+	 * @params: array
+	 * @return: array
+	 */
+	public function getLbStoreList($brand, $userAreaIds)
+	{
+		$brandId = $brand->value;
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Store as s')
+			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
+			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
+			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->where('bd.No',  Brand::LUOBO->shortCode());
+			})
+			->whereExists(function ($query) use($brandId) {
+				$query->select(DB::raw(1))
+					->from('Factory as ft')
+					->whereColumn('ft.Id', 'sc.FactoryId')
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+			})
+			#->whereNull('s.CloseDate')
+			->whereIn('s.AreaId', $authAreaIds)
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
+			#->orderBy('s.OperationCenterId')
+			#->orderBy('ar.Id')
+			->get()
+			->toArray(); 
+		
+		return $result;
+	}
+	
 	
 	/* 取有效門店清單(only id:計算用)
 	 * @params: enum
