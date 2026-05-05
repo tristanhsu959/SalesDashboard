@@ -66,7 +66,13 @@ trait StoreTrait
 		$storeList 		= $this->_formatStoreOutput($brand, $storeList);
 		$lbStoreList 	= $this->_formatStoreOutput($brand, $lbStoreList);
 		
-		$storeKeys = array_keys($storeList);
+		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
+		
+		$lbExcepts = collect($lbStoreList)->filter(function($item, $key) use($lbSpecialStore) {
+			return in_array($item['storeNo'], array_keys($lbSpecialStore));
+		})->toArray();
+		
+		$storeKeys = array_merge(array_keys($storeList), array_keys($lbExcepts));
 		
 		$lbStoreList = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
 			return ! in_array($key, $storeKeys);

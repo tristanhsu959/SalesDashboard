@@ -259,13 +259,18 @@ class StoreService
 		if (empty($orderData))
 			return [];
 		
+		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
 		$groups = data_get($product, 'code', []);
 		
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groups){
 			return in_array($item['shortCode'], $groups);
 		
-		})->groupBy(function($item, $key){
+		})->groupBy(function($item, $key) use($lbSpecialStore) {
+			$rebuildNo = data_get($lbSpecialStore, $item['storeNo'], NULL);
+			if (! empty($rebuildNo))
+				$item['storeNo'] = $rebuildNo;
+			
 			return Str::take($item['storeNo'], 9);
 		
 		})->map(function($items, $key) {
