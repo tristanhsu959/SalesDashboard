@@ -14,7 +14,7 @@ trait attrAllowAction
 	{
 		$currentUser = AppManager::getCurrentUser();
 		
-		return ($currentUser->userId == $userId);
+		return ($currentUser->id == $userId);
 	}
 	
 	/* Action permission

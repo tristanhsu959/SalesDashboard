@@ -45,7 +45,7 @@ class FactoryService
 		try
 		{
 			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser['roleArea'];
+			$this->_userAreaIds = $currentUser->roleArea;
 			$this->_statistics = $params;
 			
 			#執行統計

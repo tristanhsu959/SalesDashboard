@@ -4,6 +4,8 @@ document.addEventListener('alpine:init', () => {
 	
 	Alpine.store('app', { isLoading: false });
 	
+	Alpine.store('menu', { active: true });
+	
 	Alpine.store('toast', {
 		initialize(msg = '') {
             if (msg != '') {

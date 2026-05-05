@@ -25,8 +25,37 @@ class UserController extends Controller
 	public function list(Request $request)
 	{
 		$this->_viewModel->initialize(FormAction::LIST);
+		$this->_viewModel->keepSearchData();
 		
 		$response = $this->_service->getList();
+		
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+		{
+			$this->_viewModel->success();
+			$this->_viewModel->list = $response->data;
+		}
+		
+		return view('user/list')->with('viewModel', $this->_viewModel);
+	}
+	
+	/* Search
+	 * @params: request
+	 * @return: view
+	 */
+	public function search(Request $request)
+	{
+		$this->_viewModel->initialize(FormAction::LIST);
+		
+		#query params
+		$searchAd		= $request->input('searchAd');
+		$searchName		= $request->input('searchName');
+		$searchRoleId	= $request->input('searchRoleId');
+		
+		$this->_viewModel->keepSearchData($searchAd, $searchName, $searchRoleId);
+		
+		$response = $this->_service->searchList($searchAd, $searchName, $searchRoleId);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -61,36 +90,27 @@ class UserController extends Controller
 	{
 		#fetch form data
 		$id			= $request->input('id');
-		$account	= $request->input('account');
-		$password	= $request->input('password');
+		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$department	= $request->input('department');
-		$email		= $request->input('email');
-		$isActive	= $request->boolean('isActive');
-		$permission	= $request->array('permission');
-		$area		= $request->array('area');
-		$description= $request->input('description');
+		$roleId		= $request->input('roleId');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::CREATE);
-		$this->_viewModel->keepFormData($id, $account, $password, $displayName, $department, 
-								$email, $isActive, $permission, $area, $description);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
-            'account' 	=> 'required|max:20',
-			'password' 	=> 'required|min:6',
-			'email' 	=> 'nullable|email', 
+            'adAccount' => 'required|max:20',
+			'roleId' => 'required|integer',
         ]);
  
         if ($validator->fails()) 
 		{
-			$this->_viewModel->fail('資料輸入不完整或輸入格式錯誤');
+			$this->_viewModel->fail('資料輸入不完整');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->createUser($account, $password, $displayName, $department, 
-								$email, $isActive, $permission, $area, $description);
+		$response = $this->_service->createUser($adAccount, $displayName, $roleId);
 		
 		if ($response->status === FALSE)
 		{
@@ -119,12 +139,8 @@ class UserController extends Controller
 		if ($response->status === FALSE)
 			return redirect()->route('user.list')->with('msg', $response->msg);
 		
-		$data = $response->data;
-		$this->_viewModel->keepFormData($data['userId'], $data['userAccount'], '', $data['userDisplayName'],
-								$data['department'], $data['email'], $data['isActive'],
-								$data['rolePermission'], $data['roleArea'], $data['description'], 
-								$data['updateAt'], empty($data['userPassword']) ? FALSE : TRUE);
-								
+		$data = $response->data; 
+		$this->_viewModel->keepFormData($data['userId'], $data['userAd'], $data['userDisplayName'], $data['userRoleId'], $data['updateAt']);
 		$this->_viewModel->success();
 		
 		return view('user/detail')->with('viewModel', $this->_viewModel);
@@ -137,39 +153,30 @@ class UserController extends Controller
 	public function update(Request $request)
 	{
 		#fetch form data
-		$id			= $request->input('id');
-		$account	= $request->input('account');
-		$password	= $request->input('password');
+		$id 		= $request->input('id');
+		$adAccount	= $request->input('adAccount');
 		$displayName= $request->input('displayName');
-		$department	= $request->input('department');
-		$email		= $request->input('email');
-		$isActive	= $request->boolean('isActive');
-		$permission	= $request->array('permission');
-		$area		= $request->array('area');
-		$description= $request->input('description');
+		$roleId		= $request->input('roleId');
 		
 		#initialize
 		$this->_viewModel->initialize(FormAction::UPDATE);
-		$this->_viewModel->keepFormData($id, $account, $password, $displayName, $department, 
-								$email, $isActive, $permission, $area, $description);
+		$this->_viewModel->keepFormData($id, $adAccount, $displayName, $roleId);
 		
 		if (empty($id))
 			return redirect()->route('user.list')->with('msg', '身份識別ID為空值');
 		
-		#validate input
 		$validator = Validator::make($request->all(), [
-            'account' 	=> 'required|max:20',
-			'email' 	=> 'nullable|email', 
+            'adAccount' => 'required|max:20',
+			'roleId' => 'required|integer',
         ]);
-		
-		if ($validator->fails()) 
+ 
+        if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('資料輸入不完整');
 			return view('user/detail')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->updateUser($id, $account, $password, $displayName, $department, 
-								$email, $isActive, $permission, $area, $description);
+		$response = $this->_service->updateUser($id, $adAccount, $displayName, $roleId);
 		
 		if ($response->status === FALSE)
 		{

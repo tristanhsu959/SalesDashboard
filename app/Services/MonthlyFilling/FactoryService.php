@@ -59,7 +59,7 @@ class FactoryService
 		try
 		{
 			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser['roleArea'];
+			$this->_userAreaIds = $currentUser->roleArea;;
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['modeRange']	= $searchRange; 

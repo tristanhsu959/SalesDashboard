@@ -49,7 +49,7 @@ body {
 			padding: 0 1rem 1rem;
 			
 			.field {
-				margin-block-start: 1.25rem !important;
+				/* margin-block-start: 1.25rem !important; */
 			}
 			&>.field, &>label {
 				margin-block-start: 1.5rem;
@@ -75,7 +75,17 @@ body {
 			}
 		} */
 	}
-	
+	/* .field>:is(i,img,svg,progress.circle,a) */
+	#profileEdit {
+		.dialog-body .field > i:has(.checkbox) {
+			pointer-events: auto;
+		}
+		/*layout直接用button會有問題*/
+		.dialog-body .field > i.btn-icon {
+			pointer-events: auto;
+		}
+	}
+		
 	main.signin {
 		min-height: 100vh;
 		display: flex;

@@ -22,13 +22,13 @@
 			<span class="title">Sign In</span>
 			<h6>使用AD帳號登入至系統</h6>
 		</div>
-		<div class="field label border" :class="Helper.hasError(errors, 'adAccount')">
-			<input x-model="adAccount" type="text" name="adAccount" maxlength="20" @input="errors.delete('adAccount')">
+		<div class="field label border" :class="Helper.hasError(errors, 'account')">
+			<input x-model="formData.account" type="text" name="account" maxlength="20" @input="errors.delete('account')">
 			<label>Account</label>
 			<span class="domain">@8way.com.tw</span>
 		</div>
-		<div class="field label border" :class="Helper.hasError(errors, 'adPassword')">
-			<input x-model="adPassword" type="password" name="adPassword" maxlength="20" @input="errors.delete('adPassword')">
+		<div class="field label border" :class="Helper.hasError(errors, 'password')">
+			<input x-model="formData.password" type="password" name="password" maxlength="20" @input="errors.delete('password')">
 			<label>Password</label>
 		</div>
 		<nav class="group split">

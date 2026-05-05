@@ -174,7 +174,7 @@ class SalesService
 			$this->_statistics['productList'] = $productList;
 			
 			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser['roleArea']; #
+			$userAreaIds = $currentUser->roleArea; #
 					
 			#3. Get all shops with area permission
 			$this->_getShopList($brand, $userAreaIds);
@@ -522,7 +522,7 @@ class SalesService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載'); #暫不做重查的動作
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Exportsales data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export sales data-?'));
 		
 		try
 		{

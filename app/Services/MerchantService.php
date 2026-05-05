@@ -76,7 +76,7 @@ class MerchantService
 	{
 		try
 		{
-			/* if (AppManager::hasAreaAuth() === FALSE)
+			/* if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限'); */
 			
 			#Check cache
@@ -145,7 +145,7 @@ class MerchantService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->displayName, $cacheKey], '[?]Export merchant data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];

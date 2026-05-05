@@ -11,42 +11,19 @@
 
 @section('content')
 <!-- Content -->
-	<!-- Search panel -->
-	<form x-data='searchUser(@json($viewModel->search), @json($viewModel->options))' action="{{ route('user.search') }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
-		@csrf
-		<dialog id="searchPanel" class="right">
-			<h5>查詢</h5>
-			<div class="field label border round field-light-blue">
-				<input x-model="searchData.ad" type="text" name="searchAd" maxlength="20">
-				<label>AD帳號</label>
-			</div>
-			<div class="field label border round field-light-blue">
-				<input x-model="searchData.name" type="text" name="searchName" maxlength="20">
-				<label>顯示名稱</label>
-			</div>
-			<div class="field label suffix round border field-light-blue">
-				<select x-model="searchData.roleId" name="searchRoleId">
-					<option value="">請選擇</option>
-					<template x-for="(name, roleId) in options.roleList" :key="roleId">
-						<option :value="roleId" x-text="name" :selected="searchData.roleId == roleId"></option>
-					</template>
-				</select>
-				<label>身份</label>
-				<i>arrow_drop_down</i>
-			</div>
-			
-			<nav class="right-align group split">
-				<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
-				<button @click="reset" type="button" class="btn-search-reset right-round square large"><i>backspace</i></button>
-			</nav>
-		</dialog>
-	</form>
-	<!-- Search panel end -->
-	
 	<header class="page-nav">
 		<nav>
-			<button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button>
 			<a href="{{ route('user.create') }}" class="btn-create button circle"><i>add</i></a>
+			@if (! empty($viewModel->list))
+			<nav class="no-space filter">
+				<div class="field label border prefix field-filter-dark small">
+					<i>filter_alt</i>
+					<input type="text" x-model="$store.userFilter.filter">
+					<label>篩選</label>
+				</div>
+				<button class="right-round" @click="$store.userFilter.reset()"><i>backspace</i></button>
+			</nav>
+			@endif
 		</nav>
 	</header>
 	
@@ -64,48 +41,28 @@
 				<thead>
 					<tr>
 						<th class="min">#</th>
-						<th>AD帳號</th>
+						<th>帳號</th>
 						<th>顯示名稱</th>
-						<th>身份</th>
-						<th>管理區域</th>
-						<th>功能權限</th>
+						<th>部門</th>
+						<th>EMail</th>
+						<th>狀態</th>
 						<th>更新時間</th>
 						<th class="right-align">操作</th>
 					</tr>
 				</thead>
 				<tbody>
-				<template x-for="(user, idx) in list" :key="idx">
+				<template x-for="(user, idx) in filterUsers" :key="idx">
 					<tr>
 						<td x-text="idx+1"></td>
-						<td x-text="user.userAd"></td>
+						<td x-text="user.userAccount"></td>
 						<td x-text="user.userDisplayName"></td>
-						<td x-text="user.roleName"></td>
-						<td class="relative">
-							<span>查看</span>
-							<div class="tooltip area max white border shadow">
-								<template x-if="user.roleArea.length == 0">
-									<div class="chip round red white-text">未設定</div>
-								</template>
-							
-								<template x-for="areaId in user.roleArea" :key="areaId">
-									<div class="chip round cyan white-text" x-text="options.areas[areaId]"></div>
-								</template>
-							</div>
-						</td>
-						<td class="relative">
-							<span>查看</span>
-							<div class="tooltip max white border shadow">
-								<template x-if="user.rolePermission.length == 0">
-									<div class="chip round red white-text">未設定</div>
-								</template>
-								
-								<template x-for="code in user.rolePermission">
-									<div class="chip round blue white-text max" x-text="options.functions[code]"></div>
-								</template>
-							</div>
+						<td x-text="user.department"></td>
+						<td x-text="user.email"></td>
+						<td>
+							<i class="green-text" x-show="user.isActive">check_circle</i>
+							<i class="red-text" x-show="! user.isActive">x_circle</i>
 						</td>
 						<td class="min" x-text="user.updateAt"></td>
-						
 						<td class="right-align action">
 							<a :href="'{{ route('user.update', ['id' => 'USER_ID']) }}'.replace('USER_ID', user.userId)" class="btn-edit button circle small" :disabled="user.roleGroup == options.supervisorGroupId">
 								<i class="small">edit</i>

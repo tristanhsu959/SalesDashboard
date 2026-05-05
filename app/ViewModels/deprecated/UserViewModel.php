@@ -45,8 +45,23 @@ class UserViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.functions', AppManager::getMenu());
+		$this->set('options.roleList', $this->_service->getRoleOptions());
 		$this->set('options.areas', Area::mapWithKeys());
+		$this->set('options.functions', Functions::mapWithGroupKeys());
 		$this->set('options.supervisorGroupId',RoleGroup::SUPERVISOR->value); 
+	}
+	
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: string
+	 */
+	public function keepSearchData($adAccount = '', $displayName = '', $roleId = 0)
+    {
+		$this->set('search.ad', $adAccount);
+		$this->set('search.name', $displayName);
+		$this->set('search.roleId', $roleId);
 	}
 	
 	/* Form submit action
@@ -69,23 +84,13 @@ class UserViewModel extends Fluent
 	 * @params: int
 	 * @return: void
 	 */
-	public function keepFormData($id = 0, $account = '',  $password = '', $displayName = '', 
-						$department = '', $email = '', $isActive = TRUE, 
-						$permission = [], $area = [], $description = '', 
-						$updateAt = '', $hasSetPassword = FALSE)
+	public function keepFormData($id = 0, $adAccount = '', $displayName = '', $roleId = 0, $updateAt = '')
     {
 		$this->set('formData.id', $id);
-		$this->set('formData.account', $account);
-		$this->set('formData.password', $password);
-		$this->set('formData.displayName', $displayName);
-		$this->set('formData.department', $department);
-		$this->set('formData.email', $email);
-		$this->set('formData.isActive', $isActive);
-		$this->set('formData.permission', $permission);
-		$this->set('formData.area', $area);
-		$this->set('formData.description', $description);
+		$this->set('formData.ad', $adAccount);
+		$this->set('formData.name', $displayName);
+		$this->set('formData.roleId', $roleId);
 		$this->set('formData.updateAt', $updateAt);
-		$this->set('formData.hasSetPassword', $hasSetPassword);
 	}
 	/* User Data End */
 	

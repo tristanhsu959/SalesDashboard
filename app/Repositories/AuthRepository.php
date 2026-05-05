@@ -27,10 +27,14 @@ class AuthRepository extends Repository
 		{
 			$db = $this->connectSalesDashboard('user');
 				
-			$result = $db->select('userId', 'userAd', 'userRoleId', 'userRoleId', 'roleGroup', 'rolePermission', 'roleArea')
-						->join('role', 'roleId', '=', 'userRoleId')
-						->where('userAd', '=', $account)
-						->get()->first();
+			$result = $db
+					->select('userId', 'userAccount', 'userPassword')
+					->addSelect('userDisplayName', 'department', 'email', 'isActive')
+					->addSelect('roleGroup', 'rolePermission', 'roleArea')
+					->leftJoin('role', 'roleUserId', '=', 'userId')
+					->where('userAccount', '=', $account)
+					->get()
+					->first();
 			
 			if (! empty($result))
 			{

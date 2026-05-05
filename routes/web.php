@@ -7,9 +7,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewReleaseSettingController;
-#use App\Http\Controllers\SalesSettingController;
 use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
+use App\Http\Controllers\ProfileController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -25,6 +25,9 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	/***** Home *****/
 	Route::get('home', [HomeController::class, 'index'])->name('home');
 	
+	/***** User profile *****/
+	Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
+
 	/***** 產品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
 		Route::get('product', [ProductController::class, 'list'])->name('products');
@@ -74,18 +77,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('purchase/product/setting', [PurchaseProductController::class, 'update'])->name('purchase_product.update.post');
 	});
 	
-	/***** 身份管理 *****/
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::ROLE->value, ':')])->group(function(){
-		Route::get('role', [RoleController::class, 'list'])->name('roles');
-		Route::get('role/list', [RoleController::class, 'list'])->name('role.list');
-		Route::get('role/create', [RoleController::class, 'showCreate'])->name('role.create');
-		Route::post('role/create', [RoleController::class, 'create'])->name('role.create.post');
-		Route::get('role/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
-		Route::post('role/update', [RoleController::class, 'update'])->name('role.update.post');
-		Route::post('role/delete/{id}', [RoleController::class, 'delete'])->name('role.delete');
-	});
-	
-	/***** 帳號管理 */
+	/***** 新權限管理(整併為一個功能) *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::USER->value, ':')])->group(function(){
 		Route::get('user', [UserController::class, 'list'])->name('users');
 		Route::get('user/list', [UserController::class, 'list'])->name('user.list');
@@ -96,6 +88,18 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
 		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 	});
+	
+	/***** 身份管理 *****
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::ROLE->value, ':')])->group(function(){
+		Route::get('role', [RoleController::class, 'list'])->name('roles');
+		Route::get('role/list', [RoleController::class, 'list'])->name('role.list');
+		Route::get('role/create', [RoleController::class, 'showCreate'])->name('role.create');
+		Route::post('role/create', [RoleController::class, 'create'])->name('role.create.post');
+		Route::get('role/update/{id}', [RoleController::class, 'showUpdate'])->name('role.update');
+		Route::post('role/update', [RoleController::class, 'update'])->name('role.update.post');
+		Route::post('role/delete/{id}', [RoleController::class, 'delete'])->name('role.delete');
+	});*/
+
 });
 
 

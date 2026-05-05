@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Facades\AppManager;
 use App\Repositories\UserRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\RoleGroup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 use Log;
 
@@ -36,46 +38,52 @@ class UserService
 		}
 	}
 	
-	/* 取帳號清單 By Query Conditions
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: array
-	 */
-	public function searchList($searchAd, $searchName, $searchRoleId)
-	{
-		try
-		{
-			$list = $this->_repository->getList($searchAd, $searchName, $searchRoleId);
-			
-			return ResponseLib::initialize($list)->success();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('執行查詢時發生錯誤');
-		}
-	}
-	
 	/* Create Account
 	 * @params: string
 	 * @params: string
 	 * @params: int
 	 * @return: array
 	 */
-	public function createUser($adAccount, $displayName, $roleId)
+	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
 	{
 		try
 		{
-			#Create data
-			$this->_repository->insert($adAccount, $displayName, $roleId);
+			#1.Check account
+			if ($this->_isAccountExist($account) === TRUE)
+				throw new Exception('此帳號已存在');
+			
+			#2.Hash password
+			$password = Hash::make($password);
+			
+			#3. Create user
+			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area, $description);
 		
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('新增帳號失敗');
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
+	}
+	
+	/* 驗證帳號
+	 * @params: string
+	 * @params: int
+	 * @return: array
+	 */
+	private function _isAccountExist($account, $exceptId = FALSE)
+	{
+		try
+		{
+			$id = $this->_repository->getIdByAccount($account, $exceptId); 
+			
+			return empty($id) ? FALSE : TRUE;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('驗證帳號發生錯誤');
 		}
 	}
 	
@@ -87,7 +95,7 @@ class UserService
 	{
 		try
 		{
-			$result = $this->_repository->getById($id); 
+			$result = $this->_repository->getById($id);
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -104,17 +112,27 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function updateUser($userId, $adAccount, $displayName, $roleId)
+	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
 	{
 		try
 		{
-			$this->_repository->update($userId, $adAccount, $displayName, $roleId);
+			#1.Check account
+			if ($this->_isAccountExist($account, $id) === TRUE)
+				throw new Exception('此帳號已存在');
+			
+			#2.Hash password
+			if (! empty($password))
+				$password = Hash::make($password);
+			
+			#3. Update user
+			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description);
+			
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return ResponseLib::initialize()->fail('編輯帳號失敗');
+			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
 	
@@ -122,11 +140,11 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function deleteUser($userId)
+	public function deleteUser($id)
 	{
 		try
 		{
-			$this->_repository->remove($userId);
+			$this->_repository->remove($id);
 			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
@@ -136,26 +154,30 @@ class UserService
 		}
 	}
 	
-	/* 取可設定的Role選項清單
-	 * @params: 
+	/* User profile update
+	 * @params: int 
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @params: string
 	 * @return: array
 	 */
-	public function getRoleOptions()
+	public function updateProfile($id, $password, $displayName, $department, $email)
 	{
 		try
 		{
-			$list = $this->_repository->getRoleList();
+			$password = empty($password) ? $password : Hash::make($password);
+			$this->_repository->updateProfile($id, $password, $displayName, $department, $email);
 			
-			$list = Arr::mapWithKeys($list, function (array $item, int $key) {
-				return [$item['roleId'] => $item['roleName']];
-			});
+			#更新同步
+			AppManager::updateCurrentUserProfile($displayName, $department, $email);
 			
-			return $list;
+			return ResponseLib::initialize()->success();
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
+			return ResponseLib::initialize()->fail($e->getMessage());
 		}
 	}
 	

@@ -96,4 +96,15 @@ enum Functions : string
 		
 		return $list;
 	}
+	
+	public static function getAll(): array
+	{
+		$list = [];
+		foreach(self::cases() as $case)
+		{
+			$list[] = $case->value;
+		}
+		
+		return $list;
+	}
 }

@@ -5,14 +5,29 @@ document.addEventListener('alpine:init', () => {
 		formData: {...formData},
 		options: options,
 		errors: new Set(),
+		activeTab: '',
+		showPassword: false,
+		
+		init() {
+			const tabKey = Object.keys(this.options.functions)[0];
+			this.activeTab = tabKey;
+		},
 		
 		validate() {
 			this.errors.clear();
 			
-			if (Helper.isEmpty(this.formData.ad))
-				this.errors.add('ad');
-			if (this.formData.roleId == 0)
-				this.errors.add('roleId');
+			if (Helper.isEmpty(this.formData.account))
+				this.errors.add('account');
+			if (Helper.isEmpty(this.formData.password) && this.formData.id == 0)
+				this.errors.add('password');
+						
+			const pattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+			
+			if (! Helper.isEmpty(this.formData.password) && ! pattern.test(this.formData.password)) 
+			{
+				this.errors.add('password');
+				Alpine.store('toast').notify('密碼須包含英數，6個字元以上');
+			}
 			
 			if (this.errors.size == 0)
 			{
@@ -24,9 +39,14 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		reset() {
-			this.formData.ad = '';
-			this.formData.name = '';
-			this.formData.roleId = 0;
+			this.formData.account = '';
+			this.formData.password = '';
+			this.formData.displayName = '';
+			this.formData.department = '';
+			this.formData.email = '';
+			this.formData.permission = [];
+			this.formData.area = [];
+			this.formData.description = '';
 		}
     }));
 });

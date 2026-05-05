@@ -136,11 +136,12 @@ return [
 			'style' 	=> ['icon' => 'admin_panel_settings', 'color' => 'red-text'],
 			'url' 		=> 'users', 
 		],
+		/*
 		[
 			'name' 		=> Functions::ROLE->label(), #身份管理,
 			'code'		=> Functions::ROLE->value,
 			'style' 	=> ['icon' => 'how_to_reg', 'color' => 'red-text'],
 			'url' 		=> 'roles', 
-		],
+		],*/
 	],
 ];

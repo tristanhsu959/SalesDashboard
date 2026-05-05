@@ -114,11 +114,14 @@
 		</a>
 		
 			@if ($viewModel->search['type'] == 'store')
-			<div class="field label border prefix field-filter-dark">
-				<i>filter_alt</i>
-				<input type="text" x-model="$store.shipmentStore.filter">
-				<label>篩選</label>
-			</div>
+			<nav class="no-space filter">
+				<div class="field label border prefix field-filter-dark small">
+					<i>filter_alt</i>
+					<input type="text" x-model="$store.shipmentStore.filter">
+					<label>篩選</label>
+				</div>
+				<button class="right-round" @click="$store.shipmentStore.filter = ''"><i>backspace</i></button>
+			</nav>
 			@endif
 		@endif
 		
