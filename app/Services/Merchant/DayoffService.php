@@ -144,7 +144,7 @@ class DayoffService
 					return intval($item['money']) <= 0;
 				})->count();
 				
-				$temp['percent']	= round(intval($temp['dayoffCount']) / intval($temp['total']) * 100, 2);
+				#$temp['percent']	= round(intval($temp['dayoffCount']) / intval($temp['total']) * 100, 2);
 				
 				return $temp;
 			});
@@ -154,9 +154,9 @@ class DayoffService
 			$summary['areaName'] 	= '總計';
 			$summary['total'] 		= $dayoffData->pluck('total')->sum();
 			$summary['dayoffCount'] = $dayoffData->pluck('dayoffCount')->sum();
-			$summary['percent'] 	= round($dayoffData->pluck('percent')->sum() / $dayoffData->count(), 2);
+			#$summary['percent'] 	= round($dayoffData->pluck('percent')->sum() / $dayoffData->count(), 2);
 			
-			$area['header'] = ['區域', '店家數', '店休數', '佔比'];
+			$area['header'] = ['區域', '店家數', '店休數']; /*['區域', '店家數', '店休數', '佔比'];*/
 			$area['store'] = $dayoffData->merge([$summary])->toArray();
 			
 			return $area;

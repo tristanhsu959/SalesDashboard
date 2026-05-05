@@ -5,6 +5,7 @@ namespace App\Services\MonthlyFilling;
 use App\Facades\AppManager;
 use App\Repositories\MonthlyFillingRepository;
 use App\Services\Traits\Purchase\ProductTrait;
+use App\Services\Traits\Purchase\StoreTrait;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
@@ -26,7 +27,7 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
-	use ProductTrait;
+	use ProductTrait, StoreTrait;
 	
 	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
@@ -179,7 +180,7 @@ class StoreService
 			#依產品產生一個sheet
 			foreach($productList as $key => $product)
 			{
-				$data = $this->_parsingByStore($orderData, $product);
+				$data = $this->_parsingByStore($orderData, $product); 
 				$this->_statistics['data'][$key] = $this->_generateOutput($data);
 			}
 			
@@ -214,7 +215,8 @@ class StoreService
 		
 		$header['productList'] = config('web.purchase.monthly_filling.totalCount.group');
 		
-		$header['storeList'] = $this->_getStoreList();
+		$brand = Brand::tryFrom($this->_statistics['brandId']);
+		$header['storeList'] = $this->getStoreListWithLb($brand, $this->_userAreaIds);
 		
 		return $header;
 	}
@@ -237,50 +239,7 @@ class StoreService
 		return $header;
 	}
 	
-	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getStoreList()
-	{
-		try
-		{
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			$store = $this->_repository->getStoreList($brand, $this->_userAreaIds);
-			
-			#To key-value
-			$store = collect($store)->mapWithKeys(function($item, $key) use($brand) {
-				
-				if (is_null($item['posId']) OR $item['posId'] == 'null')
-					$item['posId'] =  '';
-				
-				$area = AreaLib::toArea(intval($item['areaId']));
-				$item['areaId']		= $area->value;
-				$item['areaName'] 	= $area->label();
-				#$item['area'] = Str::replace('-八方', '', $item['area']);
-				#$item['area'] = Str::replace('-御廚', '', $item['area']);
-				
-				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
-				if ($brand == Brand::BAFANG)
-					$storeKey = Str::take($item['storeNo'], 9);
-				else
-					$storeKey = $item['storeNo'];
-				
-				return [$storeKey => $item];
-			})->sortBy('areaId')->toArray();
-			
-			return $store;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料失敗');
-		}
-	}
+	
 	
 	/* 依門店
 	 * @params: array
@@ -300,13 +259,18 @@ class StoreService
 		if (empty($orderData))
 			return [];
 		
+		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
 		$groups = data_get($product, 'code', []);
 		
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groups){
 			return in_array($item['shortCode'], $groups);
 		
-		})->groupBy(function($item, $key){
+		})->groupBy(function($item, $key) use($lbSpecialStore) {
+			$rebuildNo = data_get($lbSpecialStore, $item['storeNo'], NULL);
+			if (! empty($rebuildNo))
+				$item['storeNo'] = $rebuildNo;
+			
 			return Str::take($item['storeNo'], 9);
 		
 		})->map(function($items, $key) {
@@ -338,8 +302,8 @@ class StoreService
 			#$storeId = $store['storeId'];
 			$storeData = data_get($data, $key);
 			
-			if (empty($storeData))
-				continue;
+			/* if (empty($storeData))
+				continue; */
 			
 			$row = [];
 			$row[] = data_get($store, 'posId');

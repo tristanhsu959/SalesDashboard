@@ -101,7 +101,7 @@ class MerchantRepository extends Repository
 				->select('o.Money')
 				->whereColumn('o.StoreId', 's.Id')
 				->where('o.ExpectedDate', '>=', $stDate)
-				->where('o.ExpectedDate', '<', $endDate)
+				->where('o.ExpectedDate', '<=', $endDate)
 				->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
@@ -123,7 +123,7 @@ class MerchantRepository extends Repository
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			->where('s.OpenDate', '<', $endDate) #不含未來開店
+			->where('s.OpenDate', '<=', $endDate) #不含未來開店
 			->whereNull('s.CloseDate') #只取有效門店
 			->when($authAreaIds, function ($query, $authAreaIds) {
 				return $query->whereIn('s.AreaId', $authAreaIds);

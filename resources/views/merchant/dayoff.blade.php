@@ -30,7 +30,7 @@
 									<i>visibility</i>
 								</button>
 							</td>
-							<td x-text="store.percent + '%'"></td>
+							<!--td x-text="store.percent + '%'"></td-->
 						</tr>
 						</template>
 					</tbody>
