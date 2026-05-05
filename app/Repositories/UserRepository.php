@@ -28,7 +28,7 @@ class UserRepository extends Repository
 			
 		$result = $db->select('a.userId', 'a.userAccount', 'a.userDisplayName', 'a.department')
 			->addSelect('a.email', 'b.roleGroup', 'a.isActive', 'a.updateAt')
-			->join('role as b', 'b.roleUserId', '=', 'a.userId')
+			->leftJoin('role as b', 'b.roleUserId', '=', 'a.userId')
 			->get()
 			->toArray();
 		
