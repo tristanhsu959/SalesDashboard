@@ -150,7 +150,7 @@ class UserRepository extends Repository
 		$result = $db->select('a.userId', 'a.userAccount', 'a.userPassword', 'a.userDisplayName', 'a.department')
 				->addSelect('a.email', 'a.isActive', 'a.updateAt')
 				->addSelect('b.roleGroup', 'b.rolePermission', 'b.roleArea', 'b.description')
-				->join('role as b', 'b.roleUserId', '=', 'a.userId')
+				->leftJoin('role as b', 'b.roleUserId', '=', 'a.userId')
 				->where('userId', '=', $id)
 				->first();
 		
