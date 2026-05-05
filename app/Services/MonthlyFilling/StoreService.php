@@ -180,7 +180,7 @@ class StoreService
 			#依產品產生一個sheet
 			foreach($productList as $key => $product)
 			{
-				$data = $this->_parsingByStore($orderData, $product);
+				$data = $this->_parsingByStore($orderData, $product); 
 				$this->_statistics['data'][$key] = $this->_generateOutput($data);
 			}
 			
@@ -297,8 +297,8 @@ class StoreService
 			#$storeId = $store['storeId'];
 			$storeData = data_get($data, $key);
 			
-			if (empty($storeData))
-				continue;
+			/* if (empty($storeData))
+				continue; */
 			
 			$row = [];
 			$row[] = data_get($store, 'posId');
