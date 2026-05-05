@@ -106,7 +106,7 @@ class MonthlyFillingService
 				#無值不cache
 				if (! empty($this->_statistics['data']))
 				{
-					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
+					$this->_statistics['exportToken'] 	= bin2hex($cacheKey);#hex2bin
 					$this->_statistics['exportName']	= '月初報表';
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
 				}
