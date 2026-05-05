@@ -108,7 +108,7 @@ class MonthlyFillingService
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= '月初報表';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
