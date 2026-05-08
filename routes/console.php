@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schedule;
 use App\Console\Commands\UpdateNewReleaseDataToLocal;
 use App\Console\Commands\BafangPosOrderReplication;
 use App\Console\Commands\BuygoodPosOrderReplication;
+use App\Console\Commands\BafangPosOrderToLocal;
+use App\Console\Commands\BuygoodPosOrderToLocal;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
 
