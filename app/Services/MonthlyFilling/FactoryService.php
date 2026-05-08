@@ -73,6 +73,7 @@ class FactoryService
 			
 			#2. Get Order data
 			$orderData = $this->_getDataFromDB($productIds);
+			$extraData = $this->_getExtraDataFromDB();
 			
 			return $this->_outputReport($orderData);
 		}
@@ -110,9 +111,6 @@ class FactoryService
 	}
 	
 	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
 	 * @params: array
 	 * @return: array
 	 */
@@ -148,6 +146,49 @@ class FactoryService
 			throw new Exception('讀取訂貨系統訂單資料失敗');
 		}
 	}
+	
+	/* #目前僅for月初報表使用, 因追加單會建在舊系統
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getExtraDataFromDB()
+	{
+		/* array:4 [
+			"expectedDate" => "2026-02"
+			"qty" => "7059"
+			"factoryId" => "1"
+			"shortCode" => "2267"
+		]
+		*/
+	
+		try
+		{
+			$codes		= config('web.purchase.monthly_filling.monthly');
+			#非0開頭會變成int(sql會convert error)
+			$codes 	= collect($codes)->pluck('code')->all();
+			$stDate	= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
+			
+			$orderData = $this->_repository->getTpExtraDataByCode($stDate, $endDate, $codes);
+			dd($orderData);
+			#目前僅for月初報表使用, 因追加單會建在舊系統
+			$extraData = $this->_repository->getExtraDataByFactory($stDate, $endDate);
+			
+			#先處理包裝轉換
+			$orderData = collect($orderData)->map(function($item, $key){
+				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
+				return $item;
+			});
+			
+			return $orderData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取舊訂貨系統加追訂單資料失敗');
+		}
+	}
+	
 	/* ====================== 主流程 End ====================== */
 	
 	

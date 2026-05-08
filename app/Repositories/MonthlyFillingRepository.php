@@ -14,7 +14,7 @@ use Exception;
 
 class MonthlyFillingRepository extends Repository
 {
-	use OrderTrait;
+	use OrderTrait, LegacyOrderTrait;
 	
 	public function __construct()
 	{
