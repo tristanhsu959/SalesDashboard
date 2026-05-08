@@ -16,7 +16,7 @@ class BafangPosOrderToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'bafang:pos-order-to-local {argStDate?}';
+    protected $signature = 'bafang:pos-order-to-local';
 
     /**
      * The console command description.
