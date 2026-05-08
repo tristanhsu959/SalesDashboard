@@ -10,6 +10,13 @@ use App\Console\Commands\BuygoodPosOrderReplication;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
 
+#Bafang pos local
+Schedule::command('bafang:pos-order-to-local')->everyTenMinutes()>withoutOverlapping();
+
+#Buygood pos local
+Schedule::command('buygood:pos-order-to-local')->everyTenMinutes()>withoutOverlapping();
+
+
 #Bafang zs_sd_order
 Schedule::command('bafang:pos-order-replication')->hourly()->between('10:00', '22:00');
 

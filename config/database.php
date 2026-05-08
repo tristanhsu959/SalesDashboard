@@ -90,6 +90,17 @@ return [
             'fetch' => PDO::FETCH_ASSOC,
         ],
 		
+		#Local pos order
+		'PosOrder' => [
+            'driver' => 'mysql',
+            'host' => env('LPOS_DB_HOST', '127.0.0.1'),
+            'port' => env('LPOS_DB_PORT', '3306'),
+            'database' => env('LPOS_DB_DATABASE', 'pos_order'),
+            'username' => env('LPOS_DB_USERNAME', 'salesdashboard'),
+            'password' => env('LPOS_DB_PASSWORD', ''),
+            'fetch' => PDO::FETCH_ASSOC,
+        ],
+		
 		'RemoteSaleDashboard' => [
             'driver' => 'sqlsrv',
             'host' => env('SD_DB_HOST', '192.168.1.237'),
