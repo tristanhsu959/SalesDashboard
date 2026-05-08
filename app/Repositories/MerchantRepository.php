@@ -33,12 +33,13 @@ class MerchantRepository extends Repository
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Store as s')
-			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->leftJoin('User as u', 'u.Id', '=', 's.SuperviseUserId')
-			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
-			->leftJoin('Car as c', 'c.Id', '=', 'sc.CarId')
-			->leftJoin('Warehouse as w', 'w.Id', '=', 'sc.WarehouseId')
+			->fromRaw('Store as s WITH(NOLOCK)')
+			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
+			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 's.Id')
+			->leftJoin(DB::raw('[User] as u WITH(NOLOCK)'), 'u.Id', '=', 's.SuperviseUserId')
+			->leftJoin(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
+			->leftJoin(DB::raw('Car as c WITH(NOLOCK)'), 'c.Id', '=', 'sc.CarId')
+			->leftJoin(DB::raw('Warehouse as w WITH(NOLOCK)'), 'w.Id', '=', 'sc.WarehouseId')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
 			->addSelect('f.Name as factoryName', 'w.Name as warehouse', 'c.Name as carNo')
@@ -93,9 +94,10 @@ class MerchantRepository extends Repository
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Store as s')
-			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->leftJoin('Factory as f', 'f.Id', '=', 'sc.FactoryId')
+			->fromRaw('Store as s WITH(NOLOCK)')
+			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
+			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 's.Id')
+			->leftJoin(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect(['money' => $db->table('Order as o')
 				->select('o.Money')

@@ -30,7 +30,8 @@ class MonthlyFillingRepository extends Repository
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Product as a')
-			->join('Stocks as st', 'st.ProductId', '=', 'a.Id')
+			->fromRaw('Product as a WITH(NOLOCK)')
+			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
 			->select('a.Id')
 			->distinct()
 			->whereExists(function ($query) use($brandId) {
@@ -73,10 +74,11 @@ class MonthlyFillingRepository extends Repository
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Order as a')
-			->join('OrderSub as b', 'b.OrderId', '=', 'a.Id')
-			->join('Product as p', 'p.Id', '=', 'b.ProductId')
-			->join('Store as s', 's.Id', '=', 'a.StoreId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 'a.StoreId')
+			->fromRaw('[Order] as a WITH(NOLOCK)')
+			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
+			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
+			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'a.StoreId')
+			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
 			->addSelect('s.Id as storeId', 's.No as storeNo', 'p.OldNo as shortCode')
@@ -124,11 +126,12 @@ class MonthlyFillingRepository extends Repository
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Order as a')
-			->join('OrderSub as b', 'b.OrderId', '=', 'a.Id')
-			->join('Product as p', 'p.Id', '=', 'b.ProductId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 'a.StoreId')
-			->join('Store as s', 's.Id', '=', 'sc.StoreId')
-			->join('Factory as f', 'f.Id', '=', 'sc.FactoryId')
+			->fromRaw('[Order] as a WITH(NOLOCK)')
+			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
+			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
+			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
+			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'sc.StoreId')
+			->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
 			->addSelect('f.No as factoryNo', 'p.OldNo as shortCode')
