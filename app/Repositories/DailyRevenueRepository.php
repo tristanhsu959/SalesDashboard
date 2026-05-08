@@ -76,8 +76,8 @@ class DailyRevenueRepository extends Repository
 		$query = $db
 				->table('SALE00 as a')
 				->fromRaw('SALE00 as a WITH(NOLOCK)')
-				->join('SHOP00 as b', 'b.SHOP_ID', '=', 'a.SHOP_ID')
-				->join('shop_kind as c', 'c.sk_id', '=', 'b.shop_kind')
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
+				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
 				->addSelect('c.sk_id as typeId', 'c.Sk_name as typeName')
 				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.amount) as amount')

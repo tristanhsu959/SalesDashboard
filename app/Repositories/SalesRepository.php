@@ -98,7 +98,7 @@ class SalesRepository extends Repository
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join('SHOP00 as s', 's.SHOP_ID', '=', 'a.shopId')
+				->join(DB::raw('SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 'a.shopId')
 				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
 				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
 				->select('a.shopId', 'a.productId as erpNo')
@@ -136,7 +136,7 @@ class SalesRepository extends Repository
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join('SHOP00 as s', 's.SHOP_ID', '=', 'a.shopId')
+				->join(DB::raw('SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 'a.shopId')
 				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
 				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
 				->select('a.shopId', 'a.productId as erpNo')
