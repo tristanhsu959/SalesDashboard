@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class BuygoodPosOrderToLocal extends Command
 {
@@ -15,61 +16,42 @@ class BuygoodPosOrderToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'buygood:pos-order-to-local {argStDate?} {argEndDate?}';
+    protected $signature = 'buygood:pos-order-to-local';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Replication Buygood Pos Sale01 to New Table';
+    protected $description = 'Copy Buygood Pos Sale01 to Local';
+	
+	protected $cacheKey = 'buygood:fetchTime';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $argStDate 	= $this->argument('argStDate');
-		$argEndDate = $this->argument('argEndDate');
-		
-		list($stDate, $endDate) = $this->_getParams($argStDate, $argEndDate);
-		
-		try
+        try
 		{
-			$this->info("Fetch buygood data start -----" . now());
-			Log::channel('commandLog')->info("Fetch buygood data start" . now(), [ __class__, __function__, __line__]);
+			Log::channel('commandLog')->info("Fetch buygood data start : " . now(), [ __class__, __function__, __line__]);
 			
-			#複寫SALE01至z-sd-order
-			DB::connection('BGPosErp')->statement("
-				INSERT INTO zs_sd_order WITH (TABLOCK)
-				(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate)
-				SELECT 
-					a.SALE_ID,
-					a.SALE_SNO,
-					a.SHOP_ID,
-					a.PROD_ID,
-					a.SALE_PRICE,
-					a.QTY,
-					a.ITEM_DISC,
-					a.TASTE_MEMO,
-					b.SALE_DATE
-				FROM SALE01 a WITH(NOLOCK)
-				JOIN SALE00 b WITH(NOLOCK)
-					ON a.SHOP_ID = b.SHOP_ID
-					AND a.SALE_ID = b.SALE_ID
-				WHERE
-					b.STATUS = '2'
-					AND b.SALE_DATE BETWEEN ? AND ?
-					AND NOT EXISTS (
-						SELECT 1
-						FROM zs_sd_order s
-						WHERE s.shopId = a.SHOP_ID
-						AND s.saleId = a.SALE_ID
-						AND s.saleSno = a.SALE_SNO
-					)", [$stDate, $endDate]);
-					
-			$this->info("Fetch buygood data completed -----" . now());
-			Log::channel('commandLog')->info("Fetch buygood data completed" . now(), [ __class__, __function__, __line__]);
+			list($stDate, $endDate) = $this->_getParams();
+			
+			Log::channel('commandLog')->info(Str::replaceArray('?', [$stDate, $endDate], "Params:?~? -----"));
+			
+			if (Carbon::parse($endDate)->isAfter(now())) 
+				Log::channel('commandLog')->info("No update -----");
+			else
+			{
+				$orderData = $this->_fetchOrder($stDate, $endDate);
+				
+				$this->_updateToLocal($orderData);
+				
+				Cache::put($this->cacheKey, $endDate, now()->addMinutes(60));
+				
+				Log::channel('commandLog')->info(Str::replaceArray('?', [count($orderData), now()], "Fetch buygood data completed:? ----- ?"), [ __class__, __function__, __line__]);
+			}
 		}
 		catch(Exception $e)
 		{
@@ -78,30 +60,97 @@ class BuygoodPosOrderToLocal extends Command
 		}
     }
 	
-	private function _getParams($stDate, $endDate)
+	private function _getParams()
 	{
-		#有日期參數:手動更新, 只要少一個參數就走每日更新模式
-		if (! empty($stDate) && ! empty($endDate))
-		{
-			$stDate		= Carbon::parse($stDate)->format('Y-m-d 00:00:00');
-			$endDate 	= Carbon::parse($endDate)->format('Y-m-d 23:59:59');
-		}
+		$this->info("Build params start ----- " . now());
+		
+		if (Cache::has($this->cacheKey))
+			$stDate = Cache::get($this->cacheKey);
 		else
-		{
-			$result = DB::connection('BGPosErp')->selectOne("SELECT TOP 1 saleDate
-					FROM zs_sd_order WITH (INDEX(idx_zs_sd_order_saleDate))
-					ORDER BY saleDate DESC");
-			
-			if ($result) #取最後更新時間
-				$stDate = Carbon::parse($result['saleDate'])->subMinutes(30)->format('Y-m-d H:i:s');
-			else if ($stDate) #取指定的開始時間
-				$stDate = Carbon::parse($stDate)->format('Y-m-d 00:00:00');
-			else
-				$stDate = now()->subMinutes(30)->format('Y-m-d 00:00:00');
-			
-			$endDate = Carbon::parse($stDate)->addDay()->subMinutes(30)->format('Y-m-d H:i:s');
-		}
+			$stDate = '2025-09-01';
+		
+		$stDate = Carbon::parse($stDate)->subMinutes(5)->format('Y-m-d H:i:s');
+		$endDate = Carbon::parse($stDate)->addMinutes(60)->format('Y-m-d H:i:s');
+		
+		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end -----?~?"));
 		
 		return [$stDate, $endDate];
+	}
+	
+	private function _fetchOrder($stDate, $endDate)
+	{
+		$this->info(Str::replaceArray('?', [now()], "Fetch buygood data start -----?"));
+			
+		#無stDate時, carbon default is now
+		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate)
+		$result = DB::connection('BGPosErp')
+			->table('SALE00 as s0')
+			->fromRaw('SALE00 as s0 WITH(NOLOCK)')
+			->join(DB::RAW('SALE01 as s1 WITH(NOLOCK)'), function($join){
+				$join->on('s1.SHOP_ID', '=', 's0.SHOP_ID')
+					->on('s1.SALE_ID', '=', 's0.SALE_ID');
+			})
+			->where('s0.STATUS', '=', '2') 
+			->where('s0.SALE_DATE', '>=', $stDate)
+			->where('s0.SALE_DATE', '<=', $endDate)
+			->select('s1.SALE_ID', 's1.SALE_SNO', 's1.SHOP_ID', 's1.PROD_ID')
+			->addSelect('s1.SALE_PRICE', 's1.QTY', 's1.ITEM_DISC', 's1.TASTE_MEMO', 's0.SALE_DATE')
+			->get()
+			->toArray();
+			#->toRawSql(); 
+			
+		$this->info(Str::replaceArray('?', [now()], "Fetch buygood data completed -----?"));
+			
+		return $result;
+	}
+	
+	private function _updateToLocal($orderData)
+	{
+		if (empty($orderData))
+			return TRUE;
+		
+		$this->info(Str::replaceArray('?', [now()], "Update buygood data to local start -----?"));
+			
+		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate, updateAt)
+		$query = DB::connection('PosOrder')->table('bg_sale01');
+		$upsert = collect($orderData)->chunk(100);
+		
+		foreach ($upsert as $items) 
+		{
+			$rows = [];
+			
+			foreach($items as $item)
+			{
+				$row = [];
+				$row['saleId']  	= $item['SALE_ID'];
+				$row['saleSno'] 	= $item['SALE_SNO'];
+				$row['shopId']  	= $item['SHOP_ID'];
+				$row['productId'] 	= $item['PROD_ID'];
+				$row['price']     	= $item['SALE_PRICE'];
+				$row['qty']       	= $item['QTY'];
+				$row['discount']  	= $item['ITEM_DISC'];
+				$row['taste']     	= $item['TASTE_MEMO'];
+				$row['saleDate']  	= $item['SALE_DATE'];
+				$row['updateAt'] 	= now()->format('Y-m-d H:i:s');
+			
+				$rows[] = $row;
+			}
+				
+			$result = $query->upsert(
+				$rows,
+				[
+					'saleId',
+					'saleSno',
+					'shopId',
+				],
+				[
+					'updateAt'
+				]
+			);
+		}
+		
+		$this->info(Str::replaceArray('?', [now()], "Update buygood data to local completed -----?"));
+			
+		return $result;
 	}
 }

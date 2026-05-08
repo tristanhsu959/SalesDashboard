@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class BafangPosOrderToLocal extends Command
 {
@@ -24,24 +25,34 @@ class BafangPosOrderToLocal extends Command
      */
     protected $description = 'Copy Bafang Pos Sale01 to Local';
 
+	protected $cacheKey = 'bafang:fetchTime';
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $argStDate 	= $this->argument('argStDate');
-		
-		list($stDate, $endDate) = $this->_getParams($argStDate);
-		
-		try
+        try
 		{
-			$this->info("Fetch bafang data start -----" . now());
-			Log::channel('commandLog')->info("Fetch bafang data start" . now(), [ __class__, __function__, __line__]);
+			Log::channel('commandLog')->info("Fetch bafang data start : " . now(), [ __class__, __function__, __line__]);
+		
+			list($stDate, $endDate) = $this->_getParams();
 			
-			$this->_fetchOrder($stDate, $endDate);
-					
-			$this->info("Fetch bafang data completed -----" . now());
-			Log::channel('commandLog')->info("Fetch bafang data completed" . now(), [ __class__, __function__, __line__]);
+			Log::channel('commandLog')->info(Str::replaceArray('?', [$stDate, $endDate], "Params:?~? -----"));
+			
+			if (Carbon::parse($endDate)->isAfter(now())) 
+				Log::channel('commandLog')->info("No update -----");
+			else
+			{
+				$orderData = $this->_fetchOrder($stDate, $endDate);
+			
+				$this->_updateToLocal($orderData);
+			
+				Cache::put($this->cacheKey, $endDate, now()->addMinutes(60));
+			
+				Log::channel('commandLog')->info(Str::replaceArray('?', [count($orderData), now()], "Fetch bafang data completed:? ----- ?"), [ __class__, __function__, __line__]);
+			}
+		
+		
 		}
 		catch(Exception $e)
 		{
@@ -50,47 +61,97 @@ class BafangPosOrderToLocal extends Command
 		}
     }
 	
-	private function _getParams($stDate)
+	private function _getParams()
 	{
-		#無stDate時, carbon default is now
-		$result = DB::connection('PosOrder')
-					->table('bf_sale01')
-					->select('saleDate')
-					->orderBy('saleDate', 'DESC')
-					->limit(1)
-					->get()
-					->toArray();
+		$this->info("Build params start ----- " . now());
 		
-		$saleData = data_get($result, 'saleData', NULL);
-		
-		if (! empty($saleData)) #取最後更新時間
-			$stDate = Carbon::parse($saleData)->subMinutes(15)->format('Y-m-d H:i:s');
+		if (Cache::has($this->cacheKey))
+			$stDate = Cache::get($this->cacheKey);
 		else
-			$stDate = Carbon::parse($stDate)->format('Y-m-d H:i:s'); #只有跑一次
+			$stDate = '2025-09-01';
 		
+		$stDate = Carbon::parse($stDate)->subMinutes(5)->format('Y-m-d H:i:s');
 		$endDate = Carbon::parse($stDate)->addMinutes(60)->format('Y-m-d H:i:s');
-			
+		
+		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end:?~? -----"));
+		
 		return [$stDate, $endDate];
 	}
 	
 	private function _fetchOrder($stDate, $endDate)
 	{
+		$this->info(Str::replaceArray('?', [now()], "Fetch bafang data start ----- ?"));
+			
 		#無stDate時, carbon default is now
 		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate)
 		$result = DB::connection('BFPosErp')
 			->table('SALE00 as s0')
 			->fromRaw('SALE00 as s0 WITH(NOLOCK)')
-			->join(DB::RAW('SALE01 as s1 WITH(NOLOCK)'), function($query){
-				$query->where('s1.SHOP_ID', 's0.SHOP_ID')
-						->where('s1.SALE_ID', 's0.SALE_ID')
+			->join(DB::RAW('SALE01 as s1 WITH(NOLOCK)'), function($join){
+				$join->on('s1.SHOP_ID', '=', 's0.SHOP_ID')
+					->on('s1.SALE_ID', '=', 's0.SALE_ID');
 			})
-			->where('s0.STATUS', '=', '2')
+			->where('s0.STATUS', '=', '2') 
 			->where('s0.SALE_DATE', '>=', $stDate)
 			->where('s0.SALE_DATE', '<=', $endDate)
 			->select('s1.SALE_ID', 's1.SALE_SNO', 's1.SHOP_ID', 's1.PROD_ID')
 			->addSelect('s1.SALE_PRICE', 's1.QTY', 's1.ITEM_DISC', 's1.TASTE_MEMO', 's0.SALE_DATE')
-			->toRawSql();
+			->get()
+			->toArray();
+			#->toRawSql(); 
 			
-		dd($result);
+		$this->info(Str::replaceArray('?', [now()], "Fetch bafang data completed -----?"));
+			
+		return $result;
+	}
+	
+	private function _updateToLocal($orderData)
+	{
+		if (empty($orderData))
+			return TRUE;
+		
+		$this->info(Str::replaceArray('?', [now()], "Update bafang data to local start -----?"));
+			
+		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate, updateAt)
+		$query = DB::connection('PosOrder')->table('bf_sale01');
+		$upsert = collect($orderData)->chunk(100);
+		
+		foreach ($upsert as $items) 
+		{
+			$rows = [];
+			
+			foreach($items as $item)
+			{
+				$row = [];
+				$row['saleId']  	= $item['SALE_ID'];
+				$row['saleSno'] 	= $item['SALE_SNO'];
+				$row['shopId']  	= $item['SHOP_ID'];
+				$row['productId'] 	= $item['PROD_ID'];
+				$row['price']     	= $item['SALE_PRICE'];
+				$row['qty']       	= $item['QTY'];
+				$row['discount']  	= $item['ITEM_DISC'];
+				$row['taste']     	= $item['TASTE_MEMO'];
+				$row['saleDate']  	= $item['SALE_DATE'];
+				$row['updateAt'] 	= now()->format('Y-m-d H:i:s');
+			
+				$rows[] = $row;
+			}
+				
+			$result = $query->upsert(
+				$rows,
+				[
+					'saleId',
+					'saleSno',
+					'shopId',
+				],
+				[
+					'updateAt'
+				]
+			);
+		}
+		
+		$this->info(Str::replaceArray('?', [now()], "Update bafang data to local completed -----?"));
+			
+		return $result;
 	}
 }
