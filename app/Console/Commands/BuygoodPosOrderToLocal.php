@@ -40,21 +40,13 @@ class BuygoodPosOrderToLocal extends Command
 			
 			Log::channel('commandLog')->info(Str::replaceArray('?', [$stDate, $endDate], "Params:?~? -----"));
 			
-			if (Carbon::parse($endDate)->isAfter(now())) 
-			{
-				Cache::put($this->cacheKey, now(), now()->addMinutes(20));
-				Log::channel('commandLog')->info("No update -----");
-			}
-			else
-			{
-				$orderData = $this->_fetchOrder($stDate, $endDate);
-				
-				$this->_updateToLocal($orderData);
-				
-				Cache::put($this->cacheKey, $endDate, now()->addMinutes(60));
-				
-				Log::channel('commandLog')->info(Str::replaceArray('?', [count($orderData), now()], "Fetch buygood data completed:? ----- ?"), [ __class__, __function__, __line__]);
-			}
+			$orderData = $this->_fetchOrder($stDate, $endDate);
+			
+			$this->_updateToLocal($orderData);
+			
+			Cache::put($this->cacheKey, $endDate, now()->addMinutes(60));
+			
+			Log::channel('commandLog')->info(Str::replaceArray('?', [count($orderData), now()], "Fetch buygood data completed:? ----- ?"), [ __class__, __function__, __line__]);
 		}
 		catch(Exception $e)
 		{
@@ -73,7 +65,12 @@ class BuygoodPosOrderToLocal extends Command
 			$stDate = '2025-09-01';
 		
 		$stDate = Carbon::parse($stDate)->subMinutes(5)->format('Y-m-d H:i:s');
-		$endDate = Carbon::parse($stDate)->addMinutes(60)->format('Y-m-d H:i:s');
+		$endDate = Carbon::parse($stDate)->addMinutes(60);
+		
+		if (Carbon::parse($endDate)->isAfter(now())) 
+			$endDate = now()->format('Y-m-d H:i:s');
+		else
+			$endDate = $endDate->format('Y-m-d H:i:s');
 		
 		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end -----?~?"));
 		

@@ -47,6 +47,8 @@ class LegacyOrderTrait
 	 */
 	private function _getPurchaseResult($db, $startDateTime, $endDateTime, $codes)
 	{
+		#shipment:	getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $userAreaIds)
+		#montly:	getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds)
 		$exceptShopIds = ['10006000', '999111', '999999', '10007000','1000','1100000'];
 		
 		$first = DB::table('users')
