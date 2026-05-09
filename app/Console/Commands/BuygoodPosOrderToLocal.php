@@ -41,7 +41,10 @@ class BuygoodPosOrderToLocal extends Command
 			Log::channel('commandLog')->info(Str::replaceArray('?', [$stDate, $endDate], "Params:?~? -----"));
 			
 			if (Carbon::parse($endDate)->isAfter(now())) 
+			{
+				Cache::put($this->cacheKey, now(), now()->addMinutes(20));
 				Log::channel('commandLog')->info("No update -----");
+			}
 			else
 			{
 				$orderData = $this->_fetchOrder($stDate, $endDate);
