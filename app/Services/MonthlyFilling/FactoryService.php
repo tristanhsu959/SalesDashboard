@@ -73,7 +73,7 @@ class FactoryService
 			
 			#2. Get Order data
 			$orderData = $this->_getDataFromDB($productIds);
-			$extraData = $this->_getExtraDataFromDB();
+			#$extraData = $this->_getExtraDataFromDB();
 			
 			return $this->_outputReport($orderData);
 		}
