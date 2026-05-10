@@ -135,7 +135,7 @@ class ShipmentsViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics)))
+		if (empty($this->statistics['exportToken']))
 			return TRUE;
 		else
 			return FALSE;
