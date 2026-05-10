@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\PosRepositoryTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,7 +12,7 @@ use Exception;
 
 class DailyRevenueRepository extends Repository
 {
-	use PosTrait;
+	use PosRepositoryTrait;
 	
 	public function __construct()
 	{
@@ -51,13 +51,13 @@ class DailyRevenueRepository extends Repository
 		return $query;
 	}
 	
-	/* 取營收資料 SALE00
+	/* 取營收資料 SALE00/有sum處理過
 	 * @params: enums
 	 * @params: datetime
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds)
+	public function getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName)
 	{
 		$configCode = $brand->code();
 		$excepts = config("web.sales.shop.except.{$configCode}");
@@ -85,10 +85,13 @@ class DailyRevenueRepository extends Repository
 				->where('a.SALE_DATE', '<=', $endDate)
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->whereIn('b.SHOP_KIND', $shopType)
-				->whereIn('b.gid', $authAreaIds)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
-				->when($authAreaIds, function ($query, $authAreaIds) {
+				->whereIn('b.gid', $authAreaIds)
+				/* ->when($authAreaIds, function ($query, $authAreaIds) {
 					return $query->whereIn('b.gid', $authAreaIds);
+				}) */
+				->when(! empty($shopName), function ($query) use ($shopName) {
+					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
 				})
 				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
 				->get()

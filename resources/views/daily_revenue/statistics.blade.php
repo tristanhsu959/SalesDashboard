@@ -30,8 +30,8 @@
 		</div>
 		
 		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
-			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
+			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
 			<label>找店名</label>
 		</div>
 		
@@ -81,7 +81,7 @@
 			</div>
 		</article>
 		@else
-		<div class="statistics">
+		<div x-data='statisticsData(@json($viewModel->statistics))' class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -93,23 +93,21 @@
 					<table class="">
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>店家數</th>
-								@foreach($viewModel->statistics['header'] as $date)
-								<th>{{$date}}</th>
-								@endforeach
+								<template x-for="(headerName, headerKey) in areaData.header" :key="headerKey">
+									<th x-text="headerName"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['area'] as $id => $area)
+							<template x-for="(row, areaKey) in areaData.data" :key="areaKey">
 							<tr>
-								<th>{{ data_get($area, 'areaName', '') }}</th>
-								<th>{{ data_get($area, 'shopCount', 0) }}</th>
-								@foreach($viewModel->statistics['header'] as $date)
-								<td>{{ Number::currency(data_get($area, "dayAmount.$date", 0), precision: 0) }}</td>
-								@endforeach
+								<td x-text="row.areaName"></td>
+								<td x-text="row.shopCount"></td>
+								<template
+								<td x-text="row.dayAmount"></td>
+								<td>{{-- Number::currency(data_get($area, "dayAmount.$date", 0), precision: 0) --}}</td>
 							</tr>
-							@endforeach
+							</template>
 						</tbody>
 					</table>
 				</section>
@@ -125,26 +123,22 @@
 								<th>門店代號</th>
 								<th>門店名稱</th>
 								<th>類型</th>
-								@foreach($viewModel->statistics['header'] as $date)
-								<th class="col-date">{{$date}}</th>
-								@endforeach
+								<th class="col-date">{{--$date--}}</th>
+								
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
 							<tr>
-								<th>{{ $shop['areaName'] }}</th>
-								<th>{{ $shopId }}</th>
-								<th>{{ $shop['shopName'] }}</th>
-								<th>{{ $shop['shopTypeName'] }}</th>
+								<th>{{-- $shop['areaName'] --}}</th>
+								<th>{{-- $shopId --}}</th>
+								<th>{{-- $shop['shopName'] --}}</th>
+								<th>{{-- $shop['shopTypeName'] --}}</th>
 								
-								@foreach($viewModel->statistics['header'] as $date)
 								<td>
-									{{ Number::currency(data_get($shop, "dayAmount.$date", 0), precision: 0) }}
+									{{-- Number::currency(data_get($shop, "dayAmount.$date", 0), precision: 0) --}}
 								</td>
-								@endforeach
 							</tr>
-							@endforeach
+							
 						</tbody>
 					</table>
 				</section>

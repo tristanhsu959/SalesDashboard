@@ -26,7 +26,7 @@ trait StoreServiceTrait
 	{
 		try
 		{
-			$cacheKey = HelperLib::buildCacheKey([$brand->value, 'pos', 'all-stores']);
+			$cacheKey = HelperLib::buildCacheKey([$brand->value, $userAreaIds, $type, $name, 'pos', 'all-stores']);
 			
 			if (Cache::has($cacheKey))
 				return Cache::get($cacheKey); #cache data is response format
@@ -55,7 +55,8 @@ trait StoreServiceTrait
 	{
 		try
 		{
-			$cacheKey = HelperLib::buildCacheKey([$brand->value, 'pos', 'active-stores']);
+			#必須要有全部的值, 尤其是areaid
+			$cacheKey = HelperLib::buildCacheKey([$brand->value, $userAreaIds, $type, $name, 'pos', 'active-stores']);
 			
 			if (Cache::has($cacheKey))
 				return Cache::get($cacheKey); #cache data is response format

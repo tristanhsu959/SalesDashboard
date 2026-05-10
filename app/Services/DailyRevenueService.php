@@ -81,14 +81,14 @@ class DailyRevenueService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType, $searchStoreName)
+	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType, $searchShopName)
 	{
 		try
 		{
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $searchStDate, $searchEndDate, $searchShopType, $searchStoreName]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
 			
 			#主要是for即時，故每次都query
 			/* if (Cache::has($cacheKey))
@@ -104,8 +104,11 @@ class DailyRevenueService
 				
 				$this->_initStatistics($brand, $searchStDate, $searchEndDate);
 				
+				if (empty($this->_userAreaIds))
+					throw new Exception('此帳號無區域瀏覽權限');
+				
 				#執行統計
-				$this->_analysisStatisticsData($searchShopType, $searchStoreName);
+				$this->_analysisStatisticsData($searchShopType, $searchShopName);
 				
 				#無值不cache
 				if (! empty($this->_statistics['shop']) OR ! empty($this->_statistics['area']))
@@ -147,24 +150,20 @@ class DailyRevenueService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($searchShopType, $searchStoreName)
+	private function _analysisStatisticsData($searchShopType, $searchShopName)
 	{
 		try
 		{
-			#1. Calc time : date time
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
+			#1. Prepare shop data
+			$this->_shopList['all'] 	= $this->_getAllStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchShopName);
+			$this->_shopList['active'] 	= $this->_getActiveStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchShopName);
 			
-			#2. Get all shops with area permission
-			$this->_shopList['all'] 	= $this->_getAllStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchStoreName);
-			$this->_shopList['active'] 	= $this->_getActiveStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchStoreName);
+			#2. Get POS data
+			$saleData = $this->_getDataFromDB($searchShopType, $searchShopName);
 			
-			#3. Get POS data
-			$saleData = $this->_getDataFromDB($this->_brand, $userAreaIds, $stDate, $endDate, $shopType);
-			
-			#4. Build base data
+			#3. Build base data
 			#會有false的無效array, 用array_filter去除
-			$baseData = $this->_buildBaseData($brand, array_filter($saleData));
+			$baseData = $this->_buildBaseData(array_filter($saleData));
 			unset($saleData);
 			
 			return $this->_outputReport($baseData);
@@ -177,31 +176,6 @@ class DailyRevenueService
 	}
 	/* ====================== 主流程 End ====================== */
 	
-	/* 取店家-
-	 * @params: collection
-	 * @return: array
-	 */
-	/* private function _getStoreList($searchShopType, $searchStoreName)
-	{
-		try
-		{
-			#這裏取有效的shop
-			$this->_shopList['all'] = $this->_repository->getShopList($this->_brand, $this->_userAreaPermissions);
-			$this->_shopList['active'] = $this->_repository->getHptransShopList($this->_brand, $this->_userAreaPermissions);
-			dd($this->_shopList);
-			$this->_shopList['active'] = collect($this->_shopList['active'])->filter(function($item, $key) use($shopType) {
-				return in_array($item['typeId'], $shopType);
-			})->toArray();
-			
-			return TRUE;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料發生錯誤');
-		}
-	} */
-	
 	/* Get main data & mapping data
 	 * @params: enums
 	 * @params: date
@@ -209,11 +183,14 @@ class DailyRevenueService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds)
+	private function _getDataFromDB($shopType, $shopName)
 	{
 		try
 		{
-			$saleData = $this->_repository->getSale00Data($brand, $stDate, $endDate, $shopType, $userAreaIds);
+			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
+			
+			$saleData = $this->_repository->getSale00Data($this->_brand, $this->_userAreaIds, $stDate, $endDate, $shopType, $shopName);
 			
 			return $saleData;
 		}
@@ -226,26 +203,27 @@ class DailyRevenueService
 	
 	
 	
-	/* 基底資料
+	/* 基底資料(DB已計算Sum)
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($brand, $saleData)
+	private function _buildBaseData($saleData)
 	{
 		/*
-		[
-		330002 => [
-			"shopId" => "350001"
-			"saleDate" => "2025-09-22"
-			"amount" => "4"
-			"shopName" => "御廚竹南博愛店"
-			"areaId" => 3
-			"areaName" => "桃竹苗區"
+		0 => array:8 [▼
+		  "shopId" => "0035"
+		  "shopName" => "0035中壢海華直營店"
+		  "areaId" => 3
+		  "areaName" => "桃竹苗區"
+		  "shopType" => "1"
+		  "shopTypeName" => "直營店"
+		  "saleDate" => "2026-05-10"
+		  "amount" => "18735.0000"
 		]
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = $this->_filterDataByShop($brand, $saleData);
+		$saleData = $this->_filterDataByShop($this->_brand, $saleData);
 		
 		#改成Shop資料來自DB,避免閉店沒有關聯到(不用$groupShopList來取)
 		$baseData = collect($saleData)->map(function($item, $key) {
@@ -261,10 +239,10 @@ class DailyRevenueService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filterShops = $this->_getFillShop($saleShopIds);
+		$fillShops = $this->_getFillShop($saleShopIds);
 		
 		#重建
-		$filterShops = $filterShops->map(function($item, $key) {
+		$fillShops = $fillShops->map(function($item, $key) {
 			$temp['shopId'] 		= $item['shopId'];
 			$temp['shopName'] 		= $item['shopName'];
 			$temp['shopType'] 		= $item['typeId'];
@@ -277,7 +255,7 @@ class DailyRevenueService
 			return $temp;
 		});
 		
-		$baseData = $baseData->merge($filterShops)->sortBy('areaId')->toArray();
+		$baseData = $baseData->merge($fillShops)->sortBy('areaId')->toArray();
 		
 		return $baseData;
 	}
@@ -293,14 +271,16 @@ class DailyRevenueService
 	{
 		try
 		{
-			#1.Header
-			$this->_statistics['header'] = $this->_buildHeader();
+			#1.Header(共用)
+			$dayList = $this->_buildDayList();
 			
 			#2.店別每日營收
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData);
+			$this->_statistics['shop']['header']= $this->_buildShopHeader($dayList);
+			$this->_statistics['shop']['data']	= $this->_parsingByShop($baseData);
 			
 			#3.區域彙每日總營收
-			$this->_statistics['area'] = $this->_parsingByArea($baseData);
+			$this->_statistics['area']['header']= $this->_buildAreaHeader($dayList);
+			$this->_statistics['area']['data']	= $this->_parsingByArea($baseData);
 			
 			/***** Statistics End *****/
 			return TRUE;
@@ -316,7 +296,7 @@ class DailyRevenueService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildHeader()
+	private function _buildDayList()
 	{
 		$st 		= Carbon::create($this->_statistics['startDate']);
 		$end 		= Carbon::create($this->_statistics['endDate']);
@@ -326,13 +306,42 @@ class DailyRevenueService
 
 		foreach ($period as $date) 
 		{
-			$dateList[] = $date->format('Y-m-d');
+			$dateFormat = $date->format('Y-m-d');
+			$dateList[$dateFormat] = $dateFormat;
 		}
 		
 		return $dateList;
 	}
 	
+	/* Header for shop & area
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildShopHeader($dayList)
+	{
+		$prefix = [
+			'areaName'		=> '區域', 
+			'shopId'		=> '門店代號', 
+			'shopName'		=> '門店名稱', 
+			'shopTypeName'	=> '類型',
+		];
+		
+		return array_merge($prefix, $dayList);
+	}
 	
+	/* Header for shop & area
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildAreaHeader($dayList)
+	{
+		$prefix = [
+			'areaName'		=> '區域', 
+			'shopCount'		=> '店家數', 
+		];
+		
+		return array_merge($prefix, $dayList);
+	}
 	
 	/* 店別每日營收
 	 * @params: array
@@ -356,7 +365,9 @@ class DailyRevenueService
 		if (empty($baseData))
 			return [];
 		
+		#'區域', '門店代號', '門店名稱', '類型'
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
+			$temp['shopId'] 		= $item->pluck('shopId')->first();
 			$temp['shopName'] 		= $item->pluck('shopName')->first();
 			$temp['shopTypeName'] 	= $item->pluck('shopTypeName')->first();
 			$temp['areaId'] 		= $item->pluck('areaId')->first();
@@ -373,10 +384,10 @@ class DailyRevenueService
 			return $temp; 
 		})->sortBy('areaId')->toArray();
 		
-		$result['總計']['shopName'] 		= ''; 
-		$result['總計']['shopTypeName'] 	= ''; 
-		$result['總計']['areaName'] 		= ''; 
-		$result['總計']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
+		$result['total']['shopName'] 	= '總計'; 
+		$result['total']['shopTypeName']= ''; 
+		$result['total']['areaName'] 	= ''; 
+		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
 			return [$date => round($items->pluck('amount')->sum())];
 		})->toArray();
 		
@@ -431,49 +442,6 @@ class DailyRevenueService
 		
 		return $result;
 	}
-	
-	/* 當日銷售前10名
-	 * @params: array
-	 * @params: date
-	 * @return: array
-	 */
-	private function _parsingByRanking($baseData, $endDate)
-	{
-		/* 以銷售量來group shop
-		[
-			"103001" => [
-				"shopId" => "103001"
-				"shopName" => "御廚民生承德直營店"
-				"area" => "大台北區"
-				"saleDate" => '2026-01-01'
-				"qty" => 29
-			]
-		]
-		*/
-		
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [[], []];
-		
-		#排名是依最後一天的值
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) use($endDate) {
-			#需考量沒有訂單的狀況
-			$dayData = $items->groupBy('saleDate')->get($endDate, collect([]))->first();
-			
-			$temp = $items->first(); #當基底資料
-			#$temp['saleDate'] 	= $endDate;
-			$temp['qty']		= intval(data_get($dayData, 'qty', 0)); 
-			unset($temp['saleDate'], $temp['areaId']);
-			
-			return $temp;
-		});
-		
-		$top = $result->sortByDesc('qty')->groupBy('qty')->take(10)->values()->toArray();
-		$last = $result->sortBy('qty')->groupBy('qty')->take(10)->values()->toArray();
-		
-		return [$top, $last];
-	}
-	
 	
 	/* Export data
 	 * @params: enum

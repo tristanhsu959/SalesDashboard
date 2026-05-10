@@ -41,8 +41,16 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.stDate = searchData.today;
 			this.searchData.endDate = searchData.today;
-			this.searchData.storeName = '';
+			this.searchData.shopName = '';
 			this.errors.clear();
+		},
+    }));
+	
+	Alpine.data('statisticsData', (data) => ({
+		areaData: {...data.area},
+		shopData: {...data.shop},
+		
+		init() {
 		},
     }));
 });

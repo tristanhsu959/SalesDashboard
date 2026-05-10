@@ -46,12 +46,12 @@ class DailyRevenueController extends Controller
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
 		$searchShopType	= $request->input('searchShopType', array_keys(config('web.sales.shop.type'))); #未選取查全部
-		$searchStoreName= $request->input('searchStoreName');
+		$searchShopName= $request->input('searchShopName');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchShopType);
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchShopType, $searchShopName);
 		
-		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType, $searchStoreName);
+		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
