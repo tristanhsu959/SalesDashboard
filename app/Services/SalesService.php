@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Facades\AppManager;
 use App\Repositories\SalesRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Traits\AuthTrait;
 use App\Services\Traits\Sales\ShopTrait;
 use App\Enums\Brand;
@@ -115,10 +116,16 @@ class SalesService
 	{
 		try
 		{
+			if (AppManager::hasAreaPermission() === FALSE)
+				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
+			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser->roleArea; #
+			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchCategory, implode('-', $searchProductIds)]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, implode('-', $searchProductIds)]);
 			
 			if (Cache::has($cacheKey))
 			{

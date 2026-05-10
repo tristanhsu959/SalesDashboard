@@ -6,6 +6,7 @@ use App\Facades\AppManager;
 use App\Repositories\NewReleaseRepository;
 use App\Services\Traits\Sales\ShopTrait;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -93,10 +94,16 @@ class NewReleaseService
 	{
 		try
 		{
+			if (AppManager::hasAreaPermission() === FALSE)
+				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
+			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser->roleArea; #
+			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchReleaseId, $searchStDate, $searchEndDate]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 			
 			if (Cache::has($cacheKey))
 			{

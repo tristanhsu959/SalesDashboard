@@ -6,6 +6,7 @@ use App\Services\MonthlyFilling\FactoryService;
 use App\Services\MonthlyFilling\StoreService;
 use App\Facades\AppManager;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -80,9 +81,13 @@ class MonthlyFillingService
 				$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
 			}
 			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser->roleArea; #
+			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+			#$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
 			
 			if (Cache::has($cacheKey))
 			{

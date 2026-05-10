@@ -7,6 +7,7 @@ use App\Services\Merchant\InfoService;
 use App\Services\Merchant\DayoffService;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -76,13 +77,17 @@ class MerchantService
 	{
 		try
 		{
-			/* if (AppManager::hasAreaPermission() === FALSE)
-				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限'); */
+			if (AppManager::hasAreaPermission() === FALSE)
+				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
+			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser->roleArea; #
 			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = $searchStDate; #目前只有單日查詢
-			$cacheKey = implode(':', [$functions->value, $searchType, $searchStDate]);
+			#$cacheKey = implode(':', [$functions->value, $searchType, $searchStDate]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
 			
 			$this->_statistics['modeType']	= $searchType;
 			$this->_statistics['brandId']	= $brand->value; 

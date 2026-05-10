@@ -8,6 +8,7 @@ use App\Services\Traits\Purchase\ProductTrait;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -153,10 +154,15 @@ class ShipmentsService
 			$this->_statistics['startDate'] = (new Carbon($params['searchStDate']))->format('Y-m-d'); 
 			$this->_statistics['endDate'] 	= (new Carbon($params['searchEndDate']))->format('Y-m-d');
 			
+			$currentUser = AppManager::getCurrentUser();
+			$userAreaIds = $currentUser->roleArea; #
+			
 			if ($params['searchBy'] == 'keyword')
-				$cacheKey = implode(':', [$functions->value, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+				$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+				#$cacheKey = implode(':', [$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
 			else
-				$cacheKey = implode(':', [$functions->value, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], implode('-', $params['searchShortCodes']), $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+				$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], $params['searchShortCodes'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
+				#$cacheKey = implode(':', [$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], implode('-', $params['searchShortCodes']), $params['searchType'], $params['searchCalc'], $params['searchBy']]);
 		
 			if (Cache::has($cacheKey))
 			{
