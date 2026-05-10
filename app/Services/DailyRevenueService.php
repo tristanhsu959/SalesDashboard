@@ -4,12 +4,13 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Repositories\DailyRevenueRepository;
-use App\Services\Traits\Sales\ShopTrait;
-use App\Libraries\ResponseLib;
+use App\Services\Traits\Sales\StoreServiceTrait;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
+use App\Libraries\HelperLib;
+use App\Libraries\ResponseLib;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -25,9 +26,12 @@ use OpenSpout\Common\Entity\Row;
 
 class DailyRevenueService
 {
-	use ShopTrait;
+	use StoreServiceTrait;
 	
 	private $_statistics	= [];
+	private $_brand			= NULL;
+	private $_userAreaIds 	= [];
+	private $_storeList		= [];
    
 	public function __construct(protected DailyRevenueRepository $_repository)
 	{
@@ -35,11 +39,13 @@ class DailyRevenueService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'header'		=> [],
 			'shop' 			=> [],
 			'area' 			=> [],
 			'exportToken'	=> '', #export
 		];
+		
+		$this->_storeList['all'] 	= [];
+		$this->_storeList['active'] = [];
 	}
 	
 	/* Parsing brand from url segment
@@ -72,42 +78,40 @@ class DailyRevenueService
 	 * @params: date
 	 * @params: date
 	 * @params: array
+	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType)
+	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchShopType, $searchStoreName)
 	{
 		try
 		{
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, implode('-', $searchShopType)]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $searchStDate, $searchEndDate, $searchShopType, $searchStoreName]);
 			
 			#主要是for即時，故每次都query
-			if (Cache::has($cacheKey))
+			/* if (Cache::has($cacheKey))
 			{
-				Log::channel('appServiceLog')->info('Get daily revenue data from cache');
+				Log::channel('appServiceLog')->info('Get daily revenue from cache');
 				
 				$statistics = Cache::get($cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
-			else
+			else */
 			{
-				Log::channel('appServiceLog')->info('Get daily revenue data from db');
+				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
-				$this->_statistics['brandId']	= $brand->value; 
-				#儲存頁面計算天數用日期
-				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
-				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+				$this->_initStatistics($brand, $searchStDate, $searchEndDate);
 				
 				#執行統計
-				$response = $this->_analysisStatisticsData($brand, $searchShopType);
+				$this->_analysisStatisticsData($searchShopType, $searchStoreName);
 				
 				#無值不cache
-				if (! empty($this->_statistics['shop']))
+				if (! empty($this->_statistics['shop']) OR ! empty($this->_statistics['area']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(5));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -119,30 +123,46 @@ class DailyRevenueService
 		}
 	}
 	
+	/* 初始代統計資料
+	 * @params: enums
+	 * @params: array
+	 * @return: array
+	 */
+	private function _initStatistics($brand, $searchStDate, $searchEndDate)
+	{
+		$this->_brand = $brand;
+		
+		#儲存統計結果所需資料(與頁面呈現有關)
+		$this->_statistics['brandId']	= $brand->value; 
+		$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
+		$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+		
+		#區域權限
+		$currentUser = AppManager::getCurrentUser();
+		$this->_userAreaIds = $currentUser->roleArea; 
+	}
+	
 	/* 取新品銷售統計
 	 * @params: enums
 	 * @params: array
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand, $shopType)
+	private function _analysisStatisticsData($searchShopType, $searchStoreName)
 	{
 		try
 		{
-			#1. Calc time
+			#1. Calc time : date time
 			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
-			#2. 檢查區域權限
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds =$currentUser->roleArea; 
+			#2. Get all shops with area permission
+			$this->_shopList['all'] 	= $this->_getAllStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchStoreName);
+			$this->_shopList['active'] 	= $this->_getActiveStores($this->_brand, $this->_userAreaIds, $searchShopType, $searchStoreName);
 			
-			#3. Get all shops with area permission
-			$this->_getShopListByType($brand, $userAreaIds, $shopType);
+			#3. Get POS data
+			$saleData = $this->_getDataFromDB($this->_brand, $userAreaIds, $stDate, $endDate, $shopType);
 			
-			#4. Get POS data
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $shopType, $userAreaIds);
-			
-			#5. Build base data
+			#4. Build base data
 			#會有false的無效array, 用array_filter去除
 			$baseData = $this->_buildBaseData($brand, array_filter($saleData));
 			unset($saleData);
@@ -157,18 +177,18 @@ class DailyRevenueService
 	}
 	/* ====================== 主流程 End ====================== */
 	
-	/* 取店家-因要考量無營收的狀況,如店休,則不會有訂單
+	/* 取店家-
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _getShopListByType($brand, $userAreaIds, $shopType)
+	/* private function _getStoreList($searchShopType, $searchStoreName)
 	{
 		try
 		{
 			#這裏取有效的shop
-			$this->_getShopList($brand, $userAreaIds);
-			#$shopList = $this->_repository->getShopList($brand, $userAreaIds);
-			
+			$this->_shopList['all'] = $this->_repository->getShopList($this->_brand, $this->_userAreaPermissions);
+			$this->_shopList['active'] = $this->_repository->getHptransShopList($this->_brand, $this->_userAreaPermissions);
+			dd($this->_shopList);
 			$this->_shopList['active'] = collect($this->_shopList['active'])->filter(function($item, $key) use($shopType) {
 				return in_array($item['typeId'], $shopType);
 			})->toArray();
@@ -180,7 +200,7 @@ class DailyRevenueService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料發生錯誤');
 		}
-	}
+	} */
 	
 	/* Get main data & mapping data
 	 * @params: enums

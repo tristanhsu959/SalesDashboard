@@ -41,6 +41,7 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.stDate = searchData.today;
 			this.searchData.endDate = searchData.today;
+			this.searchData.storeName = '';
 			this.errors.clear();
 		},
     }));

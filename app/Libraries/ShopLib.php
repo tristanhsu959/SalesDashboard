@@ -5,6 +5,7 @@ namespace App\Libraries;
 use Illuminate\Support\Str;
 use App\Enums\Area;
 
+#目前只有舊的command有用到, 應可deprecated
 class ShopLib
 {
 	/* Get area name

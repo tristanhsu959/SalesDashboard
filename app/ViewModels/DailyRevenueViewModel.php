@@ -75,14 +75,16 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($stDate = '', $endDate = '', $shopType = [])
+	public function keepSearchData($stDate = '', $endDate = '', $shopType = [], $storeName = '')
     {
+		#Init default type
 		if (empty($stDate) && empty($endDate) && empty($shopType))
 			$shopType[] = 1; #Default直營
 		
 		$this->set('search.stDate', $stDate);
 		$this->set('search.endDate', $endDate);
 		$this->set('search.shopType', $shopType);
+		$this->set('search.storeName', $storeName);
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));
 	}
 	

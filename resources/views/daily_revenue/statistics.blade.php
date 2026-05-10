@@ -29,6 +29,12 @@
 			<label>結束日期</label>
 		</div>
 		
+		<div class="space"></div>
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
+			<label>找店名</label>
+		</div>
+		
 		<div class="field middle-align">
 			<nav>
 				<template x-for="(name, id) in options.shopType" :key="id">
