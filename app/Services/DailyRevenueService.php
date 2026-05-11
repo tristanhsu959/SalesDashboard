@@ -91,14 +91,14 @@ class DailyRevenueService
 			$cacheKey = HelperLib::buildCacheKey([$functions->value, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
 			
 			#主要是for即時，故每次都query
-			/* if (Cache::has($cacheKey))
+			if (Cache::has($cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get daily revenue from cache');
 				
 				$statistics = Cache::get($cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
-			else */
+			else
 			{
 				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
@@ -114,7 +114,7 @@ class DailyRevenueService
 				if (! empty($this->_statistics['shop']) OR ! empty($this->_statistics['area']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(5));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(30));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -274,16 +274,15 @@ class DailyRevenueService
 			#1.Header(共用)
 			$dayList = $this->_buildDayList();
 			
-			#2.店別每日營收
-			$this->_statistics['shop']['header']= $this->_buildShopHeader($dayList);
-			$this->_statistics['shop']['data']	= $this->_parsingByShop($baseData);
+			#2.區域彙每日總營收
+			$areaData = $this->_parsingByArea($baseData);
+			$this->_buildOutputByArea($areaData, $dayList);
 			
-			#3.區域彙每日總營收
-			$this->_statistics['area']['header']= $this->_buildAreaHeader($dayList);
-			$this->_statistics['area']['data']	= $this->_parsingByArea($baseData);
+			#3.店別每日營收
+			$shopData = $this->_parsingByShop($baseData);
+			$this->_buildOutputByShop($shopData, $dayList);
 			
-			/***** Statistics End *****/
-			return TRUE;
+			return $this->_statistics;
 		}
 		catch(Exception $e)
 		{
@@ -306,93 +305,13 @@ class DailyRevenueService
 
 		foreach ($period as $date) 
 		{
-			$dateFormat = $date->format('Y-m-d');
-			$dateList[$dateFormat] = $dateFormat;
+			$date = $date->format('Y-m-d');
+			$dateList[$date] = $date;
 		}
 		
 		return $dateList;
 	}
 	
-	/* Header for shop & area
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildShopHeader($dayList)
-	{
-		$prefix = [
-			'areaName'		=> '區域', 
-			'shopId'		=> '門店代號', 
-			'shopName'		=> '門店名稱', 
-			'shopTypeName'	=> '類型',
-		];
-		
-		return array_merge($prefix, $dayList);
-	}
-	
-	/* Header for shop & area
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildAreaHeader($dayList)
-	{
-		$prefix = [
-			'areaName'		=> '區域', 
-			'shopCount'		=> '店家數', 
-		];
-		
-		return array_merge($prefix, $dayList);
-	}
-	
-	/* 店別每日營收
-	 * @params: array
-	 * @params: int
-	 * @return: array
-	 */
-	private function _parsingByShop($baseData)
-	{
-		/* Output
-		[
-		330002 => [
-			"shopName" => "御廚豐原向陽店"
-			"areaName" => "中彰投區"
-			"dayAmount" =>  [
-				"2025-09-15" => 666.0
-				"2025-09-14" => 777.0
-			]
-		]
-		*/
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [];
-		
-		#'區域', '門店代號', '門店名稱', '類型'
-		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) {
-			$temp['shopId'] 		= $item->pluck('shopId')->first();
-			$temp['shopName'] 		= $item->pluck('shopName')->first();
-			$temp['shopTypeName'] 	= $item->pluck('shopTypeName')->first();
-			$temp['areaId'] 		= $item->pluck('areaId')->first();
-			$temp['areaName'] 		= $item->pluck('areaName')->first();
-			
-			#整理Amount成Daily形式
-			$temp['dayAmount'] = $item->mapWithKeys(function($item, $key){
-				if (! empty($item['saleDate']))
-					return [$item['saleDate'] => round($item['amount'])];
-				else
-					return [];
-			})->toArray();
-			
-			return $temp; 
-		})->sortBy('areaId')->toArray();
-		
-		$result['total']['shopName'] 	= '總計'; 
-		$result['total']['shopTypeName']= ''; 
-		$result['total']['areaName'] 	= ''; 
-		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-			return [$date => round($items->pluck('amount')->sum())];
-		})->toArray();
-		
-		return $result;
-	}
 	
 	/* 區域營收By Day
 	 * @params: array
@@ -441,6 +360,124 @@ class DailyRevenueService
 		})->toArray();
 		
 		return $result;
+	}
+	
+	/* 區域每日營收
+	 * @params: array
+	 * @params: int
+	 * @return: array
+	 */
+	private function _buildOutputByArea($areaData, $dayList)
+	{
+		$prefix = [
+			'areaName'	=> '區域', 
+			'shopCount' => '門店數', 
+		];
+		
+		$header = array_merge($prefix, $dayList);
+		$this->_statistics['area']['header'] = $header;
+		
+		#'區域', '門店數'
+		foreach($areaData as $key => $item)
+		{
+			$row = [];
+			$row['areaName'] 	= $item['areaName'];	
+			$row['shopCount'] 	= $item['shopCount'];
+			
+			foreach($dayList as $date)
+			{
+				$row[$date] = data_get($item, "dayAmount.{$date}", 0);
+			}
+			
+			$this->_statistics['area']['data'][] = $row; 
+		}
+	}
+	
+	/* 店別每日營收
+	 * @params: array
+	 * @params: int
+	 * @return: array
+	 */
+	private function _parsingByShop($baseData)
+	{
+		/* Output: 20260510改併成一個array,也方便export
+		[
+		330002 => [
+			"shopName" => "御廚豐原向陽店"
+			"areaName" => "中彰投區"
+			"dayAmount" =>  [
+				"2025-09-15" => 666.0
+				"2025-09-14" => 777.0
+			]
+		]
+		*/
+		#會有無設定區域權限的狀況, 須判別
+		if (empty($baseData))
+			return [];
+		
+		#'區域', '門店代號', '門店名稱', '類型'
+		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
+			$temp['shopId'] 		= $items->pluck('shopId')->first();
+			$temp['shopName'] 		= $items->pluck('shopName')->first();
+			$temp['shopTypeName'] 	= $items->pluck('shopTypeName')->first();
+			$temp['areaId'] 		= $items->pluck('areaId')->first();
+			$temp['areaName'] 		= $items->pluck('areaName')->first();
+			
+			#整理Amount成Daily形式
+			$temp['dayAmount'] = $items->mapWithKeys(function($item, $key){
+				if (! empty($item['saleDate']))
+					return [$item['saleDate'] => round($item['amount'])];
+				else
+					return [];
+			})->toArray();
+			
+			return $temp; 
+		})->sortBy('areaId')->toArray();
+		
+		$result['total']['shopName'] 	= '總計'; 
+		$result['total']['shopTypeName']= ''; 
+		$result['total']['shopId'] 		= ''; 
+		$result['total']['areaName'] 	= ''; 
+		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
+				return [$date => round($items->pluck('amount')->sum())];
+			})->toArray();
+		
+		return $result;
+	}
+	
+	/* 店別每日營收
+	 * @params: array
+	 * @params: int
+	 * @return: array
+	 */
+	private function _buildOutputByShop($shopData, $dayList)
+	{
+		$prefix = [
+			'areaName'		=> '區域', 
+			'shopId'		=> '門店代號', 
+			'shopName'		=> '門店名稱', 
+			'shopTypeName'	=> '類型',
+		];
+		
+		$header = array_merge($prefix, $dayList);
+		$this->_statistics['shop']['header']= $header;
+		
+		#'區域', '門店代號', '門店名稱', '類型'
+		foreach($shopData as $key => $item)
+		{
+			$row = [];
+			$row['areaName'] 	= $item['areaName'];	
+			$row['shopId'] 		= $item['shopId'];
+			$row['shopName']	= $item['shopName'];
+			$row['shopTypeName']= $item['shopTypeName'];
+			
+			foreach($dayList as $date)
+			{
+				$row[$date] = data_get($item, "dayAmount.{$date}", 0);
+			}
+			
+			$this->_statistics['shop']['data'][] = $row; 
+		}
 	}
 	
 	/* Export data

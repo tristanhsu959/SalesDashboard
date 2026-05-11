@@ -62,7 +62,7 @@
 			<span>查詢</span>
 		</button>
 	
-		@if ($viewModel->hasExportData())
+		@if (! $viewModel->isDataEmpty())
 		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle extend red" type="button">
 			<i>download_2</i>
 			<span>下載</span>
@@ -90,7 +90,7 @@
 			<!-- 區域彙總 -->
 			<div class="page padding active" id="tab-area">
 				<section class="statistics-area">
-					<table class="">
+					<table>
 						<thead>
 							<tr>
 								<template x-for="(headerName, headerKey) in areaData.header" :key="headerKey">
@@ -99,13 +99,11 @@
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(row, areaKey) in areaData.data" :key="areaKey">
+							<template x-for="(row, rowKey) in areaData.data" :key="rowKey">
 							<tr>
-								<td x-text="row.areaName"></td>
-								<td x-text="row.shopCount"></td>
-								<template
-								<td x-text="row.dayAmount"></td>
-								<td>{{-- Number::currency(data_get($area, "dayAmount.$date", 0), precision: 0) --}}</td>
+								<template x-for="(headerName, headerKey) in areaData.header" :key="headerKey">
+									<td x-text="row[headerKey]"></td>
+								</template>
 							</tr>
 							</template>
 						</tbody>
@@ -119,26 +117,19 @@
 					<table class="stripes">
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>門店代號</th>
-								<th>門店名稱</th>
-								<th>類型</th>
-								<th class="col-date">{{--$date--}}</th>
-								
+								<template x-for="(headerName, headerKey) in shopData.header" :key="headerKey">
+									<th x-text="headerName"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
+							<template x-for="(row, rowKey) in shopData.data" :key="rowKey">
 							<tr>
-								<th>{{-- $shop['areaName'] --}}</th>
-								<th>{{-- $shopId --}}</th>
-								<th>{{-- $shop['shopName'] --}}</th>
-								<th>{{-- $shop['shopTypeName'] --}}</th>
-								
-								<td>
-									{{-- Number::currency(data_get($shop, "dayAmount.$date", 0), precision: 0) --}}
-								</td>
+								<template x-for="(headerName, headerKey) in shopData.header" :key="headerKey">
+									<td x-text="row[headerKey]"></td>
+								</template>
 							</tr>
-							
+							</template>
 						</tbody>
 					</table>
 				</section>

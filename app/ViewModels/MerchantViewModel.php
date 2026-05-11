@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
+#門店資訊
 class MerchantViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction;

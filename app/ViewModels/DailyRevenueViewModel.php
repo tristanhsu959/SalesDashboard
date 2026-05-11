@@ -90,18 +90,7 @@ class DailyRevenueViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics)))
-			return TRUE;
-		else
-			return FALSE;
-	}
-	
-	public function hasExportData()
-	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
-		else
-			return TRUE;
+		return empty($this->statistics['exportToken']);
 	}
 	
 	public function getBrandCode()

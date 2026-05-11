@@ -36,59 +36,18 @@ form {
 			padding: 0;
 			margin: 0;
 			border-radius: 4px;
+			color: var(--table-fixed-color);
 			
-			&.stripes tbody tr:nth-child(odd) {
-				background-color: var(--table-stripes);
-			}
-			
-			thead {
-				tr {
-					th {
-						position: sticky;
-						top: 0;
-						z-index: 5;
-						word-break: keep-all;
-						background-color: var(--table-bg);
-						width: 120px;
-						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
-						
-						&:nth-child(1) {
-							min-width: 120px;
-							width: 120px;
-							position: sticky;
-							left: 0;
-							z-index: 6;
-						}
-						&:nth-child(2) {
-							min-width: 120px;
-							width: 120px;
-							position: sticky;
-							left: 120px;
-							z-index: 6;
-						}
-					}
+			thead tr {
+				th {
+					word-break: keep-all;
+					background-color: var(--table-fixed-bg);
+					width: 120px;
 				}
 			}
 			
 			tbody {
 				tr {
-					th {
-						position: sticky;
-						font-weight: normal;
-						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
-						
-						&:nth-child(1) {
-							left: 0;
-							background-color: var(--table-fixed-bg);
-						}
-						&:nth-child(2) {
-							left: 120px;
-							background-color: var(--table-fixed-bg);
-						}
-					}
-					
 					td {
 						background-color: var(--table-bg);
 						color: #424242;
@@ -151,35 +110,26 @@ form {
 						background-color: var(--table-bg);
 						width: 120px;
 						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
 						
-						&:nth-child(1) {
-							/* min-width: 80px; */
+						&:nth-of-type(1) {
 							width: 80px;
-							position: sticky;
 							left: 0;
-							z-index: 6;
+							z-index: 10;
 						}
-						&:nth-child(2) {
-							min-width: 80px;
+						&:nth-of-type(2) {
 							width: 80px;
-							position: sticky;
 							left: 80px;
-							z-index: 6;
+							z-index: 10;
 						}
-						&:nth-child(3) {
-							min-width: 160px;
+						&:nth-of-type(3) {
 							width: 200px;
-							position: sticky;
 							left: 160px;
-							z-index: 6;
+							z-index: 10;
 						}
-						&:nth-child(4) {
-							min-width: 80px;
+						&:nth-of-type(4) {
 							width: 80px;
-							position: sticky;
 							left: 360px;
-							z-index: 6;
+							z-index: 10;
 						}
 					}
 				}
@@ -187,40 +137,41 @@ form {
 			
 			tbody {
 				tr {
-					th {
-						position: sticky;
+					td {
 						font-weight: normal;
-						z-index: 5;
-						color: var(--table-fixed-color); /*#1b3823;*/
-						/* border-bottom-width: 0; */
+						color: #424242;
 						
-						&:nth-child(1) {
+						&:nth-of-type(1) {
+							position: sticky;
 							left: 0;
 							background-color: var(--table-fixed-bg);
+							color: var(--table-fixed-color);
+							z-index: 5;
 						}
-						&:nth-child(2) {
+						&:nth-of-type(2) {
+							position: sticky;
 							left: 80px;
 							background-color: var(--table-fixed-bg);
+							color: var(--table-fixed-color);
+							z-index: 5;
 						}
-						&:nth-child(3) {
+						&:nth-of-type(3) {
+							position: sticky;
 							left: 160px;
 							background-color: var(--table-fixed-bg);
+							color: var(--table-fixed-color);
+							z-index: 5;
 						}
-						&:nth-child(4) {
+						&:nth-of-type(4) {
+							position: sticky;
 							left: 360px;
 							background-color: var(--table-fixed-bg);
+							color: var(--table-fixed-color);
+							z-index: 5;
 						}
 					}
 					
-					td {
-						color: #424242;
-						/* 總計 */
-						/* &:nth-last-child(-n + 2) {
-							color: #f44336;
-						} */
-					}
-					
-					&:last-child th, &:last-child td {
+					&:last-child td {
 						color: red;
 					}
 				}
