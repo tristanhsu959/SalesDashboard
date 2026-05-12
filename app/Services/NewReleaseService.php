@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Repositories\NewReleaseRepository;
-use App\Services\Traits\Sales\ShopTrait;
+use App\Services\Traits\Sales\StoreServiceTrait;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
 use App\Enums\Brand;
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -26,7 +27,7 @@ use OpenSpout\Common\Entity\Row;
 
 class NewReleaseService
 {
-	use ShopTrait;
+	use StoreServiceTrait;
 	
 	private $_brand			= NULL; #enum
 	private $_statistics	= [];
@@ -47,9 +48,6 @@ class NewReleaseService
 			'productName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
-		
-		$currentUser 		= AppManager::getCurrentUser();
-		$this->_userAreaIds = $currentUser->roleArea;
 	}
 	
 	/* Parsing brand from url segment
@@ -102,29 +100,28 @@ class NewReleaseService
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			#Check cache
-			$functions = $this->parsingFunction($brand);
-			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $this->_userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+			#Params都用pass(保留service可複用空間)
+			$params = $this->_initInputParams($brand, $searchReleaseId, $searchStDate, $searchEndDate);
 			
-			if (Cache::has($cacheKey))
+			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get new release data from cache');
 				
-				$statistics = Cache::get($cacheKey); #cache data is response format
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
 				Log::channel('appServiceLog')->info('Get new release data from db');
 				
-				$this->_statistics['brandId']	= $brand->value; 
-				#儲存頁面計算天數用日期
-				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
-				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
-				
 				#執行統計
-				$response = $this->_analysisStatisticsData($brand, $searchReleaseId);
+				$params = $this->_prepareData($params);
+				
+				#Build output data
+				$response = $this->_outputReport($baseData);
+				dd($params);
+				
+				#$this->generateStatistics();
 				
 				#無值不cache
 				if (! empty($this->_statistics['shop']))
@@ -142,38 +139,81 @@ class NewReleaseService
 		}
 	}
 	
-	/* 取新品銷售統計
+	/* Init input params
+	 * @params: enums
+	 * @params: integer
+	 * @params: string
+	 * @params: string
+	 * @return: array
+	 */
+	private function _initInputParams($brand, $searchReleaseId, $searchStDate, $searchEndDate)
+	{
+		$params = new Fluent();
+		
+		$currentUser = AppManager::getCurrentUser();
+		$userAreaIds = $currentUser->roleArea;
+		
+		$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		$functions = $this->parsingFunction($brand);
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+		
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->releaseId($searchReleaseId)->stDate($searchStDate)->endDate($searchEndDate)
+				->cacheKey($cacheKey);
+		
+		return $params;
+	}
+	
+	/* Generate statistics data
+	 * @params: object
+	 * @return: array
+	 */
+	private function _generateStatistics($params)
+	{
+		$this->_statistics = [
+			'brandId'		=> '', #export
+			'startDate'		=> '', #Y-m-d
+            'endDate'   	=> '',
+			'dayHeader'		=> [],
+			'shop' 			=> [],
+			'area' 			=> [],
+			'top' 			=> [],
+			'last' 			=> [],
+			'productName'	=> '', #export
+			'exportToken'	=> '', #export
+		];
+		
+		/* $this->_statistics['brandId']	= $brand->value; 
+				#儲存頁面計算天數用日期
+				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
+				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
+				dd($this->_statistics); */
+	}
+	
+	/* 取新品銷售統計相關資料
 	 * @params: enums
 	 * @params: integer
 	 * @return: array
 	 */
-	private function _analysisStatisticsData($brand, $searchReleaseId)
+	private function _prepareData($params)
 	{
 		try
 		{
-			#1. Calc time
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
-			
-			#2. Get params
-			list($productName, $primaryIds, $secondaryIds, $tastes) = $this->_getParams($searchReleaseId);
-			$this->_statistics['productName'] = $productName;
-			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser->roleArea; #
+			#1. Get product params
+			$params = $this->_getProductParams($params);
 					
-			#3. Get all shops with area permission
-			$this->_getShopList($brand, $userAreaIds);
+			#2. Get all shops with area permission
+			$params->allShopList 	= $this->_getAllStores($params->brand, $params->userAreaIds); #all shops
+			$params->activeShopList = $this->_getActiveStores($params->brand, $params->userAreaIds); #only active shops
 			
-			#4. Get POS data
-			$saleData = $this->_getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+			#3. Get POS data, 不需存
+			$saleData = $this->_getDataFromDB($params);
 			
-			#5. Build base data
+			#4. Build base data
 			#會有false的無效array, 用array_filter去除
-			$baseData = $this->_buildBaseData($brand, array_filter($saleData));
-			unset($saleData);
+			$params = $this->_buildBaseData($params, array_filter($saleData));
 			
-			return $this->_outputReport($baseData);
+			return $params;
 		}
 		catch(Exception $e)
 		{
@@ -188,22 +228,24 @@ class NewReleaseService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _getParams($releaseId)
+	private function _getProductParams($params)
 	{
 		try
 		{
-			$settings = $this->_repository->getSettingById($releaseId);
+			$settings = $this->_repository->getSettingById($params->releaseId);
 			
 			if (empty($settings))
 				throw new Exception('新品設定不存在或已停用');
 			
-			$result = $this->_repository->getErpNoById($releaseId);
+			$result = $this->_repository->getErpNoById($params->releaseId);
 			$result = collect($result)->groupBy('isPrimary');
 			
-			$primaryIds		= $result[1]->pluck('erpNo')->toArray();
-			$secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
+			$params->productName	= $settings['releaseName'];
+			$params->primaryIds		= $result[1]->pluck('erpNo')->toArray();
+			$params->secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
+			$params->taste 			= $settings['releaseTaste'];
 			
-			return [$settings['releaseName'], $primaryIds, $secondaryIds, $settings['releaseTaste']];
+			return $params;
 		}
 		catch(Exception $e)
 		{
@@ -219,10 +261,18 @@ class NewReleaseService
 	 * @params: array => product ids of BF
 	 * @return: array
 	 */
-	private function _getDataFromDB($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds)
+	private function _getDataFromDB($params)
 	{
 		try
 		{
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
+			$primaryIds 	= $params->primaryIds;
+			$secondaryIds 	= $params->secondaryIds;
+			$tastes 		= $params->tastes;
+			$userAreaIds 	= $params->userAreaIds;
+			
 			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
 				
 			return $saleData;
@@ -240,7 +290,7 @@ class NewReleaseService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($brand, $saleData)
+	private function _buildBaseData($params, $saleData)
 	{
 		/*
 		[
@@ -253,12 +303,12 @@ class NewReleaseService
 			"areaName" => "桃竹苗區"
 		]
 		*/
-		
 		#要改成所有店家統計(含閉店)
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		$allShopList = collect($this->_shopList['all'])->groupBy('shopId');
+		$allShopList = collect($params->allShopList)->groupBy('shopId');
 		
-		$saleData = $this->_filterDataByShop($brand, $saleData);
+		#DB有濾一遍了
+		$saleData = $this->_filterExceptShop($params->brand, $saleData);
 		
 		#因有不同的gid定義, 故無法直接寫在sql
 		$baseData = collect($saleData)->map(function($item, $key) use($allShopList) {
@@ -273,7 +323,7 @@ class NewReleaseService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filterShops = $this->_getFillShop($saleShopIds);
+		$filterShops = $this->_getFillShop($params->activeShopList, $saleShopIds);
 		
 		#重建
 		$filterShops = collect($filterShops)->map(function($item, $key) {
@@ -287,9 +337,9 @@ class NewReleaseService
 			return $temp;
 		});
 		
-		$baseData = $baseData->merge($filterShops)->toArray();
+		$params->baseData = $baseData->merge($filterShops)->toArray();
 		
-		return $baseData;
+		return $params;
 	}
 	
 	

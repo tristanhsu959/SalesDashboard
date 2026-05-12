@@ -223,7 +223,7 @@ class DailyRevenueService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = $this->_filterDataByShop($this->_brand, $saleData);
+		$saleData = $this->_filterExceptShop($this->_brand, $saleData);
 		
 		#改成Shop資料來自DB,避免閉店沒有關聯到(不用$groupShopList來取)
 		$baseData = collect($saleData)->map(function($item, $key) {

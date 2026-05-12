@@ -78,7 +78,7 @@ trait StoreServiceTrait
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _filterDataByShop($brand, $data)
+	private function _filterExceptShop($brand, $data)
 	{
 		$code = $brand->code();
 		$excepts = config("web.sales.shop.except.{$code}");
@@ -91,14 +91,12 @@ trait StoreServiceTrait
 	}
 	
 	/* 補全門店判別
-	 * @params: collection
+	 * @params: array
 	 * @return: array
 	 */
-	private function _getFillShop($saleShopIds)
+	private function _getFillShop($activeShopList, $saleShopIds)
 	{
 		#改用active shop來判過濾即可
-		$activeShopList = $this->_shopList['active'];
-		
 		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
 			#過濾出無銷售且為active門店
 			return ! in_array($item['shopId'], $saleShopIds);
