@@ -151,10 +151,39 @@ class NewReleaseRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
-		$query = $db
+		$subQuery = $db
+				->table('zs_sd_order as z')
+				->fromRaw('zs_sd_order as z WITH(NOLOCK)')
+				->select('z.shopId')
+				->selectRaw('CAST(z.saleDate AS DATE) as saleDate, sum(z.qty) as qty')
+				->where('z.saleDate', '>=', $stDate)
+				->where('z.saleDate', '<=', $endDate)
+				->where(function ($db) use ($erpNos, $tastes){
+					#(product in (...) or taste_memo like ...)
+					$db->whereIn('z.productId', $erpNos)
+						->when(! empty($tastes), function ($db) use ($tastes) {
+							$db->orWhereAny(['z.taste'], 'like', $tastes);
+						});
+				})
+				->whereNotIn('z.shopId', $excepts)
+				->groupByRaw('z.shopId, CAST(z.saleDate AS DATE)');
+				
+		$result = $db
+				->table(DB::raw('SHOP00 as s WITH(NOLOCK)'))
+				->joinSub($subQuery, 'zs', function($join){
+					$join->on('s.SHOP_ID', '=', 'zs.shopId');
+				})
+				->whereIn('s.gid', $authAreaIds)
+				->whereNotIn('s.SHOP_ID', $excepts)
+				->select('zs.shopId', 'zs.saleDate', 'zs.qty')
+				->get();
+		
+		/* $result = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
-				->join(DB::raw('SHOP00 as c WITH(NOLOCK)'), 'c.SHOP_ID', '=', 'a.shopId')
+				->joinSub($subQuery, 's', function ($join) {
+					$join->on('s.SHOP_ID', '=', 'a.shopId');
+				})
 				#->select('a.shopId', 'a.qty')
 				#->selectRaw('CAST(a.saleDate AS DATE) as saleDate')
 				->select('a.shopId')
@@ -162,8 +191,8 @@ class NewReleaseRepository extends Repository
 				
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
-				->whereIn('c.gid', $authAreaIds)
-				->whereNotIn('a.shopId', $excepts)
+				#->whereIn('c.gid', $authAreaIds)
+				#->whereNotIn('a.shopId', $excepts)
 				->where(function ($db) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
 					$db->whereIn('a.productId', $erpNos)
@@ -172,9 +201,11 @@ class NewReleaseRepository extends Repository
 						});
 				})
 				->groupByRaw('a.shopId, CAST(a.saleDate AS DATE)')
-				->get();
-		
-		return $query;
+				->toRawSql();
+				#->get(); 
+		*/
+				
+		return $result;
 	}
 	
 	/* Build query string | 只有御廚才有複合店才有的情境, 需去八方取御廚的資料
@@ -202,6 +233,33 @@ class NewReleaseRepository extends Repository
 		}
 		$caseShopIdcaseShopId .= "ELSE a.SHOP_ID END as shopId"; */
 		
+		$subQuery = $db
+				->table('zs_sd_order as z')
+				->fromRaw('zs_sd_order as z WITH(NOLOCK)')
+				->select('z.shopId')
+				->selectRaw('CAST(z.saleDate AS DATE) as saleDate, sum(z.qty) as qty')
+				->where('z.saleDate', '>=', $stDate)
+				->where('z.saleDate', '<=', $endDate)
+				->where(function ($db) use ($erpNos, $tastes){
+					#(product in (...) or taste_memo like ...)
+					$db->whereIn('z.productId', $erpNos)
+						->when(! empty($tastes), function ($db) use ($tastes) {
+							$db->orWhereAny(['z.taste'], 'like', $tastes);
+						});
+				})
+				->whereIn('z.shopId', array_keys($dualBrandedShopIds))
+				->groupByRaw('z.shopId, CAST(z.saleDate AS DATE)');
+				
+		$result = $db
+				->table(DB::raw('SHOP00 as s WITH(NOLOCK)'))
+				->joinSub($subQuery, 'zs', function($join){
+					$join->on('s.SHOP_ID', '=', 'zs.shopId');
+				})
+				->whereIn('s.gid', $authAreaIds)
+				->whereIn('s.SHOP_ID', array_keys($dualBrandedShopIds))
+				->select('zs.shopId', 'zs.saleDate', 'zs.qty')
+				->get();
+		/*
 		$query = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
@@ -224,6 +282,7 @@ class NewReleaseRepository extends Repository
 				})
 				->groupByRaw('a.shopId, CAST(a.saleDate AS DATE)')
 				->get();
+		*/
 		
 		#轉換shop id
 		$query = $query->map(function($item, $key) use($dualBrandedShopIds) {

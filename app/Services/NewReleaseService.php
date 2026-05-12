@@ -28,9 +28,11 @@ class NewReleaseService
 {
 	use ShopTrait;
 	
+	private $_brand			= NULL; #enum
 	private $_statistics	= [];
 	private $_shopList		= [];
-   
+	private $_userAreaIds	= [];
+	
 	public function __construct(protected NewReleaseRepository $_repository)
 	{
 		$this->_statistics = [
@@ -45,6 +47,9 @@ class NewReleaseService
 			'productName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
+		
+		$currentUser 		= AppManager::getCurrentUser();
+		$this->_userAreaIds = $currentUser->roleArea;
 	}
 	
 	/* Parsing brand from url segment
@@ -97,13 +102,10 @@ class NewReleaseService
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser->roleArea; #
-			
 			#Check cache
 			$functions = $this->parsingFunction($brand);
 			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $this->_userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 			
 			if (Cache::has($cacheKey))
 			{
@@ -128,7 +130,7 @@ class NewReleaseService
 				if (! empty($this->_statistics['shop']))
 				{
 					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(20));
+					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(15));
 				}
 				
 				return ResponseLib::initialize($this->_statistics)->success();

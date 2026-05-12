@@ -83,7 +83,7 @@ class NewReleaseController extends Controller
 		}
 		else
 		{
-			$fileName = $response->data; 
+			$fileName = $response->data; #成功data會存入檔名
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			if (file_exists($filePath)) {
