@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\Enums\FormAction;
 use App\Enums\Functions;
 use App\ViewModels\Attributes\attrStatus;
@@ -18,5 +19,12 @@ class HomeViewModel extends Fluent
 		$this->action	= NULL; #enum form action
 		$this->backRoute= FALSE;
 		$this->success();	#default
+		$this->hasSetPassword();
+	}
+	
+	public function hasSetPassword()
+	{
+		$currentUser = AppManager::getCurrentUser();
+		return $currentUser->hasSetPassword;
 	}
 }

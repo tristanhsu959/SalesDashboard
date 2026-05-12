@@ -5,7 +5,7 @@ body {
 }
 
 .section-wrapper {
-	display: flex;
+	/* display: flex; */
 	
 	margin-left: 1rem;
 	margin-right: 1rem;

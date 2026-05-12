@@ -20,10 +20,10 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 
 
 #Bafang zs_sd_order
-Schedule::command('bafang:pos-order-replication')->hourly()->between('10:00', '22:00');
+Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(); #->between('10:00', '22:00');
 
 #Buygood zs_sd_order
-Schedule::command('buygood:pos-order-replication')->hourly()->between('10:00', '22:00');
+Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(); #->between('10:00', '22:00');
 
 /* #Update data for current day
 #橙汁排骨

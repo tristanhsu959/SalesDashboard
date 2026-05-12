@@ -64,14 +64,14 @@ class BafangPosOrderToLocal extends Command
 			$stDate = '2025-09-01';
 		
 		$stDate = Carbon::parse($stDate)->subMinutes(5)->format('Y-m-d H:i:s');
-		$endDate = Carbon::parse($stDate)->addMinutes(60);
+		$endDate = Carbon::parse($stDate)->addDay(); #addMinutes(60);
 		
 		if (Carbon::parse($endDate)->isAfter(now())) 
 			$endDate = now()->format('Y-m-d H:i:s');
 		else
 			$endDate = $endDate->format('Y-m-d H:i:s');
 		
-		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end:?~? -----"));
+		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end:[?]~[?] -----"));
 		
 		return [$stDate, $endDate];
 	}

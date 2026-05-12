@@ -15,7 +15,10 @@
 @endsection
 
 @section('content')
-<section class="section-wrapper">
+<section class="section-wrapper container">
+	@if(!$viewModel->hasSetPassword())
+	<pre class="red-border">您尚未設定系統密碼，請點擊 <i class="orange circle small">person</i> 進行密碼設定</pre>
+	@endif
 {{--
 	<div class="purchase dp-2">
 		<h6>台北 屯山</h6>
