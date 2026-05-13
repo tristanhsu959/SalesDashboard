@@ -160,7 +160,7 @@ class NewReleaseService
 	private function _generateStatistics($params)
 	{
 		$this->_statistics['brandId']	= $params->brand->value;
-		$this->_statistics['brandCode']	= $params->brand->shortCode();
+		$this->_statistics['brandCode']	= $params->brand->code();
 		$this->_statistics['startDate'] = $params->stDate;
 		$this->_statistics['endDate']	= $params->endDate;
 		$this->_statistics['shop']		= $params->shop;
@@ -168,12 +168,12 @@ class NewReleaseService
 		$this->_statistics['top']		= $params->top;
 		$this->_statistics['last']		= $params->last;
 		$this->_statistics['productName']	= $params->productName;
-		dd($this->_statistics);
+		
 		#無值不cache
 		if (! empty($this->_statistics['shop']))
 		{
 			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
-			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(15));
+			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}
 	
@@ -199,7 +199,7 @@ class NewReleaseService
 			#4. Build base data
 			#會有false的無效array, 用array_filter去除
 			$params->baseData = $this->_buildBaseData($params, array_filter($saleData));
-		
+			
 			return $params; #object可不return
 		}
 		catch(Exception $e)
@@ -301,6 +301,7 @@ class NewReleaseService
 		$baseData = collect($saleData)->map(function($item, $key) use($allShopList) {
 			$shop = $allShopList->get($item['shopId']);
 			
+			$item['saleDate']	= (new Carbon($item['saleDate']))->format('Y-m-d');
 			$item['shopName'] 	= is_null($shop) ? '' : $shop->pluck('shopName')->first();
 			$item['areaId'] 	= is_null($shop) ? 0 : AreaLib::toId($shop->pluck('areaId')->first());
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
@@ -341,7 +342,7 @@ class NewReleaseService
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$params->dayRange	= $this->_buildDayRange();
+			$params->dayRange	= $this->_buildDayRange($params);
 			$params->totalDays 	= count($params->dayRange);
 			
 			#2.店別每日銷售
@@ -368,10 +369,10 @@ class NewReleaseService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildDayRange()
+	private function _buildDayRange($params)
 	{
-		$st 		= Carbon::create($this->_statistics['startDate']);
-		$end 		= Carbon::create($this->_statistics['endDate']);
+		$st 		= Carbon::create($params->stDate);
+		$end 		= Carbon::create($params->endDate);
 		$period 	= CarbonPeriod::create($st, $end);
 		
 		$dateList = [];
@@ -428,7 +429,7 @@ class NewReleaseService
 		
 		$params->set('shop.header', $header);
 		
-		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) use($totalDays) {
+		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($item, $key) use($totalDays) {
 			$temp['shopId']		= $item->pluck('shopId')->first();
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
 			$temp['areaId'] 	= $item->pluck('areaId')->first();
@@ -455,7 +456,7 @@ class NewReleaseService
 			$temp['totalAvg'] = empty($temp['totalQty']) ? 0 : round($temp['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
 			
 			return $temp; 
-		})->sortBy('areaId')->toArray();
+		})->toArray();
 		
 		$params->set('shop.data', $result);
 	}

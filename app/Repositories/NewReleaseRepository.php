@@ -155,7 +155,8 @@ class NewReleaseRepository extends Repository
 				->table('zs_sd_order as z')
 				->fromRaw('zs_sd_order as z WITH(NOLOCK)')
 				->select('z.shopId')
-				->selectRaw('CAST(z.saleDate AS DATE) as saleDate, sum(z.qty) as qty')
+				->selectRaw('DATEADD(day, DATEDIFF(day, 0, z.saleDate), 0) as saleDate') #yyyy-mm-dd 00:00:00, 用cast會破壞索引
+				->selectRaw('SUM(z.qty) as qty')
 				->where('z.saleDate', '>=', $stDate)
 				->where('z.saleDate', '<=', $endDate)
 				->where(function ($db) use ($erpNos, $tastes){
@@ -166,7 +167,7 @@ class NewReleaseRepository extends Repository
 						});
 				})
 				->whereNotIn('z.shopId', $excepts)
-				->groupByRaw('z.shopId, CAST(z.saleDate AS DATE)');
+				->groupByRaw('z.shopId, DATEADD(day, DATEDIFF(day, 0, z.saleDate), 0)');
 				
 		$result = $db
 				->table(DB::raw('SHOP00 as s WITH(NOLOCK)'))
@@ -240,11 +241,11 @@ class NewReleaseRepository extends Repository
 				->selectRaw('CAST(z.saleDate AS DATE) as saleDate, sum(z.qty) as qty')
 				->where('z.saleDate', '>=', $stDate)
 				->where('z.saleDate', '<=', $endDate)
-				->where(function ($db) use ($erpNos, $tastes){
+				->where(function ($query) use ($erpNos, $tastes){
 					#(product in (...) or taste_memo like ...)
-					$db->whereIn('z.productId', $erpNos)
-						->when(! empty($tastes), function ($db) use ($tastes) {
-							$db->orWhereAny(['z.taste'], 'like', $tastes);
+					$query->whereIn('z.productId', $erpNos)
+						->when(! empty($tastes), function ($query) use ($tastes) {
+							$query->orWhereAny(['z.taste'], 'like', $tastes);
 						});
 				})
 				->whereIn('z.shopId', array_keys($dualBrandedShopIds))
@@ -285,12 +286,12 @@ class NewReleaseRepository extends Repository
 		*/
 		
 		#轉換shop id
-		$query = $query->map(function($item, $key) use($dualBrandedShopIds) {
+		$result = $result->map(function($item, $key) use($dualBrandedShopIds) {
 			$item['shopId'] = $dualBrandedShopIds[$item['shopId']];
 			return $item;
 		});
 		
-		return $query;
+		return $result;
 	}
 	
 	/* Deprecated */

@@ -60,5 +60,9 @@ document.addEventListener('alpine:init', () => {
 			this.errors.clear();
 		},
     }));
+	
+	Alpine.data('statistics', (statistics) => ({
+		statistics: statistics,
+	}));
 });
 

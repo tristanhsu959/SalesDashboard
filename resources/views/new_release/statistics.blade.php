@@ -75,7 +75,7 @@
 			</div>
 		</article>
 		@else
-		<div class="statistics">
+		<div x-data='statistics(@json($viewModel->statistics))' class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -85,68 +85,47 @@
 			
 			<!-- 區域彙總 -->
 			<div class="page padding active" id="tab-area">
-				<section class="statistics-area">
+				<section class="statistics-area grid-table">
 					<div class="grid header">
-						<div class="s2">區域</div>
-						<div class="s2">店家數</div>
-						<div class="s2">銷售總量</div>
-						<div class="s2">平均日銷售量</div>
-						<div class="s2">每店平均銷量</div>
-						<div class="s2">每店平均日銷量</div>
+						<template x-for="col in statistics.area.header" :key="col">
+							<div class="s2" x-text="col"></div>
+						</template>
 					</div>
 					
-					@foreach($viewModel->statistics['area'] as $id => $area)
+					<template x-for="(areaData, idx) in statistics.area.data" :key="idx">
 					<div class="grid data">
-						<div class="s2">{{ $id == 'total' ? '全區合計' : data_get($area, 'areaName', '') }}</div>
-						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'totalQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgDayQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgShopQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
+						<template x-for="(col, colKey) in statistics.area.header" :key="colKey">
+							<div class="s2" x-text="areaData[colKey]"></div>
+						</template>
 					</div>
-					@endforeach
+					</template>
 				</section>
 			</div>
+			
 			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>門店代號</th>
-								<th>門店名稱</th>
-								@foreach($viewModel->statistics['dayHeader'] as $date)
-								<th class="col-date">
-									<span>{{ $viewModel->showHeaderYear(Str::before($date, '-')) }}</span>
-									<span>{{ Str::after($date, '-') }}</span>
-								</th>
-								@endforeach
-								<th>銷售總量</th>
-								<th>平均銷售數量</th>
+								<template x-for="col in statistics.shop.header" :key="col">
+									<th x-text="col"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
+							<template x-for="(shopData, idx) in statistics.shop.data" :key="idx">
 							<tr>
-								<th>{{ $shop['areaName'] }}</th>
-								<th>{{ $shopId }}</th>
-								<th>{{ $shop['shopName'] }}</th>
-								
-								@foreach($viewModel->statistics['dayHeader'] as $date)
-								<td>
-									{{ data_get($shop, "dayQty.$date", 0) }}
-								</td>
-								@endforeach
-								
-								<td>{{ $shop['totalQty'] }}</td>
-								<td>{{ $shop['totalAvg'] }}</td>
+								<template x-for="(col, colKey) in statistics.shop.header" :key="colKey">
+									<td x-text="shopData[colKey] || 0"></td>
+								</template>
 							</tr>
-							@endforeach
+							</template>
 						</tbody>
 					</table>
 				</section>
 			</div>
+			
 			<!-- 排名 -->
 			<div class="page padding" id="tab-ranking-asc">
 				<section class="statistics-ranking">
