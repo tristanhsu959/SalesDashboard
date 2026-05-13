@@ -170,7 +170,8 @@ class UserService
 			$this->_repository->updateProfile($id, $password, $displayName, $department, $email);
 			
 			#更新同步
-			AppManager::updateCurrentUserProfile($displayName, $department, $email);
+			$user = $this->_repository->getById($id);
+			AppManager::updateCurrentUserProfile($user['userDisplayName'], $user['department'], $user['email']);
 			
 			return ResponseLib::initialize()->success();
 		}
