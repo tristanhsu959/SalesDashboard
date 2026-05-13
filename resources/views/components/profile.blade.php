@@ -78,16 +78,17 @@
 				<label>部門</label>
 			</div>
 			
-			<div class="field label border field-purple prefix">
+			<div class="field label border field-purple prefix" :class="Helper.hasError(errors, 'email')">
 				<i>
 					<label class="checkbox">
 						<input type="checkbox" value="email" x-model="fieldEnabled">
 						<span></span>
 					</label>
 				</i>
-				<input type="text" name="email" maxlength="50" required x-model="formData.email" :disabled="!fieldEnabled.includes('email')">
+				<input type="text" id="email" name="email" maxlength="50" required x-model="formData.email" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('email')">
 				<label>EMail</label>
 			</div>
+			
 			<nav class="no-space">
 				<div class="field label border field-purple prefix max" :class="Helper.hasError(errors, 'password')">
 					<i>
@@ -104,8 +105,8 @@
 					<i x-show="showPassword">visibility_off</i>
 				</button>
 			</nav>
+			<output class="red-text small-text">英文+數字六個字元以上</output>
 			
-			<output class="red-text medium-text">英文+數字六個字元以上</output>
 			<p class="red-text medium-text"><i class="small">info</i><span>請勾選要編輯的欄位</span></p>
 			
 			<nav class="toolbar">
