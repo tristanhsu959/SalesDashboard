@@ -116,7 +116,7 @@ class NewReleaseService
 				#Statistics
 				$this->_outputReport($params);
 				
-				#Create output
+				#Create output to var statistics
 				$this->_generateStatistics($params);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
@@ -142,9 +142,9 @@ class NewReleaseService
 		$currentUser = AppManager::getCurrentUser();
 		$userAreaIds = $currentUser->roleArea;
 		
-		$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-		$functions = $this->parsingFunction($brand);
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		$functions 		= $this->parsingFunction($brand);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
 				->releaseId($searchReleaseId)->stDate($searchStDate)->endDate($searchEndDate)
@@ -187,7 +187,7 @@ class NewReleaseService
 		try
 		{
 			#1. Get product params
-			$params = $this->_getProductParams($params);
+			$this->_getProductParams($params);
 			
 			#2. Get all shops with area permission
 			$params->allShopList 	= $this->_getAllStores($params->brand, $params->userAreaIds); #all shops
@@ -198,9 +198,7 @@ class NewReleaseService
 			
 			#4. Build base data
 			#會有false的無效array, 用array_filter去除
-			$params->baseData = $this->_buildBaseData($params, array_filter($saleData));
-			
-			return $params; #object可不return
+			$this->_buildBaseData($params, array_filter($saleData));
 		}
 		catch(Exception $e)
 		{
@@ -225,14 +223,20 @@ class NewReleaseService
 				throw new Exception('新品設定不存在或已停用');
 			
 			$result = $this->_repository->getErpNoById($params->releaseId);
-			$result = collect($result)->groupBy('isPrimary');
+			
+			#分開primary & secondary
+			$primaryIds = collect($result)->filter(function($item, $key){
+				return $item['isPrimary'];
+			})->pluck('erpNo')->toArray();
+			
+			$secondaryIds = collect($result)->filter(function($item, $key){
+				return ! $item['isPrimary'];
+			})->pluck('erpNo')->toArray();
 			
 			$params->productName	= $settings['releaseName'];
-			$params->primaryIds		= $result[1]->pluck('erpNo')->toArray();
-			$params->secondaryIds 	= empty($result[0]) ? [] : $result[0]->pluck('erpNo')->toArray();
+			$params->primaryIds		= $primaryIds;
+			$params->secondaryIds 	= $secondaryIds;
 			$params->taste 			= $settings['releaseTaste'];
-			
-			return $params;
 		}
 		catch(Exception $e)
 		{
@@ -325,11 +329,8 @@ class NewReleaseService
 			return $temp;
 		});
 		
-		return $baseData->merge($filterShops)->toArray();
+		$params->baseData = $baseData->merge($filterShops)->toArray();
 	}
-	
-	
-	
 	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
@@ -342,8 +343,7 @@ class NewReleaseService
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$params->dayRange	= $this->_buildDayRange($params);
-			$params->totalDays 	= count($params->dayRange);
+			$this->_buildDayRange($params);
 			
 			#2.店別每日銷售
 			$this->_parsingByShop($params);
@@ -383,7 +383,8 @@ class NewReleaseService
 			$dateList[$dateString] = $dateString;
 		}
 		
-		return $dateList;
+		$params->dayRange	= $dateList;
+		$params->totalDays 	= count($dateList);
 	}
 	
 	
@@ -421,11 +422,10 @@ class NewReleaseService
 		if (empty($baseData))
 			return FALSE;
 		
-		$header = array_merge(
-			['areaName'	=> '區域', 'shopId'	=> '門店代號', 'shopName' => '門店名稱'], 
-			$params->dayRange, 
-			['totalQty' => '銷售總量', 'totalAvg' => '平均銷售數量']
-		);
+		$header = ['areaName' => '區域', 'shopId' => '門店代號', 'shopName' => '門店名稱', 
+					'dayQty' => $params->dayRange, 
+					'totalQty' => '銷售總量', 'totalAvg' => '平均銷售數量'
+				];
 		
 		$params->set('shop.header', $header);
 		
@@ -435,24 +435,15 @@ class NewReleaseService
 			$temp['areaId'] 	= $item->pluck('areaId')->first();
 			$temp['areaName'] 	= $item->pluck('areaName')->first();
 			
-			/* $temp['dayQty'] = $item->mapWithKeys(function($item, $key){
-				if (! empty($item['saleDate']))
-					return [$item['saleDate'] => intval($item['qty'])];
-				else
-					return [];
-			})->toArray(); */
-			
-			$dayQty = $item->mapWithKeys(function($item, $key){
+			$temp['dayQty'] = $item->mapWithKeys(function($item, $key){
 				if (! empty($item['saleDate']))
 					return [$item['saleDate'] => intval($item['qty'])];
 				else
 					return [];
 			})->toArray();
 			
-			$temp = array_merge($temp, $dayQty);
-			
 			#計算=>銷售總量|平均銷售數量
-			$temp['totalQty'] = array_sum($dayQty); #銷售量總和
+			$temp['totalQty'] = array_sum($temp['dayQty']); #銷售量總和
 			$temp['totalAvg'] = empty($temp['totalQty']) ? 0 : round($temp['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
 			
 			return $temp; 
@@ -660,17 +651,23 @@ class NewReleaseService
 	 */
 	private function _buildExportShop($shopData)
 	{
-		$header = $shopData['header'];
+		$header = Arr::flatten($shopData['header']);
 		$export[] = $header;
 		
 		foreach($shopData['data'] as $shopId => $data)
 		{
 			$row = [];
+			$row[] = data_get($data, 'areaName');
+			$row[] = data_get($data, 'shopId');
+			$row[] = data_get($data, 'shopName');
 			
-			foreach($header as $key => $headName)
+			foreach($shopData['header']['dayQty'] as $date)
 			{
-				$row[] = data_get($data, $key);
+				$row[] = data_get($data, "dayQty.{$date}", 0);
 			}
+			
+			$row[] = data_get($data, 'totalQty');
+			$row[] = data_get($data, 'totalAvg');
 			
 			$export[]= $row;
 		}

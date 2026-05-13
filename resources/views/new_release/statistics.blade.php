@@ -108,17 +108,27 @@
 					<table class="stripes">
 						<thead>
 							<tr>
-								<template x-for="col in shop.header" :key="col">
-									<th x-text="col"></th>
+								<th x-text="shop.header.areaName"></th>
+								<th x-text="shop.header.shopId"></th>
+								<th x-text="shop.header.shopName"></th>
+								<template x-for="date in shop.header.dayQty" :key="date">
+									<th x-text="date"></th>
 								</template>
+								<th x-text="shop.header.totalQty"></th>
+								<th x-text="shop.header.totalAvg"></th>
 							</tr>
 						</thead>
 						<tbody>
 							<template x-for="(shopData, idx) in shop.data" :key="idx">
 							<tr>
-								<template x-for="(col, colKey) in shop.header" :key="colKey">
-									<td x-text="shopData[colKey] || 0"></td>
+								<td x-text="shopData.areaName"></td>
+								<td x-text="shopData.shopId"></td>
+								<td x-text="shopData.shopName"></td>
+								<template x-for="date in shop.header.dayQty" :key="date">
+									<td x-text="shopData.dayQty[date] || 0"></td>
 								</template>
+								<td x-text="shopData.totalQty"></td>
+								<td x-text="shopData.totalAvg"></td>
 							</tr>
 							</template>
 						</tbody>
