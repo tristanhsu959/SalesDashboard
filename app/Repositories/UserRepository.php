@@ -290,10 +290,16 @@ class UserRepository extends Repository
 		if (! empty($password))
 			$data['userPassword'] 	= $password;
 		
-		$data['userDisplayName']= $displayName;
-		$data['department']		= $department;
-		$data['email']			= $email;
-		$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+		if (! empty($displayName))
+			$data['userDisplayName']= $displayName;
+		
+		if (! empty($department))
+			$data['department']	= $department;
+		
+		if (! empty($email))
+			$data['email'] = $email;
+		
+		$data['updateAt'] = now()->format('Y-m-d H:i:s');
 		
 		$db = $this->connectSalesDashboard();
 		
