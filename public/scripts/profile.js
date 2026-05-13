@@ -35,6 +35,7 @@ document.addEventListener('alpine:init', () => {
 		validate() {
 			this.errors.clear();
 			const passwordElement = document.querySelector('#password');
+			const emailElement = document.querySelector('#email');
 
 			if (! passwordElement.disabled)
 			{
@@ -42,6 +43,17 @@ document.addEventListener('alpine:init', () => {
 				
 				if (Helper.isEmpty(this.formData.userPassword) || ! pattern.test(this.formData.userPassword)) 
 					this.errors.add('password');
+			}
+			
+			if (! emailElement.disabled)
+			{
+				const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+				
+				if (Helper.isEmpty(this.formData.email) || ! pattern.test(this.formData.email)) 
+				{
+					this.errors.add('email');
+					Alpine.store('toast').notify('Email格式錯誤(xxx.xx@domain.com.tw)');
+				}
 			}
 			
 			if (this.errors.size == 0)
