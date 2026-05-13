@@ -594,9 +594,9 @@ class NewReleaseService
 			
 			#Build export data for sheets
 			$export['區域彙總'] 		= $this->_buildExportArea($sourceData['area']);
-			$export['店別明細'] 		= $this->_buildExportShop($sourceData['dayHeader'], $sourceData['shop']);
-			$export['當日銷售前10名'] = $this->_buildExportRanking($sourceData['endDate'], $sourceData['top']);
-			$export['當日銷售後10名']	= $this->_buildExportRanking($sourceData['endDate'], $sourceData['last']);
+			$export['店別明細'] 		= $this->_buildExportShop($sourceData['shop']);
+			$export['當日銷售前10名'] = $this->_buildExportRanking($sourceData['top'], $sourceData['endDate']);
+			$export['當日銷售後10名']	= $this->_buildExportRanking($sourceData['last'], $sourceData['endDate']);
 			
 			#Write export to file
 #			$fileName = Str::replace(':', '_', $cacheKey); 
@@ -636,48 +636,41 @@ class NewReleaseService
 	 */
 	private function _buildExportArea($areaData)
 	{
-		$export[] = ['區域', '店家數', '銷售總量', '平均日銷售量', '每店平均銷量', '每店平均日銷量'];
+		$header = $areaData['header'];
+		$export[] = $header;
 		
-		foreach($areaData as $areaId => $data)
-		{
-			$areaName = ($areaId == 'total') ? 'Total' : Area::tryFrom(intval($areaId))->label();
-			
-			$row = [];
-			$row[] = $areaName;
-			$row[] = $data['shopCount'];
-			$row[] = $data['totalQty'];
-			$row[] = $data['avgDayQty'];
-			$row[] = $data['avgShopQty'];
-			$row[] = $data['avgDayShopQty'];
-			
-			$export[]= $row;
-		}
-		
-		return $export;
-	}
-	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportShop($header, $shopData)
-	{
-		$export[] = array_merge(['區域', '門店代號', '門店名稱'], $header, ['銷售總量', '平均銷售數量']);
-		
-		foreach($shopData as $shopId => $data)
+		foreach($areaData['data'] as $areaId => $data)
 		{
 			$row = [];
-			$row[] = $data['areaName'];
-			$row[] = $shopId;
-			$row[] = $data['shopName'];
 			
-			foreach($header as $date)
+			foreach($header as $key => $headName)
 			{
-				$row[] = data_get($data, "dayQty.{$date}", 0);
+				$row[] = data_get($data, $key);
 			}
 			
-			$row[] = $data['totalQty'];
-			$row[] = $data['totalAvg'];
+			$export[]= $row;
+		}
+		
+		return $export;
+	}
+	
+	/* Build data for export
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildExportShop($shopData)
+	{
+		$header = $shopData['header'];
+		$export[] = $header;
+		
+		foreach($shopData['data'] as $shopId => $data)
+		{
+			$row = [];
+			
+			foreach($header as $key => $headName)
+			{
+				$row[] = data_get($data, $key);
+			}
 			
 			$export[]= $row;
 		}
@@ -689,14 +682,14 @@ class NewReleaseService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportRanking($targeDate, $rankingData)
+	private function _buildExportRanking($rankingData, $targeDate)
 	{
 		$export[] = array_merge(['區域', '門店代號', '門店名稱'], [$targeDate], ['排名']);
 		
 		foreach($rankingData as $ranking => $shopList)
 		{
 			#同一排名會有重複
-			foreach($shopList as $shopId => $data)
+			foreach($shopList as $index => $data)
 			{
 				$row = [];
 				$row[] = $data['areaName'];

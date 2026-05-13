@@ -75,7 +75,7 @@
 			</div>
 		</article>
 		@else
-		<div x-data='statistics(@json($viewModel->statistics))' class="statistics">
+		<div x-data="@js($viewModel->statistics)" class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -87,14 +87,14 @@
 			<div class="page padding active" id="tab-area">
 				<section class="statistics-area grid-table">
 					<div class="grid header">
-						<template x-for="col in statistics.area.header" :key="col">
+						<template x-for="col in area.header" :key="col">
 							<div class="s2" x-text="col"></div>
 						</template>
 					</div>
 					
-					<template x-for="(areaData, idx) in statistics.area.data" :key="idx">
+					<template x-for="(areaData, idx) in area.data" :key="idx">
 					<div class="grid data">
-						<template x-for="(col, colKey) in statistics.area.header" :key="colKey">
+						<template x-for="(col, colKey) in area.header" :key="colKey">
 							<div class="s2" x-text="areaData[colKey]"></div>
 						</template>
 					</div>
@@ -104,19 +104,19 @@
 			
 			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
+				<section class="statistics-shop scrollbar" :class="brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
-								<template x-for="col in statistics.shop.header" :key="col">
+								<template x-for="col in shop.header" :key="col">
 									<th x-text="col"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(shopData, idx) in statistics.shop.data" :key="idx">
+							<template x-for="(shopData, idx) in shop.data" :key="idx">
 							<tr>
-								<template x-for="(col, colKey) in statistics.shop.header" :key="colKey">
+								<template x-for="(col, colKey) in shop.header" :key="colKey">
 									<td x-text="shopData[colKey] || 0"></td>
 								</template>
 							</tr>
@@ -132,19 +132,19 @@
 					<article class="border ranking-top">
 						<ul class="list border">
 							<!--只顯示第一家,因數量太多-->
-							@foreach($viewModel->statistics['top'] as $ranking => $shopGroup)
+							<template x-for="(items, topRanking) in top" :key="topRanking">
 							<li>
-								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="ranking" x-text="topRanking + 1"></div>
 								<div class="info">
-									{{ $shopGroup[0]['areaName'] }}
-									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
-									<span>{{ $shopGroup[0]['shopId'] }}</span>
+									<span x-text="items[0]['areaName']"></span>
+									<div class="name" x-text="items[0]['shopName']"></div>
+									<span x-text="items[0]['shopId']"></span>
 								</div>
-								<span class="badge none primary">{{ $shopGroup[0]['qty'] }}</span>
+								<span class="badge none primary" x-text="items[0]['qty']"></span>
 								<div class="max"></div>
-								<label>共 {{ count($shopGroup) }} 店家</label>
+								<label x-text="`共  ${items.length} 店家`"></label>
 							</li>
-							@endforeach
+							</template>
 						</ul>
 					</article>
 				</section>
@@ -154,19 +154,19 @@
 					<article class="border ranking-last">
 						<ul class="list border">
 							<!--只顯示第一家,因數量太多-->
-							@foreach($viewModel->statistics['last'] as $ranking => $shopGroup)
+							<template x-for="(items, lastRanking) in last" :key="lastRanking">
 							<li>
-								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="ranking" x-text="lastRanking + 1"></div>
 								<div class="info">
-									{{ $shopGroup[0]['areaName'] }}
-									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
-									<span>{{ $shopGroup[0]['shopId'] }}</span>
+									<span x-text="items[0]['areaName']"></span>
+									<div class="name" x-text="items[0]['shopName']"></div>
+									<span x-text="items[0]['shopId']"></span>
 								</div>
-								<span class="badge none secondary">{{ $shopGroup[0]['qty'] }}</span>
+								<span class="badge none secondary" x-text="items[0]['qty']"></span>
 								<div class="max"></div>
-								<label>共 {{ count($shopGroup) }} 店家</label>
+								<label x-text="`共  ${items.length} 店家`"></label>
 							</li>
-							@endforeach
+							</template>
 						</ul>
 					</article>
 				</section>
