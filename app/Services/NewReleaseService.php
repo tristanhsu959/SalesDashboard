@@ -29,10 +29,7 @@ class NewReleaseService
 {
 	use StoreServiceTrait;
 	
-	private $_brand			= NULL; #enum
 	private $_statistics	= [];
-	private $_shopList		= [];
-	private $_userAreaIds	= [];
 	
 	public function __construct(protected NewReleaseRepository $_repository)
 	{
@@ -40,7 +37,6 @@ class NewReleaseService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'dayHeader'		=> [],
 			'shop' 			=> [],
 			'area' 			=> [],
 			'top' 			=> [],
@@ -101,7 +97,7 @@ class NewReleaseService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			#Params都用pass(保留service可複用空間)
-			$params = $this->_initInputParams($brand, $searchReleaseId, $searchStDate, $searchEndDate);
+			$params = $this->_initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -114,21 +110,14 @@ class NewReleaseService
 			{
 				Log::channel('appServiceLog')->info('Get new release data from db');
 				
-				#執行統計
-				$params = $this->_prepareData($params);
+				#Prepare data(object default called by reference)
+				$this->_prepareData($params);
 				
-				#Build output data
-				$response = $this->_outputReport($baseData);
-				dd($params);
+				#Statistics
+				$this->_outputReport($params);
 				
-				#$this->generateStatistics();
-				
-				#無值不cache
-				if (! empty($this->_statistics['shop']))
-				{
-					$this->_statistics['exportToken'] = bin2hex($cacheKey); #hex2bin
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(15));
-				}
+				#Create output
+				$this->_generateStatistics($params);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
@@ -146,7 +135,7 @@ class NewReleaseService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initInputParams($brand, $searchReleaseId, $searchStDate, $searchEndDate)
+	private function _initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate)
 	{
 		$params = new Fluent();
 		
@@ -170,24 +159,22 @@ class NewReleaseService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics = [
-			'brandId'		=> '', #export
-			'startDate'		=> '', #Y-m-d
-            'endDate'   	=> '',
-			'dayHeader'		=> [],
-			'shop' 			=> [],
-			'area' 			=> [],
-			'top' 			=> [],
-			'last' 			=> [],
-			'productName'	=> '', #export
-			'exportToken'	=> '', #export
-		];
-		
-		/* $this->_statistics['brandId']	= $brand->value; 
-				#儲存頁面計算天數用日期
-				$this->_statistics['startDate'] = (new Carbon($searchStDate))->format('Y-m-d'); 
-				$this->_statistics['endDate'] 	= (new Carbon($searchEndDate))->format('Y-m-d');
-				dd($this->_statistics); */
+		$this->_statistics['brandId']	= $params->brand->value;
+		$this->_statistics['brandCode']	= $params->brand->shortCode();
+		$this->_statistics['startDate'] = $params->stDate;
+		$this->_statistics['endDate']	= $params->endDate;
+		$this->_statistics['shop']		= $params->shop;
+		$this->_statistics['area']		= $params->area;
+		$this->_statistics['top']		= $params->top;
+		$this->_statistics['last']		= $params->last;
+		$this->_statistics['productName']	= $params->productName;
+		dd($this->_statistics);
+		#無值不cache
+		if (! empty($this->_statistics['shop']))
+		{
+			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
+			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(15));
+		}
 	}
 	
 	/* 取新品銷售統計相關資料
@@ -201,7 +188,7 @@ class NewReleaseService
 		{
 			#1. Get product params
 			$params = $this->_getProductParams($params);
-					
+			
 			#2. Get all shops with area permission
 			$params->allShopList 	= $this->_getAllStores($params->brand, $params->userAreaIds); #all shops
 			$params->activeShopList = $this->_getActiveStores($params->brand, $params->userAreaIds); #only active shops
@@ -211,9 +198,9 @@ class NewReleaseService
 			
 			#4. Build base data
 			#會有false的無效array, 用array_filter去除
-			$params = $this->_buildBaseData($params, array_filter($saleData));
-			
-			return $params;
+			$params->baseData = $this->_buildBaseData($params, array_filter($saleData));
+		
+			return $params; #object可不return
 		}
 		catch(Exception $e)
 		{
@@ -225,7 +212,7 @@ class NewReleaseService
 	
 	
 	/* 取ErpNo及條件
-	 * @params: int
+	 * @params: object
 	 * @return: array
 	 */
 	private function _getProductParams($params)
@@ -337,9 +324,7 @@ class NewReleaseService
 			return $temp;
 		});
 		
-		$params->baseData = $baseData->merge($filterShops)->toArray();
-		
-		return $params;
+		return $baseData->merge($filterShops)->toArray();
 	}
 	
 	
@@ -348,29 +333,29 @@ class NewReleaseService
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
 	/* 取使用者可讀取區域資料(原主邏輯不動)
-	 * @params: array
+	 * @params: fluent object
 	 * @return: array
 	 */
-	private function _outputReport($baseData)
+	private function _outputReport($params)
 	{
 		try
 		{
 			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_statistics['dayHeader'] = $this->_buildDayHeader();
-			$totalDays = count($this->_statistics['dayHeader']);
+			$params->dayRange	= $this->_buildDayRange();
+			$params->totalDays 	= count($params->dayRange);
 			
 			#2.店別每日銷售
-			$this->_statistics['shop'] = $this->_parsingByShop($baseData, $totalDays);
+			$this->_parsingByShop($params);
 			
 			#3.區域彙總
-			$this->_statistics['area'] = $this->_parsingByArea($baseData, $totalDays);
-							
+			$this->_parsingByArea($params);
+			
 			#4.當日銷售前10名
 			#5.當日銷售後10名
-			list($this->_statistics['top'], $this->_statistics['last']) = $this->_parsingByRanking($baseData, $this->_statistics['endDate']);
+			$this->_parsingByRanking($params);
 			
 			/***** Statistics End *****/
-			return TRUE;
+			return $params;
 		}
 		catch(Exception $e)
 		{
@@ -383,7 +368,7 @@ class NewReleaseService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildDayHeader()
+	private function _buildDayRange()
 	{
 		$st 		= Carbon::create($this->_statistics['startDate']);
 		$end 		= Carbon::create($this->_statistics['endDate']);
@@ -393,7 +378,8 @@ class NewReleaseService
 
 		foreach ($period as $date) 
 		{
-			$dateList[] = $date->format('Y-m-d');
+			$dateString = $date->format('Y-m-d');
+			$dateList[$dateString] = $dateString;
 		}
 		
 		return $dateList;
@@ -406,7 +392,7 @@ class NewReleaseService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _parsingByShop($baseData, $totalDays)
+	private function _parsingByShop($params)
 	{
 		/* Output
 		[
@@ -423,31 +409,55 @@ class NewReleaseService
 			"totalAvg" => 6.5
 		]
 		*/
+		
+		$params->set('shop.header', []);
+		$params->set('shop.data', []);
+		
+		$baseData	= $params->baseData;
+		$totalDays 	= $params->totalDays;
+		
 		#會有無設定區域權限的狀況, 須判別
 		if (empty($baseData))
-			return [];
+			return FALSE;
+		
+		$header = array_merge(
+			['areaName'	=> '區域', 'shopId'	=> '門店代號', 'shopName' => '門店名稱'], 
+			$params->dayRange, 
+			['totalQty' => '銷售總量', 'totalAvg' => '平均銷售數量']
+		);
+		
+		$params->set('shop.header', $header);
 		
 		$result = collect($baseData)->groupBy('shopId')->map(function($item, $key) use($totalDays) {
-			#$temp['shopId']		= $item->pluck('shopId')->first();
+			$temp['shopId']		= $item->pluck('shopId')->first();
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
 			$temp['areaId'] 	= $item->pluck('areaId')->first();
 			$temp['areaName'] 	= $item->pluck('areaName')->first();
 			
-			$temp['dayQty'] = $item->mapWithKeys(function($item, $key){
+			/* $temp['dayQty'] = $item->mapWithKeys(function($item, $key){
+				if (! empty($item['saleDate']))
+					return [$item['saleDate'] => intval($item['qty'])];
+				else
+					return [];
+			})->toArray(); */
+			
+			$dayQty = $item->mapWithKeys(function($item, $key){
 				if (! empty($item['saleDate']))
 					return [$item['saleDate'] => intval($item['qty'])];
 				else
 					return [];
 			})->toArray();
 			
+			$temp = array_merge($temp, $dayQty);
+			
 			#計算=>銷售總量|平均銷售數量
-			$temp['totalQty'] = array_sum($temp['dayQty']); #銷售量總和
+			$temp['totalQty'] = array_sum($dayQty); #銷售量總和
 			$temp['totalAvg'] = empty($temp['totalQty']) ? 0 : round($temp['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
 			
 			return $temp; 
 		})->sortBy('areaId')->toArray();
 		
-		return $result;
+		$params->set('shop.data', $result);
 	}
 	
 	/* 區域彙總
@@ -455,7 +465,7 @@ class NewReleaseService
 	 * @params: int
 	 * @return: array
 	 */
-	private function _parsingByArea($baseData, $totalDays)
+	private function _parsingByArea($params)
 	{
 		/*
 		"areaId" => [
@@ -473,9 +483,20 @@ class NewReleaseService
 			"桃竹苗區" => array:5 []
 		]
 		*/
+		$params->set('area.header', []);
+		$params->set('area.data', []);
+		
+		$baseData	= $params->baseData;
+		$totalDays 	= $params->totalDays;
+		
 		#會有無設定區域權限的狀況, 須判別
 		if (empty($baseData))
-			return [];
+			return FALSE;
+		
+		$header = ['areaName' => '區域', 'shopCount'	=> '店家數', 'totalQty' => '銷售總量', 
+					'avgDayQty' => '平均日銷售量', 'avgShopQty' => '每店平均銷量', 'avgDayShopQty' => '每店平均日銷量'];
+		
+		$params->set('area.header', $header);
 		
 		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) use($totalDays) {
 			$temp['areaName']		= $items->pluck('areaName')->first();
@@ -489,13 +510,14 @@ class NewReleaseService
 		})->sortKeys()->toArray();
 		
 		#這裏是依header
+		$result['total']['areaName'] 		= '全區合計'; 
 		$result['total']['shopCount'] 		= collect($result)->pluck('shopCount')->sum(); 
 		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
 		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
 		$result['total']['avgShopQty'] 		= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
 		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
 		
-		return $result;
+		$params->set('area.data', $result);
 	}
 	
 	/* 當日銷售前10名
@@ -503,7 +525,7 @@ class NewReleaseService
 	 * @params: date
 	 * @return: array
 	 */
-	private function _parsingByRanking($baseData, $endDate)
+	private function _parsingByRanking($params)
 	{
 		/* 以銷售量來group shop
 		[
@@ -517,9 +539,15 @@ class NewReleaseService
 		]
 		*/
 		
+		$params->set('top', []);
+		$params->set('last', []);
+		
+		$baseData	= $params->baseData;
+		$endDate 	= $params->endDate;
+		
 		#會有無設定區域權限的狀況, 須判別
 		if (empty($baseData))
-			return [[], []];
+			return FALSE;
 		
 		#排名是依最後一天的值
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) use($endDate) {
@@ -537,7 +565,8 @@ class NewReleaseService
 		$top = $result->sortByDesc('qty')->groupBy('qty')->take(10)->values()->toArray();
 		$last = $result->sortBy('qty')->groupBy('qty')->take(10)->values()->toArray();
 		
-		return [$top, $last];
+		$params->set('top', $top);
+		$params->set('last', $last);
 	}
 	
 	
