@@ -333,6 +333,7 @@ class SalesService
 		$productList = $params->productList; 
 		$allShopList = collect($params->allShopList)->groupBy('shopId');
 		
+		#過濾無效店家
 		$saleData = $this->_filterExceptShop($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($productList, $allShopList) {
@@ -466,15 +467,19 @@ class SalesService
 		$params->set('shop.header', $header);
 		
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
-			$temp['shopId'] 	= $items->pluck('shopId')->get(0);
-			$temp['shopName'] 	= $items->pluck('shopName')->get(0);
-			$temp['areaId'] 	= $items->pluck('areaId')->get(0);
-			$temp['areaName'] 	= $items->pluck('areaName')->get(0);
+			$temp['shopId'] 	= $items->pluck('shopId')->first();
+			$temp['shopName'] 	= $items->pluck('shopName')->first();
+			$temp['areaId'] 	= $items->pluck('areaId')->first();
+			$temp['areaName'] 	= $items->pluck('areaName')->first();
 				
 			#因有補全的門店,故會有key=0的狀況	
 			$temp['products'] = $items->groupBy('productId')->map(function($items, $key){
-				$temp['totalQty'] 		= $items->sum('qty_sum');
-				$temp['totalAmount'] 	= $items->sum('price_sum');
+				$price 		= $items->pluck('price')->first();
+				$discount 	= $items->sum('discount');
+				
+				$temp['totalQty']	= intval($items->sum('qty'));
+				$temp['totalAmount']= round($price * $temp['totalQty'] + $discount, 2);
+				
 				return $temp;
 				
 			})->filter(function($item, $key){
@@ -537,14 +542,17 @@ class SalesService
 			
 			#因補全門店會有key=0
 			$temp['products']  	= $items->groupBy('productId')->map(function($items, $key){
-				$temp['totalQty'] 	= $items->sum('qty_sum');
-				$temp['totalAmount']= $items->sum('price_sum');
+				$price 		= $items->pluck('price')->first();
+				$discount 	= $items->sum('discount');
+				
+				$temp['totalQty'] 	= $items->sum('qty');
+				$temp['totalAmount']= round($price * $temp['totalQty'] + $discount, 2);
 				
 				return $temp;
 			})->filter(function($item, $key){
 				return $key != 0;
 			})->toArray();
-				
+			
 			return $temp;
 		})->toArray();
 		
@@ -552,8 +560,11 @@ class SalesService
 		$result['total']['areaName']	= '全區合計';
 		$result['total']['shopCount']	= collect($baseData)->pluck('shopId')->unique()->count(); 
 		$result['total']['products'] 	= collect($baseData)->groupBy('productId')->map(function($items, $key){
-			$temp['totalQty'] 	= $items->sum('qty_sum');
-			$temp['totalAmount']= $items->sum('price_sum');
+			$price 		= $items->pluck('price')->first();
+			$discount 	= $items->sum('discount');
+				
+			$temp['totalQty'] 	= $items->sum('qty');
+			$temp['totalAmount']= round($price * $temp['totalQty'] + $discount, 2);
 			
 			return $temp;
 		})->filter(function($item, $key){
