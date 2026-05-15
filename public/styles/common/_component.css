@@ -94,6 +94,56 @@ table {
 			color: red;
 		}
 	}
+	/* 區域彙總 */
+	.statistics-area {
+		--table-bg: #ffffff; 			/* light-2 */
+		--table-bg-dark: #424242; 		/* dark-2 */
+		--table-fixed-bg: #ffffff; 		/* light-4 */
+		--table-fixed-color: #424242;	/* dark-4 */
+		--table-stripes: #ffffff;		/* light-5 */
+		
+		position: relatvie;
+		width: auto;
+		max-height: calc(100vh - 220px);
+		overflow: auto;
+		/* scrollbar-width: thin; */
+		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
+		margin: 0;
+		border: 1px solid var(--table-bg-dark);
+		background-color: var(--table-bg);
+		
+		table {
+			table-layout: fixed;
+			min-width: 100%;
+			width: max-content;
+			overflow: unset;
+			padding: 0;
+			margin: 0;
+			border-radius: 4px;
+			color: var(--table-fixed-color);
+			
+			thead tr {
+				th {
+					word-break: keep-all;
+					background-color: var(--table-fixed-bg);
+					width: 120px;
+				}
+			}
+			
+			tbody {
+				tr {
+					td {
+						background-color: var(--table-bg);
+						color: #424242;
+					}
+					
+					&:last-child th, &:last-child td {
+						color: red;
+					}
+				}
+			}
+		}
+	}
 	
 	/* 門市 */
 	.statistics-shop {

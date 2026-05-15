@@ -181,7 +181,7 @@ class DailyRevenueService
 			#2. Get data from DB
 			$saleData = $this->_getDataFromDB($params);
 			
-			#4.build to base data
+			#3.build to base data
 			$this->_buildBaseData($params, array_filter($saleData)); 
 		}
 		catch(Exception $e)
@@ -256,7 +256,7 @@ class DailyRevenueService
 		$fillShops = $this->_getFillShop($params->activeShopList, $saleShopIds);
 		
 		#重建
-		$fillShops = $fillShops->map(function($item, $key) {
+		$fillShops = $fillShops->map(function($item, $key) use($params){
 			$temp['shopId'] 		= $item['shopId'];
 			$temp['shopName'] 		= $item['shopName'];
 			$temp['shopTypeName']	= $item['typeName'];
@@ -546,27 +546,23 @@ class DailyRevenueService
 	 */
 	private function _buildExportArea($srcData)
 	{
-		$header 	= $srcData['header'];
-		$areaData 	= $srcData['data'];
-		
 		$export = [];
-		$export[] = $header;
-		#$export[] = array_merge(['區域', '店家數'], $header);
+		$export[] = Arr::flatten($srcData['header']);
 		
-		#每個product要一個sheet
-		foreach($areaData as $key => $area)
+		#Area data
+		foreach($srcData['data'] as $key => $area)
 		{
 			if (empty($area))
 				continue;
 			
 			$row = [];
-			#$row[] = $area['areaName'];
-			#$row[] = $area['shopCount'];
+			$row[] = $area['areaName'];
+			$row[] = $area['shopCount'];
 				
 			#要按Header的順序
-			foreach(array_keys($header) as $colKey)
+			foreach($srcData['header']['dayAmount'] as $colKey)
 			{
-				$row[] = data_get($area, "{$colKey}", 0);
+				$row[] = data_get($area, "dayAmount.{$colKey}", 0);
 			}
 			
 			$export[] = $row;
@@ -581,23 +577,19 @@ class DailyRevenueService
 	 */
 	private function _buildExportShop($srcData)
 	{
-		$header 	= $srcData['header'];
-		$shopData 	= $srcData['data'];
+		$export[] = Arr::flatten($srcData['header']);
 		
-		$export[] = $header;
-		#$export[] = array_merge(['區域', '門店代號', '門店名稱', '類型'], $header);
-		
-		foreach($shopData as $shopId => $shop)
+		foreach($srcData['data'] as $shopId => $shop)
 		{
 			$row = [];
-			/* $row[] = $shop['areaName'];
-			$row[] = $shopId;
+			$row[] = $shop['areaName'];
+			$row[] = $shop['shopId'];
 			$row[] = $shop['shopName'];
-			$row[] = $shop['shopTypeName']; */
+			$row[] = $shop['shopTypeName'];
 			
-			foreach(array_keys($header) as $colKey)
+			foreach($srcData['header']['dayAmount'] as $colKey)
 			{
-				$row[] = data_get($shop, "{$colKey}", '');
+				$row[] = data_get($shop, "dayAmount.{$colKey}", 0);
 			}
 			
 			$export[]= $row;
