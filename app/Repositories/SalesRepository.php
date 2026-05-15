@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,7 +12,7 @@ use Log;
 
 class SalesRepository extends Repository
 {
-	use PosTrait;
+	use PosReposTrait;
 	
 	public function __construct()
 	{
@@ -95,23 +95,24 @@ class SalesRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
-		$query = $db
+		#因會無法跑index, sum由PHP計算
+		$result = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join(DB::raw('SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 'a.shopId')
-				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
-				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
-				->select('a.shopId', 'a.productId as erpNo')
-				->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
-				->selectRaw('sum(a.qty) as qty_sum')
+				->select('a.shopId', 'a.productId as erpNo', 'a.price', 'a.qty', 'a.discount')
+				#->select('a.shopId', 'a.productId as erpNo')
+				#->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
+				#->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('s.gid', $authAreaIds)
 				->whereIn('a.productId', $erpNos)
-				->groupByRaw('a.shopId, a.productId')
-				->get();
-		
-		return $query;
+				#->whereNotIn('s.SHOP_ID', $excepts) 由PHP過濾
+				#->groupByRaw('a.shopId, a.productId')
+				->get(); 
+				
+		return $result;
 	}
 	
 	/* Build query string | 八方:只有複合店才有的情境
@@ -133,29 +134,28 @@ class SalesRepository extends Repository
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
 				
-		$query = $db
+		$result = $db
 				->table('zs_sd_order as a')
 				->fromRaw('zs_sd_order as a WITH(NOLOCK)')
 				->join(DB::raw('SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 'a.shopId')
-				#->select('a.shopId', 'a.productId', 'a.price', 'a.qty', 'a.discount')
-				#->addSelect('s.SHOP_NAME as shopName', 's.gid')
-				->select('a.shopId', 'a.productId as erpNo')
-				->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
-				->selectRaw('sum(a.qty) as qty_sum')
+				->select('a.shopId', 'a.productId as erpNo', 'a.price', 'a.qty', 'a.discount')
+				#->select('a.shopId', 'a.productId as erpNo')
+				#->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
+				#->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<=', $endDate)
 				->whereIn('s.gid', $authAreaIds)
 				->whereIn('a.productId', $erpNos)
 				->whereIn('a.shopId', array_keys($dualBrandedShopIds))
-				->groupByRaw('a.shopId, a.productId, s.SHOP_NAME, s.gid')
+				#->groupByRaw('a.shopId, a.productId, s.SHOP_NAME, s.gid')
 				->get();
 		
 		#轉換shop id
-		$query = $query->map(function($item, $key) use($dualBrandedShopIds) {
+		$result = $result->map(function($item, $key) use($dualBrandedShopIds) {
 			$item['shopId'] = $dualBrandedShopIds[$item['shopId']];
 			return $item;
 		});
 		
-		return $query;
+		return $result;
 	}
 }

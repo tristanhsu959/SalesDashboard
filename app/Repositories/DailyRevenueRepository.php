@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosRepositoryTrait;
+use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,7 +12,7 @@ use Exception;
 
 class DailyRevenueRepository extends Repository
 {
-	use PosRepositoryTrait;
+	use PosReposTrait;
 	
 	public function __construct()
 	{
@@ -73,30 +73,113 @@ class DailyRevenueRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
-		$query = $db
+		#Group會變超慢, 改為由PHP計算
+		$subQuery = $db
+				->table('SALE00 as a')
+				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->where('a.SALE_DATE', '>=', $stDate)
+				->where('a.SALE_DATE', '<=', $endDate)
+				->select('a.SALE_ID', 'a.SHOP_ID');
+					
+		$result = $db
+				->table('SALE00 as a')
+				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->joinSub($subQuery, 'orders', function($join){
+					$join->on('orders.SALE_ID', '=', 'a.SALE_ID')
+						->on('orders.SHOP_ID', '=', 'a.SHOP_ID');
+				})
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
+				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
+				->whereNotIn('a.SHOP_ID', $excepts)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->whereIn('b.SHOP_KIND', $shopType)
+				->whereIn('b.gid', $authAreaIds)
+				->when(! empty($shopName), function ($query) use ($shopName) {
+					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+				})
+				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.SALE_DATE as saleDate')
+				->selectRaw('a.amount')
+				->get()
+				->toArray();
+		
+		return $result;
+		
+		/* $result = $db
+				->table('SALE00 as a')
+				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
+				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
+				->where('a.SALE_DATE', '>=', $stDate)
+				->where('a.SALE_DATE', '<=', $endDate)
+				->whereNotIn('a.SHOP_ID', $excepts)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->whereIn('b.SHOP_KIND', $shopType)
+				->whereIn('b.gid', $authAreaIds)
+				->when($authAreaIds, function ($query, $authAreaIds) {
+					return $query->whereIn('b.gid', $authAreaIds);
+				})
+				->when(! empty($shopName), function ($query) use ($shopName) {
+					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+				})
+				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.SALE_DATE as saleDate')
+				->selectRaw('a.amount')
+				->get()
+				->toArray(); */
+				
+		/* $subQuery = $db->table(DB::raw('SHOP00 as shop WITH(NOLOCK)'))
+				->join(DB::raw('shop_kind as stype WITH(NOLOCK)'), 'stype.sk_id', '=', 'shop.shop_kind')
+				->whereIn('shop.gid', $authAreaIds)
+				->whereIn('shop.SHOP_KIND', $shopType)
+				->whereNotIn('shop.SHOP_ID', $excepts)
+				->when(! empty($shopName), function ($query) use ($shopName) {
+					$query->WhereAny(['shop.SHOP_NAME'], 'like', "%{$shopName}%");
+				})
+				->select('shop.SHOP_ID as shopId', 'shop.SHOP_NAME as shopName', 'shop.gid as areaId')
+				->addSelect('shop.SHOP_KIND as typeId', 'stype.Sk_name as typeName');
+				
+		$result = $db->table('SALE00 as a')
+				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->joinSub($subQuery, 'shop', function ($join) {
+					$join->on('shop.shopId', '=', 'a.SHOP_ID');
+				})
+				->select('a.SHOP_ID as shopId')
+				->selectRaw('DATEADD(day, DATEDIFF(day, 0, a.SALE_DATE), 0) as saleDate')
+				#->selectRaw('SUM(a.amount) as amount')
+				->addSelect('a.amount')
+				->where('a.SALE_DATE', '>=', $stDate)
+				->where('a.SALE_DATE', '<=', $endDate)
+				->where('a.STATUS', 2)
+				#->groupByRaw('a.SHOP_ID, DATEADD(day, DATEDIFF(day, 0, a.SALE_DATE), 0)')
+				->toRawSql();
+				#->get()
+				#->toArray();
+			dd($result); */	
+		
+		/* $result = $db
 				->table('SALE00 as a')
 				->fromRaw('SALE00 as a WITH(NOLOCK)')
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'b.gid as areaId')
 				->addSelect('c.sk_id as typeId', 'c.Sk_name as typeName')
-				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate, sum(a.amount) as amount')
+				->selectRaw('DATEADD(day, DATEDIFF(day, 0, a.SALE_DATE), 0) as saleDate') #yyyy-mm-dd 00:00:00, 用cast會破壞索引
+				->selectRaw('sum(a.amount) as amount')
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<=', $endDate)
-				->whereNotIn('a.SHOP_ID', $excepts)
+				#->whereNotIn('a.SHOP_ID', $excepts)
 				->whereIn('b.SHOP_KIND', $shopType)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->whereIn('b.gid', $authAreaIds)
-				/* ->when($authAreaIds, function ($query, $authAreaIds) {
-					return $query->whereIn('b.gid', $authAreaIds);
-				}) */
+				# ->when($authAreaIds, function ($query, $authAreaIds) {
+				#	return $query->whereIn('b.gid', $authAreaIds);
+				#})
 				->when(! empty($shopName), function ($query) use ($shopName) {
 					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
 				})
-				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, CAST(a.SALE_DATE AS DATE)')
+				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, DATEADD(day, DATEDIFF(day, 0, a.SALE_DATE), 0)')
 				->get()
-				->toArray();
+				->toArray(); */
 		
-		return $query;
+		
 	}
 }

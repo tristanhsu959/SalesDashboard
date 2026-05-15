@@ -75,7 +75,7 @@
 			</div>
 		</article>
 		@else
-		<div class="statistics">
+		<div x-data="@js($viewModel->statistics)" class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -86,86 +86,98 @@
 			<!-- 區域彙總 -->
 			<div class="page padding active" id="tab-area">
 				<section class="statistics-area">
-					<div class="grid header">
-						<div class="s2">區域</div>
-						<div class="s2">店家數</div>
-						<div class="s2">銷售總量</div>
-						<div class="s2">平均日銷售量</div>
-						<div class="s2">每店平均銷量</div>
-						<div class="s2">每店平均日銷量</div>
-					</div>
-					
-					@foreach($viewModel->statistics['area'] as $id => $area)
-					<div class="grid data">
-						<div class="s2">{{ $id == 'total' ? '全區合計' : data_get($area, 'areaName', '') }}</div>
-						<div class="s2">{{ data_get($area, 'shopCount', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'totalQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgDayQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgShopQty', 0) }}</div>
-						<div class="s2">{{ data_get($area, 'avgDayShopQty', 0) }}</div>
-					</div>
-					@endforeach
-				</section>
-			</div>
-			<!-- 門店 -->
-			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
-					<table class="stripes">
+					<table>
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>門店代號</th>
-								<th>門店名稱</th>
-								@foreach($viewModel->statistics['dayHeader'] as $date)
-								<th class="col-date">
-									<span>{{ $viewModel->showHeaderYear(Str::before($date, '-')) }}</span>
-									<span>{{ Str::after($date, '-') }}</span>
-								</th>
-								@endforeach
-								<th>銷售總量</th>
-								<th>平均銷售數量</th>
+								<template x-for="col in area.header" :key="col">
+									<th class="s2" x-text="col"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
+							<template x-for="(areaData, idx) in area.data" :key="idx">
 							<tr>
-								<th>{{ $shop['areaName'] }}</th>
-								<th>{{ $shopId }}</th>
-								<th>{{ $shop['shopName'] }}</th>
-								
-								@foreach($viewModel->statistics['dayHeader'] as $date)
-								<td>
-									{{ data_get($shop, "dayQty.$date", 0) }}
-								</td>
-								@endforeach
-								
-								<td>{{ $shop['totalQty'] }}</td>
-								<td>{{ $shop['totalAvg'] }}</td>
+								<template x-for="(col, colKey) in area.header" :key="colKey">
+									<td x-text="areaData[colKey]"></td>
+								</template>
 							</tr>
-							@endforeach
+							</template>
 						</tbody>
 					</table>
 				</section>
 			</div>
+			
+			<!--div class="page padding active" id="tab-area">
+				<section class="statistics-area grid-table">
+					<div class="grid header">
+						<template x-for="col in area.header" :key="col">
+							<div class="s2" x-text="col"></div>
+						</template>
+					</div>
+					
+					<template x-for="(areaData, idx) in area.data" :key="idx">
+					<div class="grid data">
+						<template x-for="(col, colKey) in area.header" :key="colKey">
+							<div class="s2" x-text="areaData[colKey]"></div>
+						</template>
+					</div>
+					</template>
+				</section>
+			</div-->
+			
+			<!-- 門店 -->
+			<div class="page padding" id="tab-shop">
+				<section class="statistics-shop scrollbar" :class="brandCode">
+					<table class="stripes">
+						<thead>
+							<tr>
+								<th x-text="shop.header.areaName"></th>
+								<th x-text="shop.header.shopId"></th>
+								<th x-text="shop.header.shopName"></th>
+								<template x-for="date in shop.header.dayQty" :key="date">
+									<th x-text="date"></th>
+								</template>
+								<th x-text="shop.header.totalQty"></th>
+								<th x-text="shop.header.totalAvg"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(shopData, idx) in shop.data" :key="idx">
+							<tr>
+								<td x-text="shopData.areaName"></td>
+								<td x-text="shopData.shopId"></td>
+								<td x-text="shopData.shopName"></td>
+								<template x-for="date in shop.header.dayQty" :key="date">
+									<td x-text="shopData.dayQty[date] || 0"></td>
+								</template>
+								<td x-text="shopData.totalQty"></td>
+								<td x-text="shopData.totalAvg"></td>
+							</tr>
+							</template>
+						</tbody>
+					</table>
+				</section>
+			</div>
+			
 			<!-- 排名 -->
 			<div class="page padding" id="tab-ranking-asc">
 				<section class="statistics-ranking">
 					<article class="border ranking-top">
 						<ul class="list border">
 							<!--只顯示第一家,因數量太多-->
-							@foreach($viewModel->statistics['top'] as $ranking => $shopGroup)
+							<template x-for="(items, topRanking) in top" :key="topRanking">
 							<li>
-								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="ranking" x-text="topRanking + 1"></div>
 								<div class="info">
-									{{ $shopGroup[0]['areaName'] }}
-									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
-									<span>{{ $shopGroup[0]['shopId'] }}</span>
+									<span x-text="items[0]['areaName']"></span>
+									<div class="name" x-text="items[0]['shopName']"></div>
+									<span x-text="items[0]['shopId']"></span>
 								</div>
-								<span class="badge none primary">{{ $shopGroup[0]['qty'] }}</span>
+								<span class="badge none primary" x-text="items[0]['qty']"></span>
 								<div class="max"></div>
-								<label>共 {{ count($shopGroup) }} 店家</label>
+								<label x-text="`共  ${items.length} 店家`"></label>
 							</li>
-							@endforeach
+							</template>
 						</ul>
 					</article>
 				</section>
@@ -175,19 +187,19 @@
 					<article class="border ranking-last">
 						<ul class="list border">
 							<!--只顯示第一家,因數量太多-->
-							@foreach($viewModel->statistics['last'] as $ranking => $shopGroup)
+							<template x-for="(items, lastRanking) in last" :key="lastRanking">
 							<li>
-								<div class="ranking">{{ $ranking + 1 }}</div>
+								<div class="ranking" x-text="lastRanking + 1"></div>
 								<div class="info">
-									{{ $shopGroup[0]['areaName'] }}
-									<div class="name">{{ $shopGroup[0]['shopName'] }}</div>
-									<span>{{ $shopGroup[0]['shopId'] }}</span>
+									<span x-text="items[0]['areaName']"></span>
+									<div class="name" x-text="items[0]['shopName']"></div>
+									<span x-text="items[0]['shopId']"></span>
 								</div>
-								<span class="badge none secondary">{{ $shopGroup[0]['qty'] }}</span>
+								<span class="badge none secondary" x-text="items[0]['qty']"></span>
 								<div class="max"></div>
-								<label>共 {{ count($shopGroup) }} 店家</label>
+								<label x-text="`共  ${items.length} 店家`"></label>
 							</li>
-							@endforeach
+							</template>
 						</ul>
 					</article>
 				</section>

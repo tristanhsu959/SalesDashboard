@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Services\Shipments\FactoryService;
 use App\Services\Shipments\StoreService;
-use App\Services\Traits\Purchase\ProductTrait;
+use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
@@ -28,7 +28,7 @@ use OpenSpout\Common\Entity\Row;
 #當主Service
 class ShipmentsService
 {
-	use ProductTrait;
+	use ProductServiceTrait;
 	private $_statistics = [];
 	
 	public function __construct(protected ShipmentsRepository $_repository)

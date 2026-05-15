@@ -81,7 +81,7 @@
 			</div>
 		</article>
 		@else
-		<div x-data='statisticsData(@json($viewModel->statistics))' class="statistics">
+		<div x-data='@json($viewModel->statistics)' class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -93,16 +93,20 @@
 					<table>
 						<thead>
 							<tr>
-								<template x-for="(headerName, headerKey) in areaData.header" :key="headerKey">
-									<th x-text="headerName"></th>
+								<th x-text="area.header.areaName"></th>
+								<th x-text="area.header.shopCount"></th>
+								<template x-for="(date, dateKey) in area.header.dayAmount" :key="dateKey">
+									<th x-text="date"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(row, rowKey) in areaData.data" :key="rowKey">
+							<template x-for="(areaData, areaId) in area.data" :key="areaId">
 							<tr>
-								<template x-for="(headerName, headerKey) in areaData.header" :key="headerKey">
-									<td x-text="row[headerKey]"></td>
+								<td x-text="areaData.areaName"></td>
+								<td x-text="areaData.shopCount"></td>
+								<template x-for="(date, dateKey) in area.header.dayAmount" :key="dateKey">
+									<td x-text="'$'+ (areaData.dayAmount[date] || 0)"></td>
 								</template>
 							</tr>
 							</template>
@@ -113,20 +117,28 @@
 			
 			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+				<section class="statistics-shop scrollbar" :class="brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
-								<template x-for="(headerName, headerKey) in shopData.header" :key="headerKey">
-									<th x-text="headerName"></th>
+								<th x-text="shop.header.areaName"></th>
+								<th x-text="shop.header.shopId"></th>
+								<th x-text="shop.header.shopName"></th>
+								<th x-text="shop.header.shopTypeName"></th>
+								<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
+									<th x-text="date"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(row, rowKey) in shopData.data" :key="rowKey">
+							<template x-for="(shopData, shopId) in shop.data" :key="shopId">
 							<tr>
-								<template x-for="(headerName, headerKey) in shopData.header" :key="headerKey">
-									<td x-text="row[headerKey]"></td>
+								<td x-text="shopData.areaName"></td>
+								<td x-text="shopData.shopId"></td>
+								<td x-text="shopData.shopName"></td>
+								<td x-text="shopData.shopTypeName"></td>
+								<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
+									<td x-text="'$'+ (shopData.dayAmount[date] || 0)"></td>
 								</template>
 							</tr>
 							</template>

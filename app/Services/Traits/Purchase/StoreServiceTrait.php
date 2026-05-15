@@ -7,7 +7,7 @@ use App\Enums\Brand;
 use Illuminate\Support\Str;
 
 /* nOrder Common */
-trait StoreTrait
+trait StoreServiceTrait
 {
 	/* Get store data by brand
 	 * @params: int

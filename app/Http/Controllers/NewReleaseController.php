@@ -70,7 +70,6 @@ class NewReleaseController extends Controller
 	{
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
-		//$token 	= $request->query('token');
 		
 		$this->_viewModel->initialize($brand, $function);
 		

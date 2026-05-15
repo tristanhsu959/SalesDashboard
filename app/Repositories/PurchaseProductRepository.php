@@ -2,14 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderTrait;
+use App\Repositories\Traits\OrderReposTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Exception;
 
 class PurchaseProductRepository extends Repository
 {
-	use OrderTrait;
+	use OrderReposTrait;
 	
 	public function __construct()
 	{

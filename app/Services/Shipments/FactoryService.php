@@ -4,7 +4,7 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Repositories\ShipmentsRepository;
-use App\Services\Traits\Purchase\ProductTrait;
+use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
@@ -25,7 +25,7 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
-	use ProductTrait;
+	use ProductServiceTrait;
 	
 	private $_userAreaIds = FALSE;
 	private $_statistics = [];

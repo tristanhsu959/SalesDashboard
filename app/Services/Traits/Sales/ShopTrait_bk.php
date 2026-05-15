@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 /* 	門店處理 Common function
 	處理訂單門市過濾/補全門店
 	Sales data沒有先過濾無效門店如:0030
+	由StoreServiceTrait替換後廢除
 */
 trait ShopTrait
 {

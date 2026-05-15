@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
+/*銷售統計*/
 class SalesController extends Controller
 {
 	public function __construct(protected SalesService $_service, protected SalesViewModel $_viewModel)

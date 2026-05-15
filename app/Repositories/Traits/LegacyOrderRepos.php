@@ -5,7 +5,7 @@ namespace App\Repositories\Traits;
 use Illuminate\Support\Facades\DB;
 
 #舊訂貨系統
-class LegacyOrderTrait
+class LegacyOrderReposTrait
 {
 	#MSSQL
 	public function __construct()

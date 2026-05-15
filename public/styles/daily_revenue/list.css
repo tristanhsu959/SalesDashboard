@@ -12,49 +12,12 @@ form {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
-		--table-bg: #ffffff; 			/* light-2 */
-		--table-bg-dark: #424242; 		/* dark-2 */
-		--table-fixed-bg: #ffffff; 		/* light-4 */
-		--table-fixed-color: #424242;	/* dark-4 */
-		--table-stripes: #ffffff;		/* light-5 */
-		
-		position: relatvie;
-		width: auto;
-		max-height: calc(100vh - 220px);
-		overflow: auto;
-		/* scrollbar-width: thin; */
-		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
-		margin: 0;
-		border: 1px solid var(--table-bg-dark);
-		background-color: var(--table-bg);
-		
 		table {
-			table-layout: fixed;
-			min-width: 100%;
-			width: max-content;
-			overflow: unset;
-			padding: 0;
-			margin: 0;
-			border-radius: 4px;
-			color: var(--table-fixed-color);
-			
-			thead tr {
-				th {
-					word-break: keep-all;
-					background-color: var(--table-fixed-bg);
-					width: 120px;
-				}
-			}
-			
 			tbody {
 				tr {
-					td {
-						background-color: var(--table-bg);
-						color: #424242;
-					}
-					
 					&:last-child th, &:last-child td {
 						color: red;
+						border-block-start: .0625rem solid var(--outline);
 					}
 				}
 			}
@@ -63,119 +26,34 @@ form {
 	
 	/* 門市 */
 	.statistics-shop {
-		&.bafang {
-			--table-bg: #4fc3f7; 			/* light-2 */
-			--table-bg-dark: #0288d1; 		/* dark-2 */
-			--table-fixed-bg: #b3e5fc; 		/* light-4 */
-			--table-fixed-color: #01579b;	/* dark-4 */
-			--table-stripes: #e1f5fe;		/* light-5 */
-		}
-		&.buygood {
-			--table-bg: #80deea;
-			--table-bg-dark: #0097a7;
-			--table-fixed-bg: #b2ebf2;
-			--table-fixed-color: #01579b;
-			--table-stripes: #e0f7fa; 
-		}
-		
-		position: relatvie;
-		width: auto;
-		max-height: calc(100vh - 220px);
-		overflow: auto;
-		/* scrollbar-width: thin; */
-		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
-		margin: 0;
-		border: 1px solid var(--table-bg-dark);
-		
 		table {
-			table-layout: fixed;
-			min-width: 100%;
-			width: max-content;
-			overflow: unset;
-			padding: 0;
-			margin: 0;
-			border-radius: 4px;
-			
-			&.stripes tbody tr:nth-child(odd) {
-				background-color: var(--table-stripes);
+			thead tr th {
+				&:nth-of-type(4) {
+					width: 150px;
+					min-width: 150px;
+					max-width: 150px;
+					position: sticky;
+					left: 500px;
+					z-index: 6;
+				}
 			}
 			
-			thead {
-				tr {
-					th {
+			tbody tr {
+				td {
+					&:nth-of-type(4) {
 						position: sticky;
-						top: 0;
 						z-index: 5;
-						word-break: keep-all;
-						background-color: var(--table-bg);
-						width: 120px;
-						color: rgba(0, 0, 0, .87);
-						
-						&:nth-of-type(1) {
-							width: 80px;
-							left: 0;
-							z-index: 10;
-						}
-						&:nth-of-type(2) {
-							width: 80px;
-							left: 80px;
-							z-index: 10;
-						}
-						&:nth-of-type(3) {
-							width: 200px;
-							left: 160px;
-							z-index: 10;
-						}
-						&:nth-of-type(4) {
-							width: 80px;
-							left: 360px;
-							z-index: 10;
-						}
+						left: 500px;
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
 					}
+				}
+				
+				&:last-child td {
+					color: red;
 				}
 			}
 			
-			tbody {
-				tr {
-					td {
-						font-weight: normal;
-						color: #424242;
-						
-						&:nth-of-type(1) {
-							position: sticky;
-							left: 0;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-							z-index: 5;
-						}
-						&:nth-of-type(2) {
-							position: sticky;
-							left: 80px;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-							z-index: 5;
-						}
-						&:nth-of-type(3) {
-							position: sticky;
-							left: 160px;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-							z-index: 5;
-						}
-						&:nth-of-type(4) {
-							position: sticky;
-							left: 360px;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-							z-index: 5;
-						}
-					}
-					
-					&:last-child td {
-						color: red;
-					}
-				}
-			}
 		}
 	}
 }

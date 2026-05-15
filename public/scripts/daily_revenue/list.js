@@ -46,12 +46,6 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
-	Alpine.data('statisticsData', (data) => ({
-		areaData: {...data.area},
-		shopData: {...data.shop},
-		
-		init() {
-		},
-    }));
+	
 });
 

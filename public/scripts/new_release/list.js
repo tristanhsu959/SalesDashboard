@@ -60,5 +60,6 @@ document.addEventListener('alpine:init', () => {
 			this.errors.clear();
 		},
     }));
+	
 });
 

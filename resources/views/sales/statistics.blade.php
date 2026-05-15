@@ -95,7 +95,7 @@
 			</div>
 		</article>
 		@else
-		<div class="statistics">
+		<div x-data="@js($viewModel->statistics)" class="statistics">
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-area">區域彙總</a>
 				<a data-ui="#tab-shop">店別明細</a>
@@ -107,58 +107,58 @@
 					<table>
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>店家數</th>
-								@foreach($viewModel->statistics['header'] as $productName)
-								<th>{{$productName}}</th>
-								@endforeach
+								<th x-text="area.header.areaName"></th>
+								<th x-text="area.header.shopCount"></th>
+								<template x-for="pName in area.header.products" :key="pName">
+									<th x-text="pName"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['area'] as $area)
+							<template x-for="(areaData, areaId) in area.data" :key="areaId">
 							<tr>
-								<td>{{ $area['areaName'] }}</td>
-								<td>{{ data_get($area, 'shopCount', 0) }}</td>
-								@foreach($viewModel->statistics['header'] as $productId => $productName)
+								<td x-text="areaData.areaName"></td>
+								<td x-text="areaData.shopCount"></td>
+								<template x-for="(pName, pId) in area.header.products" :key="pId">
 								<td>
-									<span x-show="!$store.sales.showAmount">{{ data_get($area, "products.$productId.totalQty", 0)}}</span>
-									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($area, "products.$productId.totalAmount", 0), precision: 0)}}</span>
+									<span x-show="!$store.sales.showAmount" x-text="areaData.products[pId]?.totalQty || 0"></span>
+									<span x-show="$store.sales.showAmount" x-text="'$' + Math.round(areaData.products[pId]?.totalAmount || 0)"></span>
 								</td>
-								@endforeach
+								</template>
 							</tr>
-							@endforeach
+							</template>
 						</tbody>
 					</table>
 				</section>
 			</div>
 			
 			<div class="page padding" id="tab-shop">
-				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+				<section class="statistics-shop scrollbar" :class="brandCode">
 					<table class="stripes odd-cyan">
 						<thead>
 							<tr>
-								<th>區域</th>
-								<th>門店代號</th>
-								<th>門店名稱</th>
-								@foreach($viewModel->statistics['header'] as $productName)
-								<th>{{$productName}}</th>
-								@endforeach
+								<th x-text="shop.header.areaName"></th>
+								<th x-text="shop.header.shopId"></th>
+								<th x-text="shop.header.shopName"></th>
+								<template x-for="pName in shop.header.products" :key="pName">
+									<th x-text="pName"></th>
+								</template>
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($viewModel->statistics['shop'] as $shopId => $shop)
+							<template x-for="(shopData, idx) in shop.data" :key="idx">
 							<tr>
-								<th>{{ $shop['areaName'] }}</th>
-								<th>{{ $shopId }}</th>
-								<th>{{ $shop['shopName'] }}</th>
-								@foreach($viewModel->statistics['header'] as $productId => $productName)
-								<td>
-									<span x-show="!$store.sales.showAmount">{{ data_get($shop, "products.$productId.totalQty", 0)}}</span>
-									<span x-show="$store.sales.showAmount">{{ Number::currency(data_get($shop, "products.$productId.totalAmount", 0), precision: 0)}}</span>
-								</td>
-								@endforeach
+								<td x-text="shopData.areaName"></td>
+								<td x-text="shopData.shopId"></td>
+								<td x-text="shopData.shopName"></td>
+								<template x-for="(pName, pId) in shop.header.products" :key="pId">
+									<td>
+										<span x-show="!$store.sales.showAmount" x-text="shopData.products[pId]?.totalQty || 0"></span>
+										<span x-show="$store.sales.showAmount" x-text="'$' + Math.round(shopData.products[pId]?.totalAmount || 0)"></span>
+									</td>
+								</template>
 							</tr>
-							@endforeach
+							</template>
 						</tbody>
 					</table>
 				</section>
