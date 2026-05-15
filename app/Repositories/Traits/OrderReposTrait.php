@@ -9,7 +9,7 @@ use App\Libraries\Purchase\AreaLib;
 use Illuminate\Support\Facades\DB;
 
 /* nOrder DB Common */
-trait OrderTrait
+trait OrderReposTrait
 {
 	/* 取對應nOrder的設定值
 	 * @params: int

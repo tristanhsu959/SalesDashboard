@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +11,7 @@ use Exception;
 
 class NewReleaseRepository extends Repository
 {
-	use PosTrait;
+	use PosReposTrait;
 	
 	public function __construct()
 	{

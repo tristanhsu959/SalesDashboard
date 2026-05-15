@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderTrait;
+use App\Repositories\Traits\OrderReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Purchase\AreaLib;
@@ -13,7 +13,7 @@ use Exception;
 
 class MerchantRepository extends Repository
 {
-	use OrderTrait;
+	use OrderReposTrait;
 	
 	public function __construct()
 	{

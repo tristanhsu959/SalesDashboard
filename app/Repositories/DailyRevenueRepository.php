@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosRepositoryTrait;
+use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,7 +12,7 @@ use Exception;
 
 class DailyRevenueRepository extends Repository
 {
-	use PosRepositoryTrait;
+	use PosReposTrait;
 	
 	public function __construct()
 	{

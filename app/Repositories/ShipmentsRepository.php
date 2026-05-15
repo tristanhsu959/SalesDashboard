@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderTrait;
+use App\Repositories\Traits\OrderReposTrait;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -14,7 +14,7 @@ use Exception;
 
 class ShipmentsRepository extends Repository
 {
-	use OrderTrait;
+	use OrderReposTrait;
 	
 	public function __construct()
 	{

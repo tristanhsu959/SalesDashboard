@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Services\Traits\Purchase\ProductTrait;
+use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Repositories\PurchaseProductRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -14,7 +14,7 @@ use Log;
 
 class PurchaseProductService
 {
-	use ProductTrait;
+	use ProductServiceTrait;
 	
 	public function __construct(protected PurchaseProductRepository $_repository)
 	{

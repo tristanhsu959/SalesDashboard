@@ -5,7 +5,7 @@ namespace App\Services\Traits\Purchase;
 use Illuminate\Support\Str;
 
 /* nOrder Common */
-trait ProductTrait
+trait ProductServiceTrait
 {
 	/* 取對應的Group設定值
 	 * @params: string

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosTrait;
+use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,7 +12,7 @@ use Log;
 
 class SalesRepository extends Repository
 {
-	use PosTrait;
+	use PosReposTrait;
 	
 	public function __construct()
 	{

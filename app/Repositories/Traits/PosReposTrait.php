@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 /* POS DB Common 
  * 不再分purchase, sales目錄
 */
-trait PosRepositoryTrait
+trait PosReposTrait
 {
 	/* 取所有門店資料(有些門店目前可能已Close,故統計資料須抓全部的shop)
 	 * @params: enums

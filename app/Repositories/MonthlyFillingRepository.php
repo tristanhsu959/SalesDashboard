@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderTrait;
+use App\Repositories\Traits\OrderReposTrait;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -14,8 +14,8 @@ use Exception;
 
 class MonthlyFillingRepository extends Repository
 {
-	use OrderTrait;
-	#, LegacyOrderTrait;
+	use OrderReposTrait;
+	#, LegacyOrderReposTrait;
 	
 	public function __construct()
 	{
