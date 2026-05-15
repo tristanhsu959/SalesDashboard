@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Libraries\Sales\AreaLib;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class BafangPosOrderToLocal extends Command
      *
      * @var string
      */
-    protected $signature = 'bafang:pos-order-to-local';
+    protected $signature = 'bafang:pos-order-to-local {argStDate?} {argEndDate?}';
 
     /**
      * The console command description.
@@ -34,8 +35,11 @@ class BafangPosOrderToLocal extends Command
         try
 		{
 			Log::channel('commandLog')->info("Fetch bafang data start : " . now(), [ __class__, __function__, __line__]);
-		
-			list($stDate, $endDate) = $this->_getParams();
+			
+			$argStDate 	= $this->argument('argStDate');
+			$argEndDate = $this->argument('argEndDate');
+			
+			list($stDate, $endDate) = $this->_getParams($argStDate, $argEndDate);
 			
 			Log::channel('commandLog')->info(Str::replaceArray('?', [$stDate, $endDate], "Params:?~? -----"));
 			
@@ -54,22 +58,19 @@ class BafangPosOrderToLocal extends Command
 		}
     }
 	
-	private function _getParams()
+	private function _getParams($argStDate, $argEndDate)
 	{
 		$this->info("Build params start ----- " . now());
 		
-		if (Cache::has($this->cacheKey))
-			$stDate = Cache::get($this->cacheKey);
+		if (empty($argStDate))
+			$stDate = Carbon::yesterday()->format('Y-m-d H:i:s');
 		else
-			$stDate = '2025-09-01';
+			$stDate = Carbon::parse($argStDate)->format('Y-m-d H:i:s');
 		
-		$stDate = Carbon::parse($stDate)->subMinutes(5)->format('Y-m-d H:i:s');
-		$endDate = Carbon::parse($stDate)->addDay(); #addMinutes(60);
-		
-		if (Carbon::parse($endDate)->isAfter(now())) 
-			$endDate = now()->format('Y-m-d H:i:s');
+		if (empty($argEndDate))
+			$endDate = Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
 		else
-			$endDate = $endDate->format('Y-m-d H:i:s');
+			$endDate = Carbon::parse($argEndDate)->addDay()->format('Y-m-d H:i:s');
 		
 		$this->info(Str::replaceArray('?', [$stDate, $endDate], "Build params end:[?]~[?] -----"));
 		
@@ -78,27 +79,33 @@ class BafangPosOrderToLocal extends Command
 	
 	private function _fetchOrder($stDate, $endDate)
 	{
-		$this->info(Str::replaceArray('?', [now()], "Fetch bafang data start ----- ?"));
-			
-		#無stDate時, carbon default is now
-		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate)
 		$result = DB::connection('BFPosErp')
-			->table('SALE00 as s0')
-			->fromRaw('SALE00 as s0 WITH(NOLOCK)')
-			->join(DB::RAW('SALE01 as s1 WITH(NOLOCK)'), function($join){
-				$join->on('s1.SHOP_ID', '=', 's0.SHOP_ID')
-					->on('s1.SALE_ID', '=', 's0.SALE_ID');
+			->table('SALE01 as s01')
+			->fromRaw('poserp.dbo.SALE01 as s01 WITH(NOLOCK)')
+			->join(DB::RAW('poserp.dbo.SALE00 as s00 WITH(NOLOCK)'), function($join){
+					$join->on('s00.SALE_ID', '=', 's01.SALE_ID')
+							->on('s00.SHOP_ID', '=', 's01.SHOP_ID');
 			})
-			->where('s0.STATUS', '=', '2') 
-			->where('s0.SALE_DATE', '>=', $stDate)
-			->where('s0.SALE_DATE', '<=', $endDate)
-			->select('s1.SALE_ID', 's1.SALE_SNO', 's1.SHOP_ID', 's1.PROD_ID')
-			->addSelect('s1.SALE_PRICE', 's1.QTY', 's1.ITEM_DISC', 's1.TASTE_MEMO', 's0.SALE_DATE')
+			->join(DB::RAW('poserp.dbo.SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 's01.SHOP_ID')
+			->where('s00.SALE_DATE', '>=', $stDate)
+			->where('s00.SALE_DATE', '<', $endDate)
+			->select('s01.SALE_ID as saleId', 's01.SALE_SNO as saleSno', 's01.SHOP_ID as shopId', 's01.PROD_ID as productId')
+			->addSelect('s01.SALE_PRICE as price', 's01.QTY as qty', 's01.ITEM_DISC as discount', 's01.TASTE_MEMO as taste', 's00.SALE_DATE')
+			->addSelect('s.SHOP_NAME as shopName', 's.SHOP_KIND as shopKind', 's.gid as areaId')
 			->get()
 			->toArray();
-			#->toRawSql(); 
-			
-		$this->info(Str::replaceArray('?', [now()], "Fetch bafang data completed -----?"));
+		
+		/* $result = DB::connection('BFPosErp')
+			->table('zs_sd_order as s01')
+			->fromRaw('poserp.dbo.zs_sd_order as s01 WITH(NOLOCK)')
+			->join(DB::RAW('poserp.dbo.SHOP00 as s WITH(NOLOCK)'), 's.SHOP_ID', '=', 's01.shopId')
+			->where('s01.saleDate', '>=', $stDate)
+			->where('s01.saleDate', '<', $endDate)
+			->select('s01.saleId', 's01.saleSno', 's01.shopId', 's01.productId')
+			->addSelect('s01.price', 's01.qty', 's01.discount', 's01.taste', 's01.saleDate')
+			->addSelect('s.SHOP_NAME as shopName', 's.SHOP_KIND as shopKind', 's.gid as areaId')
+			->get()
+			->toArray(); */
 			
 		return $result;
 	}
@@ -111,7 +118,7 @@ class BafangPosOrderToLocal extends Command
 		$this->info(Str::replaceArray('?', [now()], "Update bafang data to local start -----?"));
 			
 		#(saleId, saleSno, shopId, productId, price, qty, discount, taste, saleDate, updateAt)
-		$query = DB::connection('PosOrder')->table('bf_sale01');
+		$query = DB::connection('SalesDashboard')->table('bf_sale01');
 		$upsert = collect($orderData)->chunk(100);
 		
 		foreach ($upsert as $items) 
@@ -121,15 +128,19 @@ class BafangPosOrderToLocal extends Command
 			foreach($items as $item)
 			{
 				$row = [];
-				$row['saleId']  	= $item['SALE_ID'];
-				$row['saleSno'] 	= $item['SALE_SNO'];
-				$row['shopId']  	= $item['SHOP_ID'];
-				$row['productId'] 	= $item['PROD_ID'];
-				$row['price']     	= $item['SALE_PRICE'];
-				$row['qty']       	= $item['QTY'];
-				$row['discount']  	= $item['ITEM_DISC'];
-				$row['taste']     	= $item['TASTE_MEMO'];
-				$row['saleDate']  	= $item['SALE_DATE'];
+				$row['saleId']  	= $item['saleId'];
+				$row['saleSno'] 	= $item['saleSno'];
+				$row['shopId']  	= $item['shopId'];
+				$row['shopName']  	= $item['shopName'];
+				$row['shopKind']  	= $item['shopKind'];
+				$row['areaId']  	= AreaLib::toId($item['areaId']);
+				$row['productId'] 	= $item['productId'];
+				$row['price']     	= $item['price'];
+				$row['qty']       	= $item['qty'];
+				$row['discount']  	= $item['discount'];
+				$row['taste']     	= Str::contains($item['taste'], '秘製滷肉汁') ? 1 : 0;
+				$row['saleDate']  	= Carbon::parse($item['saleDate'])->format('Y-m-d');
+				$row['saleDateTime']= $item['saleDate'];
 				$row['updateAt'] 	= now()->format('Y-m-d H:i:s');
 			
 				$rows[] = $row;

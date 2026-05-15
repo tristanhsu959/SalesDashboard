@@ -18,6 +18,11 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 #Buygood pos local
 #Schedule::command('buygood:pos-order-to-local')->everyTenMinutes()->withoutOverlapping();
 
+#Bafang zs_sd_order
+Schedule::command('bafang:pos-order-statistics')->everyTenMinutes()->withoutOverlapping(); #->between('10:00', '22:00');
+
+#Buygood zs_sd_order
+Schedule::command('buygood:pos-order-statistics')->everyTenMinutes()->withoutOverlapping(); #->between('10:00', '22:00');
 
 #Bafang zs_sd_order
 Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(); #->between('10:00', '22:00');
