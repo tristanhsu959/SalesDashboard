@@ -20,7 +20,7 @@
 			<!-- 門店 -->
 			<template x-for="(name, productId) in statistics.header.productList" :key="productId">
 			<div class="page paddin" :class="{ 'active': activeProduct === productId }">
-				<section class="statistics-store scrollbar {{$viewModel->getBrandCode()}}">
+				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
 					<table class="stripes">
 						<thead>
 							<tr>
@@ -37,10 +37,10 @@
 							<!--template x-for="(store, storeId) in statistics.header['storeList']" :key="storeId"-->
 							<template x-for="(store, idx) in filterStore" :key="idx">
 							<tr>
-								<th x-text="store.posId"></th>
-								<th x-text="store.areaName"></th>
-								<th x-text="store.storeNo"></th>
-								<th x-text="store.storeName"></th>
+								<td x-text="store.posId"></td>
+								<td x-text="store.areaName"></td>
+								<td x-text="store.storeNo"></td>
+								<td x-text="store.storeName"></td>
 								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
 									<td x-text="statistics.data[productId]?.[store['storeKey']]?.[date]?.['qty'] ?? 0"></td>
 								</template>

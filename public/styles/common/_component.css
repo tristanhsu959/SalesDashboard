@@ -109,8 +109,8 @@ table {
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
 		margin: 0;
-		border: 1px solid var(--table-bg-dark);
-		background-color: var(--table-bg);
+		/* border: 1px solid var(--table-bg-dark); */
+		background-color: var(--surface);
 		
 		table {
 			table-layout: fixed;
@@ -125,7 +125,7 @@ table {
 			thead tr {
 				th {
 					word-break: keep-all;
-					background-color: var(--table-fixed-bg);
+					/* background-color: var(--background); */
 					width: 120px;
 				}
 			}
@@ -133,12 +133,8 @@ table {
 			tbody {
 				tr {
 					td {
-						background-color: var(--table-bg);
+						/* background-color: var(--background); */
 						color: #424242;
-					}
-					
-					&:last-child th, &:last-child td {
-						color: red;
 					}
 				}
 			}
@@ -199,18 +195,24 @@ table {
 						/*較固定的三個col*/
 						&:nth-of-type(1) {
 							width: 150px;
+							min-width: 150px;
+							max-width: 150px;
 							position: sticky;
 							left: 0;
 							z-index: 6;
 						}
 						&:nth-of-type(2) {
 							width: 150px;
+							min-width: 150px;
+							max-width: 150px;
 							position: sticky;
 							left: 150px;
 							z-index: 6;
 						}
 						&:nth-of-type(3) {
 							width: 200px;
+							min-width: 200px;
+							max-width: 200px;
 							position: sticky;
 							left: 300px;
 							z-index: 6;

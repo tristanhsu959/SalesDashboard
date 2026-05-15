@@ -244,7 +244,7 @@ class DailyRevenueService
 			$temp['shopName'] 		= $item['shopName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
-			$temp['areaName']		= (Area::tryFrom($item['areaId']))->label();
+			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
 			$temp['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
 			$temp['amount'] 		= $item['amount'];
 			

@@ -85,6 +85,29 @@
 			
 			<!-- 區域彙總 -->
 			<div class="page padding active" id="tab-area">
+				<section class="statistics-area">
+					<table>
+						<thead>
+							<tr>
+								<template x-for="col in area.header" :key="col">
+									<th class="s2" x-text="col"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(areaData, idx) in area.data" :key="idx">
+							<tr>
+								<template x-for="(col, colKey) in area.header" :key="colKey">
+									<td x-text="areaData[colKey]"></td>
+								</template>
+							</tr>
+							</template>
+						</tbody>
+					</table>
+				</section>
+			</div>
+			
+			<!--div class="page padding active" id="tab-area">
 				<section class="statistics-area grid-table">
 					<div class="grid header">
 						<template x-for="col in area.header" :key="col">
@@ -100,7 +123,7 @@
 					</div>
 					</template>
 				</section>
-			</div>
+			</div-->
 			
 			<!-- 門店 -->
 			<div class="page padding" id="tab-shop">
