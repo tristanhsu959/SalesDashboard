@@ -103,8 +103,8 @@ class BuygoodPosOrderStatistics extends Command
 			
 			if ($lastDate->isToday())
 			{
-				$stDate = Carbon::parse(now())->subMinutes(60)->format('Y-m-d H:i:s');
-				$endDate = Carbon::parse(now())->subMinutes(10)->format('Y-m-d H:i:s');
+				$stDate = Carbon::parse(now())->subMinutes(30)->format('Y-m-d H:i:s');
+				$endDate = Carbon::parse(now())->subMinutes(5)->format('Y-m-d H:i:s');
 			}
 			else
 			{

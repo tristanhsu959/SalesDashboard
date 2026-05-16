@@ -19,16 +19,35 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 #Schedule::command('buygood:pos-order-to-local')->everyTenMinutes()->withoutOverlapping();
 
 #Bafang zs_sd_order
-Schedule::command('bafang:pos-order-statistics')->everyTenMinutes()->withoutOverlapping(); #->between('10:00', '22:00');
+/* Schedule::command('bafang:pos-order-statistics')
+		->everyFifteenMinutes()
+		->when(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10); */
 
+Schedule::command('bafang:pos-order-statistics')
+		#->hourly()
+		->everyTenMinutes()
+		->unless(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10);
+		
 #Buygood zs_sd_order
-Schedule::command('buygood:pos-order-statistics')->everyTenMinutes()->withoutOverlapping(); #->between('10:00', '22:00');
+/* Schedule::command('buygood:pos-order-statistics')
+		->everyFifteenMinutes()
+		->when(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10); */ 
 
+Schedule::command('buygood:pos-order-statistics')
+		#->hourly()
+		->everyTenMinutes()
+		->unless(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10);
+		
+		
 #Bafang zs_sd_order
-Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(); #->between('10:00', '22:00');
+Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 #Buygood zs_sd_order
-Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(); #->between('10:00', '22:00');
+Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 /* #Update data for current day
 #橙汁排骨
