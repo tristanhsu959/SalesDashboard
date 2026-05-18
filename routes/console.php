@@ -27,7 +27,7 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 Schedule::command('bafang:pos-order-statistics')
 		#->hourly()
 		->everyTenMinutes()
-		->unless(fn () => now()->between('10:00', '21:00'))
+		->unlessBetween('10:00', '21:00')
 		->withoutOverlapping(10);
 		
 #Buygood zs_sd_order
@@ -39,7 +39,7 @@ Schedule::command('bafang:pos-order-statistics')
 Schedule::command('buygood:pos-order-statistics')
 		#->hourly()
 		->everyTenMinutes()
-		->unless(fn () => now()->between('10:00', '21:00'))
+		->unlessBetween('10:00', '21:00')
 		->withoutOverlapping(10);
 		
 		
