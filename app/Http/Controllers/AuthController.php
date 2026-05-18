@@ -25,6 +25,7 @@ class AuthController extends Controller
 		#自動登出,避免view載入錯誤
 		$this->_service->signout();
 		$this->_viewModel->action = FormAction::SIGNIN;
+		session()->put('botTimeValidate', now());
 		
 		return view('signin')->with('viewModel', $this->_viewModel);
 	}
@@ -37,6 +38,7 @@ class AuthController extends Controller
 	{
 		$account 	= $request->input('account');
 		$password	= $request->input('password');
+		$captcha	= $request->input('captcha');
 		
 		$this->_viewModel->action = FormAction::SIGNIN;
 		$this->_viewModel->keepFormData($account); #account only
@@ -45,7 +47,12 @@ class AuthController extends Controller
             'account' => 'required|max:20',
 			'password' => 'required|max:20',
         ]);
- 
+		
+		$botSt = session()->get('botTimeValidate');
+		
+		if (! empty($captcha) OR $botSt->diffInSeconds(now()) < 1)
+			 abort(400, 'Bad Request');
+		
         if ($validator->fails())
 		{
 			$this->_viewModel->fail('登入失敗，帳號或密碼輸入不完整');

@@ -16,8 +16,8 @@ use App\Http\Middleware\AccessPermissionMiddleware;
 use App\Enums\Functions;
 
 /* Login */
-Route::get('signin', [AuthController::class, 'showSignin'])->name('signin');
-Route::redirect('/', '/signin'); 
+Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
+Route::redirect('signin', '/'); 
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
 

@@ -133,7 +133,7 @@ body {
 			width: 400px;
 			padding: 4rem 2rem;
 			
-			.head {
+			.header {
 				padding: 0;
 				margin-block-end: 1rem;
 				
@@ -146,6 +146,7 @@ body {
 					font-size: 1.4rem;
 				}
 				h6 {
+					font-family: 'Orbitron';
 					color: var(--on-surface-variant); 
 					font-weight: normal;
 					font-size: .875rem;
@@ -159,6 +160,13 @@ body {
 				color: var(--on-surface-variant);
 				opacity: .6;
 				transform: translateY(-50%);
+			}
+			
+			.field.captcha {
+				position: absolute;
+				top: 0;
+				left: 0;
+				display: none;
 			}
 			
 			nav.group {
