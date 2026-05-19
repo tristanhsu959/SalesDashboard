@@ -416,11 +416,11 @@ class DailyRevenueService
 		$params->set('shop.header', $header);
 		
 		#Sum已在DB計算, 這裏只要format output
-		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($items, $key) {
+		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
 			$temp['shopId'] 		= $items->pluck('shopId')->first();
 			$temp['shopName'] 		= $items->pluck('shopName')->first();
 			$temp['shopTypeName'] 	= $items->pluck('shopTypeName')->first();
-			#$temp['areaId'] 		= $items->pluck('areaId')->first();
+			$temp['areaId'] 		= $items->pluck('areaId')->first();
 			$temp['areaName'] 		= $items->pluck('areaName')->first();
 			
 			#整理Amount成Daily形式
@@ -437,7 +437,10 @@ class DailyRevenueService
 			})->toArray();
 			
 			return $temp; 
-		})->toArray();
+		})
+		->values()
+		->sortBy('areaId')
+		->toArray();
 		
 		$result['total']['shopId'] 		= ''; 
 		$result['total']['shopName'] 	= '總計'; 
