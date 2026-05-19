@@ -26,7 +26,7 @@ class UserRepository extends Repository
 	{
 		$db = $this->connectSalesDashboard('user as a');
 			
-		$result = $db->select('a.userId', 'a.userAccount', 'a.userDisplayName', 'a.department')
+		$result = $db->select('a.userId', 'a.userAccount', 'a.userPassword', 'a.userDisplayName', 'a.department')
 			->addSelect('a.email', 'b.roleGroup', 'a.isActive', 'a.updateAt')
 			->leftJoin('role as b', 'b.roleUserId', '=', 'a.userId')
 			->get()

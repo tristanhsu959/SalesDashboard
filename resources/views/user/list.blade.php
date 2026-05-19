@@ -54,7 +54,7 @@
 				<template x-for="(user, idx) in filterUsers" :key="idx">
 					<tr>
 						<td x-text="idx+1"></td>
-						<td x-text="user.userAccount"></td>
+						<td><span x-text="user.userAccount"></span><i class="green-text" x-show="user.hasSysPassword">passkey</i></td>
 						<td x-text="user.userDisplayName"></td>
 						<td x-text="user.department"></td>
 						<td x-text="user.email"></td>
