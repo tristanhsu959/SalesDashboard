@@ -269,39 +269,6 @@ class DailyRevenueService
 		});
 		
 		$params->baseData = $baseData->merge($fillShops)->sortBy('areaId')->toArray();
-		
-		#改成Shop資料來自DB,避免閉店沒有關聯到(不用$groupShopList來取)
-		/* $baseData = collect($saleData)->map(function($item, $key) {
-			$item['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
-			$item['shopType'] 		= $item['typeId'];
-			$item['shopTypeName']	= $item['typeName'];
-			$item['areaId'] 		= AreaLib::toId($item['areaId']);
-			$item['areaName']		= (Area::tryFrom($item['areaId']))->label();
-			
-			unset($item['typeId'], $item['typeName']);
-			
-			return $item; 
-		});
-		
-		#補全未有銷售的門店資料(closedown = 0)
-		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$fillShops = $this->_getFillShop($params->activeShopList, $saleShopIds);
-		
-		#重建
-		$fillShops = $fillShops->map(function($item, $key) {
-			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $item['shopName'];
-			$temp['shopType'] 		= $item['typeId'];
-			$temp['shopTypeName']	= $item['typeName'];
-			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
-			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
-			$temp['saleDate'] 		= $params->endDate;
-			$temp['amount'] 		= 0;
-			
-			return $temp;
-		}); */
-		
-		
 	}
 	
 	
