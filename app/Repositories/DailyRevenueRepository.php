@@ -73,12 +73,34 @@ class DailyRevenueRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
 		
+		/* $result = $db
+				->table('z_sd_sale00 as a')
+				->fromRaw('z_sd_sale00 as a WITH(NOLOCK)')
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.shopId')
+				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<=', $endDate)
+				->whereIn('b.SHOP_KIND', $shopType)
+				->whereIn('b.gid', $authAreaIds)
+				->when(! empty($shopName), function ($query) use ($shopName) {
+					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+				})
+				->whereNotIn('a.shopId', $excepts)
+				->select('a.shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
+				->selectRaw('sum(a.amount) as amount')
+				->groupBy('a.shopId', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', 'a.saleDate')
+				->get()
+				->toArray(); 
+		
+		return $result; */
+		
 		#Group會變超慢, 改為由PHP計算
 		$subQuery = $db
 				->table('SALE00 as a')
 				->fromRaw('SALE00 as a WITH(NOLOCK)')
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<=', $endDate)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->select('a.SALE_ID', 'a.SHOP_ID');
 					
 		$result = $db
@@ -91,7 +113,6 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
 				->whereNotIn('a.SHOP_ID', $excepts)
-				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
 				->when(! empty($shopName), function ($query) use ($shopName) {
@@ -102,7 +123,7 @@ class DailyRevenueRepository extends Repository
 				->get()
 				->toArray();
 		
-		return $result;
+		return $result; 
 		
 		/* $result = $db
 				->table('SALE00 as a')
@@ -111,16 +132,13 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.shop_kind')
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<=', $endDate)
-				->whereNotIn('a.SHOP_ID', $excepts)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
-				->when($authAreaIds, function ($query, $authAreaIds) {
-					return $query->whereIn('b.gid', $authAreaIds);
-				})
 				->when(! empty($shopName), function ($query) use ($shopName) {
 					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
 				})
+				->whereNotIn('a.SHOP_ID', $excepts)
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.SALE_DATE as saleDate')
 				->selectRaw('a.amount')
 				->get()
@@ -179,7 +197,5 @@ class DailyRevenueRepository extends Repository
 				->groupByRaw('a.SHOP_ID, b.SHOP_NAME, b.gid, c.sk_id, c.Sk_name, DATEADD(day, DATEDIFF(day, 0, a.SALE_DATE), 0)')
 				->get()
 				->toArray(); */
-		
-		
 	}
 }

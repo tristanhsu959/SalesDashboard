@@ -4,19 +4,25 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
 use Illuminate\Support\Facades\Schedule;
-use App\Console\Commands\UpdateNewReleaseDataToLocal;
 use App\Console\Commands\BafangPosOrderReplication;
 use App\Console\Commands\BuygoodPosOrderReplication;
+
+use App\Console\Commands\BafangPosSale00;
+use App\Console\Commands\BafangPosSale01;
+
+use App\Console\Commands\BuygoodPosSale00;
+use App\Console\Commands\BuygoodPosSale01;
+
 use App\Console\Commands\BafangPosOrderToLocal;
 use App\Console\Commands\BuygoodPosOrderToLocal;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
 
-#Bafang pos local
-#Schedule::command('bafang:pos-order-to-local')->everyTenMinutes()->withoutOverlapping();
+#Bafang pos sale00
+Schedule::command('bafang:pos-sale00')->everyTenMinutes()->withoutOverlapping(5);
 
-#Buygood pos local
-#Schedule::command('buygood:pos-order-to-local')->everyTenMinutes()->withoutOverlapping();
+#Buygood pos sale00
+Schedule::command('buygood:pos-sale00')->everyTenMinutes()->withoutOverlapping(5);
 
 #Bafang zs_sd_order
 /* Schedule::command('bafang:pos-order-statistics')
@@ -24,10 +30,10 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 		->when(fn () => now()->between('10:00', '21:00'))
 		->withoutOverlapping(10); */
 
-Schedule::command('bafang:pos-order-statistics')
+Schedule::command('bafang:pos-sale01')
 		#->hourly()
-		->everyTenMinutes()
-		->unlessBetween('10:00', '21:00')
+		->everyThirtyMinutes()
+		#->unlessBetween('10:00', '21:00')
 		->withoutOverlapping(10);
 		
 #Buygood zs_sd_order
@@ -36,10 +42,10 @@ Schedule::command('bafang:pos-order-statistics')
 		->when(fn () => now()->between('10:00', '21:00'))
 		->withoutOverlapping(10); */ 
 
-Schedule::command('buygood:pos-order-statistics')
+Schedule::command('buygood:pos-sale01')
 		#->hourly()
-		->everyTenMinutes()
-		->unlessBetween('10:00', '21:00')
+		->everyThirtyMinutes()
+		#->unlessBetween('10:00', '21:00')
 		->withoutOverlapping(10);
 		
 		

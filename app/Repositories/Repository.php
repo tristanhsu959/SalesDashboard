@@ -42,6 +42,14 @@ class Repository
 			return DB::connection('SalesDashboard')->table($table);
 	}
 	
+	protected function connectPosStatistics($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('PosStatistics');
+		else
+			return DB::connection('PosStatistics')->table($table);
+	}
+	
 	#台北(北區)
 	protected function connectOrderTP($table = NULL)
 	{

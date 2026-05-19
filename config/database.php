@@ -91,11 +91,11 @@ return [
         ],
 		
 		#Local pos order
-		'PosOrder' => [
+		'PosStatistics' => [
             'driver' => 'mysql',
             'host' => env('LPOS_DB_HOST', '127.0.0.1'),
             'port' => env('LPOS_DB_PORT', '3306'),
-            'database' => env('LPOS_DB_DATABASE', 'pos_order'),
+            'database' => env('LPOS_DB_DATABASE', 'pos_statistics'),
             'username' => env('LPOS_DB_USERNAME', 'salesdashboard'),
             'password' => env('LPOS_DB_PASSWORD', ''),
             'fetch' => PDO::FETCH_ASSOC,
