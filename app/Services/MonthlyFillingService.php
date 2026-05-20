@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -68,61 +69,86 @@ class MonthlyFillingService
 	{
 		try
 		{
-			#轉換日期
-			if ($searchRange == 'year')
-			{
-				$year = Carbon::now()->year;
-				$searchStDate 	= Carbon::create($year)->startOfYear()->toDateString();
-				$searchEndDate 	= Carbon::create($year)->endOfYear()->toDateString();
-			}
-			else if ($searchRange == 'month')
-			{
-				$searchStDate = Carbon::createFromFormat('!Y-m', $searchStDate)->toDateString();
-				$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
-			}
+			if (AppManager::hasAreaPermission() === FALSE)
+				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser->roleArea; #
+			$params = $this->_initParams($brand, $searchStDate, $searchEndDate, $searchType, $searchRange);
 			
-			#Check cache
-			$functions = $this->parsingFunction($brand);
-			#$cacheKey = implode(':', [$functions->value, $searchStDate, $searchEndDate, $searchType, $searchRange]);
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
-			
-			if (Cache::has($cacheKey))
+			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get monthly filling data from cache');
 				
-				$statistics = Cache::get($cacheKey); #cache data is response format
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
+				
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
 				Log::channel('appServiceLog')->info('Get monthly filling data from db');
 				
-				if ($searchType == 'store')
+				if ($params->type == 'store')
 					$service = app(StoreService::class);
 				else
 					$service = app(FactoryService::class);
 				
 				#執行統計
-				$this->_statistics = $service->analysisStatisticsData($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
+				$this->_statistics = $service->analysisStatisticsData($params);
 				
+				return ResponseLib::initialize($this->_statistics)->success();
 				#無值不cache
-				if (! empty(Arr::flatten($this->_statistics['data'])))
+				/* if (! empty(Arr::flatten($this->_statistics['data'])))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey);#hex2bin
 					$this->_statistics['exportName']	= '月初報表';
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				}
+				} */
 				
-				return ResponseLib::initialize($this->_statistics)->success();
+				
 			}
 		}
 		catch(Exception $e)
 		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
+	}
+	
+	/* Init input params
+	 * @params: enums
+	 * @params: string
+	 * @params: string
+	 * @params: array
+	 * @params: string
+	 * @return: array
+	 */
+	private function _initParams($brand, $searchStDate, $searchEndDate, $searchType, $searchRange)
+	{
+		$params = new Fluent();
+		
+		$currentUser = AppManager::getCurrentUser();
+		$userAreaIds = $currentUser->roleArea;
+		
+		#轉換日期
+		if ($searchRange == 'year')
+		{
+			$year = Carbon::now()->year;
+			$searchStDate 	= Carbon::create($year)->startOfYear()->toDateString();
+			$searchEndDate 	= Carbon::create($year)->endOfYear()->toDateString();
+		}
+		else if ($searchRange == 'month')
+		{
+			$searchStDate = Carbon::createFromFormat('!Y-m', $searchStDate)->toDateString();
+			$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
+		}
+			
+		$functions 	= $this->parsingFunction($brand);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+		
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->range($searchRange)
+				->cacheKey($cacheKey);
+		
+		return $params;
 	}
 	
 	/* Export data

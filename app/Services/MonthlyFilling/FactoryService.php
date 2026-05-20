@@ -55,7 +55,7 @@ class FactoryService
 	 * @return: array
 	 */
 	public function analysisStatisticsData($brandId, $searchStDate, $searchEndDate, $searchType, $searchRange)
-	{
+	{dd($brandId);
 		try
 		{
 			$currentUser = AppManager::getCurrentUser();
@@ -131,6 +131,8 @@ class FactoryService
 			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
+			#無法分區域權限, 取回再處理(不分store or factory)
+			$re = $this->_repository->getExtraDataFromLegacy($stDate, $endDate, $productIds);
 			
 			#先處理包裝轉換
 			$orderData = collect($orderData)->map(function($item, $key){
@@ -170,7 +172,7 @@ class FactoryService
 			$endDate= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
 			
 			$orderData = $this->_repository->getTpExtraDataByCode($stDate, $endDate, $codes);
-			dd($orderData);
+			
 			#目前僅for月初報表使用, 因追加單會建在舊系統
 			$extraData = $this->_repository->getExtraDataByFactory($stDate, $endDate);
 			

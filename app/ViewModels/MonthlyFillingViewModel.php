@@ -58,8 +58,8 @@ class MonthlyFillingViewModel extends Fluent
 	private function _setSearchMode()
 	{
 		$type = [
-			'store'		=> '依門店', 
-			'factory'	=> '依工廠',
+			'store'		=> '依門店(餡量)', 
+			'factory'	=> '依工廠(月總量．月均量)',
 		];
 		$this->set('options.mode.type', $type);
 		
