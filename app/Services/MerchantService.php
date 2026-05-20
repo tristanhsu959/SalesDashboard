@@ -114,7 +114,7 @@ class MerchantService
 				$this->_statistics = $service->analysis($this->_statistics);
 				
 				#無值不cache
-				if (! empty($this->_statistics['info']) OR ! empty($this->_statistics['dayoff']))
+				if (! empty(Arr::flatten($this->_statistics['info'])) OR ! empty(Arr::flatten($this->_statistics['dayoff'])))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= ($searchType == 'info') ? '門店資訊' : '店休資訊';

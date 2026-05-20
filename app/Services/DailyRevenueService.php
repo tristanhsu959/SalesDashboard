@@ -159,7 +159,7 @@ class DailyRevenueService
 		$this->_statistics['area']		= $params->area;
 		
 		#無值不cache
-		if (! empty($this->_statistics['shop']))
+		if (! empty(Arr::flatten($this->_statistics['shop'])))
 		{
 			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));

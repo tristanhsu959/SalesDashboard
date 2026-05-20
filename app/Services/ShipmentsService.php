@@ -189,7 +189,7 @@ class ShipmentsService
 				$this->_statistics = $service->analysis($this->_statistics);
 				
 				#無值不cache
-				if (! empty($this->_statistics['data']))
+				if (! empty(Arr::flatten($this->_statistics['data'])))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= ($params['searchBy'] == 'keyword') ? $params['searchKeyword'] : '分類';

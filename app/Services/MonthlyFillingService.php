@@ -109,7 +109,7 @@ class MonthlyFillingService
 				$this->_statistics = $service->analysisStatisticsData($brand->value, $searchStDate, $searchEndDate, $searchType, $searchRange);
 				
 				#無值不cache
-				if (! empty($this->_statistics['data']))
+				if (! empty(Arr::flatten($this->_statistics['data'])))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey);#hex2bin
 					$this->_statistics['exportName']	= '月初報表';
