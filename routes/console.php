@@ -18,41 +18,16 @@ use App\Console\Commands\BuygoodPosOrderToLocal;
 
 #* * * * * cd /var/www/html/SalesDashboard && php artisan schedule:run >> /dev/null 2>&1
 
-#Bafang pos sale00
+#Bafang pos sale00(門店營收)
 Schedule::command('bafang:pos-sale00')->everyTenMinutes()->withoutOverlapping(5);
 
-#Buygood pos sale00
+#Buygood pos sale00(門店營收)
 Schedule::command('buygood:pos-sale00')->everyTenMinutes()->withoutOverlapping(5);
 
-#Bafang zs_sd_order
-/* Schedule::command('bafang:pos-order-statistics')
-		->everyFifteenMinutes()
-		->when(fn () => now()->between('10:00', '21:00'))
-		->withoutOverlapping(10); */
-
-Schedule::command('bafang:pos-sale01')
-		#->hourly()
-		->everyThirtyMinutes()
-		#->unlessBetween('10:00', '21:00')
-		->withoutOverlapping(10);
-		
-#Buygood zs_sd_order
-/* Schedule::command('buygood:pos-order-statistics')
-		->everyFifteenMinutes()
-		->when(fn () => now()->between('10:00', '21:00'))
-		->withoutOverlapping(10); */ 
-
-Schedule::command('buygood:pos-sale01')
-		#->hourly()
-		->everyThirtyMinutes()
-		#->unlessBetween('10:00', '21:00')
-		->withoutOverlapping(10);
-		
-		
-#Bafang zs_sd_order
+#Bafang zs_sd_order(銷售統計)
 Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
-#Buygood zs_sd_order
+#Buygood zs_sd_order(銷售統計)
 Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 /* #Update data for current day
@@ -84,3 +59,28 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 */
+
+#Bafang zs_sd_order
+/* Schedule::command('bafang:pos-order-statistics')
+		->everyFifteenMinutes()
+		->when(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10); 
+
+Schedule::command('bafang:pos-sale01')
+		#->hourly()
+		->everyThirtyMinutes()
+		#->unlessBetween('10:00', '21:00')
+		->withoutOverlapping(10);
+		
+#Buygood zs_sd_order
+Schedule::command('buygood:pos-order-statistics')
+		->everyFifteenMinutes()
+		->when(fn () => now()->between('10:00', '21:00'))
+		->withoutOverlapping(10);
+
+Schedule::command('buygood:pos-sale01')
+		#->hourly()
+		->everyThirtyMinutes()
+		#->unlessBetween('10:00', '21:00')
+		->withoutOverlapping(10);
+*/	
