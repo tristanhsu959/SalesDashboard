@@ -16,7 +16,7 @@
 			<!-- 工廠 -->
 			<template x-for="(data, type) in statistics.data" :key="type">
 			<div class="page padding active" :id="`page-${type}`">
-				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
+				<section class="statistics-factory scrollbar" :class="statistics.brandCode">
 					<table>
 						<thead>
 							<tr>

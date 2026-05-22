@@ -24,7 +24,7 @@ use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
-#當主Service
+#月初報表(餡料)
 class MonthlyFillingService
 {
 	private $_statistics = [];
@@ -43,7 +43,7 @@ class MonthlyFillingService
 		return Brand::tryFromCode($brand);
 	}
 	
-	/* Parsing function by brand
+	/* Parsing function by brand(BF only)
 	 * @params: enums
 	 * @return: string
 	 */
@@ -95,15 +95,6 @@ class MonthlyFillingService
 				$this->_statistics = $service->analysisStatisticsData($params);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
-				#無值不cache
-				/* if (! empty(Arr::flatten($this->_statistics['data'])))
-				{
-					$this->_statistics['exportToken'] 	= bin2hex($cacheKey);#hex2bin
-					$this->_statistics['exportName']	= '月初報表';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				} */
-				
-				
 			}
 		}
 		catch(Exception $e)

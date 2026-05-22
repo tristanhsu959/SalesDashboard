@@ -122,7 +122,9 @@ class MonthlyFillingViewModel extends Fluent
 	
 	public function isDataEmpty()
 	{
-		if (empty(Arr::collapse($this->statistics)))
+		$data = data_get($this->statistics, 'exportToken', NULL);
+		
+		if (empty($data))
 			return TRUE;
 		else
 			return FALSE;

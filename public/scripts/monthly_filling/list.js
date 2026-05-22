@@ -86,7 +86,7 @@ document.addEventListener('alpine:init', () => {
 		activeProduct: '',
 		
 		init() { 
-			const keys = Object.keys(this.statistics.header.sheet);
+			const keys = Object.keys(this.statistics.sheets);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
 			

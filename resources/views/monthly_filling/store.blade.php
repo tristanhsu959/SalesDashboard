@@ -9,25 +9,25 @@
 		@else
 		<div class="store-content">
 			<div class="tabs cyan-text">
-				<template x-for="(productName, groupId) in statistics.header.sheet" :key="groupId">
-					<a x-text="productName" @click="activeProduct = groupId" :data-ui="`#page-${groupId}`" :class="activeProduct == groupId ? 'active':''"></a>
+				<template x-for="(sheetName, sheetId) in statistics.sheets" :key="sheetId">
+					<a x-text="sheetName" @click="activeProduct = sheetId" :data-ui="`#page-${sheetId}`" :class="activeProduct == sheetId ? 'active':''"></a>
 				</template>
 			</div>
 			
 			<!-- 門店 -->
-			<template x-for="(productName, groupId) in statistics.header.sheet" :key="groupId">
-			<div class="page padding" :id="`page-${groupId}`" >
-				<section class="statistics-store scrollbar {{$viewModel->getBrandCode()}}">
+			<template x-for="(sheetName, sheetId) in statistics.sheets" :key="sheetId">
+			<div class="page padding" :id="`page-${sheetId}`" >
+				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
-								<template x-for="(header, idx) in statistics.header.tableHeader" :key="idx">
+								<template x-for="(header, idx) in statistics.header" :key="idx">
 									<th x-text="header"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(rowData, rowDataIndex) in statistics.data[groupId]" :key="rowDataIndex">
+							<template x-for="(rowData, rowDataIndex) in statistics.data[sheetId]" :key="rowDataIndex">
 							<tr>
 								<template x-for="(row, idx) in rowData" :key="idx">
 									<td x-text="row"></td>
