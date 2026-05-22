@@ -157,6 +157,13 @@ table {
 			--table-fixed-color: #01579b;
 			--table-stripes: #e0f7fa; 
 		}
+		&.fjveggie {
+			--table-bg: #aed581;
+			--table-bg-dark: #689f38;
+			--table-fixed-bg: #dcedc8;
+			--table-fixed-color: #33691e;
+			--table-stripes: #f1f8e9; 
+		}
 		
 		position: relatvie;
 		width: auto;
