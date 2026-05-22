@@ -207,7 +207,12 @@ class DailyRevenueService
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
-			
+			#去除shop id
+			$result = collect($result)->map(function($item, $key){
+				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
+				return $item;
+			})->toArray();
+				
 			return $result;
 		}
 		catch(Exception $e)
