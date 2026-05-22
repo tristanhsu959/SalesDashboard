@@ -5,6 +5,7 @@ namespace App\Repositories\Traits;
 use App\Enums\Brand;
 use App\Libraries\Sales\AreaLib;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /* POS DB Common 
  * 不再分purchase, sales目錄
@@ -49,8 +50,13 @@ trait PosReposTrait
 			})
 			->whereNotIn('a.SHOP_ID', $excepts)
 			->orderBy('a.SHOP_ID')
-			->get()
-			->toArray();
+			->get();
+		
+		#去除shop id
+		$result = $result->map(function($item, $key){
+			$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
+			return $item;
+		})->toArray();
 		
 		return $result;
 	}
@@ -91,9 +97,13 @@ trait PosReposTrait
 			})
 			->whereNotIn('a.SHOP_ID', $excepts)
 			->orderBy('a.SHOP_ID')
-			->get()
-			->toArray();
-			
+			->get();
+		#去除shop id
+		$result = $result->map(function($item, $key){
+			$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
+			return $item;
+		})->toArray();
+		
 		return $result;
 	}
 	
