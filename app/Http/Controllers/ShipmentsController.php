@@ -91,6 +91,7 @@ class ShipmentsController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData();
 		
 		$response = $this->_service->export($token);
 		

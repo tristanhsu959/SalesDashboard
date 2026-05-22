@@ -74,6 +74,7 @@ class DailyRevenueController extends Controller
 		//$token 	= $request->query('token');
 		
 		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData();
 		
 		$response = $this->_service->export($token);
 		
