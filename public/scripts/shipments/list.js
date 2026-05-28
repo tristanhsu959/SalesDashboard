@@ -39,6 +39,15 @@ document.addEventListener('alpine:init', () => {
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
+				
+				if (this.searchData.by == 'keyword')
+				{
+					this.searchData.category = '';
+					this.searchData.shortCodes = [];
+				}
+				else
+					this.searchData.keyword = '';
+				
 				setTimeout(() => {
 					ui('#searchPanel');
 					this.$el.submit();

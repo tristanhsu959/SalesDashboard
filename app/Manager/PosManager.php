@@ -3,7 +3,6 @@
 namespace App\Manager;
 
 use App\Manager\Repositories\PosRepository;
-use App\Repositories\SalesRepository;
 use App\Libraries\Sales\AreaLib;
 use App\Libraries\HelperLib;
 use App\Enums\Brand;

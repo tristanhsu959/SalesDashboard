@@ -43,12 +43,17 @@ class ShipmentsController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		$params = $request->all();
-		$params['searchShortCodes'] = $request->array('searchShortCodes');
-		unset($params['_token']);
-		
-		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($params); 
+		$searchType 		= $request->input('searchType');
+		$searchCalc 		= $request->input('searchCalc');
+		$searchStDate 		= $request->input('searchStDate');
+		$searchEndDate 		= $request->input('searchEndDate');
+		$searchBy 			= $request->input('searchBy');
+		$searchKeyword		= $request->input('searchKeyword');
+		$searchCategory 	= $request->input('searchCategory');
+		$searchShortCodes 	= $request->array('searchShortCodes');
+ 		
+  		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -62,14 +67,14 @@ class ShipmentsController extends Controller
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		if (($params['searchBy'] == 'keyword' && empty($params['searchKeyword'])) 
-				OR ($params['searchBy'] == 'category' && empty($params['searchShortCodes'])))
+		if (($searchBy == 'keyword' && empty($searchKeyword))
+				OR ($searchBy == 'category' && empty($searchShortCodes)))
 		{
 			$this->_viewModel->fail('查詢產品參數錯誤');
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $function, $params);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
