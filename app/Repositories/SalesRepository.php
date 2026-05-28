@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -12,8 +11,6 @@ use Log;
 
 class SalesRepository extends Repository
 {
-	use PosReposTrait;
-	
 	public function __construct()
 	{
 	}
@@ -105,7 +102,7 @@ class SalesRepository extends Repository
 				#->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
 				#->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
+				->where('a.saleDate', '<', $endDate)
 				->whereIn('s.gid', $authAreaIds)
 				->whereIn('a.productId', $erpNos)
 				#->whereNotIn('s.SHOP_ID', $excepts) 由PHP過濾
@@ -143,7 +140,7 @@ class SalesRepository extends Repository
 				#->selectRaw('sum(a.price * a.qty + a.discount) as price_sum')
 				#->selectRaw('sum(a.qty) as qty_sum')
 				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
+				->where('a.saleDate', '<', $endDate)
 				->whereIn('s.gid', $authAreaIds)
 				->whereIn('a.productId', $erpNos)
 				->whereIn('a.shopId', array_keys($dualBrandedShopIds))

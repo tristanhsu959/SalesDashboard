@@ -306,7 +306,7 @@ class NewReleaseService
 			$item['saleDate']	= (new Carbon($item['saleDate']))->format('Y-m-d');
 			$item['shopName'] 	= is_null($shop) ? 'NotFound' : $shop['shopName'];
 			$item['areaId'] 	= is_null($shop) ? 0 : $shop['areaId'];
-			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			$item['areaName']	= $shop['areaName'];
 
 			return $item; 
 		});
