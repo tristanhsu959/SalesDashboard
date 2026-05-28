@@ -139,7 +139,7 @@ class PurchaseManager
 			#$item['area'] = Str::replace('-御廚', '', $item['area']);
 			
 			#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
+			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
 			if ($brand == Brand::BAFANG)
 				$storeKey = Str::take($item['storeNo'], 9);
 			else

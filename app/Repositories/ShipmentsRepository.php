@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderReposTrait;
+use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -14,8 +14,6 @@ use Exception;
 
 class ShipmentsRepository extends Repository
 {
-	use OrderReposTrait;
-	
 	public function __construct()
 	{
 		
@@ -34,76 +32,6 @@ class ShipmentsRepository extends Repository
 			->select('p.purchaseBrandId as brandId', 'p.purchaseProductCode as shortCode')
 			->where('p.purchaseBrandId', '=', $brandId)
 			->get()
-			->toArray();
-		
-		return $result;
-	}
-	
-	/* 取Product id
-	 * @params: int
-	 * @params: string
-	 * @return: array
-	 */
-	public function getProductIdByName($brandId, $name)
-	{
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Product as a')
-			->fromRaw('Product as a WITH(NOLOCK)')
-			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
-			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			->where('a.IsStop', '=', 0)
-			->where('a.Name', 'like', "%{$name}%")
-			->groupBy('a.Id')
-			->get()
-			->pluck('Id')
-			->toArray();
-		
-		return $result;
-	}
-	
-	/* 取Product id - short code
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getProductIdByShortCode($brandId, $shortCodes)
-	{
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Product as a')
-			->fromRaw('Product as a WITH(NOLOCK)')
-			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
-			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			->where('a.IsStop', '=', 0)
-			->whereIn('a.OldNo', $shortCodes)
-			->groupBy('a.Id')
-			->get()
-			->pluck('Id')
 			->toArray();
 		
 		return $result;
@@ -143,16 +71,16 @@ class ShipmentsRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
-			->where('a.ExpectedDate', '<=', $endDate)
+			->where('a.ExpectedDate', '<', $endDate)
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->where('p.ErpNo', '!=', '')
