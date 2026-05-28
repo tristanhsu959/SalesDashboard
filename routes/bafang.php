@@ -9,6 +9,7 @@ use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MonthlyFillingController;
 use App\Http\Controllers\MerchantController; #store
+use App\Http\Controllers\PurchaseSalesController; #store
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -66,4 +67,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('merchant/search', [MerchantController::class, 'search'])->name('merchant.search');
 		Route::get('merchant/export/{token}', [MerchantController::class, 'export'])->name('merchant.export');
 	});	
+	
+	/* 門店進貨及銷售 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE_SALES->value, ':')])->group(function(){
+		Route::get('purchase_sales', [PurchaseSalesController::class, 'showSearch'])->name('purchase_sales');
+		Route::post('purchase_sales/search', [PurchaseSalesController::class, 'search'])->name('purchase_sales.search');
+		Route::get('purchase_sales/search', [PurchaseSalesController::class, 'list'])->name('purchase_sales.list');
+		Route::post('purchase_sales/detail', [PurchaseSalesController::class, 'detail'])->name('purchase_sales.detail');
+		Route::get('purchase_sales/export/{token}', [PurchaseSalesController::class, 'export'])->name('purchase_sales.export');
+	});
 });

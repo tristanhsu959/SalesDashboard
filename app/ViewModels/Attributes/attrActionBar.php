@@ -29,7 +29,12 @@ trait attrActionBar
 		if ($action && ! in_array($action->value, $except))
 			if (! empty($action->label()))
 				$breadcrumb[] = $action->label();
-				
+		
+		$extra = $this->get('extraBreadcrumb', NULL);
+		
+		if (! empty($extra))
+			$breadcrumb[] = $extra;
+		
 		return $breadcrumb;
 	}
 	

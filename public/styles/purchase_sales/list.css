@@ -1,0 +1,27 @@
+/* Product list */
+
+.store-list {
+	.info {
+		.row div {
+			margin-right: .5rem;
+			font-weight: bold;
+			color: #9c27b0;
+		}
+	}
+	
+	.statistics-store {
+		max-height: calc(100vh - 240px);
+		overflow-y: auto;
+		
+		table.stripes tbody tr:nth-child(odd) {
+			background-color: #d7ccc8; 
+		}
+		
+		table {
+			thead tr th:last-child, tbody tr td:last-child {
+				text-align: right;
+				padding-right: 1rem;
+			}
+		}
+	}
+}

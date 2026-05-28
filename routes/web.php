@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StoreMapController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NewReleaseSettingController;
 use App\Http\Controllers\SalesProductController;
@@ -87,6 +88,11 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
 		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
 		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+	});
+	
+	/***** 門店對應表 *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::STORE_MAP->value, ':')])->group(function(){
+		Route::get('store_map', [StoreMapController::class, 'list'])->name('store_map');
 	});
 	
 	/***** 身份管理 *****

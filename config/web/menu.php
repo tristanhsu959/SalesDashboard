@@ -45,6 +45,12 @@ return [
 			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.merchant'),
 		],
+		[
+			'name' 		=> Functions::BF_PURCHASE_SALES->label(), #門店進貨及銷售
+			'code'		=> Functions::BF_PURCHASE_SALES->value,
+			'style' 	=> ['icon' => 'finance_mode', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_sales'),
+		],
 	],
 	
 	MenuGroup::BUYGOOD->value => [
@@ -136,6 +142,12 @@ return [
 			'style' 	=> ['icon' => 'admin_panel_settings', 'color' => 'red-text'],
 			'url' 		=> 'users', 
 		],
+		/* [
+			'name' 		=> Functions::STORE_MAP->label(), #門店管理,
+			'code'		=> Functions::STORE_MAP->value,
+			'style' 	=> ['icon' => 'two_pager_store', 'color' => 'red-text'],
+			'url' 		=> 'store_map', 
+		], */
 		/*
 		[
 			'name' 		=> Functions::ROLE->label(), #身份管理,
