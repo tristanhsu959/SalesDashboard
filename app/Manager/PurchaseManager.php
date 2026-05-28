@@ -8,6 +8,7 @@ use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 /* New Order sys Common */
 class PurchaseManager
@@ -50,11 +51,34 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $userAreaIds)
+	public function getStoreList($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		try
 		{
+			#取回的close date已+8
 			$store = $this->_repository->getStoreList($brand, $userAreaIds);
+			
+			#排除閉店:有值才檢查,start/end都要有
+			if (! empty($stDate) && ! empty($endDate))
+			{
+				$stDate	= Carbon::parse($stDate);
+				$endDate= Carbon::parse($endDate);
+				
+				$store = collect($store)->reject(function($item, $key) use($stDate, $endDate) {
+					
+					$openDate 	= Carbon::parse($item['openDate']);
+					$closeDate 	= Carbon::parse($item['closeDate']);
+					
+					#在開始時間前己閉店
+					if ($closeDate->lte($stDate))
+						return TRUE;
+					
+					#在結束時間後才開店
+					if ($openDate->gt($endDate))
+						return TRUE;
+
+				});
+			}
 			
 			return $this->_formatStoreOutput($brand, $store);
 		}

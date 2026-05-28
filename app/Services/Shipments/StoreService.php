@@ -303,8 +303,11 @@ class StoreService
 	{
 		try
 		{
-			$brandId = $params->brand->value;
-			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds);
+			$brandId 	= $params->brand->value;
+			$stDate		= $params->stDate;
+			$endDate	= $params->endDate;
+			
+			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
 			
 			#To key-value:store list沒有包含蘿蔔
 			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
