@@ -7,6 +7,6 @@ class AppManager extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return \App\Services\AppManager::class;
+        return \App\Manager\AppManager::class;
     }
 }
