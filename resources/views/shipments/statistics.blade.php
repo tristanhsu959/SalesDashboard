@@ -37,13 +37,13 @@
 				
 				<div class="space"></div>
 				<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-					<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
+					<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
 					<label>開始日期</label>
 				</div>
 				
 				<div class="space"></div>
 				<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-					<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
+					<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.tomorrow">
 					<label>結束日期</label>
 					<output class="red-text">查詢日期為到貨日期</output>
 				</div>

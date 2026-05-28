@@ -3,8 +3,8 @@
 namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\ShipmentsRepository;
-use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
@@ -25,14 +25,26 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
-	use ProductServiceTrait;
-	
-	private $_userAreaIds = FALSE;
 	private $_statistics = [];
 	
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
-		
+		$this->_statistics = [
+			'modeType'		=> '',
+			'modeCalc'		=> '',
+			'modeBy'		=> '',
+			'brandId'		=> '', #export
+			'brandCode'		=> '', 
+			'startDate'		=> '', #Y-m-d
+            'endDate'   	=> '',
+			'productIds'	=> [],
+			'dateList'		=> [],
+			'productList'	=> [],
+			'factoryList'	=> [],
+			'data'			=> [],
+			'exportName'	=> '', #export
+			'exportToken'	=> '', #export
+		];
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
@@ -44,13 +56,13 @@ class FactoryService
 	{
 		try
 		{
-			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser->roleArea;
-			$this->_statistics = $params;
+			$this->_prepareData($params);
 			
-			#執行統計
-			$orderData = $this->_getDataFromDB();
-			return $this->_outputReport($orderData);
+			$this->_outputReport($params);
+			
+			$this->_generateStatistics($params);
+			
+			return $this->_statistics;
 		}
 		catch(Exception $e)
 		{
@@ -58,7 +70,59 @@ class FactoryService
 		}
 	}
 	
+	/* Generate statistics data
+	 * @params: object
+	 * @return: array
+	 */
+	private function _generateStatistics($params)
+	{
+		$this->_statistics['modeType']		= $params->type;
+		$this->_statistics['modeCalc']		= $params->calc; 
+		$this->_statistics['modeBy']		= $params->by; 
+		$this->_statistics['brandId']		= $params->brand->value; 
+		$this->_statistics['brandCode']		= $params->brand->code(); 
+		$this->_statistics['startDate'] 	= $params->stDate; 
+		$this->_statistics['endDate'] 		= $params->endDate;
+		$this->_statistics['dateList'] 		= $params->dateList;
+		$this->_statistics['productList'] 	= $params->productList;
+		$this->_statistics['factoryList'] 	= $params->factoryList;
+		$this->_statistics['data'] 			= $params->data;
+		
+		#無值不cache
+		if (! empty($params->data))
+		{
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			$name = [];
+			$name[] = ($params->type == 'store') ? '門店' : '工廠';
+			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
+			
+			$this->_statistics['exportName'] = Arr::join($name, '_');
+			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
+		}
+	}
+	
 	/* ====================== 主流程 End ====================== */
+	
+	/* 取統計相關參數
+	 * @params: enums
+	 * @params: integer
+	 * @return: array
+	 */
+	private function _prepareData($params)
+	{
+		try
+		{
+			$orderData = $this->_getDataFromDB($params);
+			
+			#$result = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
+			$this->_buildBaseData($params, array_filter($orderData)/* , array_filter($extraData) */);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
 	
 	/* Get order data
 	 * @params: enums
@@ -67,7 +131,7 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getDataFromDB()
+	private function _getDataFromDB($params)
 	{
 		/*0 => array:9 [
 			"expectedDate" => "2026-03-25"
@@ -84,18 +148,12 @@ class FactoryService
 	
 		try
 		{
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
-			$productIds	= $this->_statistics['productIds'];
+			$brand 		= $params->brand;
+			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productIds	= $params->productIds;
 			
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $this->_userAreaIds);
-			#先處理包裝轉換
-			$orderData = collect($orderData)->map(function($item, $key){
-				$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
-				return $item;
-			});
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
 			
 			return $orderData;
 		}
@@ -106,29 +164,51 @@ class FactoryService
 		}
 	}
 	
+	/* 基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildBaseData($params, $orderData, $extraData=[])
+	{
+		#整合追加資料
+		$baseData = collect($orderData)->merge($extraData);
+		
+		#處理包裝轉換
+		$baseData = collect($baseData)->map(function($item, $key){
+			
+			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '');
+			$item['storeKey'] = Str::take($storeKey, 7);
+			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+			
+			return $item;
+		})->toArray();
+				
+		$params->baseData = $baseData;
+	}
+	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
 	/* 
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($orderData)
+	private function _outputReport($params)
 	{
 		try
 		{
-			#1.Build header
-			$this->_statistics['header']['dateList'] = $this->_buildDateHeader();
+			#1.計算查詢範圍總天數 (use Date not DateTime)
+			$this->_buildDateHeader($params);
 			
-			#2.productList
-			$this->_statistics['header']['productList']  = $this->_getProductList($orderData);
+			#2.Build productList
+			$this->_getProductList($params);
 		
-			#3.factory list
-			$this->_statistics['header']['factoryList'] = $this->_getFactoryList();
+			#3.Get store list
+			$this->_getFactoryList($params);
+
+			#4. analysis by 門店
+			$this->_parsingByFactory($params);
 			
-			#4.analysis by 工廠
-			$this->_statistics['data'] = $this->_parsingByFactory($orderData);
-			
-			return $this->_statistics;
+			return $params;
 		}
 		catch(Exception $e)
 		{
@@ -141,17 +221,18 @@ class FactoryService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _buildDateHeader()
+	private function _buildDateHeader($params)
 	{
-		$st 		= Carbon::create($this->_statistics['startDate']);
-		$end 		= Carbon::create($this->_statistics['endDate']);
-		$modeCalc 	= $this->_statistics['modeCalc'];
+		$modeCalc 	= $params->calc;
 		$header 	= [];
 		
 		if ($modeCalc == 'day')
 		{
 			#By day
-			$period 	= CarbonPeriod::create($st, $end);
+			$st		= Carbon::create($params->stDate);
+			$end 	= Carbon::create($params->endDate);
+			$period = CarbonPeriod::create($st, $end);
+			
 			foreach ($period as $date) 
 			{
 				$header[] = $date->format('Y-m-d');
@@ -160,26 +241,28 @@ class FactoryService
 		else
 		{
 			#By month
-			$st = Carbon::parse($this->_statistics['startDate'])->startOfMonth();
-			$end = Carbon::parse($this->_statistics['endDate'])->startOfMonth();
-			
+			$st		= Carbon::parse($params->stDate)->startOfMonth();
+			$end	= Carbon::parse($params->endDate)->startOfMonth();
 			$period = CarbonPeriod::create($st, '1 month', $end);
+			
 			foreach ($period as $date) 
 			{
 				$header[] = $date->format('Y-m');
 			}
 		}
 		
-		return $header;
+		$params->dateList = $header;
 	}
 	
 	/* Get order data
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getProductList($orderData)
+	private function _getProductList($params)
 	{
-		return collect($orderData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
+		$baseData = $params->baseData;
+		
+		$productList = collect($baseData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
 			$temp['productName']= $items->pluck('productName')->first();
 			$temp['memo'] 		= $items->pluck('memo')->filter(function($value, $key){
 				return trim($value) != '';
@@ -191,12 +274,7 @@ class FactoryService
 			return [$erpNo => $temp];
 		})->toArray();
 		
-		/* return collect($orderData)->unique('erpNo')->mapWithKeys(function($item, $key){
-			$temp['productName']= $item['productName'];
-			$temp['memo'] 		= trim($item['memo']);
-			
-			return [$item['erpNo'] => $temp];
-		})->toArray(); */
+		$params->productList = $productList;
 	}
 	
 	/* Get order data
@@ -206,19 +284,14 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getFactoryList()
+	private function _getFactoryList($params)
 	{
 		try
 		{
-			$brandId = $this->_statistics['brandId'];
-			$factory = $this->_repository->getFactoryList($brandId);
+			$brandId = $params->brand->value;
+			$factory = PurchaseManager::getFactoryList($brandId);
 			
-			#To key-value
-			$factory = collect($factory)->mapWithKeys(function($item, $key){
-				return [$item['factoryNo'] => $item['factoryName']];
-			})->toArray();
-			
-			return $factory;
+			$params->factoryList = $factory;
 		}
 		catch(Exception $e)
 		{
@@ -231,7 +304,7 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _parsingByFactory($orderData)
+	private function _parsingByFactory($params)
 	{
 		/*
 		"PR00313063" => array:2 [
@@ -244,10 +317,13 @@ class FactoryService
 			"TW_TP" => array:2 []
 		]
 		*/
+		
+		$orderData = $params->baseData;
+		
 		if (empty($orderData))
 			return [];
 		
-		$modeCalc = $this->_statistics['modeCalc'];
+		$modeCalc = $params->calc;
 		
 		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
 			$temp = $items->groupBy('factoryNo')->map(function($items, $key) use($modeCalc) {
@@ -257,9 +333,9 @@ class FactoryService
 					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
 						$temp['qty'] = round($items->pluck('qty')->sum(), 2);
 						return $temp;
-					});
+					})->toArray();
 					
-					return $day->toArray();	
+					return $day;	
 				}
 				
 				if ($modeCalc == 'month')
@@ -269,18 +345,16 @@ class FactoryService
 					})->map(function ($group) {
 						$temp['qty'] = round($group->pluck('qty')->sum(), 2);
 						return $temp;
-					});
+					})->toArray();
 					
-					return $month->toArray();	
+					return $month;	
 				}
-				
-				#return $day->merge($month)->toArray();
 			});
 			
 			return $temp;
 		})->sortKeys()->toArray();
 		
-		return $result;
+		$params->data = $result;
 	}
 	
 	/* Export data
@@ -292,11 +366,11 @@ class FactoryService
 		try
 		{
 			#Build export data for sheets
-			$export = $this->_buildExportData($sourceData['header'], $sourceData['data']);
+			$export = $this->_buildExportData($sourceData);
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_出貨總量_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_出貨總量_?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
@@ -330,15 +404,15 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportData($header, $data)
+	private function _buildExportData($sourceData)
 	{
 		$export = [];
-		$outputHeader = array_merge(['出貨工廠'], $header['dateList']);
+		$outputHeader = array_merge(['出貨工廠'], $sourceData['dateList']);
 		
 		#每個product要一個sheet
-		foreach($header['productList'] as $erpNo => $item)
+		foreach($sourceData['productList'] as $erpNo => $item)
 		{
-			$factoryData = data_get($data, $erpNo, []);
+			$factoryData = data_get($sourceData['data'], $erpNo, []);
 			$productName = $item['productName'];
 			
 			if (empty($factoryData))
@@ -348,13 +422,13 @@ class FactoryService
 			$export[$productName][] = $outputHeader;
 			
 			#使用header來控制顯示順序,先TP後KH
-			foreach($header['factoryList'] as $factoryNo => $factoryName)
+			foreach($sourceData['factoryList'] as $factoryNo => $factoryName)
 			{
 				$row = [];
 				$row[] = $factoryName;
 				
 				#要按Header的順序
-				foreach($header['dateList'] as $date)
+				foreach($sourceData['dateList'] as $date)
 				{
 					$row[] = data_get($factoryData, "{$factoryNo}.{$date}.qty", 0);
 				}

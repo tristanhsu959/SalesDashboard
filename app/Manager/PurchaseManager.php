@@ -128,6 +128,7 @@ class PurchaseManager
 		
 		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
 		
+		#特殊的蘿蔔店(只有蘿蔔的情境)
 		$lbExcepts = collect($lbStoreList)->filter(function($item, $key) use($lbSpecialStore) {
 			return in_array($item['storeNo'], array_keys($lbSpecialStore));
 		})->toArray();
@@ -164,10 +165,14 @@ class PurchaseManager
 			
 			#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
 			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
-			if ($brand == Brand::BAFANG)
-				$storeKey = Str::take($item['storeNo'], 9);
-			else
-				$storeKey = $item['storeNo'];
+			#有些No沒有TP/KH要注意
+				
+			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
+							->replaceStart('TS', '')->replaceStart('RL', '');
+			$storeKey = Str::take($storeKey, 7);
+								
+			#存下storeKey
+			$item['storeKey'] = $storeKey;
 			
 			return [$storeKey => $item];
 		})->sortBy('areaId')->toArray();
@@ -175,12 +180,27 @@ class PurchaseManager
 		return $store;
 	}
 	
+	/* 取工廠清單
+	 * @params: int
+	 * @return: array
+	 */
+	public function getFactoryList($brandId)
+	{
+		$factory = $this->_repository->getFactoryList($brandId);
+		
+		#To key-value
+		$factory = collect($factory)->mapWithKeys(function($item, $key){
+			return [$item['factoryNo'] => $item['factoryName']];
+		})->toArray();
+			
+		return $factory;
+	}
 	
 	/******************** Product ********************/
 	/* Get product id */
 	public function getProductIdByName($brandId, $name)
 	{
-		$result = $this->_repository->getProductIdByName($brandId);
+		$result = $this->_repository->getProductIdByName($brandId, $name);
 		return $result;
 	}
 	

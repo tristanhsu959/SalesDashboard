@@ -45,6 +45,7 @@ class ShipmentsService
 			'dateList'		=> [],
 			'productList'	=> [],
 			'storeList'		=> [],
+			'factoryList'	=> [],
 			'data'			=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export

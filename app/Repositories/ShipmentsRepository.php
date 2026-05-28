@@ -63,7 +63,7 @@ class ShipmentsRepository extends Repository
 			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
 			->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE) as expectedDate')
-			->addSelect('ar.Name as area', 's.Id as storeId', 's.No as storeNo')
+			->addSelect('ar.id as areaId', 's.Id as storeId', 's.No as storeNo')
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.ErpNo as erpNo', 'p.OldNo as shortCode', 'p.Memo as memo')

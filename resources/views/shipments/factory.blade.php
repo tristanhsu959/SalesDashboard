@@ -9,7 +9,7 @@
 		@else
 		<div class="factory-content">
 			<div class="tabs cyan-text">
-				<template x-for="(item, erpNo) in statistics.header['productList']" :key="erpNo">
+				<template x-for="(item, erpNo) in statistics.productList" :key="erpNo">
 					<a @click="activeProduct = erpNo" :class="{ 'active': activeProduct === erpNo }">
 						<span x-text="item.productName"></span>
 						<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
@@ -18,24 +18,24 @@
 			</div>
 			
 			<!-- 工廠 -->
-			<template x-for="(name, productId) in statistics.header['productList']" :key="productId">
-			<div class="page padding" :class="{ 'active': activeProduct === productId }">
-				<section class="statistics-factory scrollbar {{$viewModel->getBrandCode()}}">
+			<template x-for="(name, erpNo) in statistics.productList" :key="erpNo">
+			<div class="page padding" :class="{ 'active': activeProduct === erpNo }">
+				<section class="statistics-factory scrollbar" :class="statistics.brandCode">
 					<table>
 						<thead>
 							<tr>
 								<th>出貨工廠</th>
-								<template x-for="(name, id) in statistics.header['dateList']" :key="id">
+								<template x-for="(name, id) in statistics.dateList" :key="id">
 									<th x-text="name"></th>
 								</template>
 							</tr>
 						</thead>
 						<tbody>
-							<template x-for="(factoryName, factoryId) in statistics.header['factoryList']" :key="factoryId">
+							<template x-for="(factoryName, factoryId) in statistics.factoryList" :key="factoryId">
 							<tr>
 								<th x-text="factoryName"></th>
-								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-									<td x-text="statistics.data[productId]?.[factoryId]?.[date]?.['qty'] ?? 0"></td>
+								<template x-for="(date, idx) in statistics.dateList" :key="idx">
+									<td x-text="statistics.data[erpNo]?.[factoryId]?.[date]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>

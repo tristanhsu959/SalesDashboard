@@ -57,10 +57,6 @@ class StoreService
 	{
 		try
 		{
-			/* $currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser->roleArea;
-			$this->_statistics = $params; */
-			
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
@@ -97,7 +93,11 @@ class StoreService
 		if (! empty($params->data))
 		{
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
-			$this->_statistics['exportName']	= ($params->by == 'keyword') ? '關鍵字' : '分類';
+			$name = [];
+			$name[] = ($params->type == 'store') ? '門店' : '工廠';
+			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
+			
+			$this->_statistics['exportName'] = Arr::join($name, '_');
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}
@@ -157,9 +157,6 @@ class StoreService
 			
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
 			
-			#先處理包裝轉換
-			
-			
 			return $orderData;
 		}
 		catch(Exception $e)
@@ -181,13 +178,14 @@ class StoreService
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '');
+			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
+							->replaceStart('TS', '')->replaceStart('RL', '');
 			$item['storeKey'] = Str::take($storeKey, 7);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
 		})->toArray();
-				
+			
 		$params->baseData = $baseData;
 	}
 	
@@ -233,10 +231,10 @@ class StoreService
 		
 		if ($modeCalc == 'day')
 		{
+			#By day
 			$st		= Carbon::create($params->stDate);
 			$end 	= Carbon::create($params->endDate);
-			#By day
-			$period 	= CarbonPeriod::create($st, $end);
+			$period = CarbonPeriod::create($st, $end);
 			
 			foreach ($period as $date) 
 			{
@@ -248,7 +246,6 @@ class StoreService
 			#By month
 			$st		= Carbon::parse($params->stDate)->startOfMonth();
 			$end	= Carbon::parse($params->endDate)->startOfMonth();
-			
 			$period = CarbonPeriod::create($st, '1 month', $end);
 			
 			foreach ($period as $date) 
@@ -284,12 +281,6 @@ class StoreService
 		})->toArray();
 		
 		$params->productList = $productList;
-		/* return collect($orderData)->unique('erpNo')->mapWithKeys(function($item, $key){
-			$temp['productName']= $item['productName'];
-			$temp['memo'] 		= trim($item['memo']);
-			
-			return [$item['erpNo'] => $temp];
-		})->toArray(); */
 	}
 	
 	/* Get order data
@@ -308,28 +299,6 @@ class StoreService
 			$endDate	= $params->endDate;
 			
 			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
-			
-			#To key-value:store list沒有包含蘿蔔
-			$store = collect($store)->mapWithKeys(function($item, $key) use($brandId) {
-				
-				if (is_null($item['posId']) OR $item['posId'] == 'null')
-					$item['posId'] =  '';
-				
-				#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-				#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)
-				#有些No沒有TP/KH要注意
-				
-				$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '');
-				
-				if ($brandId == Brand::BAFANG->value)
-					$storeKey = Str::take($storeKey, 7);
-								
-				#存下storeKey
-				$item['storeKey'] = $storeKey;
-				
-				return [$storeKey => $item];
-			})->sortBy([['areaId', 'asc'], ['storeKey', 'asc']])->values();
-			
 			$params->storeList = $store;
 		}
 		catch(Exception $e)
