@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Manager;
+
+use App\Manager\Repositories\PosRepository;
+use App\Repositories\SalesRepository;
+use App\Libraries\Sales\AreaLib;
+use App\Libraries\HelperLib;
+use App\Enums\Brand;
+use App\Enums\Area;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+
+/* 改為Singleton
+門店處理 Common function
+處理訂單門市過濾/補全門店
+*/
+class PosManager
+{
+	public function __construct(protected PosRepository $_repository)
+	{
+	}
+	
+	/* 取全部店家(含閉店)
+	 * @params: enum
+	 * @params: array
+	 * @params: array
+	 * @params: string
+	 * @return: array
+	 */
+	public function getAllStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
+	{
+		try
+		{
+			$cacheKey = HelperLib::buildCacheKey([$brand->value, $userAreaIds, $type, $name, 'pos', 'all-stores']);
+			
+			if (Cache::has($cacheKey))
+				return Cache::get($cacheKey); #cache data is response format
+			
+			#會Filter區域權限及無效門店
+			$storeList = $this->_repository->getStoreList($brand, $userAreaIds, $type, $name); #all shops
+			$storeList = $this->_formatStores($storeList);
+			
+			Cache::put($cacheKey, $storeList, now()->addMinutes(60));
+			
+			return $storeList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料發生錯誤');
+		}
+	}
+	
+	/* 取有效店家
+	 * @params: enum
+	 * @params: array
+	 * @params: array
+	 * @params: string
+	 * @return: array
+	 */
+	public function getActiveStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
+	{
+		try
+		{
+			#必須要有全部的值, 尤其是areaid
+			$cacheKey = HelperLib::buildCacheKey([$brand->value, $userAreaIds, $type, $name, 'pos', 'active-stores']);
+			
+			if (Cache::has($cacheKey))
+				return Cache::get($cacheKey); #cache data is response format
+			
+			#會Filter區域權限及無效門店
+			$storeList = $this->_repository->getHptransStoreList($brand, $userAreaIds, $type, $name); #all shops
+			$storeList = $this->_formatStores($storeList);
+			
+			Cache::put($cacheKey, $storeList, now()->addMinutes(60));
+			
+			return $storeList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料發生錯誤');
+		}
+	}
+	
+	/* 格式化及轉換
+	 * @params: array
+	 * @return: array
+	 */
+	private function _formatStores($storeList)
+	{
+		$result = $storeList->map(function($item, $key){
+			$item['shopName'] 	= Str::replace($item['shopId'], '', $item['shopName']); #去除Name前置的shop id
+			$item['areaId']		= AreaLib::toId($item['areaId']);
+			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			return $item;
+		})->toArray();
+		
+		return $result;
+	}	
+		
+	/* Filter data by shop
+	 * @params: collection
+	 * @return: array
+	 */
+	public function filterExceptStore($brand, $data)
+	{
+		$code = $brand->code();
+		$excepts = config("web.sales.shop.except.{$code}");
+		
+		$result = collect($data)->filter(function($item, $key) use($excepts){
+			return ! in_array($item['shopId'], $excepts);
+		});
+		
+		return $result;
+	}
+	
+	/* 補全門店判別
+	 * @params: array
+	 * @return: array
+	 */
+	public function getFillOutStore($activeShopList, $saleShopIds)
+	{
+		#改用active shop來判過濾即可
+		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
+			#過濾出無銷售且為active門店
+			return ! in_array($item['shopId'], $saleShopIds);
+		});
+		
+		return $result;
+	}
+}

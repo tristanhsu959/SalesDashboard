@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Manager\AppManager;
+use App\Manager\PosManager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Events\StatementPrepared;
 use Illuminate\Support\Facades\Event;
@@ -18,8 +20,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // 綁定單例
-		$this->app->singleton(\App\Manager\AppManager::class, function ($app) {
+		$this->app->singleton(AppManager::class, function ($app) {
 			return new \App\Manager\AppManager();
+		});
+		
+		$this->app->singleton(PosManager::class, function ($app) {
+			return $app->build(PosManager::class);
 		});
     }
 
