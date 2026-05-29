@@ -85,7 +85,7 @@ class ShipmentsRepository extends Repository
 			->where('b.Money', '>', 0)
 			->where('p.ErpNo', '!=', '')
 			->whereIn('s.AreaId', $authAreaIds)
-			->whereIn('b.ProductId', $productIds)#->toRawSql();
+			->whereIn('b.ProductId', $productIds)#->ddRawSql();
 			->get()
 			->toArray();
 		

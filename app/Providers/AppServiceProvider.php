@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Manager\AppManager;
 use App\Manager\PosManager;
 use App\Manager\PurchaseManager;
+use App\Manager\LegacyManager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Events\StatementPrepared;
 use Illuminate\Support\Facades\Event;
@@ -31,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
 		
 		$this->app->singleton(PurchaseManager::class, function ($app) {
 			return $app->build(PurchaseManager::class);
+		});
+		
+		$this->app->singleton(LegacyManager::class, function ($app) {
+			return $app->build(LegacyManager::class);
 		});
     }
 

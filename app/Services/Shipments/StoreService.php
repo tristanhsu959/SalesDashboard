@@ -4,6 +4,7 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\LegacyManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
@@ -60,7 +61,7 @@ class StoreService
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
-			
+		
 			$this->_generateStatistics($params);
 			
 			return $this->_statistics;
@@ -115,8 +116,9 @@ class StoreService
 		{
 			$orderData = $this->_getDataFromDB($params);
 			
-			#$result = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
-			$this->_buildBaseData($params, array_filter($orderData)/* , array_filter($extraData) */);
+			$extraData = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
+			
+			$this->_buildBaseData($params, array_filter($orderData) , array_filter($extraData));
 		}
 		catch(Exception $e)
 		{
@@ -166,11 +168,35 @@ class StoreService
 		}
 	}
 	
+	/* Get extra order data from old system
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getExtraDataFromDB($params)
+	{
+		try
+		{
+			$brand 		= $params->brand;
+			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes = $params->shortCodes;
+			
+			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			return $extraData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取訂貨系統訂單資料失敗');
+		}
+	}
+	
 	/* 基底資料
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($params, $orderData, $extraData=[])
+	private function _buildBaseData($params, $orderData, $extraData = [])
 	{
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
@@ -185,7 +211,7 @@ class StoreService
 			
 			return $item;
 		})->toArray();
-			
+	
 		$params->baseData = $baseData;
 	}
 	
@@ -266,6 +292,20 @@ class StoreService
 		$baseData = $params->baseData;
 		
 		#有的工廠沒有設memo,故要手動處理
+		#改用shortcode group(因舊系統追加沒erpNo)
+		$productList = collect($baseData)->groupBy('shortCode')->map(function($items, $key){
+			#取新的為主, 新系統才有erpNo
+			$item = $items->where('erpNo', '!=', '')->first();
+			
+			$temp['productName']= $item['productName'];
+			$temp['memo']		= trim($item['memo']);
+			
+			return $temp;
+		})->toArray();
+		
+		$params->productList = $productList;
+		
+		/* old process code
 		$productList = collect($baseData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
 			$temp['productName']= $items->pluck('productName')->first();
 			
@@ -279,8 +319,7 @@ class StoreService
 			
 			return [$erpNo => $temp];
 		})->toArray();
-		
-		$params->productList = $productList;
+		*/
 	}
 	
 	/* Get order data
@@ -333,7 +372,7 @@ class StoreService
 		
 		$modeCalc = $params->calc;
 		
-		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
+		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) use($modeCalc) {
 			
 			$temp = $items->groupBy('storeKey')->map(function($items, $key) use($modeCalc) {
 				
@@ -419,9 +458,9 @@ class StoreService
 		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $sourceData['dateList']);
 		
 		#每個product要一個sheet
-		foreach($sourceData['productList'] as $erpNo => $item)
+		foreach($sourceData['productList'] as $shortCode => $item)
 		{
-			$storeData = data_get($sourceData['data'], $erpNo, []);
+			$storeData = data_get($sourceData['data'], $shortCode, []);
 			$productName = $item['productName'];
 			
 			if (empty($storeData))

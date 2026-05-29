@@ -66,17 +66,16 @@ class PurchaseManager
 				
 				$store = collect($store)->reject(function($item, $key) use($stDate, $endDate) {
 					
-					$openDate 	= Carbon::parse($item['openDate']);
-					$closeDate 	= Carbon::parse($item['closeDate']);
+					$openDate 	= empty($item['openDate']) ? NULL : Carbon::parse($item['openDate']);
+					$closeDate 	= empty($item['closeDate']) ? NULL : Carbon::parse($item['closeDate']);
 					
 					#在開始時間前己閉店
-					if ($closeDate->lte($stDate))
+					if (! is_null($closeDate) && $closeDate->lte($stDate))
 						return TRUE;
 					
 					#在結束時間後才開店
-					if ($openDate->gt($endDate))
+					if (! is_null($openDate) && $openDate->gt($endDate))
 						return TRUE;
-
 				});
 			}
 			
@@ -152,12 +151,13 @@ class PurchaseManager
 	private function _formatStoreOutput($brand, $storeList)
 	{
 		#To key-value
-		$store = collect($storeList)->mapWithKeys(function($item, $key) use($brand) {
+		$store = collect($storeList)->map(function($item, $key) use($brand) {
 			
 			if (is_null($item['posId']) OR $item['posId'] == 'null')
 				$item['posId'] =  '';
 			
 			$area = AreaLib::toArea(intval($item['areaId']));
+			
 			$item['areaId']		= $area->value;
 			$item['areaName'] 	= $area->label();
 			#$item['area'] = Str::replace('-八方', '', $item['area']);
@@ -174,8 +174,8 @@ class PurchaseManager
 			#存下storeKey
 			$item['storeKey'] = $storeKey;
 			
-			return [$storeKey => $item];
-		})->sortBy('areaId')->toArray();
+			return $item;
+		})->sortBy('areaId')->values()->all();
 		
 		return $store;
 	}

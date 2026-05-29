@@ -9,8 +9,8 @@
 		@else
 		<div class="store-content">
 			<div class="tabs cyan-text">
-				<template x-for="(item, erpNo) in statistics.productList" :key="erpNo">
-					<a @click="activeProduct = erpNo" :class="{ 'active': activeProduct === erpNo }">
+				<template x-for="(item, shortCode) in statistics.productList" :key="shortCode">
+					<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
 						<span x-text="item.productName"></span>
 						<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
 					</a>
@@ -18,8 +18,8 @@
 			</div>
 			
 			<!-- 門店 -->
-			<template x-for="(name, productId) in statistics.productList" :key="productId">
-			<div class="page paddin" :class="{ 'active': activeProduct === productId }">
+			<template x-for="(name, shortCode) in statistics.productList" :key="shortCode">
+			<div class="page paddin" :class="{ 'active': activeProduct === shortCode }">
 				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
 					<table class="stripes">
 						<thead>
@@ -42,7 +42,7 @@
 								<td x-text="store.storeKey"></td>
 								<td x-text="store.storeName"></td>
 								<template x-for="(date, idx) in statistics.dateList" :key="idx">
-									<td x-text="statistics.data[productId]?.[store['storeKey']]?.[date]?.['qty'] ?? 0"></td>
+									<td x-text="statistics.data[shortCode]?.[store['storeKey']]?.[date]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>

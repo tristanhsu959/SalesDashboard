@@ -4,6 +4,7 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\LegacyManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -114,8 +115,9 @@ class FactoryService
 		{
 			$orderData = $this->_getDataFromDB($params);
 			
-			#$result = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
-			$this->_buildBaseData($params, array_filter($orderData)/* , array_filter($extraData) */);
+			$extraData = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
+			
+			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
 		}
 		catch(Exception $e)
 		{
@@ -164,11 +166,35 @@ class FactoryService
 		}
 	}
 	
+	/* Get extra order data from old system
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getExtraDataFromDB($params)
+	{
+		try
+		{
+			$brand 		= $params->brand;
+			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes = $params->shortCodes;
+			
+			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			return $extraData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取訂貨系統訂單資料失敗');
+		}
+	}
+	
 	/* 基底資料
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($params, $orderData, $extraData=[])
+	private function _buildBaseData($params, $orderData, $extraData = [])
 	{
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
@@ -176,7 +202,8 @@ class FactoryService
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '');
+			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
+							->replaceStart('TS', '')->replaceStart('RL', '');
 			$item['storeKey'] = Str::take($storeKey, 7);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
@@ -262,16 +289,14 @@ class FactoryService
 	{
 		$baseData = $params->baseData;
 		
-		$productList = collect($baseData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
-			$temp['productName']= $items->pluck('productName')->first();
-			$temp['memo'] 		= $items->pluck('memo')->filter(function($value, $key){
-				return trim($value) != '';
-			})->first();
+		$productList = collect($baseData)->groupBy('shortCode')->map(function($items, $key){
+			#取新的為主, 新系統才有erpNo
+			$item = $items->where('erpNo', '!=', '')->first();
 			
-			$temp['memo'] = empty($temp['memo']) ? '' : $temp['memo'];
-			$erpNo = $items->pluck('erpNo')->first();
+			$temp['productName']= $item['productName'];
+			$temp['memo']		= trim($item['memo']);
 			
-			return [$erpNo => $temp];
+			return $temp;
 		})->toArray();
 		
 		$params->productList = $productList;
@@ -325,7 +350,7 @@ class FactoryService
 		
 		$modeCalc = $params->calc;
 		
-		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key) use($modeCalc) {
+		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) use($modeCalc) {
 			$temp = $items->groupBy('factoryNo')->map(function($items, $key) use($modeCalc) {
 				
 				if ($modeCalc == 'day')
@@ -410,9 +435,9 @@ class FactoryService
 		$outputHeader = array_merge(['出貨工廠'], $sourceData['dateList']);
 		
 		#每個product要一個sheet
-		foreach($sourceData['productList'] as $erpNo => $item)
+		foreach($sourceData['productList'] as $shortCode => $item)
 		{
-			$factoryData = data_get($sourceData['data'], $erpNo, []);
+			$factoryData = data_get($sourceData['data'], $shortCode, []);
 			$productName = $item['productName'];
 			
 			if (empty($factoryData))
