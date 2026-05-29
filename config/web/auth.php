@@ -36,7 +36,7 @@ return [
 	#my defined
 	'adDomain' => '8way.com.tw', 
 	
-	'adAuthEnable' => TRUE, #改為系統驗證時,可併行使用
+	'adAuthEnable' => FALSE, #改為系統驗證時,可併行使用
 	
 	'supervisor' => [
 		'T2025098' => 'tristan.hsu',
