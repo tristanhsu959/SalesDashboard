@@ -94,7 +94,7 @@ class PosManager
 			$item['areaId']		= AreaLib::toId($item['areaId']);
 			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
 			return $item;
-		})->toArray();
+		})->sortBy('areaId')->values()->all();
 		
 		return $result;
 	}	

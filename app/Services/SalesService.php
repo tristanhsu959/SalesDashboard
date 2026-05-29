@@ -465,7 +465,7 @@ class SalesService
 				];
 		$params->set('shop.header', $header);
 		
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
+		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($items, $key) {
 			$temp['shopId'] 	= $items->pluck('shopId')->first();
 			$temp['shopName'] 	= $items->pluck('shopName')->first();
 			$temp['areaId'] 	= $items->pluck('areaId')->first();
@@ -486,7 +486,7 @@ class SalesService
 			})->toArray();
 			
 			return $temp;	
-		})->sortBy('areaId')->toArray();
+		})->values()->all();
 		
 		$params->set('shop.data', $result);
 	}

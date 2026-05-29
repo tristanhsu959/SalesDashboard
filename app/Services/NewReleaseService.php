@@ -445,7 +445,7 @@ class NewReleaseService
 			$temp['totalAvg'] = empty($temp['totalQty']) ? 0 : round($temp['totalQty'] / $totalDays, 1); #平均銷售數量:銷售量總和/天數
 			
 			return $temp; 
-		})->toArray();
+		})->values()->all();
 		
 		$params->set('shop.data', $result);
 	}
