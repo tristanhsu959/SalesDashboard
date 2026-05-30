@@ -43,7 +43,9 @@ class PurchaseProductViewModel extends Fluent
 	private function _setOptions()
 	{
 		$this->set('options.brands', Brand::toArray()); 
-		$this->set('options.products', $this->_service->getProductList()); 
+		
+		if ($this->action == FormAction::UPDATE)
+			$this->set('options.products', $this->_service->getProductList()); 
 	}
 	
 	/* Form submit action

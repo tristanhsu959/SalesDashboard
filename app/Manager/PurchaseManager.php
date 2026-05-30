@@ -211,17 +211,20 @@ class PurchaseManager
 	}
 	
 	/* 取對應的Product&Short code mapping
-	 * @params: string
+	 * @params: int
+	 * @params: boolean
 	 * @return: array
 	 */
-	public function getProductShortCodeMapping($brandId)
+	public function getProductShortCodeMapping($brandId, $returnMapping = TRUE)
 	{
-		$result = $this->_repository->getProductShortCode($brandId);
+		$productMapping = $this->_repository->getProductShortCode($brandId);
 		
-		#default format
-		$productMapping = collect($result)->mapWithKeys(function($item, $key){
-			return [$item['productNo'] => $item['productName']];
-		})->toArray();
+		if ($returnMapping === TRUE)
+		{
+			$productMapping = collect($productMapping)->mapWithKeys(function($item, $key){
+				return [$item['productNo'] => $item['productName']];
+			})->toArray();
+		}
 		
 		return $productMapping;
 	}
