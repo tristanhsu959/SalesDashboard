@@ -26,10 +26,10 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		initFieldEnabled(){
-			this.fieldEnabled.push('displayName');
+			/* this.fieldEnabled.push('displayName');
 			this.fieldEnabled.push('department');
 			this.fieldEnabled.push('email');
-			this.fieldEnabled.push('password');
+			this.fieldEnabled.push('password'); */
 		},
 		
 		validate() {

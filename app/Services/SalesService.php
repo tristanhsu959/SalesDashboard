@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Facades\PosManager;
 use App\Repositories\SalesRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -30,8 +31,6 @@ use OpenSpout\Common\Entity\Row;
 #Service BF | BG 共用
 class SalesService
 {
-	use StoreServiceTrait;
-	
 	private $_statistics	= [];
 	
 	public function __construct(protected SalesRepository $_repository)
@@ -185,12 +184,12 @@ class SalesService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['brandId']	= $params->brand->value;
-		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['startDate'] = $params->stDate;
-		$this->_statistics['endDate']	= $params->endDate;
-		$this->_statistics['shop']		= $params->shop;
-		$this->_statistics['area']		= $params->area;
+		$this->_statistics['brandId']		= $params->brand->value;
+		$this->_statistics['brandCode']		= $params->brand->code();
+		$this->_statistics['startDate'] 	= $params->stDate;
+		$this->_statistics['endDate']		= $params->endDate;
+		$this->_statistics['shop']			= $params->shop;
+		$this->_statistics['area']			= $params->area;
 		$this->_statistics['productList']	= $params->productList;
 		
 		#無值不cache
@@ -213,8 +212,8 @@ class SalesService
 			$this->_getProductParams($params);
 			
 			#2. Get all shops with area permission
-			$params->allShopList 	= $this->_getAllStores($params->brand, $params->userAreaIds); #all shops
-			$params->activeShopList = $this->_getActiveStores($params->brand, $params->userAreaIds); #only active shops
+			$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
+			$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
 			
 			#3. Get data from DB
 			$saleData = $this->_getDataFromDB($params);
@@ -292,7 +291,7 @@ class SalesService
 			
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$primaryIds 	= $params->primaryIds;
 			$secondaryIds 	= $params->secondaryIds;
 			$userAreaIds 	= $params->userAreaIds;
@@ -334,15 +333,15 @@ class SalesService
 		$allShopList = collect($params->allShopList)->groupBy('shopId');
 		
 		#過濾無效店家
-		$saleData = $this->_filterExceptShop($params->brand, $saleData);
+		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($productList, $allShopList) {
-			$shop = $allShopList->get($item['shopId']); 
+			$shop = $allShopList->get($item['shopId'])->first(); 
 			$product = data_get($productList, $item['erpNo'], NULL);
 			
-			$item['shopName'] 	= is_null($shop) ? '' : $shop->pluck('shopName')->first(); #因group後是array故用pluck
-			$item['areaId'] 	= is_null($shop) ? 0 : AreaLib::toId($shop->pluck('areaId')->first());
-			$item['areaName']	= (Area::tryFrom($item['areaId']))->label();
+			$item['shopName'] 	= is_null($shop) ? 'NotFound' : $shop['shopName'];
+			$item['areaId'] 	= is_null($shop) ? 0 : $shop['areaId'];
+			$item['areaName']	= $shop['areaName'];
 			
 			#轉換成系統設定Id and Name
 			$item['productId']	= empty($product) ? 0 : $product['productId'];
@@ -353,24 +352,24 @@ class SalesService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filterShops = $this->_getFillShop($params->activeShopList, $saleShopIds);
+		$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
 		
 		#因每個統計內容不同, 故無法寫在trait class
-		$filterShops = collect($filterShops)->map(function($item, $key) {
+		$filloutShops = collect($filloutShops)->map(function($item, $key) {
 			$temp['shopId'] 	= $item['shopId'];
 			$temp['shopName'] 	= $item['shopName'];
 			$temp['erpNo'] 		= '';
 			$temp['price_sum'] 	= 0;
 			$temp['qty_sum'] 	= 0;
-			$temp['areaId'] 	= AreaLib::toId($item['areaId']);
-			$temp['areaName']	= (Area::tryFrom($temp['areaId']))->label();
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName']	= $item['areaName'];
 			$temp['productId'] 	= 0;
 			$temp['productName']= '';
 			
 			return $temp;
 		});
 		
-		$params->baseData = $baseData->merge($filterShops)->toArray();
+		$params->baseData = $baseData->merge($filloutShops)->toArray();
 	}
 	
 	/* ========================== 統計 ========================== */
@@ -466,7 +465,7 @@ class SalesService
 				];
 		$params->set('shop.header', $header);
 		
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
+		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($items, $key) {
 			$temp['shopId'] 	= $items->pluck('shopId')->first();
 			$temp['shopName'] 	= $items->pluck('shopName')->first();
 			$temp['areaId'] 	= $items->pluck('areaId')->first();
@@ -487,7 +486,7 @@ class SalesService
 			})->toArray();
 			
 			return $temp;	
-		})->sortBy('areaId')->toArray();
+		})->values()->all();
 		
 		$params->set('shop.data', $result);
 	}

@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PosReposTrait;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Sales\AreaLib;
@@ -13,8 +12,6 @@ use Exception;
 
 class DailyRevenueRepository extends Repository
 {
-	use PosReposTrait;
-	
 	public function __construct()
 	{
 		
@@ -65,7 +62,7 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.shopId')
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->where('a.saleDate', '>=', $stDate)
-				->where('a.saleDate', '<=', $endDate)
+				->where('a.saleDate', '<', $endDate)
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
 				->when(! empty($shopName), function ($query) use ($shopName) {
@@ -94,7 +91,7 @@ class DailyRevenueRepository extends Repository
 				->table('SALE00 as a')
 				->fromRaw('SALE00 as a WITH(NOLOCK)')
 				->where('a.SALE_DATE', '>=', $stDate)
-				->where('a.SALE_DATE', '<=', $endDate)
+				->where('a.SALE_DATE', '<', $endDate)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->select('a.SALE_ID', 'a.SHOP_ID');
 					

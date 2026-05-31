@@ -79,7 +79,9 @@ class DailyRevenueViewModel extends Fluent
     {
 		#Init default type
 		if (empty($stDate) && empty($endDate) && empty($shopType))
-			$shopType[] = 1; #Default直營
+		{
+			$shopType = ($this->brand == Brand::BAFANG) ? [1] : [1, 2]; #Default直營
+		}
 		
 		$this->set('search.stDate', $stDate);
 		$this->set('search.endDate', $endDate);

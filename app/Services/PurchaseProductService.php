@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Services\Traits\Purchase\ProductServiceTrait;
+use App\Facades\PurchaseManager;
 use App\Repositories\PurchaseProductRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -14,8 +14,6 @@ use Log;
 
 class PurchaseProductService
 {
-	use ProductServiceTrait;
-	
 	public function __construct(protected PurchaseProductRepository $_repository)
 	{
 	}
@@ -28,7 +26,12 @@ class PurchaseProductService
 	{
 		try
 		{
-			$productMapping = $this->getProductListByShortCode();
+			$bfBrandId = Brand::BAFANG->value;
+			$bgBrandId = Brand::BUYGOOD->value;
+			
+			$productMapping[$bfBrandId] = PurchaseManager::getProductShortCodeMapping($bfBrandId);
+			$productMapping[$bgBrandId] = PurchaseManager::getProductShortCodeMapping($bgBrandId);
+			
 			$list = $this->_repository->getSetting();
 			
 			$list = collect($list)->groupBy('brandId')->map(function($items, $key) use($productMapping) {
@@ -48,8 +51,9 @@ class PurchaseProductService
 		}
 	}
 	
-	/* Get product for options from new order system
-	 * @params: int
+	/* Get product for options from new order system(called by vm for options)
+	 * called by update
+	 * @params: 
 	 * @return: array
 	 */
 	public function getProductList()
@@ -61,12 +65,13 @@ class PurchaseProductService
 			
 			
 			#要分開取, 因short code是不分brand
-			$list[$bfBrandId] = $this->_repository->getProductShortCode($bfBrandId);
-			$list[$bgBrandId] = $this->_repository->getProductShortCode($bgBrandId);
+			$list[$bfBrandId] = PurchaseManager::getProductShortCodeMapping($bfBrandId, FALSE);
+			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping($bgBrandId, FALSE);
 			
+			#下架沒有被設定成stop, 但erpNo似乎會是空值, 目前是全取
 			$list = collect($list)->map(function($items, $key) {
 				return collect($items)->unique('productNo')->map(function($item, $key){
-					$group = $this->getGroupByShortCode($item['productNo']);
+					$group = PurchaseManager::getGroupByShortCode($item['productNo']);
 					return array_merge($item, $group);
 				})->groupBy('groupId')->map(function($items, $key){
 					$temp['groupName'] 	= $items->pluck('groupName')->first();
@@ -75,35 +80,6 @@ class PurchaseProductService
 					})->toArray();
 					
 					return $temp;
-				});
-			})->toArray();
-			
-			return $list;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			return [];
-		}
-	}
-	
-	/* Get product list with short code key
-	 * @params: int
-	 * @return: array
-	 */
-	public function getProductListByShortCode()
-	{
-		try
-		{
-			$bfBrandId = Brand::BAFANG->value;
-			$bgBrandId = Brand::BUYGOOD->value;
-			
-			$list[$bfBrandId] = $this->_repository->getProductShortCode($bfBrandId);
-			$list[$bgBrandId] = $this->_repository->getProductShortCode($bgBrandId);
-			
-			$list = collect($list)->map(function($items, $brand) {
-				return collect($items)->mapWithKeys(function($items, $brand) {
-					return [$items['productNo'] => $items['productName']];
 				});
 			})->toArray();
 			

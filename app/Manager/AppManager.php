@@ -1,6 +1,6 @@
 <?php
 #目前未用到
-namespace App\Services;
+namespace App\Manager;
 
 use App\Models\CurrentUser;
 use App\Enums\MenuGroup;

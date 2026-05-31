@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Services\Shipments\FactoryService;
 use App\Services\Shipments\StoreService;
-use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -28,7 +29,6 @@ use OpenSpout\Common\Entity\Row;
 #當主Service
 class ShipmentsService
 {
-	use ProductServiceTrait;
 	private $_statistics = [];
 	
 	public function __construct(protected ShipmentsRepository $_repository)
@@ -38,10 +38,14 @@ class ShipmentsService
 			'modeCalc'		=> '',
 			'modeBy'		=> '',
 			'brandId'		=> '', #export
+			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'productIds'	=> [],
-			'header'		=> [],
+			'dateList'		=> [],
+			'productList'	=> [],
+			'storeList'		=> [],
+			'factoryList'	=> [],
 			'data'			=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
@@ -80,10 +84,7 @@ class ShipmentsService
 		$enableProducts = $this->_repository->getEnableProducts($brandId);
 		
 		#Build product mapping
-		$productMapping = $this->_repository->getProductShortCode($brandId);
-		$productMapping = collect($productMapping)->mapWithKeys(function($item, $key){
-			return [$item['productNo'] => $item['productName']];
-		})->toArray();
+		$productMapping = PurchaseManager::getProductShortCodeMapping($brandId);
 		
 		#Build options
 		/*array:4 [
@@ -96,7 +97,7 @@ class ShipmentsService
 		$list = collect($enableProducts)->map(function($item, $key) use($productMapping) {
 			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
 			
-			$category = $this->getGroupByShortCode($item['shortCode']);
+			$category = PurchaseManager::getGroupByShortCode($item['shortCode']);
 			$item['groupId']	= $category['groupId'];
 			$item['groupName'] 	= $category['groupName'];
 			unset($item['brandId']);
@@ -136,65 +137,37 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $function, $params)
+	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			#Check cache
-			$functions = $this->parsingFunction($brand);
-			$searchEndDate = empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 			
-			$this->_statistics['modeType']	= $params['searchType'];
-			$this->_statistics['modeCalc']	= $params['searchCalc']; 
-			$this->_statistics['modeBy']	= $params['searchBy']; 
-			$this->_statistics['brandId']	= $brand->value; 
-			$this->_statistics['startDate'] = (new Carbon($params['searchStDate']))->format('Y-m-d'); 
-			$this->_statistics['endDate'] 	= (new Carbon($params['searchEndDate']))->format('Y-m-d');
-			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser->roleArea; #
-			
-			if ($params['searchBy'] == 'keyword')
-				$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
-				#$cacheKey = implode(':', [$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchKeyword'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
-			else
-				$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], $params['searchShortCodes'], $params['searchType'], $params['searchCalc'], $params['searchBy']]);
-				#$cacheKey = implode(':', [$functions->value, $userAreaIds, $params['searchStDate'], $params['searchEndDate'], $params['searchCategory'], implode('-', $params['searchShortCodes']), $params['searchType'], $params['searchCalc'], $params['searchBy']]);
-		
-			if (Cache::has($cacheKey))
+			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from cache');
 				
-				$statistics = Cache::get($cacheKey); #cache data is response format
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
-				if ($params['searchType'] == 'store')
-					$service = app(StoreService::class);
-				else
-					$service = app(FactoryService::class);
+				$this->_getProductId($params);
 				
-				if ($params['searchBy'] == 'keyword')
-					$this->_statistics['productIds'] = $this->_getProductIdByName($brand->value, $params['searchKeyword']);
+				if ($params->type == 'store')
+					$service = app(StoreService::class);
+				else if ($params->type == 'factory')
+					$service = app(FactoryService::class);
 				else
-					$this->_statistics['productIds'] = $this->_getProductIdByShortCode($brand->value, $params['searchShortCodes']);
+					throw new Exception('查詢訂貨總量時發生錯誤');
 				
 				#執行統計
-				$this->_statistics = $service->analysis($this->_statistics);
-				
-				#無值不cache
-				if (! empty(Arr::flatten($this->_statistics['data'])))
-				{
-					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					$this->_statistics['exportName']	= ($params['searchBy'] == 'keyword') ? $params['searchKeyword'] : '分類';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				}
+				$this->_statistics = $service->analysis($params);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
@@ -205,45 +178,50 @@ class ShipmentsService
 		}
 	}
 	
-	/* Name to proudct id
-	 * @params: int
+	
+	/* Init input params
+	 * @params: enums
+	 * @params: string
+	 * @params: string
+	 * @params: array
+	 * @params: string
 	 * @return: array
 	 */
-	private function _getProductIdByName($brandId, $keyword)
+	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
-		try
-		{
-			$ids = $this->_repository->getProductIdByName($brandId, $keyword);
-			
-			if (empty($ids))
-				throw new Exception('無此產品名稱');
-			
-			return $ids;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception($e->getMessage());
-		}
+		$params = new Fluent();
+		
+		$currentUser = AppManager::getCurrentUser();
+		$userAreaIds = $currentUser->roleArea;
+		
+		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		$functions 		= $this->parsingFunction($brand);
+		
+		if ($searchBy == 'keyword')
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
+		else
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
+		
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->calc($searchCalc)->by($searchBy)
+				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)
+				->cacheKey($cacheKey);
+		
+		return $params;
 	}
 	
-	/* Name to proudct id
-	 * @params: int
-	 * @return: array
-	 */
-	private function _getProductIdByShortCode($brandId, $shortCodes)
+	private function _getProductId($params)
 	{
 		try
 		{
-			if (empty($shortCodes))
-				return [];
-			
-			$ids = $this->_repository->getProductIdByShortCode($brandId, $shortCodes);
-			
-			if (empty($ids))
-				throw new Exception('無對應的產品');
-			
-			return $ids;
+			if ($params->by == 'keyword')
+				$params->productIds = PurchaseManager::getProductIdByName($params->brand->value,  $params->keyword);
+			else
+				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand->value, $params->shortCodes);
+		
+			if (empty($params->productIds))
+				throw new Exception('查無此產品');
 		}
 		catch(Exception $e)
 		{

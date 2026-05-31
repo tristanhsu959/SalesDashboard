@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Facades\PosManager;
 use App\Repositories\DailyRevenueRepository;
-use App\Services\Traits\Sales\StoreServiceTrait;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -27,8 +27,6 @@ use OpenSpout\Common\Entity\Row;
 
 class DailyRevenueService
 {
-	use StoreServiceTrait;
-	
 	private $_statistics	= [];
 	
 	public function __construct(protected DailyRevenueRepository $_repository)
@@ -175,8 +173,8 @@ class DailyRevenueService
 		try
 		{
 			#1. Get all shops with area permission
-			$params->allShopList 	= $this->_getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
-			$params->activeShopList = $this->_getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
+			$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
+			$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
 			
 			#2. Get data from DB
 			$saleData = $this->_getDataFromDB($params);
@@ -201,7 +199,7 @@ class DailyRevenueService
 		{
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$shopType 		= $params->shopType;
 			$shopName 		= $params->shopName;
 			$userAreaIds 	= $params->userAreaIds;
@@ -242,7 +240,7 @@ class DailyRevenueService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = $this->_filterExceptShop($params->brand, $saleData);
+		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) {
 			$temp['shopId'] 		= $item['shopId'];
@@ -258,22 +256,22 @@ class DailyRevenueService
 		
 		#補全未有銷售的門店資料(closedown = 0)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$fillShops = $this->_getFillShop($params->activeShopList, $saleShopIds);
+		$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
 		
 		#重建
-		$fillShops = $fillShops->map(function($item, $key) use($params){
+		$filloutShops = $filloutShops->map(function($item, $key) use($params){
 			$temp['shopId'] 		= $item['shopId'];
 			$temp['shopName'] 		= $item['shopName'];
 			$temp['shopTypeName']	= $item['typeName'];
-			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
-			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
+			$temp['areaId'] 		= $item['areaId'];
+			$temp['areaName']		= $item['areaName'];
 			$temp['saleDate'] 		= $params->endDate;
 			$temp['amount'] 		= 0;
 			
 			return $temp;
 		});
 		
-		$params->baseData = $baseData->merge($fillShops)->sortBy('areaId')->toArray();
+		$params->baseData = $baseData->merge($filloutShops)->sortBy('areaId')->toArray();
 	}
 	
 	

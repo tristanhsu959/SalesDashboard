@@ -39,6 +39,15 @@ document.addEventListener('alpine:init', () => {
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
+				
+				if (this.searchData.by == 'keyword')
+				{
+					this.searchData.category = '';
+					this.searchData.shortCodes = [];
+				}
+				else
+					this.searchData.keyword = '';
+				
 				setTimeout(() => {
 					ui('#searchPanel');
 					this.$el.submit();
@@ -69,13 +78,13 @@ document.addEventListener('alpine:init', () => {
 		activeProduct: '',
 		
 		init() { 
-			const keys = Object.keys(this.statistics.header.productList);
+			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
 		},
     }));
 	
-	//Store
+	//Store cache
 	Alpine.store('shipmentStore', {
 		filter: '',
 	});
@@ -84,8 +93,8 @@ document.addEventListener('alpine:init', () => {
 		statistics: {...data},
 		activeProduct: '',
 		
-		init() { 
-			const keys = Object.keys(this.statistics.header.productList);
+		init() { console.log(this.statistics);
+			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
 		},
@@ -93,7 +102,7 @@ document.addEventListener('alpine:init', () => {
 		get filterStore() {
 			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
 			
-			const list = Object.values(this.statistics.header.storeList);
+			const list = Object.values(this.statistics.storeList);
 			
 			const result = list.filter(store => 
 				String(store.posId || '').toLowerCase().includes(searchKeyword) ||

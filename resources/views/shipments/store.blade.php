@@ -9,8 +9,8 @@
 		@else
 		<div class="store-content">
 			<div class="tabs cyan-text">
-				<template x-for="(item, erpNo) in statistics.header.productList" :key="erpNo">
-					<a @click="activeProduct = erpNo" :class="{ 'active': activeProduct === erpNo }">
+				<template x-for="(item, shortCode) in statistics.productList" :key="shortCode">
+					<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
 						<span x-text="item.productName"></span>
 						<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
 					</a>
@@ -18,9 +18,9 @@
 			</div>
 			
 			<!-- 門店 -->
-			<template x-for="(name, productId) in statistics.header.productList" :key="productId">
-			<div class="page paddin" :class="{ 'active': activeProduct === productId }">
-				<section class="statistics-shop scrollbar {{$viewModel->getBrandCode()}}">
+			<template x-for="(name, shortCode) in statistics.productList" :key="shortCode">
+			<div class="page paddin" :class="{ 'active': activeProduct === shortCode }">
+				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
@@ -28,7 +28,7 @@
 								<th>區域</th>
 								<th>門店代號</th>
 								<th>門店名稱</th>
-								<template x-for="(name, id) in statistics.header.dateList" :key="id">
+								<template x-for="(name, id) in statistics.dateList" :key="id">
 									<th x-text="name"></th>
 								</template>
 							</tr>
@@ -39,10 +39,10 @@
 							<tr>
 								<td x-text="store.posId"></td>
 								<td x-text="store.areaName"></td>
-								<td x-text="store.storeNo"></td>
+								<td x-text="store.storeKey"></td>
 								<td x-text="store.storeName"></td>
-								<template x-for="(date, idx) in statistics.header.dateList" :key="idx">
-									<td x-text="statistics.data[productId]?.[store['storeKey']]?.[date]?.['qty'] ?? 0"></td>
+								<template x-for="(date, idx) in statistics.dateList" :key="idx">
+									<td x-text="statistics.data[shortCode]?.[store['storeKey']]?.[date]?.['qty'] ?? 0"></td>
 								</template>
 							</tr>
 							</template>

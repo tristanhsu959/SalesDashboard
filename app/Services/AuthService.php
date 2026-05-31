@@ -119,6 +119,7 @@ class AuthService
 			
 		#驗證AD
 		$adInfo = $this->_authAD($account, $password);
+		
 		if ($adInfo !== FALSE)
 			return TRUE;
 		
@@ -133,6 +134,11 @@ class AuthService
 	 */
 	public function _authAD($account, $password)
 	{
+		$adEnable = config('web.auth.adAuthEnable');
+		
+		if (env('APP_ENV', '') == 'production' && $adEnable === FAlSE)
+			return FALSE;
+		
 		#for local non ad env
 		if (env('APP_ENV_TYPE', '') == 'nonad') 
 		{
