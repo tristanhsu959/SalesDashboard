@@ -112,6 +112,8 @@ class FactoryService
 	{
 		try
 		{
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			
 			$orderData = $this->_getDataFromDB($params);
 			
 			#未來若建在新系統, 直接mark即可
@@ -181,8 +183,13 @@ class FactoryService
 			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
-			$storeKeys = PurchaseManager::getStoreKeys($brand, $userAreaIds);
-			dd($extraData,$storeKeys);
+			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
+			
+			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
+				$storeKey = Str::take($item['storeNo'], 7);
+				return in_array($storeKey, $validStoreKeys);
+			})->toArray();
+			
 			return $extraData;
 		}
 		catch(Exception $e)
@@ -321,29 +328,6 @@ class FactoryService
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取工廠資料失敗');
-		}
-	}
-	
-	/* Get storekey list
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getValidStoreKey($params)
-	{
-		try
-		{
-			$brandId 	= $params->brand->value;
-			$stDate		= $params->stDate;
-			$endDate	= $params->endDate;
-			
-			#只要回傳storeKey list判別用
-			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
-			$params->storeList = $store;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料失敗');
 		}
 	}
 	

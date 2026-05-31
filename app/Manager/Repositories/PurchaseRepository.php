@@ -135,6 +135,8 @@ class PurchaseRepository extends Repository
 			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
+			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')

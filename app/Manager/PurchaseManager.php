@@ -105,6 +105,28 @@ class PurchaseManager
 			if ($brand == Brand::BAFANG)
 			{
 				$lbStoreList = $this->_repository->getLbStoreList($brand, $userAreaIds);
+				
+				#排除閉店:有值才檢查,start/end都要有
+				if (! empty($stDate) && ! empty($endDate))
+				{
+					$stDate	= Carbon::parse($stDate);
+					$endDate= Carbon::parse($endDate);
+					
+					$lbStoreList = collect($lbStoreList)->reject(function($item, $key) use($stDate, $endDate) {
+						
+						$openDate 	= empty($item['openDate']) ? NULL : Carbon::parse($item['openDate']);
+						$closeDate 	= empty($item['closeDate']) ? NULL : Carbon::parse($item['closeDate']);
+						
+						#在開始時間前己閉店
+						if (! is_null($closeDate) && $closeDate->lte($stDate))
+							return TRUE;
+						
+						#在結束時間後才開店
+						if (! is_null($openDate) && $openDate->gt($endDate))
+							return TRUE;
+					});
+				}
+				
 				$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
 				
 				return $this->_mergeStoreOutput($brand, $storeList, $lbStoreList);
@@ -116,27 +138,6 @@ class PurchaseManager
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料失敗');
-		}
-	}
-	
-	/* Get store key
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getStoreKeys($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
-	{
-		try
-		{
-			#因追加在舊系統無法判別區域權限
-			$storeList = $this->getStoreList($brand, $userAreaIds, $stDate, $endDate);
-			
-			return collect($storeList)->pluck('storeKey')->values()->all();
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店Key值失敗');
 		}
 	}
 	

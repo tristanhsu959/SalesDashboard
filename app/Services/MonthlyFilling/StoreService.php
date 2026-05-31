@@ -46,7 +46,7 @@ class StoreService
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
-	/* Search data
+	/* Search data(因月初報表較固定模式,寫法不同)
 	 * @params: array
 	 * @return: array
 	 */
@@ -111,7 +111,7 @@ class StoreService
 			
 			#2.Build params
 			$params->productGroup	= config('web.purchase.monthly_filling.totalCount.group');
-			$params->storeList 		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds);
+			$params->storeList 		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -179,10 +179,10 @@ class StoreService
 	
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
-			$userAreaIds= $params->userAreaIds;
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
+			$userAreaIds	= $params->userAreaIds;
 			$productIds 	= $params->productIds;
 			
 			$orderData = $this->_repository->getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds);
@@ -208,8 +208,17 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
+			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			#因無areaId, 故只能從門店過濾
+			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
+			
+			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
+				$storeKey = Str::take($item['storeNo'], 7);
+				return in_array($storeKey, $validStoreKeys);
+			})->toArray();
 			
 			return $extraData;
 		}
@@ -228,20 +237,19 @@ class StoreService
 	{
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
-		dd($orderData, $extraData);
+		
 		#處理包裝轉換
 		#因追加在舊系統,故要改成storeKey做為主要關聯
 		$baseData = collect($baseData)->map(function($item, $key){
-			$temp['expectedDate'] = Carbon::parse($item['expectedDate'])->format('Y-m');
-			#$temp['storeId'] = $item['storeId'];
-			$temp['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
-			$temp['shortCode'] = $item['shortCode'];
-			$temp['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+			$temp['expectedDate']	= Carbon::parse($item['expectedDate'])->format('Y-m');
+			$temp['storeNo'] 		= $item['storeNo'];
+			$temp['storeKey'] 		= PurchaseManager::buildStoreKey($item['storeNo']);
+			$temp['shortCode'] 		= $item['shortCode'];
+			$temp['qty'] 			= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $temp;
 		})->toArray();
 			
-		dd($baseData);
 		$params->baseData = $baseData;
 	}
 	
@@ -338,22 +346,12 @@ class StoreService
 		if (empty($orderData))
 			return [];
 		
-		#特殊的店, 八方與蘿蔔尾碼不是1&2的對應關係, 故須另外處理
-		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
-		
 		#先依定義的餡分群
 		$result = collect($orderData)->filter(function($item, $key) use($groupCodes){
 			return in_array($item['shortCode'], $groupCodes);
 		
-		})->groupBy(function($item, $key) use($lbSpecialStore) {
-			$rebuildNo = data_get($lbSpecialStore, $item['storeNo'], NULL);
+		})->groupBy('storeKey')->map(function($items, $key) {
 			
-			if (! empty($rebuildNo))
-				$item['storeNo'] = $rebuildNo;
-			
-			return Str::take($item['storeNo'], 9);
-
-		})->map(function($items, $key) {
 			return $items->groupBy('expectedDate')->map(function($items, $key) {
 				return $items->pluck('qty')->sum();
 			})->toArray();
@@ -380,7 +378,7 @@ class StoreService
 		foreach($storeList as $key => $store)
 		{
 			#$storeId = $store['storeId'];
-			$storeData = data_get($data, $key);
+			$storeData = data_get($data, $store['storeKey']);
 			
 			/* if (empty($storeData))
 				continue; */
@@ -388,7 +386,7 @@ class StoreService
 			$row = [];
 			$row[] = data_get($store, 'posId');
 			$row[] = data_get($store, 'areaName');
-			$row[] = data_get($store, 'storeNo');
+			$row[] = data_get($store, 'storeKey');
 			$row[] = data_get($store, 'storeName');
 			
 			foreach($monthList as $month)

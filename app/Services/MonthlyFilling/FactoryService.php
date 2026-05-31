@@ -44,7 +44,7 @@ class FactoryService
 	}
 	
 	/* ====================== 主流程 ====================== */
-	/* Search data
+	/* Search data(因月初報表較固定模式,寫法不同)
 	 * @params: int
 	 * @params: date
 	 * @params: date
@@ -111,9 +111,12 @@ class FactoryService
 			$this->_getProductIdByCode($params);
 			
 			#2.Build params
-			$params->productList = config('web.purchase.monthly_filling.monthly');
-			$params->factoryList = $this->_getFactoryList($params);
-		
+			$params->productList 	= config('web.purchase.monthly_filling.monthly');
+			$params->factoryList 	= $this->_getFactoryList($params);
+			
+			#因追加的關係才抓storeList
+			$params->storeList		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
 			
@@ -236,8 +239,17 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
+			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			#因無areaId, 故只能從門店過濾
+			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
+			
+			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
+				$storeKey = Str::take($item['storeNo'], 7);
+				return in_array($storeKey, $validStoreKeys);
+			})->toArray();
 			
 			return $extraData;
 		}

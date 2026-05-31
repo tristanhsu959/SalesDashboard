@@ -114,6 +114,8 @@ class StoreService
 	{
 		try
 		{
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			
 			$orderData = $this->_getDataFromDB($params);
 			
 			$extraData = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
@@ -126,7 +128,6 @@ class StoreService
 			throw new Exception($e->getMessage());
 		}
 	}
-	
 	
 	/* Get order data
 	 * @params: 
@@ -177,12 +178,21 @@ class StoreService
 	{
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productCodes = $params->shortCodes;
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes 	= $params->shortCodes;
+			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			#因無areaId, 故只能從門店過濾
+			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
+			
+			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
+				$storeKey = Str::take($item['storeNo'], 7);
+				return in_array($storeKey, $validStoreKeys);
+			})->toArray();
 			
 			return $extraData;
 		}
@@ -228,12 +238,9 @@ class StoreService
 			$this->_buildDateHeader($params);
 			
 			#2.Build productList
-			$this->_getProductList($params);
+			$this->_buildProductList($params);
 		
-			#3.Get store list
-			$this->_getStoreList($params);
-
-			#4. analysis by 門店
+			#3. analysis by 門店
 			$this->_parsingByStore($params);
 			
 			return $params;
@@ -286,7 +293,7 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getProductList($params)
+	private function _buildProductList($params)
 	{
 		$baseData = $params->baseData;
 		
@@ -319,29 +326,6 @@ class StoreService
 			return [$erpNo => $temp];
 		})->toArray();
 		*/
-	}
-	
-	/* Get order data
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getStoreList($params)
-	{
-		try
-		{
-			$brandId 	= $params->brand->value;
-			$stDate		= $params->stDate;
-			$endDate	= $params->endDate;
-			
-			#八方店家,不顯示蘿蔔但資料有含蘿蔔(特殊店不會被顯示)
-			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
-			$params->storeList = $store;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取門店資料失敗');
-		}
 	}
 	
 	/* 依工廠
