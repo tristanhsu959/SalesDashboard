@@ -88,6 +88,7 @@
 				<input type="text" id="email" name="email" maxlength="50" required x-model="formData.email" @input="errors.delete('password')" :disabled="!fieldEnabled.includes('email')">
 				<label>EMail</label>
 			</div>
+			<output class="red-text small-text">格式：abc@xxx.com.tw</output>
 			
 			<nav class="no-space">
 				<div class="field label border field-purple prefix max" :class="Helper.hasError(errors, 'password')">
