@@ -3,8 +3,9 @@
 namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
+use App\Facades\LegacyManager;
 use App\Repositories\MonthlyFillingRepository;
-use App\Services\Traits\Purchase\ProductServiceTrait;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
@@ -25,8 +26,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class FactoryService
 {
-	use ProductServiceTrait;
-	
 	private $_statistics	= [];
    
 	public function __construct(protected MonthlyFillingRepository $_repository)
@@ -116,9 +115,12 @@ class FactoryService
 			$params->factoryList = $this->_getFactoryList($params);
 		
 			#3.Get Purchase data
-			list($orderData, $extraData) = $this->_getDataFromDB($params);
+			$orderData = $this->_getDataFromDB($params);
 			
-			#4. Build base data
+			#4.Get extra data
+			$extraData = $this->_getExtraDataFromDB($params);
+			
+			#5. Build base data
 			#會有false的無效array, 用array_filter去除
 			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
 		}
@@ -174,11 +176,11 @@ class FactoryService
 		try
 		{
 			$brandId = $params->brand->value;
-			$factory = $this->_repository->getFactoryList($brandId);
+			$factory = PurchaseManager::getFactoryList($brandId);
 			
-			$factory = collect($factory)->mapWithKeys(function($item, $key){
+			/* $factory = collect($factory)->mapWithKeys(function($item, $key){
 				return [$item['factoryNo'] => $item['factoryName']];
-			})->toArray();
+			})->toArray(); */
 			
 			return $factory;
 		}
@@ -207,18 +209,37 @@ class FactoryService
 		{
 			$brand 		= $params->brand;
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
+			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$userAreaIds= $params->userAreaIds;
-			
-			$productIds 	= $params->productIds;
-			$productCodes 	= $params->productCodes;
+			$productIds = $params->productIds;
 			
 			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $userAreaIds);
 			
-			#無法分區域權限, 取回再處理
-			$extraData = $this->_repository->getExtraDataByFactory($stDate, $endDate, $productCodes);
+			return $orderData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取訂貨系統訂單資料失敗');
+		}
+	}
+	
+	/* Get extra order data from old system
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getExtraDataFromDB($params)
+	{
+		try
+		{
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes 	= $params->productCodes;
 			
-			return [$orderData, $extraData];
+			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			return $extraData;
 		}
 		catch(Exception $e)
 		{
@@ -234,15 +255,19 @@ class FactoryService
 	private function _buildBaseData($params, $orderData, $extraData)
 	{
 		#整合追加資料
-		$baseData = collect($orderData)->merge($extraData);
+		$baseData = collect($orderData)->merge($extraData); 
 		
 		#處理包裝轉換
-		$baseData = collect($baseData)->map(function($item, $key){
-			$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
-			return $item;
+		$baseData = $baseData->map(function($item, $key){
+			$temp['expectedDate'] = Carbon::parse($item['expectedDate'])->format('Y-m');
+			$temp['factoryNo'] = $item['factoryNo'];
+			$temp['shortCode'] = $item['shortCode'];
+			
+			$temp['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+			
+			return $temp;
 		})->toArray();
 			
-		
 		$params->baseData = $baseData;
 	}
 	/* ====================== 主流程 End ====================== */

@@ -56,6 +56,7 @@ class PurchaseManager
 		try
 		{
 			#取回的close date已+8
+			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
 			$store = $this->_repository->getStoreList($brand, $userAreaIds);
 			
 			#排除閉店:有值才檢查,start/end都要有
@@ -79,6 +80,7 @@ class PurchaseManager
 				});
 			}
 			
+			#return format store
 			return $this->_formatStoreOutput($brand, $store);
 		}
 		catch(Exception $e)
@@ -88,30 +90,53 @@ class PurchaseManager
 		}
 	}
 	
-	/* Get store data by brand with LB stores
+	/* Get store data by brand with LB stores(月初報表才會顯示特殊的蘿蔔店, 其它目前沒有顯示)
 	 * @params: int
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreListWithLb($brand, $userAreaIds)
+	public function getStoreListWithLb($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		try
 		{
-			$storeList = $this->_repository->getStoreList($brand, $userAreaIds);
+			$storeList = $this->getStoreList($brand, $userAreaIds, $stDate, $endDate);
 			
 			#八方才有蘿蔔
 			if ($brand == Brand::BAFANG)
 			{
 				$lbStoreList = $this->_repository->getLbStoreList($brand, $userAreaIds);
+				$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
+				
 				return $this->_mergeStoreOutput($brand, $storeList, $lbStoreList);
 			}
 			else
-				return $this->_formatStoreOutput($brand, $storeList);
+				return $storeList;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料失敗');
+		}
+	}
+	
+	/* Get store key
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getStoreKeys($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
+	{
+		try
+		{
+			#因追加在舊系統無法判別區域權限
+			$storeList = $this->getStoreList($brand, $userAreaIds, $stDate, $endDate);
+			
+			return collect($storeList)->pluck('storeKey')->values()->all();
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店Key值失敗');
 		}
 	}
 	
@@ -121,19 +146,17 @@ class PurchaseManager
 	 */
 	private function _mergeStoreOutput($brand, $storeList, $lbStoreList)
 	{
-		#To key-value
-		$storeList 		= $this->_formatStoreOutput($brand, $storeList);
-		$lbStoreList 	= $this->_formatStoreOutput($brand, $lbStoreList);
-		
 		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
 		
-		#特殊的蘿蔔店(只有蘿蔔的情境)
+		#取得特殊的蘿蔔店(只有蘿蔔的情境)
 		$lbExcepts = collect($lbStoreList)->filter(function($item, $key) use($lbSpecialStore) {
 			return in_array($item['storeNo'], array_keys($lbSpecialStore));
 		})->toArray();
 		
+		#因storeList有過濾區域權限, 故蘿蔔也要
 		$storeKeys = array_merge(array_keys($storeList), array_keys($lbExcepts));
 		
+		#todo:待確認
 		$lbStoreList = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
 			return ! in_array($key, $storeKeys);
 		});
@@ -166,13 +189,9 @@ class PurchaseManager
 			#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
 			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
 			#有些No沒有TP/KH要注意
-				
-			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
-							->replaceStart('TS', '')->replaceStart('RL', '');
-			$storeKey = Str::take($storeKey, 7);
 								
 			#存下storeKey
-			$item['storeKey'] = $storeKey;
+			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
 			
 			return $item;
 		})->sortBy('areaId')->values()->all();
@@ -180,18 +199,23 @@ class PurchaseManager
 		return $store;
 	}
 	
+	
+	
 	/* 取工廠清單
 	 * @params: int
 	 * @return: array
 	 */
-	public function getFactoryList($brandId)
+	public function getFactoryList($brandId, $returnMapping = TRUE)
 	{
 		$factory = $this->_repository->getFactoryList($brandId);
 		
 		#To key-value
-		$factory = collect($factory)->mapWithKeys(function($item, $key){
-			return [$item['factoryNo'] => $item['factoryName']];
-		})->toArray();
+		if ($returnMapping === TRUE)
+		{
+			$factory = collect($factory)->mapWithKeys(function($item, $key){
+				return [$item['factoryNo'] => $item['factoryName']];
+			})->toArray();
+		}
 			
 		return $factory;
 	}
@@ -261,4 +285,18 @@ class PurchaseManager
 		
 		return data_get($config, $code, 1);
 	}
+	
+	/* Build store key(新舊系統Mapping)
+	 * @params: string
+	 * @return: array
+	 */
+	public function buildStoreKey($storeNo)
+	{
+		#新系統有前置碼/八方有蘿蔔尾碼1&2
+		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		$storeKey = Str::take($storeKey, 7);
+		
+		return $storeKey;
+	}
+	
 }

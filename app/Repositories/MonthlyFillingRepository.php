@@ -2,8 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\OrderReposTrait;
-use App\Repositories\Traits\LegacyOrderReposTrait;
+use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -15,8 +14,6 @@ use Exception;
 
 class MonthlyFillingRepository extends Repository
 {
-	use OrderReposTrait, LegacyOrderReposTrait;
-	
 	public function __construct()
 	{
 		
@@ -39,13 +36,13 @@ class MonthlyFillingRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->where('a.IsStop', '=', 0)
 			->whereIn('a.OldNo', $codes)
@@ -87,16 +84,16 @@ class MonthlyFillingRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
-			->where('a.ExpectedDate', '<=', $endDate)
+			->where('a.ExpectedDate', '<', $endDate)
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->whereIn('s.AreaId', $authAreaIds)
@@ -140,16 +137,16 @@ class MonthlyFillingRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
-			->where('a.ExpectedDate', '<=', $endDate)
+			->where('a.ExpectedDate', '<', $endDate)
 			->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->whereIn('s.AreaId', $authAreaIds)

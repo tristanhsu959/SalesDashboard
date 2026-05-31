@@ -157,6 +157,7 @@ class StoreService
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
 			
+			#已包含蘿蔔訂單
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
 			
 			return $orderData;
@@ -204,9 +205,7 @@ class StoreService
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
-							->replaceStart('TS', '')->replaceStart('RL', '');
-			$item['storeKey'] = Str::take($storeKey, 7);
+			$item['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
@@ -323,9 +322,6 @@ class StoreService
 	}
 	
 	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
 	 * @params: array
 	 * @return: array
 	 */
@@ -337,6 +333,7 @@ class StoreService
 			$stDate		= $params->stDate;
 			$endDate	= $params->endDate;
 			
+			#八方店家,不顯示蘿蔔但資料有含蘿蔔(特殊店不會被顯示)
 			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
 			$params->storeList = $store;
 		}

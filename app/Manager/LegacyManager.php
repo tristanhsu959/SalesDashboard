@@ -47,6 +47,7 @@ class LegacyManager
 			$item['factoryNo'] 		= Factory::TP->value;
 			$item['factoryName'] 	= Factory::TP->label();
 			$item['expectedDate']	= Carbon::parse($item['expectedDate'])->format('Y-m-d');
+			$item['isExtra'] 		= TRUE; #判別area權限用,因這裏沒有區域定義
 			return $item;
 		});
 		
@@ -54,6 +55,7 @@ class LegacyManager
 			$item['factoryNo'] 		= Factory::KH->value;
 			$item['factoryName'] 	= Factory::KH->label();
 			$item['expectedDate']	= Carbon::parse($item['expectedDate'])->format('Y-m-d');
+			$item['isExtra'] 		= TRUE;
 			return $item;
 		});
 		
@@ -77,6 +79,7 @@ class LegacyManager
 			$item['factoryNo'] 		= Factory::TS->value;
 			$item['factoryName'] 	= Factory::TS->label();
 			$item['expectedDate']	= Carbon::parse($item['expectedDate'])->format('Y-m-d');
+			$item['isExtra'] 		= TRUE;
 			return $item;
 		});
 		
@@ -84,6 +87,7 @@ class LegacyManager
 			$item['factoryNo'] 		= Factory::RL->value;
 			$item['factoryName'] 	= Factory::RL->label();
 			$item['expectedDate']	= Carbon::parse($item['expectedDate'])->format('Y-m-d');
+			$item['isExtra'] 		= TRUE;
 			return $item;
 		});
 		

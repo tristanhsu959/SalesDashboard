@@ -72,7 +72,7 @@ class FactoryService
 	}
 	
 	/* Generate statistics data
-	 * @params: object
+	 * @params: array
 	 * @return: array
 	 */
 	private function _generateStatistics($params)
@@ -105,8 +105,7 @@ class FactoryService
 	/* ====================== 主流程 End ====================== */
 	
 	/* 取統計相關參數
-	 * @params: enums
-	 * @params: integer
+	 * @params: array
 	 * @return: array
 	 */
 	private function _prepareData($params)
@@ -115,6 +114,7 @@ class FactoryService
 		{
 			$orderData = $this->_getDataFromDB($params);
 			
+			#未來若建在新系統, 直接mark即可
 			$extraData = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
 			
 			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
@@ -127,9 +127,6 @@ class FactoryService
 	}
 	
 	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
 	 * @params: array
 	 * @return: array
 	 */
@@ -155,6 +152,7 @@ class FactoryService
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
 			
+			#已包含蘿蔔訂單
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
 			
 			return $orderData;
@@ -167,20 +165,24 @@ class FactoryService
 	}
 	
 	/* Get extra order data from old system
-	 * @params: 
+	 * @params: array 
 	 * @return: array
 	 */
 	private function _getExtraDataFromDB($params)
 	{
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productCodes = $params->shortCodes;
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes	= $params->shortCodes;
+			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
 			
+			#因無areaId, 故只能從門店過濾
+			$storeKeys = PurchaseManager::getStoreKeys($brand, $userAreaIds);
+			dd($extraData,$storeKeys);
 			return $extraData;
 		}
 		catch(Exception $e)
@@ -191,7 +193,9 @@ class FactoryService
 	}
 	
 	/* 基底資料
-	 * @params: collection
+	 * @params: array
+	 * @params: array
+	 * @params: array
 	 * @return: array
 	 */
 	private function _buildBaseData($params, $orderData, $extraData = [])
@@ -202,20 +206,18 @@ class FactoryService
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$storeKey = Str::of($item['storeNo'])->replaceStart('TP', '')->replaceStart('KH', '')
-							->replaceStart('TS', '')->replaceStart('RL', '');
-			$item['storeKey'] = Str::take($storeKey, 7);
+			$item['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
 		})->toArray();
-				
+			
 		$params->baseData = $baseData;
 	}
 	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
-	/* 
+	/* 處理統計資料輸出
 	 * @params: array
 	 * @return: array
 	 */
@@ -229,7 +231,7 @@ class FactoryService
 			#2.Build productList
 			$this->_getProductList($params);
 		
-			#3.Get store list
+			#3.Get factory list
 			$this->_getFactoryList($params);
 
 			#4. analysis by 門店
@@ -245,7 +247,7 @@ class FactoryService
 	}
 	
 	/* 計算日期天數
-	 * @params: 
+	 * @params: array 
 	 * @return: array
 	 */
 	private function _buildDateHeader($params)
@@ -303,9 +305,6 @@ class FactoryService
 	}
 	
 	/* Get order data
-	 * @params: enums
-	 * @params: date
-	 * @params: date
 	 * @params: array
 	 * @return: array
 	 */
@@ -322,6 +321,29 @@ class FactoryService
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取工廠資料失敗');
+		}
+	}
+	
+	/* Get storekey list
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getValidStoreKey($params)
+	{
+		try
+		{
+			$brandId 	= $params->brand->value;
+			$stDate		= $params->stDate;
+			$endDate	= $params->endDate;
+			
+			#只要回傳storeKey list判別用
+			$store = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $stDate, $endDate);
+			$params->storeList = $store;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料失敗');
 		}
 	}
 	

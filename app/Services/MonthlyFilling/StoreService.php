@@ -3,9 +3,9 @@
 namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
+use App\Facades\LegacyManager;
 use App\Repositories\MonthlyFillingRepository;
-use App\Services\Traits\Purchase\ProductServiceTrait;
-use App\Services\Traits\Purchase\StoreServiceTrait;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
@@ -27,9 +27,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class StoreService
 {
-	use ProductServiceTrait, StoreServiceTrait;
-	
-	private $_userAreaIds 	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected MonthlyFillingRepository $_repository)
@@ -114,12 +111,15 @@ class StoreService
 			
 			#2.Build params
 			$params->productGroup	= config('web.purchase.monthly_filling.totalCount.group');
-			$params->storeList 		= $this->getStoreListWithLb($params->brand, $params->userAreaIds);
+			$params->storeList 		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds);
 			
 			#3.Get Purchase data
-			list($orderData, $extraData) = $this->_getDataFromDB($params);
+			$orderData = $this->_getDataFromDB($params);
 			
-			#4. Build base data
+			#4.Get extra data
+			$extraData = $this->_getExtraDataFromDB($params);
+			
+			#5. Build base data
 			#會有false的無效array, 用array_filter去除
 			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
 		}
@@ -169,10 +169,11 @@ class StoreService
 	private function _getDataFromDB($params)
 	{
 		/* [
-			"expectedDate" => "2026-03"
-			"qty" => "310"
-			"storeId" => "1911"
-			"shortCode" => "0003"
+			"expectedDate" => "2026-04"
+			"qty" => "5"
+			"storeId" => "152"
+			"storeNo" => "KH1100100"
+			"shortCode" => "0001"
 		]
 		*/
 	
@@ -182,16 +183,35 @@ class StoreService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
 			$userAreaIds= $params->userAreaIds;
-			
 			$productIds 	= $params->productIds;
-			$productCodes 	= $params->productCodes;
 			
 			$orderData = $this->_repository->getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds);
 			
-			#無法分區域權限, 取回再處理
-			$extraData = $this->_repository->getExtraDataByStore($stDate, $endDate, $productCodes);
+			return $orderData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取訂貨系統訂單資料失敗');
+		}
+	}
+	
+	/* Get extra order data from old system
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getExtraDataFromDB($params)
+	{
+		try
+		{
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes 	= $params->productCodes;
 			
-			return [$orderData, $extraData];
+			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			
+			return $extraData;
 		}
 		catch(Exception $e)
 		{
@@ -208,14 +228,20 @@ class StoreService
 	{
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
-		
+		dd($orderData, $extraData);
 		#處理包裝轉換
+		#因追加在舊系統,故要改成storeKey做為主要關聯
 		$baseData = collect($baseData)->map(function($item, $key){
-			$item['qty'] = round(intval($item['qty']) * $this->getPackagingScale($item['shortCode']), 2);
-			return $item;
+			$temp['expectedDate'] = Carbon::parse($item['expectedDate'])->format('Y-m');
+			#$temp['storeId'] = $item['storeId'];
+			$temp['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
+			$temp['shortCode'] = $item['shortCode'];
+			$temp['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+			
+			return $temp;
 		})->toArray();
 			
-		
+		dd($baseData);
 		$params->baseData = $baseData;
 	}
 	
