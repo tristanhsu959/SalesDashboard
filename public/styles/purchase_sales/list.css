@@ -1,4 +1,7 @@
 /* Product list */
+body main.app {
+	overflow-y: hidden !important;
+}
 
 .store-list {
 	.info {
@@ -10,7 +13,7 @@
 	}
 	
 	.statistics-store {
-		max-height: calc(100vh - 240px);
+		max-height: calc(100vh - 230px);
 		overflow-y: auto;
 		
 		table.stripes tbody tr:nth-child(odd) {

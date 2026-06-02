@@ -167,7 +167,7 @@ table {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 220px);
+		max-height: calc(100vh - 230px);
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/

@@ -31,6 +31,18 @@
 		</article>
 		@else
 		<div x-data="statistics(@js($viewModel->statistics))" class="statistics">
+			<article class="store-info border s6">
+				<div class="search-date">
+					<div x-text="`${statistics.searchYear}.${statistics.searchMonth}`"></div>
+					<div class="day" x-text="statistics.searchDay"></div>
+				</div>
+				<div class="info">
+					<div x-text="statistics.storeInfo['storeName']" class="header"></div>
+					<div x-text="statistics.storeInfo['storeKey']"></div>
+					<div x-text="statistics.storeInfo['posId']"></div>
+				</div>
+			</article>
+
 			<div class="tabs cyan-text">
 				<a class="active" data-ui="#tab-purchase">訂貨</a>
 				<a data-ui="#tab-sale">銷售</a>
