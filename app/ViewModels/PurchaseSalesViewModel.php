@@ -51,7 +51,19 @@ class PurchaseSalesViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		#$this->set('options.newReleaseProducts', $this->_service->getNewReleaseProducts($this->brand->value));
+		if ($this->action == FormAction::DETAIL)
+			return TRUE;
+		
+		#List才需要
+		$type = [
+			'all'		=> '全部店家', 
+			'area'		=> '找區域',
+			'storeName'	=> '找店名',
+		];
+		$this->set('options.type', $type);
+		
+		$areaList = $this->getAuthAreaList();
+		$this->set('options.areaList', $areaList);
 	}
 	
 	/* Form submit action
@@ -72,6 +84,30 @@ class PurchaseSalesViewModel extends Fluent
 		};
 	}
 	
+	/* Keep search data of form
+	 * @params: string
+	 * @params: string
+	 * @params: int
+	 * @return: string
+	 */
+	public function keepSearchData($searchType = 'all', $searchDate = '', $searchAreaId = 0, $searchStoreName = '')
+    {
+		$today =  Carbon::now()->format('Y-m-d');
+		$searchDate = empty($searchDate) ? $today : $searchDate;
+		
+		if (empty($searchAreaId))
+			$areaName = '';
+		else
+			$areaName = (Area::tryfrom($searchAreaId))->label();
+		
+		$this->set('search.type', $searchType);
+		$this->set('search.date', $searchDate);
+		$this->set('search.areaId', $searchAreaId);
+		$this->set('search.areaName', $areaName);
+		$this->set('search.storeName', $searchStoreName);
+		$this->set('search.today', $today);
+	}
+	
 	/* Form submit action
 	 * @params: 
 	 * @return: string
@@ -80,22 +116,6 @@ class PurchaseSalesViewModel extends Fluent
     {
 		$brandCode = $this->brand->code();
 		return route(Str::replace('?', $brandCode, '?.purchase_sales.detail'));
-	}
-	
-	/* Keep search data of form
-	 * @params: string
-	 * @params: string
-	 * @params: int
-	 * @return: string
-	 */
-	public function keepSearchData($searchDate = '', $searchStoreName = '')
-    {
-		$today =  Carbon::now()->format('Y-m-d');
-		$searchDate = empty($searchDate) ? $today : $searchDate;
-		
-		$this->set('search.date', $searchDate);
-		$this->set('search.storeName', $searchStoreName);
-		$this->set('search.today', $today);
 	}
 	
 	public function isDataEmpty()

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -18,44 +19,15 @@ class PurchaseSalesRepository extends Repository
 		
 	}
 	
-	/* 取對應nOrder的設定值
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getOpCenterNo($brandId)
-	{
-		#台北/高雄
-		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value)
-			return OpCenter::toValueArray();
-		
-		return [];
-	}
-	
-	public function getBrandNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		return $brand->shortCode();
-	}
-	
-	public function getFactoryNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		if ($brandId == Brand::BAFANG->value)
-			return [Factory::TP->value, Factory::KH->value];
-		else
-			return [Factory::TS->value, Factory::RL->value];
-	}
-	
 	/* 取有效門店清單(取法不同於其它功能)
 	 * @params: enum
 	 * @params: array
 	 * @return: array
 	 */
-	public function getActiveStoreListFromNOrder($brand, $userAreaIds, $storeName)
+	public function getActiveStoreListFromPurchase($brand, $areaIds, $storeName)
 	{
 		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $areaIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -69,19 +41,19 @@ class PurchaseSalesRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->where('bd.No',  PurchaseManager::getBrandNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->when(!empty($storeName), function($query) use($storeName){
 				$query->whereAny(['s.Name'], 'like', DB::raw("N'%$storeName%'"));
@@ -100,7 +72,7 @@ class PurchaseSalesRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getStoreInfoByIdFromNOrder($storeId)
+	public function getPurchaseStoreInfoById($storeId)
 	{
 		#已過濾area權限, 不用再過濾
 		$db = $this->connectNewOrder();
@@ -116,14 +88,14 @@ class PurchaseSalesRepository extends Repository
 	}
 	
 	
-	/* 取主資料 By records 
+	/* 取訂貨訂單資料 By records 
 	 * @params: enums
 	 * @params: datetime
 	 * @params: datetime
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataFromNOrder($brand, $stDate, $endDate, $storeId)
+	public function getPurchaseOrderByStore($brand, $stDate, $endDate, $storeId)
 	{
 		#to UTC Time
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
@@ -140,26 +112,26 @@ class PurchaseSalesRepository extends Repository
 			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
 			->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE) as expectedDate')
-			->addSelect('b.Quantity as qty', 'b.Money as amount', 'a.StoreId')
+			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.OldNo as shortCode', 'p.Memo as memo')
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			->where('a.StoreId', '=', $storeId)
 			->whereIn('a.State', $orderStatus)
 			->where('b.Money', '>', 0)
-			->where('p.ErpNo', '!=', '');
+			->where('p.ErpNo', '!=', '')
 			->get()
 			->toArray();
 		

@@ -3,9 +3,11 @@
 namespace App\Services\PurchaseSales;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
+use App\Facades\LegacyManager;
 use App\Repositories\PurchaseSalesRepository;
-use App\Repositories\Traits\LegacyOrderReposTrait;
 use App\Libraries\ResponseLib;
+use App\Libraries\HelperLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 use OpenSpout\Writer\XLSX\Writer;
@@ -22,10 +25,8 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class DataService
+class OrderService
 {
-	use LegacyOrderReposTrait;
-	
 	private $_statistics	= [];
    
 	public function __construct(protected PurchaseSalesRepository $_repository)
@@ -45,13 +46,16 @@ class DataService
 	 * @params: array
 	 * @return: array
 	 */
-	public function analysis($params)
+	public function analysis($brand, $functions, $searchDate, $searchStoreId)
 	{
 		try
 		{
+			#因不同邏輯,故init params放在child service
+			$params = $this->_initParams($brand, $functions, $searchDate, $searchStoreId);
+			
 			#Prepare data(object default called by reference)
 			$this->_prepareData($params);
-				
+			dd($params);	
 			#Statistics
 			$this->_outputReport($params);
 				
@@ -64,6 +68,29 @@ class DataService
 		{
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* Init input params
+	 * @params: enums
+	 * @params: integer
+	 * @params: string
+	 * @params: string
+	 * @return: array
+	 */
+	private function _initParams($brand, $functions, $searchDate, $searchStoreId)
+	{
+		$params = new Fluent();
+		
+		$currentUser = AppManager::getCurrentUser();
+		$userAreaIds = $currentUser->roleArea;
+		
+		$cacheKey 	= HelperLib::buildCacheKey([$functions, $userAreaIds, $searchDate, $searchStoreId]);
+		
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->searchDate($searchDate)->searchStoreId($searchStoreId)
+				->cacheKey($cacheKey);
+		
+		return $params;
 	}
 	
 	/* Generate statistics data
@@ -103,12 +130,14 @@ class DataService
 			#1.Get product id
 			$this->_getStoreParams($params);
 			
-			#2.Get Purchase data
-			list($orderData, $extraData) = $this->_getPurchaseDataFromDB($params);
+			#2.Get purchase order
+			$this->_getPurchaseOrderFromDB($params);
 			
-			#4. Build base data
-			#會有false的無效array, 用array_filter去除
-			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
+			#3.Get pos order
+			$this->_getPosOrderFromDB($params);
+			dd($params);
+			
+			$this->_buildBaseData($params, array_filter($orderData) , array_filter($extraData));
 		}
 		catch(Exception $e)
 		{
@@ -125,15 +154,10 @@ class DataService
 	{
 		try
 		{
-			$info = $this->_repository->getStoreInfoByIdFromNOrder($params->searchStoreId);
+			$info = $this->_repository->getPurchaseStoreInfoById($params->searchStoreId);
 			
-			$params->storeId 	= $info['storeId'];
-			$params->storeName 	= $info['storeName'];
-			$params->storeNo 	= $info['storeNo'];
-			$params->erpNo		= $info['erpNo']; #erp_shopid
-			$params->vatNumber 	= $info['vatNumber']; #mapping to CODE
-			$params->posId 		= $info['posId'];
-			$params->storeKey 	= Str::replaceMatches('/TP|KH|U/', '', $info['storeNo']); #pos id
+			$info['storeKey'] = PurchaseManager::buildStoreKey($info['storeNo']);
+			$params->set('storeInfo', $info);
 		}
 		catch(Exception $e)
 		{
@@ -146,29 +170,42 @@ class DataService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getPurchaseDataFromDB($params)
+	private function _getPurchaseOrderFromDB($params)
 	{
-		/* array:4 [
-			"expectedDate" => "2026-02"
-			"qty" => "7059"
-			"factoryNo" => "TW_TP" | TW_KH
-			"shortCode" => "2267"
+		/* [
+			"expectedDate" => "2026-06-01"
+			"qty" => "40"
+			"amount" => "2800.000000"
+			"productName" => "招牌餡"
+			"shortCode" => "0001"
+			"memo" => "170823最小單位改10斤 1070603改回最小單位5斤"
 		]
 		*/
 	
 		try
 		{
 			$brand 		= $params->brand;
-			$storeId	= $params->storeId;
 			$stDate		= (new Carbon($params->searchDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->searchDate))->addDay()->format('Y-m-d H:i:s');
+			$storeId	= $params->searchStoreId;
+			$storeKey	= $params->storeInfo['storeKey'];
 			
-			$orderData = $this->_repository->getOrderDataFromNOrder($brand, $stDate, $endDate, $storeId);
+			#已包含蘿蔔訂單(因為是單店,區域權限在list已過濾)
+			$orderData = $this->_repository->getPurchaseOrderByStore($brand, $stDate, $endDate, $storeId);
 			
-			#無法分區域權限, 取回再處理
-			$extraData = $this->_repository->getAllExtraDataByStoreId($brand, $stDate, $endDate, $storeId);
+			$extraData = LegacyManager::getExtraDataByStore($brand, $stDate, $endDate, $storeKey);
 			
-			return [$orderData, $extraData];
+			#整合追加資料
+			$baseData = collect(array_filter($orderData))->merge(array_filter($extraData));
+			
+			#處理包裝轉換
+			$baseData = $baseData->map(function($item, $key){
+				$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+				$item['amount'] = round($item['amount'], 2);
+				return $item;
+			})->toArray();
+			
+			$params->purchaseBaseData = $baseData;
 		}
 		catch(Exception $e)
 		{
@@ -177,24 +214,6 @@ class DataService
 		}
 	}
 	
-	/* 基底資料
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _buildBaseData($params, $orderData, $extraData)
-	{
-		#整合追加資料
-		$baseData = collect($orderData)->merge($extraData);
-		
-		#處理包裝轉換
-		$baseData = collect($baseData)->map(function($item, $key){
-			$item['qty'] = intval($item['qty']) * $this->getPackagingScale($item['shortCode']);
-			return $item;
-		})->toArray();
-			
-		
-		$params->baseData = $baseData;
-	}
 	/* ====================== 主流程 End ====================== */
 	
 	

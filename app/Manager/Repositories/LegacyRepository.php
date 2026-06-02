@@ -93,13 +93,15 @@ class LegacyRepository  extends Repository
 				->where('a.OrderDate', '>=', $stDate)
 				->where('a.OrderDate', '<', $endDate)
 				->where('a.Ps', '!=', 'OMS') #追加會是空白
-				->whereIn('a.ProductNo', $productNos)
+				->when(($productNos !== FALSE), function($query) use($productNos){
+					$query->whereIn('a.ProductNo', $productNos);
+				})
 				->where('a.Money', '>', 0)
 				->whereNotIn('a.AccNo', $exceptShopIds)
 				#->groupBy('a.ProductNo', 'a.ProductName', 'a.AccNo', 'a.ProductName')
 				#->groupByRaw('LEFT(CAST(a.OrderDate AS DATE), 7)') 
 				->get();
-		
+				
 		return $result;
 	}
 }

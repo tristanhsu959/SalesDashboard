@@ -15,18 +15,43 @@
 
 	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
 		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'date')">
 			<input type="date" name="searchDate" maxlength="10" x-model="searchData.date" x-ref="searchDate" @input="errors.delete('date')" :max="searchData.today">
 			<label>查詢日期</label>
 		</div>
 		
-		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
-			<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
-			<label>門店名稱</label>
+		<div x-show="searchData.type == 'area'">
+			<div class="space"></div>
+			<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'areaId')">
+				<select x-model="searchData.areaId" name="searchAreaId" :disabled="searchData.type != 'area'" @change="errors.delete('areaId')">
+					<option value="">請選擇</option>
+					<template x-for="(name, areaId) in options.areaList" :key="areaId">
+						<option x-text="name" :value="areaId" :selected="searchData.areaId == areaId"></option>
+					</template>
+				</select>
+				<label>區域</label>
+				<i>arrow_drop_down</i>
+			</div>
 		</div>
 		
+		<div x-show="searchData.type == 'storeName'">
+			<div class="space"></div>
+			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+				<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName" :disabled="searchData.type != 'storeName'" @input="errors.delete('storeName')">
+				<label>門店名稱</label>
+			</div>
+		</div>
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
@@ -54,7 +79,7 @@
 	
 @if($viewModel->status() === TRUE)	
 	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
-	<section x-data='storeList(@json($viewModel->statistics))' class="store-list container">
+	<section x-data='storeList(@json($viewModel->search), @json($viewModel->statistics))' class="store-list container">
 		@if($viewModel->isDataEmpty())
 		<article class="error-container border">
 			<div class="row">
@@ -66,14 +91,13 @@
 		<form action="{{ $viewModel->getDetailFormAction() }}" method="post" x-ref="detailForm" class="no-margin" novalidate>
 			@csrf
 			<input type="hidden" name="searchStoreId" x-model="formData.storeId">
-			<input type="hidden" name="searchDate" x-model="statistics.searchDate">
-			<input type="hidden" name="searchStoreName" x-model="statistics.searchStoreName">
+			<input type="hidden" name="searchDate" x-model="formData.date">
 		</form>
 		
 		<div class="store-content">
 			<article class="info">
 				<div class="row">
-					<div x-text="statistics.searchStoreName || '全部門店'"></div>
+					<div x-text="listHeader"></div>
 				</div>
 			</article>
 			<!-- 門店 -->
@@ -81,13 +105,13 @@
 				<table class="stripes">
 					<thead>
 						<tr>
-							<template x-for="(header, idx) in statistics.storeList.header" :key="idx">
+							<template x-for="(header, idx) in statistics.store.header" :key="idx">
 								<th x-text="header"></th>
 							</template>
 						</tr>
 					</thead>
 					<tbody>
-						<template x-for="(store, idx) in statistics.storeList.data" :key="idx">
+						<template x-for="(store, idx) in statistics.store.data" :key="idx">
 						<tr>
 							<td x-text="store['posId']"></td>
 							<td x-text="store['areaName']"></td>
@@ -96,7 +120,7 @@
 							<td x-text="store['address']"></td>
 							<td x-text="store['bossName']"></td>
 							<td x-text="store['openDate']"></td>
-							<td><button :data-id="store['storeId']" @click="getDetail($el.getAttribute('data-id'))"><i>more_horiz</i><span>查看</span></button></td>
+							<td><button :data-id="store['storeId']" @click="getDetail($el.getAttribute('data-id'))"><i>more_horiz</i><span>More</span></button></td>
 						</tr>
 						</template>
 					</tbody>

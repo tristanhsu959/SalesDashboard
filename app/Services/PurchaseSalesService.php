@@ -11,7 +11,7 @@ use App\Enums\Functions;
 use App\Enums\Area;
 use App\Libraries\Purchase\AreaLib;
 use App\Services\PurchaseSales\StoreService;
-use App\Services\PurchaseSales\DataService;
+use App\Services\PurchaseSales\OrderService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +34,9 @@ class PurchaseSalesService
 	{
 		$this->_statistics = [
 			'brandId'			=> '', 
+			'searchType'		=> '', #可移除
 			'searchDate'		=> '', #Y-m-d
+			'searchAreaId' 		=> 0,
 			'searchStoreName' 	=> '',
             'storeList' 		=> [],
 			'purchaseData' 		=> [], 
@@ -73,7 +75,7 @@ class PurchaseSalesService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStoreList($brand, $searchDate, $searchStoreName)
+	public function getStoreList($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName)
 	{
 		try
 		{
@@ -82,9 +84,9 @@ class PurchaseSalesService
 			
 			$service = app(StoreService::class);
 			
-			$params = $this->_initStoreParams($brand, $searchDate, $searchStoreName);
-			$this->_statistics = $service->getActiveList($params);
+			$this->_statistics = $service->getActiveList($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName);
 			
+			#Save search to session, 在主service處理
 			$functions = ($this->parsingFunction($brand))->value;
 			$service->saveToSession($functions);
 			
@@ -94,26 +96,6 @@ class PurchaseSalesService
 		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
-	}
-	
-	/* Init input params
-	 * @params: enums
-	 * @params: string
-	 * @params: string
-	 * @return: array
-	 */
-	private function _initStoreParams($brand, $searchDate, $searchStoreName)
-	{
-		#參數各自獨立, 故寫在partial service
-		$params = new Fluent();
-		
-		$currentUser	= AppManager::getCurrentUser();
-		$userAreaIds	= $currentUser->roleArea;
-		
-		$params->brand($brand)->userAreaIds($userAreaIds)
-				->searchDate($searchDate)->searchStoreName($searchStoreName);
-		
-		return $params;
 	}
 	
 	/* 取Last store list
@@ -133,12 +115,11 @@ class PurchaseSalesService
 		return ResponseLib::initialize($data)->success();
 	}
 	
-	/*************** Ger purchase & sales data ***************/
+	/*************** Get detail purchase & sales data ***************/
 	/* Get statistics from order & pos
 	 * @params: enum
+	 * @params: date
 	 * @params: int
-	 * @params: date
-	 * @params: date
 	 * @return: array
 	 */
 	public function getStatistics($brand, $searchDate, $searchStoreId)
@@ -148,9 +129,7 @@ class PurchaseSalesService
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			#Params都用pass(保留service可複用空間)
-			$params = $this->_initDetailParams($brand, $searchDate, $searchStoreId);
-			
+			/* 此功能暫不cache
 			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get purchase & sales data from cache');
@@ -158,12 +137,15 @@ class PurchaseSalesService
 				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
-			else
+			else 
+			*/
 			{
 				Log::channel('appServiceLog')->info('Get purchase & sales data from db');
 				
-				$service = app(DataService::class);
-				$this->_statistics = $service->analysis($params);
+				$service = app(OrderService::class);
+				$functions = ($this->parsingFunction($brand))->value; #for cache
+				
+				$this->_statistics = $service->analysis($brand, $functions, $searchDate, $searchStoreId);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
@@ -174,27 +156,5 @@ class PurchaseSalesService
 		}
 	}
 	
-	/* Init input params
-	 * @params: enums
-	 * @params: integer
-	 * @params: string
-	 * @params: string
-	 * @return: array
-	 */
-	private function _initDetailParams($brand, $searchDate, $searchStoreId)
-	{
-		$params = new Fluent();
-		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
-		
-		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchDate, $searchStoreId]);
-		
-		$params->brand($brand)->userAreaIds($userAreaIds)
-				->searchDate($searchDate)->searchStoreId($searchStoreId)
-				->cacheKey($cacheKey);
-		
-		return $params;
-	}
+	
 }

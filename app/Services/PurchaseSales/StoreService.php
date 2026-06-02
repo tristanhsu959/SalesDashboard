@@ -22,29 +22,35 @@ use Exception;
 #partial Service
 class StoreService
 {
-	private $_userAreaIds	= FALSE;
 	private $_statistics	= [];
    
 	public function __construct(protected PurchaseSalesRepository $_repository)
 	{
 		$this->_statistics = [
 			'brandId'			=> '', 
+			'searchType'		=> '', #可移除
 			'searchDate'		=> '', #Y-m-d
+			'searchAreaId' 		=> 0,
 			'searchStoreName' 	=> '',
-            'storeList' 		=> [],
-			'exportToken'		=> '',
+            'store' 			=> [],
 		];
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
-	/* Search data
-	 * @params: array
+	/* 只取有效店家
+	 * @params: enums
+	 * @params: string
+	 * @params: int
+	 * @params: string
 	 * @return: array
 	 */
-	public function getActiveList($params)
+	public function getActiveList($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName)
 	{
 		try
 		{
+			#因不同邏輯,故init params放在child service
+			$params = $this->_initParams($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName);
+			
 			$this->_getListFromDB($params);
 			
 			$this->_buildOutput($params);
@@ -59,6 +65,29 @@ class StoreService
 		}
 	}
 	
+	/* Init input params
+	 * @params: enums
+	 * @params: string
+	 * @params: int
+	 * @params: string
+	 * @return: array
+	 */
+	private function _initParams($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName)
+	{
+		#參數各自獨立, 故寫在partial service
+		$params = new Fluent();
+		
+		$currentUser	= AppManager::getCurrentUser();
+		$userAreaIds	= $currentUser->roleArea;
+		
+		#返回時會用到, 故參數都存
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->searchType($searchType)->searchDate($searchDate)
+				->searchAreaId($searchAreaId)->searchStoreName($searchStoreName);
+		
+		return $params;
+	}
+	
 	
 	
 	/* 取Active store list
@@ -70,7 +99,9 @@ class StoreService
 		try
 		{
 			#以訂貨系統的門店為基準(不含蘿蔔,因不見得有POS對應, 取資料時才處理蘿蔔店)
-			$result = $this->_repository->getActiveStoreListFromNOrder($params->brand, $params->userAreaIds, $params->searchStoreName);
+			#固定格式才call purchase manager的store list, 這裏暫自行處理
+			$areaIds = empty($params->searchAreaId) ? $params->userAreaIds : $params->searchAreaId;
+			$result = $this->_repository->getActiveStoreListFromPurchase($params->brand, $areaIds, $params->searchStoreName);
 			
 			$result = collect($result)->map(function($item, $key){
 				$area = AreaLib::toArea(intval($item['areaId']));
@@ -82,7 +113,7 @@ class StoreService
 				return $item;
 			})->toArray();
 			
-			$params->set('storeList.data', $result);
+			$params->set('store.data', $result);
 			
 			return $params;
 		}
@@ -99,10 +130,10 @@ class StoreService
 	 */
 	private function _buildOutput($params)
 	{
-		$params->set('storeList.header', ['PosId', '區域', '門店代號', '門店名稱', '地址', '加盟主', '開店日期', '查看']);
+		$params->set('store.header', ['PosId', '區域', '門店代號', '門店名稱', '地址', '加盟主', '開店日期', '查看']);
 			
-		$data = collect($params->storeList['data'])->sortBy('areaId')->values();
-		$params->set('storeList.data', $data);
+		$data = collect($params->store['data'])->sortBy('areaId')->values()->all();
+		$params->set('store.data', $data);
 	}
 	
 	/* Generate statistics data
@@ -113,24 +144,26 @@ class StoreService
 	{
 		$this->_statistics['brandId']			= $params->brand->value;
 		$this->_statistics['brandCode']			= $params->brand->code();
+		$this->_statistics['searchType']		= $params->searchType;
 		$this->_statistics['searchDate']		= $params->searchDate;
+		$this->_statistics['searchAreaId']		= $params->searchAreaId;
 		$this->_statistics['searchStoreName']	= $params->searchStoreName;
-		$this->_statistics['storeList']			= $params->storeList;
+		$this->_statistics['store']				= $params->store;
 		$this->_statistics['exportToken']		= NULL; #保留供判斷用
 	}
 	
 	public function saveToSession($function)
 	{
-		session()->put("SESS::{$function}", $this->_statistics);
+		session()->put("Sess::List:{$function}", $this->_statistics);
 	}
 	
 	
 	public function getFromSession($function)
 	{
-		if (session()->missing("SESS::{$function}"))
+		if (session()->missing("Sess::List:{$function}"))
 			return FALSE;
 		
-		return session()->get("SESS::{$function}");
+		return session()->get("Sess::List:{$function}");
 	}
 	
 }

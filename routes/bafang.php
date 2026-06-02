@@ -72,7 +72,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE_SALES->value, ':')])->group(function(){
 		Route::get('purchase_sales', [PurchaseSalesController::class, 'showSearch'])->name('purchase_sales');
 		Route::post('purchase_sales/search', [PurchaseSalesController::class, 'search'])->name('purchase_sales.search');
-		Route::get('purchase_sales/search', [PurchaseSalesController::class, 'list'])->name('purchase_sales.list');
+		Route::get('purchase_sales/search', [PurchaseSalesController::class, 'search'])->name('purchase_sales.list');
 		Route::post('purchase_sales/detail', [PurchaseSalesController::class, 'detail'])->name('purchase_sales.detail');
 		Route::get('purchase_sales/export/{token}', [PurchaseSalesController::class, 'export'])->name('purchase_sales.export');
 	});

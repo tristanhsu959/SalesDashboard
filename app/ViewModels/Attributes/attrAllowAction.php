@@ -6,6 +6,7 @@ use App\Facades\AppManager;
 use App\Models\CurrentUser;
 use App\Traits\AuthTrait;
 use App\Enums\Operation;
+use App\Enums\Area;
 
 #Status & Message
 trait attrAllowAction
@@ -27,6 +28,24 @@ trait attrAllowAction
 		#Middleware已有過濾, 可不用
 		$currentUser = AppManager::getCurrentUser();
 		return $currentUser->hasPermissionTo($this->function->value);
+	}
+	
+	/* Area permission
+	 * @params: string
+	 * @return: void
+	 */
+	public function getAuthAreaList()
+	{
+		$currentUser = AppManager::getCurrentUser();
+		$authAreaList = $currentUser['roleArea'];
+		
+		$allAreaList = Area::options();
+		
+		$list = collect($allAreaList)->filter(function($item, $key) use($authAreaList){
+			return in_array($key, $authAreaList);
+		})->toArray();
+		
+		return $list;
 	}
 	
 	/* Action permission

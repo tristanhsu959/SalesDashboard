@@ -149,7 +149,7 @@ class PurchaseManager
 	{
 		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
 		
-		#取得特殊的蘿蔔店(只有蘿蔔的情境)
+		#取得特殊的蘿蔔店(因老蘿蔔沒有八方, 故要特別處理)
 		$lbExcepts = collect($lbStoreList)->filter(function($item, $key) use($lbSpecialStore) {
 			return in_array($item['storeNo'], array_keys($lbSpecialStore));
 		})->toArray();

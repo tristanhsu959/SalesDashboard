@@ -42,45 +42,33 @@ class PurchaseSalesController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		#query params
-		$searchDate		= $request->input('searchDate');
-		$searchStoreName= $request->input('searchStoreName');
-		
-		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchDate, $searchStoreName);
-	
-		$response = $this->_service->getStoreList($brand, $searchDate, $searchStoreName);
-		
-		if ($response->status === FALSE)
-			$this->_viewModel->fail($response->msg);
+		if ($request->isMethod('post'))
+		{
+			#query params
+			$searchType		= $request->input('searchType');
+			$searchDate		= $request->input('searchDate');
+			$searchAreaId	= $request->input('searchAreaId');
+			$searchStoreName= $request->input('searchStoreName');
+			
+			$this->_viewModel->initialize($brand, $function);
+			$this->_viewModel->keepSearchData($searchType, $searchDate, $searchAreaId, $searchStoreName);
+			
+			$response = $this->_service->getStoreList($brand, $searchType, $searchDate, $searchAreaId, $searchStoreName);
+			
+			if ($response->status === FALSE)
+				$this->_viewModel->fail($response->msg);
+			else
+				$this->_viewModel->success();
+		}
 		else
-			$this->_viewModel->success();
+		{
+			$response = $this->_service->getLastSearchData($function);
+			$params = $response->data;
+			
+			$this->_viewModel->initialize($brand, $function);
+			$this->_viewModel->keepSearchData($params['searchType'], $params['searchDate'], $params['searchAreaId'], $params['searchStoreName']);
+		}
 		
-		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
-		
-		return view('purchase_sales.index')->with('viewModel', $this->_viewModel);
-	}
-	
-	/* Called by return to Search
-	 * @params: request
-	 * @return: view
-	 */
-	public function list(Request $request)
-	{
-		$brand 		= $this->_service->parsingBrand($request->segments());
-		$function 	= $this->_service->parsingFunction($brand);
-		
-		$response = $this->_service->getLastSearchData($function);
-		
-		if ($response->status === FALSE)
-			return redirect()->route(Str::replace('?', $brand->code(), '?.purchase_sales'));
-		
-		$searchDate 		= $response->data['searchDate'];
-		$searchStoreName	= $response->data['searchStoreName'];
-		
-		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchDate, $searchStoreName);
-		$this->_viewModel->success();
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
 		return view('purchase_sales.index')->with('viewModel', $this->_viewModel);
@@ -98,18 +86,18 @@ class PurchaseSalesController extends Controller
 		#query params
 		$searchStoreId		= $request->input('searchStoreId');
 		$searchDate			= $request->input('searchDate');
-		$searchStoreName	= $request->input('searchStoreName');
 		
 		$this->_viewModel->initialize($brand, $function, FormAction::DETAIL);
-		$this->_viewModel->keepSearchData($searchDate, $searchStoreName);
+		
+		$backRoute = Str::replace('?', $brand->code(), '?.purchase_sales.list');
 		
 		if (empty($searchStoreId))
-			return redirect()->back()->with('msg', '無法識別門店代碼');
+			return redirect()->route($backRoute)->with('msg', '無法識別門店代碼');
 		
 		$response = $this->_service->getStatistics($brand, $searchDate, $searchStoreId);
 		
 		if ($response->status === FALSE)
-			return redirect()->back()->with('msg', $response->msg);
+			return redirect()->route($backRoute)->with('msg', $response->msg);
 		
 		$this->_viewModel->success();
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
