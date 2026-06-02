@@ -129,32 +129,16 @@ class PurchaseSalesService
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			/* 此功能暫不cache
-			if (Cache::has($params->cacheKey))
-			{
-				Log::channel('appServiceLog')->info('Get purchase & sales data from cache');
-				
-				$statistics = Cache::get($params->cacheKey); #cache data is response format
-				return ResponseLib::initialize($statistics)->success();
-			}
-			else 
-			*/
-			{
-				Log::channel('appServiceLog')->info('Get purchase & sales data from db');
-				
-				$service = app(OrderService::class);
-				$functions = ($this->parsingFunction($brand))->value; #for cache
-				
-				$this->_statistics = $service->analysis($brand, $functions, $searchDate, $searchStoreId);
-				
-				return ResponseLib::initialize($this->_statistics)->success();
-			}
+			$service = app(OrderService::class);
+            $functions = ($this->parsingFunction($brand))->value; #for cache
+                
+            $this->_statistics = $service->analysis($brand, $functions, $searchDate, $searchStoreId);				
+			
+			return ResponseLib::initialize($this->_statistics)->success();
 		}
 		catch(Exception $e)
 		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}
-	
-	
 }

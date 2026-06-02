@@ -32,12 +32,13 @@ class OrderService
 	public function __construct(protected PurchaseSalesRepository $_repository)
 	{
 		$this->_statistics = [
-			'brandId'			=> '', 
-			'searchDate'		=> '', #Y-m-d
-			'searchStoreId' 	=> '',
-            'purchaseData' 		=> [],
-			'salesData'			=> [],
-			'exportToken'		=> '',
+			'brandId'		=> '', 
+			'brandCode'		=> '', 
+			'searchDate'	=> '', #Y-m-d
+			'storeInfo' 	=> '',
+            'purchaseData' 	=> [],
+			'saleData'		=> [],
+			'exportToken'	=> '',
 		];
 	}
 	
@@ -53,16 +54,30 @@ class OrderService
 			#因不同邏輯,故init params放在child service
 			$params = $this->_initParams($brand, $functions, $searchDate, $searchStoreId);
 			
-			#Prepare data(object default called by reference)
-			$this->_prepareData($params);
-			dd($params);	
-			#Statistics
-			$this->_outputReport($params);
+			#此功能暫不cache
+			#暫cache for testing
+			if (Cache::has($params->cacheKey))
+			{
+				Log::channel('appServiceLog')->info('Get purchase & sales data from cache');
 				
-			#Create output to var statistics
-			$this->_generateStatistics($params);
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
+				return $statistics;
+			}
+			else 
+			{
+				Log::channel('appServiceLog')->info('Get purchase & sales data from db');
 				
-			return $this->_statistics;
+				#Prepare data(object default called by reference)
+				$this->_prepareData($params);
+			
+				#Statistics
+				$this->_outputReport($params);
+					
+				#Create output to var statistics
+				$this->_generateStatistics($params);
+				
+				return $this->_statistics;
+			}
 		}
 		catch(Exception $e)
 		{
@@ -99,22 +114,19 @@ class OrderService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
-		$this->_statistics['modeRange']		= $params->range;
 		$this->_statistics['brandId']		= $params->brand->value;
 		$this->_statistics['brandCode']		= $params->brand->code();
-		$this->_statistics['startDate'] 	= $params->stDate;
-		$this->_statistics['endDate']		= $params->endDate;
-		$this->_statistics['header']		= $params->header;
-		$this->_statistics['data']			= $params->data;
+		$this->_statistics['searchDate'] 	= $params->searchDate;
+		$this->_statistics['storeInfo'] 	= $params->storeInfo;
+		$this->_statistics['purchaseData']	= $params->purchaseData;
+		$this->_statistics['saleData']		= []; #$params->saleData;
 		
 		#無值不cache
-		if (! empty(Arr::flatten($this->_statistics['data'])))
+		if (! empty($params->purchaseData['data']) OR ! empty($params->saleData['data']))
 		{
-			
-			$this->_statistics['exportName']	= '各餡月均量';
-			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
-			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
+			$this->_statistics['exportName']	= Str::replaceArray('?', [$params->storeInfo['storeName'], $params->searchDate], '?_訂貨及銷售資訊_?');;
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); 
+			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(20));
 		}
 	}
 	
@@ -134,10 +146,7 @@ class OrderService
 			$this->_getPurchaseOrderFromDB($params);
 			
 			#3.Get pos order
-			$this->_getPosOrderFromDB($params);
-			dd($params);
-			
-			$this->_buildBaseData($params, array_filter($orderData) , array_filter($extraData));
+			#$this->_getPosOrderFromDB($params);
 		}
 		catch(Exception $e)
 		{
@@ -227,15 +236,8 @@ class OrderService
 	{
 		try
 		{
-			#1.計算查詢範圍Month
-			$this->_buildMonthRange($params);
-			
-			#2.統計
-			$this->_parsingByFactory($params);
-			
-			#3.產出成row data
-			$params->set('data.qty', $this->_generateOutput($params, 'qty'));
-			$params->set('data.avg', $this->_generateOutput($params, 'avg'));
+			#1.訂貨統計
+			$this->_parsingByPurchase($params);
 			
 			return $params;
 		}
@@ -246,121 +248,38 @@ class OrderService
 		}
 	}
 	
-	/* 計算用參數
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildMonthRange($params)
-	{
-		$monthList 	= [];
-		
-		#By month
-		$st 	= Carbon::parse($params->stDate)->startOfMonth();
-		$end	= Carbon::parse($params->endDate)->startOfMonth();
-			
-		$period = CarbonPeriod::create($st, '1 month', $end);
-		foreach ($period as $month) 
-		{
-			$monthList[] = $month->format('Y-m');
-		}
-		
-		$params->monthList = $monthList;
-	}
-	
-	/* 依工廠
+	/* 依訂貨
 	 * @params: array
 	 * @return: array
 	 */
-	private function _parsingByFactory($params)
+	private function _parsingByPurchase($params)
 	{
-		/*
-		[
-			"TW_KH" => array:2 [
-				"2026-01" => array:9 [
-					"0001" => array:2 [
-						"qty" => 464490
-						"avg" => 14983.55
-					]
-					"0002" => array:2 [...]
-					"0003" => array:2 [...]
-					"0005" => array:2 [...]
-					"0006" => array:2 [...]
-					"0007" => array:2 [...]
-					"0011" => array:2 [...]
-					"0015" => array:2 [...]
-					"2267" => array:2 [...]
-				]
-				"2026-02" => array:9 [..]
-			]
-			"TW_TP" => array:2 [...]
-		*/
-		$orderData = $params->baseData;
+		$orderData = $params->purchaseBaseData;
 		
 		if (empty($orderData))
 			return [];
 		
+		$params->set('purchaseData.header', ['產品代碼', '產品名稱', '數量', '金額', '備註']);
+		
 		#分群定義不同
-		$result = collect($orderData)->groupBy('factoryNo')->map(function($items, $key) {
-			return $items->groupBy('expectedDate')->map(function($items, $month) {
-				return $items->groupBy('shortCode')->map(function($items, $key) use ($month){
-					
-					$days = Carbon::parse($month)->daysInMonth;
-					$temp['qty'] = round($items->pluck('qty')->sum(), 2);
-					$temp['avg'] = round($temp['qty'] / $days, 2);
-					
-					return $temp;
-					
-				})->toArray();
-			});
+		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) {
+			$temp['shortCode'] 	= $items->pluck('shortCode')->first();
+			$temp['productName']= $items->pluck('productName')->first();
+			$temp['qty'] 		= round($items->pluck('qty')->sum(), 2);
+			$temp['amount'] 	= round($items->pluck('amount')->sum(), 2);
+			$temp['memo'] 		= $items->pluck('memo')->first();
 			
-		})->sortKeys()->toArray();
+			return $temp;
+		});
 		
-		$params->parsingData = $result;
-	}
-	
-	/* 改成產出row data
-	 * @params: array
-	 * @return: array
-	 */
-	private function _generateOutput($params, $type)
-	{
-		$parsingData = $params->parsingData;
+		$total['shortCode'] 	= '';
+		$total['productName']	= '總計';
+		$total['qty'] 			= round($result->pluck('qty')->sum(), 2);
+		$total['amount'] 		= round($result->pluck('amount')->sum(), 2);
+		$total['memo'] 			= '';
 		
-		if (empty($parsingData))
-			return [];
-		
-		$productList= collect($params->productList)->pluck('name', 'code')->toArray();
-		$factoryList= $params->factoryList;
-		$monthList	= $params->monthList;
-		
-		$params->header = array_merge(['出貨工廠', '年月'], array_values($productList));
-		
-		#共用Header
-		$rowData = [];
-		
-		foreach($factoryList as $factoryNo => $factoryName)
-		{
-			$factoryData = data_get($parsingData, $factoryNo);
-			
-			if (empty($factoryData))
-				continue;
-			
-			foreach($monthList as $month)
-			{
-				$row = [];
-				$row[] = $factoryName;
-				$row[] = $month;
-				
-				foreach($productList as $code => $name)
-				{
-					$row[] = data_get($factoryData, "{$month}.{$code}.{$type}");
-				}
-				
-				$rowData[] = $row;
-			}
-		}
-		
-		return $rowData;
+		$result = $result->push($total)->values()->all();
+		$params->set('purchaseData.data', $result);
 	}
 	
 	/* Export data

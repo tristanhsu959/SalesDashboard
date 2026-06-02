@@ -115,7 +115,7 @@
 						<tr>
 							<td x-text="store['posId']"></td>
 							<td x-text="store['areaName']"></td>
-							<td x-text="store['storeNo']"></td>
+							<td x-text="store['storeKey']"></td>
 							<td x-text="store['storeName']"></td>
 							<td x-text="store['address']"></td>
 							<td x-text="store['bossName']"></td>

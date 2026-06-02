@@ -3,6 +3,7 @@
 namespace App\Services\PurchaseSales;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\PurchaseSalesRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
@@ -109,6 +110,7 @@ class StoreService
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
 				$item['openDate']	= Carbon::parse($item['openDate'])->format('Y-m-d');
+				$item['storeKey']	= PurchaseManager::buildStoreKey($item['storeNo']);
 				
 				return $item;
 			})->toArray();

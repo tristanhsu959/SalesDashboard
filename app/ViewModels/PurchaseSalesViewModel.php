@@ -84,6 +84,16 @@ class PurchaseSalesViewModel extends Fluent
 		};
 	}
 	
+	/* Detail form submit action(因在List要取用,故要獨立出來)
+	 * @params: 
+	 * @return: string
+	 */
+	public function getDetailFormAction() : string
+    {
+		$brandCode = $this->brand->code();
+		return route(Str::replace('?', $brandCode, '?.purchase_sales.detail'));
+	}
+	
 	/* Keep search data of form
 	 * @params: string
 	 * @params: string
@@ -106,16 +116,6 @@ class PurchaseSalesViewModel extends Fluent
 		$this->set('search.areaName', $areaName);
 		$this->set('search.storeName', $searchStoreName);
 		$this->set('search.today', $today);
-	}
-	
-	/* Form submit action
-	 * @params: 
-	 * @return: string
-	 */
-	public function getDetailFormAction() : string
-    {
-		$brandCode = $this->brand->code();
-		return route(Str::replace('?', $brandCode, '?.purchase_sales.detail'));
 	}
 	
 	public function isDataEmpty()
