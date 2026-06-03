@@ -431,7 +431,6 @@ class DailyRevenueService
 		
 		#Sum已在DB計算, 這裏只要format output
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
-			if ($key == '0825')
 			
 			$temp['shopId'] 		= $items->pluck('shopId')->first();
 			$temp['shopName'] 		= $items->pluck('shopName')->first();
