@@ -8,8 +8,8 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MonthlyFillingController;
-use App\Http\Controllers\MerchantController; #store
-use App\Http\Controllers\PurchaseSalesController; #store
+use App\Http\Controllers\MerchantController;
+use App\Http\Controllers\PurchaseSalesController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;

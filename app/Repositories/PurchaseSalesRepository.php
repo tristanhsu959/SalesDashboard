@@ -10,6 +10,7 @@ use App\Enums\Brand;
 use App\Enums\Factory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Exception;
 
 
@@ -153,6 +154,11 @@ class PurchaseSalesRepository extends Repository
 		$primaryData 		= $this->_getPrimaryData($brand, $stDate, $endDate, $posId);
 		$dualBrandedData	= $this->_getDualBrandedData($brand, $stDate, $endDate, $posId);
 		
+		$dualBrandedData = $dualBrandedData->filter(function($item, $key){
+			#排除非UC的item
+			return Str::startsWith($item['erpNo'], 'UC');
+		});
+		
 		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
 		$result = $primaryData->merge($dualBrandedData)->toArray();
 		
@@ -186,7 +192,7 @@ class PurchaseSalesRepository extends Repository
 				->where('a.saleDate', '<', $endDate)
 				->where('a.shopId', '=', $posId)
 				->get(); 
-				
+		
 		return $result;
 	}
 	
@@ -205,9 +211,9 @@ class PurchaseSalesRepository extends Repository
 		if ($brand == Brand::BAFANG)
 			return [];
 		
-		$dualBrandedShopIds = PosManager::getDualBrandedMappingId($posId);
+		$mappingPosId = PosManager::getDualBrandedMappingId($posId);
 		
-		if (! PosManager::isDualBranded($posId) OR empty($dualBrandedShopIds))
+		if (! PosManager::isDualBranded($posId) OR empty($mappingPosId))
 			return [];
 		
 		$db = $this->connectBFPosErp();
@@ -218,9 +224,10 @@ class PurchaseSalesRepository extends Repository
 				->select('a.productId as erpNo', 'p.PROD_NAME1 as productName', 'a.price', 'a.qty', 'a.discount')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<', $endDate)
-				->where('a.shopId', '=', $dualBrandedShopIds)->ddRawSql();
-				#->get(); 
-				
+				->where('a.shopId', '=', $mappingPosId)
+				#->where('a.productId', 'like', 'UC%') 很慢
+				->get(); 
+			
 		return $result;
 	}
 }
