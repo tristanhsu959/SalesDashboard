@@ -210,7 +210,7 @@ class StoreService
 			$productCodes 	= $params->productCodes;
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LegacyManager::getExtraData($brand, $stDate, $endDate, $productCodes);
+			$extraData = LegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();

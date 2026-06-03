@@ -85,7 +85,7 @@ class LegacyRepository  extends Repository
 		#union all有點慢
 		$result = $db->table("{$table} as a")
 				->fromRaw("{$table} as a WITH(NOLOCK)")
-				->select('a.ProductNo as shortCode', 'a.ProductName as productName')
+				->select('a.Idx as legacyId', 'a.ProductNo as shortCode', 'a.ProductName as productName')
 				->addSelect('a.AccNo as storeNo', 'a.OrderDate as expectedDate')
 				->addSelect('a.Amount as qty', 'a.Money as amount')
 				#->selectRaw('sum(a.Amount) as qty, sum(a.Money) as amount')

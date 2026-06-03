@@ -16,12 +16,39 @@ class LegacyManager
 	{
 	}
 	
+	/* 取全部追加(Save to local scheduling會用到)
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getExtraData($stDate, $endDate)
+	{
+		/*[
+			"shortCode" => "3615"
+			"productName" => "紹辣醬"
+			"storeNo" => "1001"
+			"expectedDate" => "2026-06-01"
+			"qty" => "50.00"
+			"amount" => "4500.00"
+			"factoryNo" => "TW_TP"
+			"factoryName" => "淡水總廠"
+			"isExtra" => true
+		]
+		*/
+		$bafang 	= $this->getExtraDataByBafang($stDate, $endDate, FALSE); #false for all
+		$buygood	= $this->getExtraDataByBuygood($stDate, $endDate, FALSE);
+		
+		$result = collect($bafang)->merge($buygood)->toArray();
+		
+		return $result;
+	}
+	
 	/* 取追加
 	 * @params: datetime
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getExtraData($brand, $stDate, $endDate, $productCodes)
+	public function getExtraDataByProduct($brand, $stDate, $endDate, $productCodes)
 	{
 		if ($brand == Brand::BAFANG)
 			$data = $this->getExtraDataByBafang($stDate, $endDate, $productCodes);

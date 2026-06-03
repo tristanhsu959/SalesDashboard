@@ -30,6 +30,9 @@ Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(
 #Buygood zs_sd_order(銷售統計)
 Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
+#舊系統追加 To Local
+Schedule::command('legacy:extra-order-to-local')->everyFourHours()->withoutOverlapping(); #->between('10:00', '22:00');
+
 /* #Update data for current day
 #橙汁排骨
 Schedule::command('new-release:update-to-local porkRibs 1')->everyFifteenMinutes()->between('10:00', '21:00');
