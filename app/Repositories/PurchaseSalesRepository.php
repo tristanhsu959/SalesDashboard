@@ -154,10 +154,10 @@ class PurchaseSalesRepository extends Repository
 		$primaryData 		= $this->_getPrimaryData($brand, $stDate, $endDate, $posId);
 		$dualBrandedData	= $this->_getDualBrandedData($brand, $stDate, $endDate, $posId);
 		
-		$dualBrandedData = $dualBrandedData->filter(function($item, $key){
+		$dualBrandedData = collect($dualBrandedData)->filter(function($item, $key){
 			#排除非UC的item
 			return Str::startsWith($item['erpNo'], 'UC');
-		});
+		})->toArray();
 		
 		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
 		$result = $primaryData->merge($dualBrandedData)->toArray();
