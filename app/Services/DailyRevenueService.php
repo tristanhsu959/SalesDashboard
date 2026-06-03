@@ -250,7 +250,8 @@ class DailyRevenueService
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
 			$temp['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
 			$temp['amount'] 		= $item['amount'];
-			
+			$temp['totalSales']		= floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']);
+				
 			return $temp; 
 		});
 		
@@ -267,6 +268,7 @@ class DailyRevenueService
 			$temp['areaName']		= $item['areaName'];
 			$temp['saleDate'] 		= $params->endDate;
 			$temp['amount'] 		= 0;
+			$temp['totalSales']		= 0;
 			
 			return $temp;
 		});
@@ -366,7 +368,12 @@ class DailyRevenueService
 			
 			#整理Amount成Daily形式
 			$temp['dayAmount'] = $items->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-				return [$date => round($items->pluck('amount')->sum())];
+				#因amount會有0的狀況
+				$amount			= $items->pluck('amount')->sum();
+				$totalSales		= $items->pluck('totalSales')->sum();
+				$finalAmount 	= empty($amount) ? $totalSales : $amount;
+				
+				return [$date => round($finalAmount, 2)];
 			})->filter(function($item, $key){
 				return $key > 0;
 			})->toArray();
@@ -378,7 +385,11 @@ class DailyRevenueService
 		$result['total']['areaName'] 	= '總計'; 
 		$result['total']['shopCount'] 	= collect($baseData)->pluck('shopId')->unique()->count(); 
 		$result['total']['dayAmount'] 	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-			return [$date => round($items->pluck('amount')->sum())];
+			$amount		= $items->pluck('amount')->sum();
+			$totalSales	= $items->pluck('totalSales')->sum();
+			$finalAmount= empty($amount) ? $totalSales : $amount;
+			
+			return [$date => round($finalAmount)];
 		})->filter(function($item, $key){
 			return $key > 0;
 		})->toArray();
@@ -420,6 +431,8 @@ class DailyRevenueService
 		
 		#Sum已在DB計算, 這裏只要format output
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
+			if ($key == '0825')
+			
 			$temp['shopId'] 		= $items->pluck('shopId')->first();
 			$temp['shopName'] 		= $items->pluck('shopName')->first();
 			$temp['shopTypeName'] 	= $items->pluck('shopTypeName')->first();
@@ -433,7 +446,11 @@ class DailyRevenueService
 				if (empty($saleDate))
 					return [];
 				
-				return [$saleDate => intval($items->pluck('amount')->sum())];
+				$amount			= $items->pluck('amount')->sum();
+				$totalSales		= $items->pluck('totalSales')->sum();
+				$finalAmount 	= empty($amount) ? $totalSales : $amount;
+				
+				return [$saleDate => round($finalAmount, 2)];
 
 			})->filter(function($item, $key){
 				return $key > 0;
@@ -450,7 +467,11 @@ class DailyRevenueService
 		$result['total']['shopTypeName']= ''; 
 		$result['total']['areaName'] 	= ''; 
 		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-			return [$date => round($items->pluck('amount')->sum())];
+			$amount		= $items->pluck('amount')->sum();
+			$totalSales	= $items->pluck('totalSales')->sum();
+			$finalAmount= empty($amount) ? $totalSales : $amount;
+			
+			return [$date => round($finalAmount, 2)];
 		})->toArray();
 		
 		$params->set('shop.data',  $result);

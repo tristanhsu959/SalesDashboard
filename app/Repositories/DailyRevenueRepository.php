@@ -57,8 +57,7 @@ class DailyRevenueRepository extends Repository
 	public function getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $shopType, $shopName, $excepts)
 	{
 		$result = $db
-				->table('z_sd_sale00 as a')
-				->fromRaw('z_sd_sale00 as a WITH(NOLOCK)')
+				->table(DB::raw('z_sd_sale00 as a WITH(NOLOCK)'))
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.shopId')
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->where('a.saleDate', '>=', $stDate)
@@ -66,11 +65,14 @@ class DailyRevenueRepository extends Repository
 				->whereIn('b.SHOP_KIND', $shopType)
 				->whereIn('b.gid', $authAreaIds)
 				->when(! empty($shopName), function ($query) use ($shopName) {
-					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+					$query->whereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
 				})
 				->whereNotIn('a.shopId', $excepts)
 				->select('a.shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
 				->selectRaw('sum(a.amount) as amount')
+				->selectRaw('sum(a.totalSales) as totalSales')
+				->selectRaw('sum(a.totalExtra) as totalExtra')
+				->selectRaw('sum(a.totalDischarge) as totalDischarge')
 				->groupBy('a.shopId', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', 'a.saleDate')
 				->get()
 				->toArray(); 
@@ -88,16 +90,14 @@ class DailyRevenueRepository extends Repository
 	{
 		#Group會變超慢, 改為由PHP計算
 		$subQuery = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->table(DB::raw('SALE00 as a WITH(NOLOCK)'))
 				->where('a.SALE_DATE', '>=', $stDate)
 				->where('a.SALE_DATE', '<', $endDate)
 				->where('a.STATUS', '=', 2) #3:作廢不計入
 				->select('a.SALE_ID', 'a.SHOP_ID');
 					
 		$result = $db
-				->table('SALE00 as a')
-				->fromRaw('SALE00 as a WITH(NOLOCK)')
+				->table(DB::raw('SALE00 as a WITH(NOLOCK)'))
 				->joinSub($subQuery, 'orders', function($join){
 					$join->on('orders.SALE_ID', '=', 'a.SALE_ID')
 						->on('orders.SHOP_ID', '=', 'a.SHOP_ID');
@@ -112,6 +112,9 @@ class DailyRevenueRepository extends Repository
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.SALE_DATE as saleDate')
 				->selectRaw('sum(a.amount) as amount')
+				->selectRaw('sum(a.TOT_SALES) as totalSales')
+				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
+				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
 				->groupBy('a.SHOP_ID', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', 'a.SALE_DATE')
 				->get()
 				->toArray();
