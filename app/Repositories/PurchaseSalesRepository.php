@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Facades\PurchaseManager;
+use App\Facades\PosManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -31,7 +32,7 @@ class PurchaseSalesRepository extends Repository
 		
 		$db = $this->connectNewOrder();
 		$result = $db
-			->table('Store as s')
+			->table(DB::raw('Store as s WITH(NOLOCK)'))
 			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
 			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName')
@@ -77,7 +78,7 @@ class PurchaseSalesRepository extends Repository
 		#已過濾area權限, 不用再過濾
 		$db = $this->connectNewOrder();
 		$result = $db
-			->table('Store as s')
+			->table(DB::raw('Store as s WITH(NOLOCK)'))
 			->select('s.Id as storeId', 's.No as storeNo', 's.Name as storeName')
 			->addSelect('s.PosId as posId', 's.VATNumber as vatNumber', 's.ErpNo as erpNo')
 			->where('s.Id', '=', $storeId)
@@ -87,7 +88,7 @@ class PurchaseSalesRepository extends Repository
 		return $result;
 	}
 	
-	
+	/*************** New Purchase Order ***************/
 	/* 取訂貨訂單資料 By records 
 	 * @params: enums
 	 * @params: datetime
@@ -105,8 +106,7 @@ class PurchaseSalesRepository extends Repository
 		
 		$db = $this->connectNewOrder();
 		$result = $db
-			->table('Order as a')
-			->fromRaw('[Order] as a WITH(NOLOCK)')
+			->table(DB::raw('[Order] as a WITH(NOLOCK)'))
 			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
 			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
 			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
@@ -135,6 +135,92 @@ class PurchaseSalesRepository extends Repository
 			->get()
 			->toArray();
 		
+		return $result;
+	}
+	
+	/*************** Pos Order ***************/
+	/* Sale data | 新品:八方/梁社漢共用
+	 * @params: query builder
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: string
+	 * @params: array
+	 * @return: array
+	 */
+	public function getPosOrderByPosId($brand, $stDate, $endDate, $posId)
+	{
+		$primaryData 		= $this->_getPrimaryData($brand, $stDate, $endDate, $posId);
+		$dualBrandedData	= $this->_getDualBrandedData($brand, $stDate, $endDate, $posId);
+		
+		#合併查詢(gid在八方及御廚定義不同, 這裏不處理)
+		$result = $primaryData->merge($dualBrandedData)->toArray();
+		
+		return $result;
+	}
+	
+	/* Build query string | 八方,御廚
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getPrimaryData($brand, $stDate, $endDate, $posId)
+	{
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else if ($brand == Brand::BUYGOOD)
+			$db = $this->connectBGPosErp();
+		else
+			return [];
+		
+		#因會無法跑index, sum由PHP計算
+		$result = $db
+				->table(DB::raw('zs_sd_order as a WITH(NOLOCK)'))
+				->join(DB::raw('PRODUCT00 as p WITH(NOLOCK)'), 'p.PROD_ID', '=', 'a.productId')
+				->select('a.productId as erpNo', 'p.PROD_NAME1 as productName', 'a.price', 'a.qty', 'a.discount')
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<', $endDate)
+				->where('a.shopId', '=', $posId)
+				->get(); 
+				
+		return $result;
+	}
+	
+	/* Build query string | 八方:只有複合店才有的情境
+	 * @params: connection
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getDualBrandedData($brand, $stDate, $endDate, $posId)
+	{
+		#複合店御廚Order會存在八方，故只有御廚時需要到poserp取order
+		if ($brand == Brand::BAFANG)
+			return [];
+		
+		$dualBrandedShopIds = PosManager::getDualBrandedMappingId($posId);
+		
+		if (! PosManager::isDualBranded($posId) OR empty($dualBrandedShopIds))
+			return [];
+		
+		$db = $this->connectBFPosErp();
+		
+		$result = $db
+				->table(DB::raw('zs_sd_order as a WITH(NOLOCK)'))
+				->join(DB::raw('PRODUCT00 as p WITH(NOLOCK)'), 'p.PROD_ID', '=', 'a.productId')
+				->select('a.productId as erpNo', 'p.PROD_NAME1 as productName', 'a.price', 'a.qty', 'a.discount')
+				->where('a.saleDate', '>=', $stDate)
+				->where('a.saleDate', '<', $endDate)
+				->where('a.shopId', '=', $dualBrandedShopIds)->ddRawSql();
+				#->get(); 
+				
 		return $result;
 	}
 }

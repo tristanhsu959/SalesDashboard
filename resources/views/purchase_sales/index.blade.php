@@ -10,7 +10,7 @@
 
 @section('content')
 <!-- Search panel -->
-<form x-data='search(@json($viewModel->search), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+<form x-data="search(@js($viewModel->search), @js($viewModel->options))" action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
 	@csrf
 
 	<dialog id="searchPanel" class="right">

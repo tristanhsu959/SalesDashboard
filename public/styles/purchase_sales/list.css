@@ -21,9 +21,21 @@ body main.app {
 		}
 		
 		table {
+			thead tr th {
+				position: sticky;
+				top: 0;
+				z-index: 5;
+				word-break: keep-all;
+				background-color: var(--background);
+			}
+						
 			thead tr th:last-child, tbody tr td:last-child {
 				text-align: right;
 				padding-right: 1rem;
+			}
+			
+			tbody tr:hover {
+				color: red;
 			}
 		}
 	}

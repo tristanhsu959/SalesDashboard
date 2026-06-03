@@ -61,13 +61,14 @@ section.purchase-sale-list {
 			--table-fixed-color: #01579b;
 			--table-stripes: #e0f7fa; 
 		}
+		
 		/* sale table use same define */
 		&.sale {
-			--table-bg: #aed581;
-			--table-bg-dark: #689f38;
-			--table-fixed-bg: #dcedc8;
-			--table-fixed-color: #33691e;
-			--table-stripes: #f1f8e9; 
+			--table-bg: #ba68c8;
+			--table-bg-dark: #7b1fa2;
+			--table-fixed-bg: #e1bee7;
+			--table-fixed-color: #4a148c;
+			--table-stripes: #f3e5f5; 
 		}
 		
 		position: relatvie;

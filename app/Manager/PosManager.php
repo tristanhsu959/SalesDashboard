@@ -129,4 +129,38 @@ class PosManager
 		
 		return $result;
 	}
+	
+	/* 判別複合店
+	 * @params: array
+	 * @return: array
+	 */
+	public function isDualBranded($posId)
+	{
+		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
+		#八方及御廚都判斷, 不用特別判別Brand
+		
+		$bafang	= array_keys($dualBrandedShopIds);
+		$buygood= array_values($dualBrandedShopIds);
+		
+		return in_array($posId, $bafang) OR in_array($posId, $buygood);
+	}
+	
+	/* 取複合店
+	 * @params: array
+	 * @return: array
+	 */
+	public function getDualBrandedMappingId($posId)
+	{
+		#八方及御廚都判斷, 不用特別判別Brand
+		$bafangMapping = config('web.sales.shop.dualBrandedId');
+		$buygoodMapping = array_flip($bafangMapping);
+		
+		#基本上都是御廚posid要抓八方,所以先判別buygood
+		$mapId = data_get($buygoodMapping, $posId, 0);
+		
+		if (! empty($mapId))
+			return $mapId;
+		
+		return data_get($bafangMapping, $posId, 0);
+	}
 }

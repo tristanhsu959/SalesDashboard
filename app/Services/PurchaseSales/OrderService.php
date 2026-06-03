@@ -72,7 +72,7 @@ class OrderService
 			
 				#Statistics
 				$this->_outputReport($params);
-					
+				
 				#Create output to var statistics
 				$this->_generateStatistics($params);
 				
@@ -119,7 +119,7 @@ class OrderService
 		$this->_statistics['searchDate'] 	= $params->searchDate;
 		$this->_statistics['storeInfo'] 	= $params->storeInfo;
 		$this->_statistics['purchaseData']	= $params->purchaseData;
-		$this->_statistics['saleData']		= []; #$params->saleData;
+		$this->_statistics['saleData']		= $params->saleData;
 		
 		#無值不cache
 		if (! empty($params->purchaseData['data']) OR ! empty($params->saleData['data']))
@@ -139,14 +139,14 @@ class OrderService
 	{
 		try
 		{
-			#1.Get product id
+			#1.Get product id(必須先執行)
 			$this->_getStoreParams($params);
 			
 			#2.Get purchase order
 			$this->_getPurchaseOrderFromDB($params);
 			
 			#3.Get pos order
-			#$this->_getPosOrderFromDB($params);
+			$this->_getSaleOrderFromDB($params);
 		}
 		catch(Exception $e)
 		{
@@ -202,6 +202,7 @@ class OrderService
 			#已包含蘿蔔訂單(因為是單店,區域權限在list已過濾)
 			$orderData = $this->_repository->getPurchaseOrderByStore($brand, $stDate, $endDate, $storeId);
 			
+			#舊系統用storeKey = accno
 			$extraData = LegacyManager::getExtraDataByStore($brand, $stDate, $endDate, $storeKey);
 			
 			#整合追加資料
@@ -209,7 +210,7 @@ class OrderService
 			
 			#處理包裝轉換
 			$baseData = $baseData->map(function($item, $key){
-				$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+				$item['qty'] 	= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 				$item['amount'] = round($item['amount'], 2);
 				return $item;
 			})->toArray();
@@ -220,6 +221,51 @@ class OrderService
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取訂貨系統訂單資料失敗');
+		}
+	}
+	
+	/* Get order data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getSaleOrderFromDB($params)
+	{
+		/* [
+			"erpNo" => "PS05000016"
+			"productName" => "黃金泡菜"
+			"price" => "30"
+			"qty" => "1"
+			"discount" => ".0000"
+		]
+		*/
+		try
+		{
+			$brand 		= $params->brand;
+			$stDate		= (new Carbon($params->searchDate))->format('Y-m-d 00:00:00');
+			$endDate 	= (new Carbon($params->searchDate))->addDay()->format('Y-m-d H:i:s');
+			$posId		= $params->storeInfo['posId'];
+			
+			#因為是單店,區域權限在list已過濾
+			$orderData = $this->_repository->getPosOrderByPosId($brand, $stDate, $endDate, $posId);
+			
+			#格式化成baseData, 先正規化變數
+			$baseData = collect($orderData)->map(function($item, $key){
+				
+				$temp['erpNo']		= $item['erpNo'];
+				$temp['productName']= $item['productName'];
+				$temp['qty'] 		= intval($item['qty']); 
+				#只先處理單項的amount
+				$temp['amount'] 	= round(($item['qty'] * $item['price']) + $item['discount'], 2);
+				
+				return $temp;
+			})->toArray();
+			
+			$params->saleBaseData = $baseData;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取Pos系統訂單資料失敗');
 		}
 	}
 	
@@ -238,6 +284,9 @@ class OrderService
 		{
 			#1.訂貨統計
 			$this->_parsingByPurchase($params);
+			
+			#2.銷售統計
+			$this->_parsingBySale($params);
 			
 			return $params;
 		}
@@ -265,7 +314,7 @@ class OrderService
 		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) {
 			$temp['shortCode'] 	= $items->pluck('shortCode')->first();
 			$temp['productName']= $items->pluck('productName')->first();
-			$temp['qty'] 		= round($items->pluck('qty')->sum(), 2);
+			$temp['qty'] 		= intval($items->pluck('qty')->sum());
 			$temp['amount'] 	= round($items->pluck('amount')->sum(), 2);
 			$temp['memo'] 		= $items->pluck('memo')->first();
 			
@@ -274,12 +323,44 @@ class OrderService
 		
 		$total['shortCode'] 	= '';
 		$total['productName']	= '總計';
-		$total['qty'] 			= round($result->pluck('qty')->sum(), 2);
+		$total['qty'] 			= intval($result->pluck('qty')->sum());
 		$total['amount'] 		= round($result->pluck('amount')->sum(), 2);
 		$total['memo'] 			= '';
 		
-		$result = $result->push($total)->values()->all();
+		$result = $result->sortBy('shortCode')->push($total)->values()->all();
 		$params->set('purchaseData.data', $result);
+	}
+	
+	/* 依銷售
+	 * @params: array
+	 * @return: array
+	 */
+	private function _parsingBySale($params)
+	{
+		$orderData = $params->saleBaseData;
+		
+		if (empty($orderData))
+			return [];
+		
+		$params->set('saleData.header', ['產品料號', '產品名稱', '數量', '金額']);
+		
+		#這裏才處理分群不同,先針對erpNo group(之後若需要,要group by dashboard product)
+		$result = collect($orderData)->groupBy('erpNo')->map(function($items, $key){
+				$temp['erpNo']		= $items->pluck('erpNo')->first();
+				$temp['productName']= $items->pluck('productName')->first();
+				$temp['qty'] 		= intval($items->pluck('qty')->sum()); #qty直接加總
+				$temp['amount'] 	= round($items->pluck('amount')->sum(), 2);
+				
+				return $temp;
+			});
+		
+		$total['erpNo'] 		= '';
+		$total['productName']	= '總計';
+		$total['qty'] 			= intval($result->pluck('qty')->sum());
+		$total['amount'] 		= round($result->pluck('amount')->sum(), 2);
+		
+		$result = $result->sortBy('erpNo')->push($total)->values()->all();
+		$params->set('saleData.data', $result);
 	}
 	
 	/* Export data

@@ -74,7 +74,30 @@
 				</section>
 			</div>
 			
-			
+			<!-- 銷售資訊 -->
+			<div class="page padding active" id="tab-sale">
+				<section class="statistics-list sale" :class="statistics.brandCode">
+					<table class="stripes">
+						<thead>
+							<tr>
+								<template x-for="col in statistics.saleData.header" :key="col">
+									<th class="s2" x-text="col"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(data, idx) in statistics.saleData.data" :key="idx">
+							<tr>
+								<td x-text="data['erpNo']"></td>
+								<td x-text="data['productName']"></td>
+								<td x-text="data['qty']"></td>
+								<td x-text="data['amount']"></td>
+							</tr>
+							</template>
+						</tbody>
+					</table>
+				</section>
+			</div>
 		</div>
 		@endif
 	</section>
