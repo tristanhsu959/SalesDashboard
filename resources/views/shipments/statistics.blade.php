@@ -10,12 +10,10 @@
 
 @section('content')
 <!-- Search panel -->
-<form x-data='searchShipments(@json($viewModel->search), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+<dialog x-data="searchShipments(@js($viewModel->searchFormData()))" id="searchPanel" class="right">
+	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
-
-	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
-		
 		<div class="search-condition">
 			<div class="condition-group">
 				<div class="space"></div>
@@ -96,49 +94,56 @@
 				</nav>
 			</div>
 		</div>
-	</dialog>
-</form>
+	</form>	
+</dialog>
 <!-- Search panel end -->
 
-<header class="page-nav">
-	<nav>
-		<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
-			<i>search</i>
-			<span>查詢</span>
-		</button>
-		
-		@if ($viewModel->hasExportData())
-		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle extend red" type="button">
-			<i>download_2</i>
-			<span>下載</span>
-		</a>
-		
-			@if ($viewModel->search['type'] == 'store')
-			<nav class="no-space filter">
-				<div class="field label border prefix field-filter-dark small">
-					<i>filter_alt</i>
-					<input type="text" x-model="$store.shipmentStore.filter">
-					<label>篩選</label>
-				</div>
-				<button class="right-round" @click="$store.shipmentStore.filter = ''"><i>backspace</i></button>
-			</nav>
-			@endif
-		@endif
-		
-	</nav>
-</header>
+<div x-data="{response:@js($viewModel->statisticsInfo())}" class="content-wrapper">
+	<header class="page-nav">
+		<nav>
+			<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
+				<i>search</i>
+				<span>查詢</span>
+			</button>
+			
+			<template x-if="response.exportAction != ''">
+				<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
+					<i>download_2</i>
+					<span>下載</span>
+				</a>
+			
+				<nav x-show="response.hasFilter" class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.shipmentStore.filter">
+						<label>篩選</label>
+					</div>
+					<button class="right-round" @click="$store.shipmentStore.filter = ''"><i>backspace</i></button>
+				</nav>
+			</template>
+		</nav>
+	</header>
 	
-@if($viewModel->status() === TRUE)	
-	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
+	<template x-if="response.status && !response.hasData">
+		<!-- Loading -->
+		<section class="container">
+			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
+			<pre x-show="response.brandCode == 'bafang'" class="red-border">菜肉餡：Qty X 2.5<br/>新蔬食餡：Qty X 1.8</pre>
+		</section>
+	</template>
+	
+	<template x-if="!response.status">
+		<section class="container">
+			<article class="error-container border">
+				<div class="row">
+					<i>error</i><div class="max">查詢時發生錯誤，請重新查詢</div>
+				</div>
+			</article>
+		</section>
+	</template>
+	
+	<template x-if="response.status && response.hasData">
 		@include($viewModel->getPartialView())
-	@else
-	<section class="container">
-		<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-		@if($viewModel->isBafang())
-		<pre class="red-border">菜肉餡：Qty X 2.5<br/>新蔬食餡：Qty X 1.8</pre>
-		@endif
-	</section>
-	@endif
-@endif
-
+	</template>
+</div>
 @endsection

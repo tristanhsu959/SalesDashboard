@@ -1,13 +1,12 @@
  
-	<section x-data='statisticsFactory(@json($viewModel->statistics))' class="factory-list container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
+	<section x-data='statisticsFactory(@json($viewModel->statisticsData()))' class="factory-list container">
+		<article x-show="!statistics.exportToken" class="error-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		@else
-		<div class="factory-content">
+		
+		<div x-show="statistics.exportToken" class="factory-content">
 			<div class="tabs cyan-text">
 				<template x-for="(item, erpNo) in statistics.productList" :key="erpNo">
 					<a @click="activeProduct = erpNo" :class="{ 'active': activeProduct === erpNo }">
@@ -46,5 +45,4 @@
 			</div>
 			</template>
 		</div>
-		@endif
 	</section>

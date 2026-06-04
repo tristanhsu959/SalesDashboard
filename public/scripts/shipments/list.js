@@ -1,9 +1,9 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('searchShipments', (searchData, options) => ({
-		searchData: {...searchData},
-		options: {...options},
+	Alpine.data('searchShipments', (searchData) => ({
+		searchData: {...searchData.search},
+		options: {...searchData.options},
 		errors: new Set(),
 		
 		init() {
@@ -89,6 +89,7 @@ document.addEventListener('alpine:init', () => {
 		filter: '',
 	});
 	
+	/*呼叫function要多處理變數*/
 	Alpine.data('statisticsStore', (data) => ({
 		statistics: {...data},
 		activeProduct: '',

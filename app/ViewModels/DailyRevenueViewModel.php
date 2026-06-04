@@ -25,6 +25,7 @@ class DailyRevenueViewModel extends Fluent
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -56,13 +57,11 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.daily_revenue.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.daily_revenue.export'), ['token' => $this->statistics['exportToken']]),
@@ -75,28 +74,42 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($stDate = '', $endDate = '', $shopType = [], $shopName = '')
+	public function keepSearchData($stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
     {
 		#Init default type
+		$today = Carbon::now()->format('Y-m-d');
+		
 		if (empty($stDate) && empty($endDate) && empty($shopType))
 		{
 			$shopType = ($this->brand == Brand::BAFANG) ? [1] : [1, 2]; #Default直營
 		}
 		
-		$this->set('search.stDate', $stDate);
-		$this->set('search.endDate', $endDate);
+		$this->set('search.stDate', $stDate ?? $today);
+		$this->set('search.endDate', $endDate ?? $today);
 		$this->set('search.shopType', $shopType);
 		$this->set('search.shopName', $shopName);
-		$this->set('search.today', Carbon::now()->format('Y-m-d'));
+		$this->set('search.today', $today);
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		return empty($this->statistics['exportToken']);
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
 	}
 	
-	public function getBrandCode()
+	public function statisticsData()
 	{
-		return $this->brand->code();
+		$token = data_get($this->statistics, 'exportToken', NULL);
+		
+		if (empty($token))
+			$this->exportAction = '';
+		else
+			$this->exportAction = $this->getFormAction(FormAction::EXPORT);
+		
+		$this->status = $this->status();
+		
+		return $this->only('statistics', 'exportAction', 'status');
 	}
 }

@@ -44,7 +44,7 @@ form {
 					z-index: 6;
 				}
 			}
-			
+			/*無總計*/
 			tbody tr td {
 				&:nth-of-type(1) {
 					background-color: var(--table-fixed-bg);

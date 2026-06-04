@@ -26,6 +26,7 @@ class ShipmentsViewModel extends Fluent
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -85,13 +86,11 @@ class ShipmentsViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.shipments.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.shipments.export'), ['token' => $this->statistics['exportToken']]),
@@ -138,29 +137,33 @@ class ShipmentsViewModel extends Fluent
 		};
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		if (empty($this->statistics['exportToken']))
-			return TRUE;
-		else
-			return FALSE;
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
 	}
 	
-	public function hasExportData()
+	/*共用view所需的data*/
+	public function statisticsInfo()
 	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
-		else
-			return TRUE;
+		$token 		= data_get($this->statistics, 'exportToken', NULL);
+		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #有執行查詢才會有brandId
+		$modeType	= data_get($this->statistics, 'modeType', NULL); #有執行查詢才會有brandId
+		
+		$info['status'] 		= $this->status();
+		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
+		$info['hasData'] 		= ! empty($brandCode);
+		$info['hasFilter']		= ($modeType == 'store');
+		$info['brandCode']		= $brandCode;
+			
+		return $info;
 	}
 	
-	public function getBrandCode()
+	/*功能view所需的data*/
+	public function statisticsData()
 	{
-		return $this->brand->code();
-	}
-	
-	public function isBafang()
-	{
-		return $this->brand == Brand::BAFANG;
+		return $this->statistics;
 	}
 }

@@ -1,13 +1,12 @@
  
-	<section x-data='statisticsStore(@json($viewModel->statistics))' class="store-list container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
+	<section x-data='statisticsStore(@json($viewModel->statisticsData()))' class="store-list container">
+		<article x-show="!statistics.exportToken" class="error-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		@else
-		<div class="store-content">
+		
+		<div x-show="statistics.exportToken" class="store-content">
 			<div class="tabs cyan-text">
 				<template x-for="(item, shortCode) in statistics.productList" :key="shortCode">
 					<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
@@ -20,7 +19,7 @@
 			<!-- 門店 -->
 			<template x-for="(name, shortCode) in statistics.productList" :key="shortCode">
 			<div class="page paddin" :class="{ 'active': activeProduct === shortCode }">
-				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
+				<section class="statistics-store scrollbar" :class="statistics.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
@@ -53,5 +52,4 @@
 			</div>
 			</template>
 		</div>
-		@endif
 	</section>

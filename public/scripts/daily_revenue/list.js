@@ -1,16 +1,16 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('search', (searchData, options) => ({
-		searchData: {...searchData},
-		options: {...options},
+	Alpine.data('search', (searchData) => ({
+		searchData: {...searchData.search},
+		options: {...searchData.options},
 		errors: new Set(),
 		
 		init() {
 			if (searchData.stDate == '')
-				this.searchData.stDate = searchData.today;
+				this.searchData.stDate = this.searchData.today;
 			if (searchData.endDate == '')
-				this.searchData.endDate = searchData.today;
+				this.searchData.endDate = this.searchData.today;
 		},
 		
 		search() {
@@ -39,8 +39,8 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.stDate = searchData.today;
-			this.searchData.endDate = searchData.today;
+			this.searchData.stDate = this.searchData.today;
+			this.searchData.endDate = this.searchData.today;
 			this.searchData.shopName = '';
 			this.errors.clear();
 		},

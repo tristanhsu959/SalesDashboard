@@ -12,48 +12,68 @@ form {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
-		table {
-			tbody {
-				tr {
-					&:last-child th, &:last-child td {
-						color: red;
-						border-block-start: .0625rem solid var(--outline);
-					}
-				}
+		table tbody tr {
+			&:last-child th, &:last-child td {
+				color: red;
+				border-block-start: .0625rem solid var(--outline);
 			}
 		}
 	}
 	
 	/* 門市 */
-	.statistics-shop {
+	.statistics-store {
 		table {
-			thead tr th {
-				&:nth-of-type(4) {
-					width: 150px;
-					min-width: 150px;
-					max-width: 150px;
-					position: sticky;
-					left: 500px;
-					z-index: 6;
+			thead tr {
+				th {
+					&:nth-of-type(3) {
+						width: 150px;
+						min-width: 150px;
+						max-width: 150px;
+						position: sticky;
+						left: 0;
+						z-index: 6;
+					}
+					&:nth-of-type(4) {
+						width: 120px;
+						min-width: 120px;
+						max-width: 120px;
+						position: sticky;
+						left: 150px;
+						z-index: 6;
+					}
 				}
 			}
 			
 			tbody tr {
 				td {
+					&:nth-of-type(1) {
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
+					}
+					&:nth-of-type(2) {
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
+					}
+					&:nth-of-type(3) {
+						position: sticky;
+						z-index: 5;
+						left: 0;
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
+					}
 					&:nth-of-type(4) {
 						position: sticky;
 						z-index: 5;
-						left: 500px;
+						left: 150px;
 						background-color: var(--table-fixed-bg);
 						color: var(--table-fixed-color);
 					}
 				}
-				
+				/*須放在最後,以免被nth-of-type覆蓋*/
 				&:last-child td {
 					color: red;
 				}
 			}
-			
 		}
 	}
 }
