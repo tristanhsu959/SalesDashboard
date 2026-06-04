@@ -1,5 +1,5 @@
  
-	<section x-data='statisticsFactory(@json($viewModel->statisticsData()))' class="factory-list container">
+	<section x-data="statisticsFactory(@js($viewModel->statisticsData()))" class="factory-list container">
 		<article x-show="!statistics.exportToken" class="error-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>

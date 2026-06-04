@@ -99,17 +99,23 @@ class DailyRevenueViewModel extends Fluent
 		return $this->only('search', 'options');
 	}
 	
+	/*共用view所需的data*/
+	public function responseData()
+	{
+		$token 		= data_get($this->statistics, 'exportToken', NULL);
+		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #有執行查詢才會有brandId
+		
+		$info['status'] 		= $this->status();
+		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
+		$info['hasData'] 		= ! empty($brandCode);
+		$info['brandCode']		= $brandCode;
+			
+		return $info;
+	}
+	
+	/*功能view所需的data*/
 	public function statisticsData()
 	{
-		$token = data_get($this->statistics, 'exportToken', NULL);
-		
-		if (empty($token))
-			$this->exportAction = '';
-		else
-			$this->exportAction = $this->getFormAction(FormAction::EXPORT);
-		
-		$this->status = $this->status();
-		
-		return $this->only('statistics', 'exportAction', 'status');
+		return $this->statistics;
 	}
 }

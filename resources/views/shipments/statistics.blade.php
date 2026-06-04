@@ -98,7 +98,7 @@
 </dialog>
 <!-- Search panel end -->
 
-<div x-data="{response:@js($viewModel->statisticsInfo())}" class="content-wrapper">
+<div x-data="{response:@js($viewModel->responseData())}" class="content-wrapper">
 	<header class="page-nav">
 		<nav>
 			<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
@@ -106,13 +106,14 @@
 				<span>查詢</span>
 			</button>
 			
-			<template x-if="response.exportAction != ''">
+			<template x-if="response.exportAction">
 				<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
 					<i>download_2</i>
 					<span>下載</span>
 				</a>
-			
-				<nav x-show="response.hasFilter" class="no-space filter">
+			</template>
+			<template x-if="response.hasData && response.hasFilter">
+				<nav class="no-space filter">
 					<div class="field label border prefix field-filter-dark small">
 						<i>filter_alt</i>
 						<input type="text" x-model="$store.shipmentStore.filter">

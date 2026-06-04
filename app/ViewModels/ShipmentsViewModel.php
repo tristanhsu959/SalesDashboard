@@ -146,17 +146,16 @@ class ShipmentsViewModel extends Fluent
 	}
 	
 	/*共用view所需的data*/
-	public function statisticsInfo()
+	public function responseData()
 	{
 		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #有執行查詢才會有brandId
-		$modeType	= data_get($this->statistics, 'modeType', NULL); #有執行查詢才會有brandId
+		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #指有執行查詢才有存的brand
 		
 		$info['status'] 		= $this->status();
 		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
-		$info['hasData'] 		= ! empty($brandCode);
-		$info['hasFilter']		= ($modeType == 'store');
+		$info['hasData'] 		= ! empty($brandCode); #因可能有些功能沒下載,故不使用token判別
 		$info['brandCode']		= $brandCode;
+		$info['hasFilter']		= ($this->search['type'] == 'store');
 			
 		return $info;
 	}
