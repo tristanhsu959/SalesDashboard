@@ -81,50 +81,6 @@ class NewReleaseViewModel extends Fluent
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));
 	}
 	
-	public function isDataEmpty()
-	{
-		if (empty(Arr::collapse($this->statistics)))
-			return TRUE;
-		else
-			return FALSE;
-	}
-	
-	/* public function getAreaName($id)
-	{
-		return Area::tryFrom($id)->label();
-	} */
-	
-	/* 時間Header, 顯示方式不同
-	 * @params: boolean #default desc
-	 * @return: array
-	 */
-	public function showHeaderYear($year)
-	{
-		$lastYear = $this->get('lastYear', NULL);
-		
-		if ($lastYear == $year)
-			return '';
-		else
-		{
-			$this->set('lastYear', $year);
-			return $year;
-		}
-		
-	}
-	
-	public function hasExportData()
-	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
-		else
-			return TRUE;
-	}
-	
-	public function getBrandCode()
-	{
-		return $this->brand->code();
-	}
-	
 	/* Output js */
 	public function searchFormData()
 	{
