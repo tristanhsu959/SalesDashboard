@@ -35,11 +35,11 @@ class NewReleaseService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'shop' 			=> [],
 			'area' 			=> [],
+			'shop' 			=> [],
 			'top' 			=> [],
 			'last' 			=> [],
-			'productName'	=> '', #export
+			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
 	}

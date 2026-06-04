@@ -23,9 +23,10 @@ class NewReleaseViewModel extends Fluent
 	public function __construct(protected NewReleaseService $_service)
 	{
 		$this->function		= NULL;
-		$this->action 		= FormAction::LIST; 
+		$this->action 		= FormAction::LIST; #與breadcrumb有關
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -38,7 +39,6 @@ class NewReleaseViewModel extends Fluent
 	{
 		$this->brand	= $brand;
 		$this->function = $function;
-		$this->statistics = [];
 		
 		$this->_setOptions();
 	}
@@ -56,13 +56,11 @@ class NewReleaseViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.new_releases.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.new_releases.export'), ['token' => $this->statistics['exportToken']]),
@@ -125,5 +123,27 @@ class NewReleaseViewModel extends Fluent
 	public function getBrandCode()
 	{
 		return $this->brand->code();
+	}
+	
+	/* Output js */
+	public function searchFormData()
+	{
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
+	}
+	
+	public function statisticsData()
+	{
+		$token = data_get($this->statistics, 'exportToken', NULL);
+		
+		if (empty($token))
+			$this->exportAction = '';
+		else
+			$this->exportAction = $this->getFormAction(FormAction::EXPORT);
+		
+		$this->status = $this->status();
+		
+		return $this->only('statistics', 'exportAction', 'status');
 	}
 }

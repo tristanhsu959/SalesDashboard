@@ -31,26 +31,37 @@ form {
 	} */
 	
 	/* 門市 */
-	.statistics-shop {
+	.statistics-store {
 		table {
 			thead tr th {
-				&.col-date span {
-					display: inline-flex;
-					flex-direction: column;
-					justify-content: center;
-					
-					&:first-child {
-						/* font-size: .9rem; */
-						background-color: #e91e63;
-						border-radius: 4px;
-						color: rgba(255, 255, 255, .87);
-						font-weight: 400;
-						padding: 0 .25rem;
-					}
+				/*fixed col*/
+				&:nth-of-type(3) {
+					width: 200px;
+					min-width: 200px;
+					max-width: 200px;
+					position: sticky;
+					left: 0;
+					z-index: 6;
 				}
 			}
 			
 			tbody tr td {
+				&:nth-of-type(1) {
+					background-color: var(--table-fixed-bg);
+					color: var(--table-fixed-color);
+				}
+				&:nth-of-type(2) {
+					background-color: var(--table-fixed-bg);
+					color: var(--table-fixed-color);
+				}
+				&:nth-of-type(3) {
+					position: sticky;
+					z-index: 5;
+					left: 0;
+					background-color: var(--table-fixed-bg);
+					color: var(--table-fixed-color);
+				}
+						
 				&:nth-last-of-type(-n + 2) {
 					color: #f44336;
 				}

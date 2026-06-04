@@ -142,7 +142,7 @@ table {
 	}
 	
 	/* 門市 */
-	.statistics-shop {
+	.statistics-store {
 		&.bafang {
 			--table-bg: #4fc3f7; 			/* light-2 */
 			--table-bg-dark: #0288d1; 		/* dark-2 */
@@ -195,35 +195,9 @@ table {
 						z-index: 5;
 						word-break: keep-all;
 						background-color: var(--table-bg);
-						min-width: 150px;
+						min-width: 120px;
 						color: rgba(0, 0, 0, .87);
 						padding-top: 1rem;
-						
-						/*較固定的三個col*/
-						&:nth-of-type(1) {
-							width: 150px;
-							min-width: 150px;
-							max-width: 150px;
-							position: sticky;
-							left: 0;
-							z-index: 6;
-						}
-						&:nth-of-type(2) {
-							width: 150px;
-							min-width: 150px;
-							max-width: 150px;
-							position: sticky;
-							left: 150px;
-							z-index: 6;
-						}
-						&:nth-of-type(3) {
-							width: 200px;
-							min-width: 200px;
-							max-width: 200px;
-							position: sticky;
-							left: 300px;
-							z-index: 6;
-						}
 					}
 				}
 			}
@@ -233,29 +207,6 @@ table {
 					td {
 						font-weight: normal;
 						color: #424242;
-						
-						&:nth-of-type(1) {
-							position: sticky;
-							z-index: 5;
-							left: 0;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-						}
-						&:nth-of-type(2) {
-							position: sticky;
-							z-index: 5;
-							left: 150px;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-						}
-						&:nth-of-type(3) {
-							position: sticky;
-							z-index: 5;
-							left: 300px;
-							background-color: var(--table-fixed-bg);
-							color: var(--table-fixed-color);
-						}
-				
 					}
 				}
 			}

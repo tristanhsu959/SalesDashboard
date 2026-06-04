@@ -30,7 +30,7 @@ trait attrStatus
 	 * @return: void
 	 */
 	public function status()
-	{
+	{ 
 		return $this->_status;
 	}
 	
