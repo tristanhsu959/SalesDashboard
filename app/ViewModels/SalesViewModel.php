@@ -26,6 +26,7 @@ class SalesViewModel extends Fluent
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -36,9 +37,9 @@ class SalesViewModel extends Fluent
 	 */
 	public function initialize($brand , $function)
 	{
-		$this->brand	= $brand;
-		$this->function = $function;
-		$this->statistics = [];
+		$this->brand		= $brand;
+		$this->function 	= $function;
+		$this->statistics 	= [];
 		
 		$this->_setOptions();
 	}
@@ -59,13 +60,11 @@ class SalesViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.sales.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.sales.export'), ['token' => $this->statistics['exportToken']]),
@@ -89,24 +88,25 @@ class SalesViewModel extends Fluent
 		$this->set('search.today', $today);
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		if (empty(Arr::collapse($this->statistics)))
-			return TRUE;
-		else
-			return FALSE;
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
 	}
 	
-	public function hasExportData()
+	public function statisticsData()
 	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
+		$token = data_get($this->statistics, 'exportToken', NULL);
+		
+		if (empty($token))
+			$this->exportAction = '';
 		else
-			return TRUE;
-	}
-	
-	public function getBrandCode()
-	{
-		return $this->brand->code();
+			$this->exportAction = $this->getFormAction(FormAction::EXPORT);
+		
+		$this->status = $this->status();
+		
+		return $this->only('statistics', 'exportAction', 'status');
 	}
 }

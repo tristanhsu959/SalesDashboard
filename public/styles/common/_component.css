@@ -196,6 +196,7 @@ table {
 						word-break: keep-all;
 						background-color: var(--table-bg);
 						min-width: 120px;
+						width: 120px;
 						color: rgba(0, 0, 0, .87);
 						padding-top: 1rem;
 					}

@@ -33,7 +33,7 @@ class SalesRepository extends Repository
 		return $result;
 	}
 	
-	/* 取查詢產品對應的erp no
+	/* 取查詢Dashboard產品對應的erp no
 	 * @params: int
 	 * @return: array
 	 */

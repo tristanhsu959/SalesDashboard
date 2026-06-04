@@ -12,23 +12,13 @@ form {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
-		table {
-			tbody {
-				tr {
-					&:last-child th, &:last-child td {
-						color: red;
-						border-block-start: .0625rem solid var(--outline);
-					}
-				}
+		table tbody tr {
+			&:last-child th, &:last-child td {
+				color: red;
+				border-block-start: .0625rem solid var(--outline);
 			}
 		}
 	}
-	
-	/* .statistics-area.grid-table {
-		.grid.data:last-child {
-			color: red;
-		}
-	} */
 	
 	/* 門市 */
 	.statistics-store {

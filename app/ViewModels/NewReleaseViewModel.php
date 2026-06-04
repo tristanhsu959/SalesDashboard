@@ -37,8 +37,9 @@ class NewReleaseViewModel extends Fluent
 	 */
 	public function initialize($brand , $function)
 	{
-		$this->brand	= $brand;
-		$this->function = $function;
+		$this->brand		= $brand;
+		$this->function 	= $function;
+		$this->statistics 	= [];
 		
 		$this->_setOptions();
 	}

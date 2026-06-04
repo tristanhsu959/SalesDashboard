@@ -10,7 +10,6 @@ use App\Services\NewRelease\AreaService;
 use App\Services\NewRelease\RankingService;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
-use App\Libraries\Sales\AreaLib;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;

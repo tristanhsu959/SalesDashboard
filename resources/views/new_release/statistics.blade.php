@@ -124,7 +124,7 @@
 					</section>
 				</div>
 		
-				<!-- 門店 -->
+				<!-- 店別明細 -->
 				<div class="page padding" id="tab-shop">
 					<section class="statistics-store scrollbar" :class="statistics.brandCode">
 						<table class="stripes">
