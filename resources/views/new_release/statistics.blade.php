@@ -50,7 +50,7 @@
 </dialog>
 
 <!-- Search panel end -->
-<div x-data="@js($viewModel->statisticsData())" class="content-wrapper">
+<div x-data="{response:@js($viewModel->responseData())}" class="content-wrapper">
 	<header class="page-nav">
 		<nav>
 			<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
@@ -58,8 +58,8 @@
 				<span>查詢</span>
 			</button>
 			
-			<template x-if="exportAction != ''">
-				<a :href="`javascript:window.location.href='${exportAction}'`" class="button circle extend red" type="button">
+			<template x-if="response.exportAction">
+				<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
 					<i>download_2</i>
 					<span>下載</span>
 				</a>
@@ -67,14 +67,14 @@
 		</nav>
 	</header>
 	
-	<template x-if="status && !statistics.brandId">
+	<template x-if="response.status && !response.brandCode">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
 		</section>
 	</template>
 	
-	<template x-if="!status">
+	<template x-if="!response.status">
 		<section class="container">
 			<article class="error-container border">
 				<div class="row">
@@ -84,8 +84,8 @@
 		</section>
 	</template>
 	
-	<template x-if="status && statistics.brandId">
-		<section class="new-release-list container">
+	<template x-if="response.status && response.brandCode">
+		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="new-release-list container">
 			<article x-show="!statistics.exportToken" class="secondary-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
