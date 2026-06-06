@@ -25,7 +25,7 @@
 		<div class="field label border" :class="Helper.hasError(errors, 'account')">
 			<input x-model="formData.account" type="text" name="account" maxlength="20" @input="errors.delete('account')">
 			<label>Account</label>
-			<span class="domain">@8way.com.tw</span>
+			<!--span class="domain">@8way.com.tw</span-->
 		</div>
 		<div class="field label border" :class="Helper.hasError(errors, 'password')">
 			<input x-model="formData.password" type="password" name="password" maxlength="20" @input="errors.delete('password')">

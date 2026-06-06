@@ -112,7 +112,7 @@
 					<span>下載</span>
 				</a>
 			</template>
-			<template x-if="response.hasData && response.hasFilter">
+			<template x-if="response.hasResult && response.hasFilter">
 				<nav class="no-space filter">
 					<div class="field label border prefix field-filter-dark small">
 						<i>filter_alt</i>
@@ -125,7 +125,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasData">
+	<template x-if="response.status && !response.hasResult">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -143,7 +143,7 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasData">
+	<template x-if="response.status && response.hasResult">
 		@include($viewModel->getPartialView())
 	</template>
 </div>

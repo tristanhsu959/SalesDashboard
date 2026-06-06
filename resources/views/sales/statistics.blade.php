@@ -77,7 +77,7 @@
 					<span>下載</span>
 				</a>
 			</template>
-			<template x-if="response.hasData">
+			<template x-if="response.hasResult">
 				<label class="switch icon">
 					<input type="checkbox" x-model="$store.sales.showAmount">
 					<span>
@@ -88,7 +88,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasData">
+	<template x-if="response.status && !response.hasResult">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -105,7 +105,7 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasData">
+	<template x-if="response.status && response.hasResult">
 		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="sales-list container">
 			<article x-show="!statistics.exportToken" class="secondary-container border">
 				<div class="row">

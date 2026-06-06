@@ -26,6 +26,7 @@ class MerchantViewModel extends Fluent
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -70,13 +71,12 @@ class MerchantViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
 		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.merchant.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.merchant.export'), ['token' => $this->statistics['exportToken']]),
@@ -115,25 +115,32 @@ class MerchantViewModel extends Fluent
 		};
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		#改判別token即可
-		if (empty($this->statistics['exportToken']))
-			return TRUE;
-		else
-			return FALSE;
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
 	}
 	
-	public function hasExportData()
+	/*共用view所需的data*/
+	public function responseData()
 	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
-		else
-			return TRUE;
+		$token 		= data_get($this->statistics, 'exportToken', NULL);
+		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #指有執行查詢才有存的brand
+		
+		$info['status'] 		= $this->status();
+		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
+		$info['hasData'] 		= ! empty($brandCode); #因可能有些功能沒下載,故不使用token判別
+		$info['brandCode']		= $brandCode;
+		$info['hasFilter']		= ($this->search['type'] == 'store');
+			
+		return $info;
 	}
 	
-	public function getBrandCode()
+	/*功能view所需的data*/
+	public function statisticsData()
 	{
-		return $this->brand->code();
+		return $this->statistics;
 	}
 }

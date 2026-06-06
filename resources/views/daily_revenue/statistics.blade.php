@@ -72,7 +72,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasData">
+	<template x-if="response.status && !response.hasResult">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -89,7 +89,7 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasData">
+	<template x-if="response.status && response.hasResult">
 		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="new-release-list container">
 			<article x-show="!statistics.exportToken" class="secondary-container border">
 				<div class="row">
