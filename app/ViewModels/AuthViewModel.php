@@ -15,7 +15,7 @@ class AuthViewModel extends Fluent
 		#Default data
 		$this->action = FormAction::SIGNIN;
 		$this->keepFormData();
-		$this->success();	
+		$this->success();
 	}
 	
 	/* Keep signin form data : account only, 以防會使用到
@@ -26,5 +26,15 @@ class AuthViewModel extends Fluent
     {
 		$this->set('formData.account', $account);
 		$this->set('formData.password', $password);
+	}
+	
+	/* Output json
+	 * @params: string
+	 * @return: void
+	 */
+	public function responseData()
+    {
+		$this->set('formData.formAction', route('signin.post'));
+		return $this->only('formData');
 	}
 }

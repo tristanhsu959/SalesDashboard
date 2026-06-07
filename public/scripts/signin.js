@@ -1,8 +1,8 @@
 /* Login JS */
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('login', (formData) => ({
-		formData: {...formData},
+    Alpine.data('login', (response) => ({
+		formData: {...response.formData},
 		errors: new Set(),
 		isLoading: false,
 		

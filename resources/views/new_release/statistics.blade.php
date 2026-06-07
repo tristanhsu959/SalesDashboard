@@ -9,9 +9,8 @@
 @endpush
 
 @section('content')
+
 <!-- Search panel -->
-
-
 <dialog x-data="searchProduct(@js($viewModel->searchFormData()))" id="searchPanel" class="right">
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 		@csrf
@@ -48,8 +47,8 @@
 		</nav>
 	</form>
 </dialog>
-
 <!-- Search panel end -->
+
 <div x-data="{response:@js($viewModel->responseData())}" class="content-wrapper">
 	<header class="page-nav">
 		<nav>
@@ -67,7 +66,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasResult">
+	<template x-if="response.status && response.isInit">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -84,15 +83,15 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasResult">
-		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="new-release-list container">
-			<article x-show="!statistics.exportToken" class="secondary-container border">
+	<template x-if="response.status && !response.isInit">
+		<section class="new-release-list container">
+			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
 		
-			<div x-show="statistics.exportToken" class="statistics">
+			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
 					<a class="active" data-ui="#tab-area">區域彙總</a>
 					<a data-ui="#tab-shop">店別明細</a>
@@ -101,20 +100,20 @@
 				</div>
 		
 				<!-- 區域彙總 -->
-				<div class="page padding active" id="tab-area">
+				<div x-data="{area:@js($viewModel->statisticsData('area'))}" class="page padding active" id="tab-area">
 					<section class="statistics-area">
 						<table>
 							<thead>
 								<tr>
-									<template x-for="col in statistics.area.header" :key="col">
+									<template x-for="col in area.header" :key="col">
 										<th class="s2" x-text="col"></th>
 									</template>
 								</tr>
 							</thead>
 							<tbody>
-								<template x-for="(areaData, idx) in statistics.area.data" :key="idx">
+								<template x-for="(areaData, idx) in area.data" :key="idx">
 								<tr>
-									<template x-for="(col, colKey) in statistics.area.header" :key="colKey">
+									<template x-for="(col, colKey) in area.header" :key="colKey">
 										<td x-text="areaData[colKey]"></td>
 									</template>
 								</tr>
@@ -125,28 +124,28 @@
 				</div>
 		
 				<!-- 店別明細 -->
-				<div class="page padding" id="tab-shop">
-					<section class="statistics-store scrollbar" :class="statistics.brandCode">
+				<div x-data="{shop:@js($viewModel->statisticsData('shop'))}" class="page padding" id="tab-shop">
+					<section class="statistics-store scrollbar" :class="response.brandCode">
 						<table class="stripes">
 							<thead>
 								<tr>
-									<th x-text="statistics.shop.header.areaName"></th>
-									<th x-text="statistics.shop.header.shopId"></th>
-									<th x-text="statistics.shop.header.shopName"></th>
-									<template x-for="date in statistics.shop.header.dayQty" :key="date">
+									<th x-text="shop.header.areaName"></th>
+									<th x-text="shop.header.shopId"></th>
+									<th x-text="shop.header.shopName"></th>
+									<template x-for="date in shop.header.dayQty" :key="date">
 										<th x-text="date"></th>
 									</template>
-									<th x-text="statistics.shop.header.totalQty"></th>
-									<th x-text="statistics.shop.header.totalAvg"></th>
+									<th x-text="shop.header.totalQty"></th>
+									<th x-text="shop.header.totalAvg"></th>
 								</tr>
 							</thead>
 							<tbody>
-								<template x-for="(shopData, idx) in statistics.shop.data" :key="idx">
+								<template x-for="(shopData, idx) in shop.data" :key="idx">
 								<tr>
 									<td x-text="shopData.areaName"></td>
 									<td x-text="shopData.shopId"></td>
 									<td x-text="shopData.shopName"></td>
-									<template x-for="date in statistics.shop.header.dayQty" :key="date">
+									<template x-for="date in shop.header.dayQty" :key="date">
 										<td x-text="shopData.dayQty[date] || 0"></td>
 									</template>
 									<td x-text="shopData.totalQty"></td>
@@ -159,12 +158,12 @@
 				</div>
 		
 				<!-- 排名 -->
-				<div class="page padding" id="tab-ranking-asc">
+				<div x-data="{top:@js($viewModel->statisticsData('top'))}" class="page padding" id="tab-ranking-asc">
 					<section class="statistics-ranking">
 						<article class="border ranking-top">
 							<ul class="list border">
 								<!--只顯示第一家,因數量太多-->
-								<template x-for="(items, topRanking) in statistics.top" :key="topRanking">
+								<template x-for="(items, topRanking) in top" :key="topRanking">
 								<li>
 									<div class="ranking" x-text="topRanking + 1"></div>
 									<div class="info">
@@ -181,12 +180,12 @@
 						</article>
 					</section>
 				</div>
-				<div class="page padding" id="tab-ranking-desc">
+				<div x-data="{last:@js($viewModel->statisticsData('last'))}" class="page padding" id="tab-ranking-desc">
 					<section class="statistics-ranking">
 						<article class="border ranking-last">
 							<ul class="list border">
 								<!--只顯示第一家,因數量太多-->
-								<template x-for="(items, lastRanking) in statistics.last" :key="lastRanking">
+								<template x-for="(items, lastRanking) in last" :key="lastRanking">
 								<li>
 									<div class="ranking" x-text="lastRanking + 1"></div>
 									<div class="info">
