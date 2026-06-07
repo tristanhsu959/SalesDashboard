@@ -72,7 +72,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasResult">
+	<template x-if="response.status && response.isInit">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -89,79 +89,22 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasResult">
-		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="new-release-list container">
-			<article x-show="!statistics.exportToken" class="secondary-container border">
+	<template x-if="response.status && !response.isInit">
+		<section class="new-release-list container">
+			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
 			
-			<div x-show="statistics.exportToken" class="statistics">
+			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
 					<a class="active" data-ui="#tab-area">區域彙總</a>
 					<a data-ui="#tab-shop">店別明細</a>
 				</div>
-			
-				<!-- 區域彙總 -->
-				<div class="page padding active" id="tab-area">
-					<section class="statistics-area">
-						<table>
-							<thead>
-								<tr>
-									<th x-text="statistics.area.header.areaName"></th>
-									<th x-text="statistics.area.header.shopCount"></th>
-									<template x-for="(date, dateKey) in statistics.area.header.dayAmount" :key="dateKey">
-										<th x-text="date"></th>
-									</template>
-								</tr>
-							</thead>
-							<tbody>
-								<template x-for="(areaData, areaId) in statistics.area.data" :key="areaId">
-								<tr>
-									<td x-text="areaData.areaName"></td>
-									<td x-text="areaData.shopCount"></td>
-									<template x-for="(date, dateKey) in statistics.area.header.dayAmount" :key="dateKey">
-										<td x-text="'$'+ (areaData.dayAmount[date] || 0)"></td>
-									</template>
-								</tr>
-								</template>
-							</tbody>
-						</table>
-					</section>
-				</div>
-			
-				<!-- 門店 -->
-				<div class="page padding" id="tab-shop">
-					<section class="statistics-store scrollbar" :class="statistics.brandCode">
-						<table class="stripes">
-							<thead>
-								<tr>
-									<th x-text="statistics.shop.header.areaName"></th>
-									<th x-text="statistics.shop.header.shopId"></th>
-									<th x-text="statistics.shop.header.shopName"></th>
-									<th x-text="statistics.shop.header.shopTypeName"></th>
-									<template x-for="(date, dateKey) in statistics.shop.header.dayAmount" :key="dateKey">
-										<th x-text="date"></th>
-									</template>
-								</tr>
-							</thead>
-							<tbody>
-								<template x-for="(shopData, shopId) in statistics.shop.data" :key="shopId">
-								<tr>
-									<td x-text="shopData.areaName"></td>
-									<td x-text="shopData.shopId"></td>
-									<td x-text="shopData.shopName"></td>
-									<td x-text="shopData.shopTypeName"></td>
-									<template x-for="(date, dateKey) in statistics.shop.header.dayAmount" :key="dateKey">
-										<td x-text="'$'+ (shopData.dayAmount[date] || 0)"></td>
-									</template>
-								</tr>
-								</template>
-							</tbody>
-						</table>
-					</section>
-				</div>
+				
+				@include('daily_revenue.area')
+				@include('daily_revenue.store')
 			</div>
 	</section>
 </div>

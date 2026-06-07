@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@use('Illuminate\Support\Number')
 
 @push('styles')
     <link href="{{ asset('styles/sales/list.css') }}" rel="stylesheet">
@@ -88,7 +87,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasResult">
+	<template x-if="response.status && response.isInit">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -105,83 +104,22 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasResult">
-		<section x-data="{statistics:@js($viewModel->statisticsData())}" class="sales-list container">
-			<article x-show="!statistics.exportToken" class="secondary-container border">
+	<template x-if="response.status && !response.isInit">
+		<section class="sales-list container">
+			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
 			
-			<div x-show="statistics.exportToken" class="statistics">
+			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
 					<a class="active" data-ui="#tab-area">區域彙總</a>
 					<a data-ui="#tab-shop">店別明細</a>
 				</div>
 			
-				<!-- 區域彙總 -->
-				<div class="page padding active scroll" id="tab-area">
-					<section class="statistics-area">
-						<table>
-							<thead>
-								<tr>
-									<th x-text="statistics.area.header.areaName"></th>
-									<th x-text="statistics.area.header.shopCount"></th>
-									<template x-for="pName in statistics.area.header.products" :key="pName">
-										<th x-text="pName"></th>
-									</template>
-								</tr>
-							</thead>
-							<tbody>
-								<template x-for="(areaData, areaId) in statistics.area.data" :key="areaId">
-								<tr>
-									<td x-text="areaData.areaName"></td>
-									<td x-text="areaData.shopCount"></td>
-									<template x-for="(pName, pId) in statistics.area.header.products" :key="pId">
-									<td>
-										<span x-show="!$store.sales.showAmount" x-text="areaData.products[pId]?.totalQty || 0"></span>
-										<span x-show="$store.sales.showAmount" x-text="'$' + Math.round(areaData.products[pId]?.totalAmount || 0)"></span>
-									</td>
-									</template>
-								</tr>
-								</template>
-							</tbody>
-						</table>
-					</section>
-				</div>
-				
-				<!-- 門店 -->
-				<div class="page padding" id="tab-shop">
-					<section class="statistics-store scrollbar" :class="statistics.brandCode">
-						<table class="stripes">
-							<thead>
-								<tr>
-									<th x-text="statistics.shop.header.areaName"></th>
-									<th x-text="statistics.shop.header.shopId"></th>
-									<th x-text="statistics.shop.header.shopName"></th>
-									<template x-for="pName in statistics.shop.header.products" :key="pName">
-										<th x-text="pName"></th>
-									</template>
-								</tr>
-							</thead>
-							<tbody>
-								<template x-for="(shopData, idx) in statistics.shop.data" :key="idx">
-								<tr>
-									<td x-text="shopData.areaName"></td>
-									<td x-text="shopData.shopId"></td>
-									<td x-text="shopData.shopName"></td>
-									<template x-for="(pName, pId) in statistics.shop.header.products" :key="pId">
-										<td>
-											<span x-show="!$store.sales.showAmount" x-text="shopData.products[pId]?.totalQty || 0"></span>
-											<span x-show="$store.sales.showAmount" x-text="'$' + Math.round(shopData.products[pId]?.totalAmount || 0)"></span>
-										</td>
-									</template>
-								</tr>
-								</template>
-							</tbody>
-						</table>
-					</section>
-				</div>
+				@include('sales.area')
+				@include('sales.store')
 			</div>
 		</section>
 	</template>

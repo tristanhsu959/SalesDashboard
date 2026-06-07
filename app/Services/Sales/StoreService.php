@@ -107,17 +107,17 @@ class StoreService
 		$export['shopQty'][]	= $header;
 		$export['shopAmount'][] = $header;
 		
-		foreach($shopData['data'] as $shopId => $data)
+		foreach($shopData['data'] as $index => $data)
 		{
 			$rowQty		= [];
 			$rowAmount 	= [];
 			
 			$rowQty[]	= $data['areaName'];
-			$rowQty[]	= $shopId;
+			$rowQty[]	= $data['shopId'];
 			$rowQty[]	= $data['shopName'];
 			
 			$rowAmount[]= $data['areaName'];
-			$rowAmount[]= $shopId;
+			$rowAmount[]= $data['shopId'];
 			$rowAmount[]= $data['shopName'];
 			
 			foreach($shopData['header']['products'] as $productId => $productName)

@@ -5,6 +5,7 @@ namespace App\ViewModels;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -17,7 +18,7 @@ use Illuminate\Support\Fluent;
 
 class DailyRevenueViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct()
 	{
@@ -97,25 +98,5 @@ class DailyRevenueViewModel extends Fluent
 		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
 		
 		return $this->only('search', 'options');
-	}
-	
-	/*共用view所需的data*/
-	public function responseData()
-	{
-		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandId	= data_get($this->statistics, 'brandId', NULL); #指有執行查詢才有存的brand
-		
-		$info['status'] 		= $this->status();
-		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
-		$info['hasResult'] 		= ! empty($brandId); #因可能有些功能沒下載,故不使用token判別
-		$info['brandCode']		= $this->brand->code();
-			
-		return $info;
-	}
-	
-	/*功能view所需的data*/
-	public function statisticsData()
-	{
-		return $this->statistics;
 	}
 }

@@ -6,6 +6,7 @@ use App\Services\SalesService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\FormAction;
@@ -18,7 +19,7 @@ use Illuminate\Support\Fluent;
 #銷售統計
 class SalesViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct(protected SalesService $_service)
 	{
@@ -95,24 +96,5 @@ class SalesViewModel extends Fluent
 		
 		return $this->only('search', 'options');
 	}
-	
-	/*共用view所需的data*/
-	public function responseData()
-	{
-		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandId	= data_get($this->statistics, 'brandId', NULL); #指有執行查詢才有存的brand
-		
-		$info['status'] 		= $this->status();
-		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
-		$info['hasResult'] 		= ! empty($brandId); #因可能有些功能沒下載,故不使用token判別
-		$info['brandCode']		= $this->brand->code();
-			
-		return $info;
-	}
-	
-	/*功能view所需的data*/
-	public function statisticsData()
-	{
-		return $this->statistics;
-	}
+
 }
