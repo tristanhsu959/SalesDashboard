@@ -141,4 +141,26 @@ class PurchaseSalesService
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
 	}
+	
+	/* Export data
+	 * @params: enum
+	 * @params: date
+	 * @params: date
+	 * @return: array
+	 */
+	public function export($token)
+	{
+		$cacheKey = hex2bin($token);
+		
+		if (! Cache::has($cacheKey))
+			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
+		
+		$currentUser = AppManager::getCurrentUser();
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export purchase & sales data-?'));
+		
+		$sourceData = Cache::get($cacheKey);
+		$service = app(OrderService::class); #只有detail有download
+		
+		return $service->export($sourceData);
+	}
 }

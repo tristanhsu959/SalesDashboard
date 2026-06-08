@@ -9,6 +9,7 @@ use App\Enums\Factory;
 use Illuminate\Support\Str;
 
 /* nOrder Common Function */
+#抽出成trait避免交叉include
 trait PurchaseReposTrait
 {
 	/* 取對應nOrder的設定值

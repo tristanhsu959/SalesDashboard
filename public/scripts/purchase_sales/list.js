@@ -1,9 +1,9 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('search', (searchData, options) => ({
-		searchData: {...searchData},
-		options: {...options},
+	Alpine.data('search', (searchData) => ({
+		searchData: {...searchData.search},
+		options: {...searchData.options},
 		errors: new Set(),
 		
 		init() {
@@ -41,8 +41,8 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
-	Alpine.data('storeList', (searchData, statistics) => ({
-		searchData: {...searchData},
+	Alpine.data('storeList', (statistics) => ({
+		//searchData: {...searchData},
 		statistics: {...statistics},
 		formData : {
 			storeId: 0,
@@ -50,15 +50,15 @@ document.addEventListener('alpine:init', () => {
 		},
 		listHeader: '',
 		
-		init() {
-			if (this.searchData.type == 'all')
+		init() { 
+			if (this.statistics.searchType == 'all')
 				this.listHeader = '所有門店';
-			else if (this.searchData.type == 'area')
-				this.listHeader = '區域：'+searchData.areaName;
-			else if (this.searchData.type == 'storeName')
-				this.listHeader = '店名：'+searchData.storeName;
+			else if (this.statistics.searchType == 'area')
+				this.listHeader = '區域：' + statistics.searchAreaName;
+			else if (this.statistics.searchType == 'storeName')
+				this.listHeader = '店名：' + statistics.searchStoreName;
 			
-			this.formData.date = this.searchData.date;
+			this.formData.date = this.statistics.searchDate;
 		},
 		
 		getDetail(storeId) {

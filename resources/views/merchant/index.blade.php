@@ -60,7 +60,6 @@
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-			<pre x-show="response.brandCode == 'bafang'" class="red-border">菜肉餡：Qty X 2.5<br/>新蔬食餡：Qty X 1.8</pre>
 		</section>
 	</template>
 	

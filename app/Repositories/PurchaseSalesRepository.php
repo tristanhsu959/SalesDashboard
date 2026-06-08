@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Facades\PosManager;
 use App\Libraries\Purchase\AreaLib;
@@ -16,6 +17,8 @@ use Exception;
 
 class PurchaseSalesRepository extends Repository
 {
+	use PurchaseReposTrait;
+	
 	public function __construct()
 	{
 		
@@ -43,19 +46,19 @@ class PurchaseSalesRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  PurchaseManager::getBrandNo($brandId));
+					->where('bd.No',  $this->getBrandNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
 			->when(!empty($storeName), function($query) use($storeName){
 				$query->whereAny(['s.Name'], 'like', DB::raw("N'%$storeName%'"));
@@ -119,13 +122,13 @@ class PurchaseSalesRepository extends Repository
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', PurchaseManager::getOpCenterNo($brandId));
+					->whereIn('oc.No', $this->getOpCenterNo($brandId));
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  PurchaseManager::getFactoryNo($brandId));
+					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)

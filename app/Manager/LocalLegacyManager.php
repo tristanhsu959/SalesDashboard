@@ -49,13 +49,7 @@ class LocalLegacyManager
 			"isExtra" => true
 		]
 		*/
-		#先取全部再過濾
-		if ($brand == Brand::BAFANG)
-			$data = $this->getExtraDataByBafang($stDate, $endDate, FALSE);
-		else if ($brand == Brand::BUYGOOD)
-			$data = $this->getExtraDataByBuygood($stDate, $endDate, FALSE);
-		else
-			$data = [];
+		$data = $this->_repository->getExtraData($brand->value, $stDate, $endDate, FALSE);
 		
 		$data = collect($data)->map(function($item, $key){
 			$temp['expectedDate'] 	= $item['expectedDate'];

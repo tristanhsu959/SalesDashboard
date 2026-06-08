@@ -29,7 +29,7 @@ class StoreService
 	{
 		$this->_statistics = [
 			'brandId'			=> '', 
-			'searchType'		=> '', #可移除
+			'searchType'		=> '', 
 			'searchDate'		=> '', #Y-m-d
 			'searchAreaId' 		=> 0,
 			'searchStoreName' 	=> '',
@@ -80,16 +80,33 @@ class StoreService
 		
 		$currentUser	= AppManager::getCurrentUser();
 		$userAreaIds	= $currentUser->roleArea;
+		$area 			= Area::tryFrom($searchAreaId);
 		
 		#返回時會用到, 故參數都存
 		$params->brand($brand)->userAreaIds($userAreaIds)
 				->searchType($searchType)->searchDate($searchDate)
-				->searchAreaId($searchAreaId)->searchStoreName($searchStoreName);
+				->searchAreaId($searchAreaId)->searchAreaName($area->label())
+				->searchStoreName($searchStoreName);
 		
 		return $params;
 	}
 	
-	
+	/* Generate statistics data
+	 * @params: object
+	 * @return: array
+	 */
+	private function _generateStatistics($params)
+	{
+		$this->_statistics['brandId']			= $params->brand->value;
+		$this->_statistics['brandCode']			= $params->brand->code();
+		$this->_statistics['searchType']		= $params->searchType;
+		$this->_statistics['searchDate']		= $params->searchDate;
+		$this->_statistics['searchAreaId']		= $params->searchAreaId;
+		$this->_statistics['searchAreaName']	= $params->searchAreaName;
+		$this->_statistics['searchStoreName']	= $params->searchStoreName;
+		$this->_statistics['store']				= $params->store;
+		$this->_statistics['exportToken']		= NULL; #保留供判斷用
+	}
 	
 	/* 取Active store list
 	 * @params: int
@@ -136,22 +153,6 @@ class StoreService
 			
 		$data = collect($params->store['data'])->sortBy('areaId')->values()->all();
 		$params->set('store.data', $data);
-	}
-	
-	/* Generate statistics data
-	 * @params: object
-	 * @return: array
-	 */
-	private function _generateStatistics($params)
-	{
-		$this->_statistics['brandId']			= $params->brand->value;
-		$this->_statistics['brandCode']			= $params->brand->code();
-		$this->_statistics['searchType']		= $params->searchType;
-		$this->_statistics['searchDate']		= $params->searchDate;
-		$this->_statistics['searchAreaId']		= $params->searchAreaId;
-		$this->_statistics['searchStoreName']	= $params->searchStoreName;
-		$this->_statistics['store']				= $params->store;
-		$this->_statistics['exportToken']		= NULL; #保留供判斷用
 	}
 	
 	public function saveToSession($function)

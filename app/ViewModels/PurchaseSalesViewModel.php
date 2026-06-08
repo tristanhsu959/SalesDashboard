@@ -5,6 +5,7 @@ namespace App\ViewModels;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -17,7 +18,7 @@ use Illuminate\Support\Fluent;
 
 class PurchaseSalesViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct()
 	{
@@ -70,28 +71,17 @@ class PurchaseSalesViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.purchase_sales.search')),
+			FormAction::DETAIL	=> route(Str::replace('?', $brandCode, '?.purchase_sales.detail')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.purchase_sales.export'), ['token' => $this->statistics['exportToken']]),
 			default				=> '',
 		};
-	}
-	
-	/* Detail form submit action(因在List要取用,故要獨立出來)
-	 * @params: 
-	 * @return: string
-	 */
-	public function getDetailFormAction() : string
-    {
-		$brandCode = $this->brand->code();
-		return route(Str::replace('?', $brandCode, '?.purchase_sales.detail'));
 	}
 	
 	/* Keep search data of form
@@ -118,24 +108,32 @@ class PurchaseSalesViewModel extends Fluent
 		$this->set('search.today', $today);
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		if (empty(Arr::collapse($this->statistics)))
-			return TRUE;
-		else
-			return FALSE;
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
+		
+		return $this->only('search', 'options');
 	}
 	
-	public function hasExportData()
+	/*有額外資訊能獨立加入,故要寫在Base*/
+	public function responseData()
 	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
+		$response = $this->responseBaseData();
+		
+		#filter tool
+		if ($this->action == FormAction::LIST)
+		{
+			$data = data_get($this->statistics, 'store', []);
+			$response['detailFormAction'] = $this->getFormAction(FormAction::DETAIL);
+		}
+		else if ($this->action == FormAction::DETAIL)
+			$data = data_get($this->statistics, 'purchaseData.data', []);
 		else
-			return TRUE;
-	}
-	
-	public function getBrandCode()
-	{
-		return $this->brand->code();
+			$data = [];
+		
+		$response['hasResult'] = !empty($data);
+		
+		return $response;
 	}
 }

@@ -4,7 +4,7 @@ namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
-use App\Facades\LegacyManager;
+use App\Facades\LocalLegacyManager;
 use App\Repositories\MonthlyFillingRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
@@ -241,7 +241,7 @@ class FactoryService
 			$productCodes 	= $params->productCodes;
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();

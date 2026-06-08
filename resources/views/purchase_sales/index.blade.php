@@ -10,10 +10,9 @@
 
 @section('content')
 <!-- Search panel -->
-<form x-data="search(@js($viewModel->search), @js($viewModel->options))" action="{{ $viewModel->getFormAction() }}" method="post" id="searchForm" class="no-margin" novalidate @submit.prevent="search()">
+<dialog x-data="search(@js($viewModel->searchFormData()))" id="searchPanel" class="right">
+	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
-
-	<dialog id="searchPanel" class="right">
 		<h5>查詢</h5>
 		<div class="field middle-align">
 			<nav class="wrap">
@@ -52,88 +51,97 @@
 				<label>門店名稱</label>
 			</div>
 		</div>
+		
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>
 			<button @click="resetSearch()" type="button" class="btn-search-reset right-round square large"><i>backspace</i></button>
 		</nav>
-	</dialog>
-</form>
+	</form>
+</dialog>
 <!-- Search panel end -->
 
-<header class="page-nav">
-	<nav>
-		<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
-			<i>search</i>
-			<span>查詢</span>
-		</button>
-	
-		@if ($viewModel->hasExportData())
-		<a href="javascript:window.location.href='{{ $viewModel->getFormAction(TRUE) }}'" class="button circle extend red" type="button">
-			<i>download_2</i>
-			<span>下載</span>
-		</a>
-		@endif
-	</nav>
-</header>
-	
-@if($viewModel->status() === TRUE)	
-	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
-	<section x-data='storeList(@json($viewModel->search), @json($viewModel->statistics))' class="store-list container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
-			<div class="row">
-				<i>info</i><div class="max">查無符合資料</div>
-			</div>
-		</article>
-		@else
+<div x-data="{response:@js($viewModel->responseData())}" class="content-wrapper">
+	<header class="page-nav">
+		<nav>
+			<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
+				<i>search</i>
+				<span>查詢</span>
+			</button>
 		
-		<form action="{{ $viewModel->getDetailFormAction() }}" method="post" x-ref="detailForm" class="no-margin" novalidate>
-			@csrf
-			<input type="hidden" name="searchStoreId" x-model="formData.storeId">
-			<input type="hidden" name="searchDate" x-model="formData.date">
-		</form>
-		
-		<div class="store-content">
-			<article class="info">
+			<template x-if="response.exportAction">
+			<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
+				<i>download_2</i>
+				<span>下載</span>
+			</a>
+			</template>
+		</nav>
+	</header>
+	
+	<template x-if="response.status && response.isInit">
+		<!-- Loading -->
+		<section class="container">
+			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
+		</section>
+	</template>
+	
+	<template x-if="!response.status">
+		<section class="container">
+			<article class="error-container border">
 				<div class="row">
-					<div x-text="listHeader"></div>
+					<i>error</i><div class="max">查詢時發生錯誤，請重新查詢</div>
 				</div>
 			</article>
-			<!-- 門店 -->
-			<section class="statistics-store scrollbar" :class="statistics.brandCode">
-				<table class="stripes">
-					<thead>
-						<tr>
-							<template x-for="(header, idx) in statistics.store.header" :key="idx">
-								<th x-text="header"></th>
+		</section>
+	</template>
+	
+	<template x-if="response.status && !response.isInit">
+		<section x-data="storeList(@js($viewModel->statisticsData()))" class="store-list container">
+			<article x-show="!response.hasResult" class="secondary-container border">
+				<div class="row">
+					<i>info</i><div class="max">查無符合資料</div>
+				</div>
+			</article>
+			
+			<form :action="response.detailFormAction" method="post" x-ref="detailForm" class="no-margin" novalidate>
+				@csrf
+				<input type="hidden" name="searchStoreId" x-model="formData.storeId">
+				<input type="hidden" name="searchDate" x-model="formData.date">
+			</form>
+			
+			<div class="store-content">
+				<article class="info border">
+					<div class="row">
+						<div x-text="listHeader"></div>
+					</div>
+				</article>
+				<!-- 門店 -->
+				<section class="statistics-store scrollbar" :class="response.brandCode">
+					<table class="stripes">
+						<thead>
+							<tr>
+								<template x-for="(header, idx) in statistics.store.header" :key="idx">
+									<th x-text="header"></th>
+								</template>
+							</tr>
+						</thead>
+						<tbody>
+							<template x-for="(store, idx) in statistics.store.data" :key="idx">
+							<tr>
+								<td x-text="store['posId']"></td>
+								<td x-text="store['areaName']"></td>
+								<td x-text="store['storeKey']"></td>
+								<td x-text="store['storeName']"></td>
+								<td x-text="store['address']"></td>
+								<td x-text="store['bossName']"></td>
+								<td x-text="store['openDate']"></td>
+								<td><button :data-id="store['storeId']" @click="getDetail($el.getAttribute('data-id'))"><i>more_horiz</i><span>More</span></button></td>
+							</tr>
 							</template>
-						</tr>
-					</thead>
-					<tbody>
-						<template x-for="(store, idx) in statistics.store.data" :key="idx">
-						<tr>
-							<td x-text="store['posId']"></td>
-							<td x-text="store['areaName']"></td>
-							<td x-text="store['storeKey']"></td>
-							<td x-text="store['storeName']"></td>
-							<td x-text="store['address']"></td>
-							<td x-text="store['bossName']"></td>
-							<td x-text="store['openDate']"></td>
-							<td><button :data-id="store['storeId']" @click="getDetail($el.getAttribute('data-id'))"><i>more_horiz</i><span>More</span></button></td>
-						</tr>
-						</template>
-					</tbody>
-				</table>
-			</section>
-		</div>
-		@endif
-	</section>
-	@else
-	<section class="container">
-		<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-	</section>
-	@endif
-@endif
-
+						</tbody>
+					</table>
+				</section>
+			</div>
+		</section>
+	</template>
 @endsection

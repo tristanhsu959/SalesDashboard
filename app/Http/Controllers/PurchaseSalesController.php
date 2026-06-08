@@ -122,7 +122,7 @@ class PurchaseSalesController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('new_release.statistics')->with('viewModel', $this->_viewModel);
+			return view('purchase_sales.index')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

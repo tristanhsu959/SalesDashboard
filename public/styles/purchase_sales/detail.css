@@ -64,11 +64,11 @@ section.purchase-sale-list {
 		
 		/* sale table use same define */
 		&.sale {
-			--table-bg: #ba68c8;
-			--table-bg-dark: #7b1fa2;
-			--table-fixed-bg: #e1bee7;
-			--table-fixed-color: #4a148c;
-			--table-stripes: #f3e5f5; 
+			--table-bg: #f06292;
+			--table-bg-dark: #c2185b;
+			--table-fixed-bg: #f8bbd0;
+			--table-fixed-color: #880e4f;
+			--table-stripes: #fce4ec; 
 		}
 		
 		position: relatvie;

@@ -4,7 +4,7 @@ namespace App\Services\PurchaseSales;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
-use App\Facades\LegacyManager;
+use App\Facades\LocalLegacyManager;
 use App\Repositories\PurchaseSalesRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -203,7 +203,7 @@ class OrderService
 			$orderData = $this->_repository->getPurchaseOrderByStore($brand, $stDate, $endDate, $storeId);
 			
 			#舊系統用storeKey = accno
-			$extraData = LegacyManager::getExtraDataByStore($brand, $stDate, $endDate, $storeKey);
+			$extraData = LocalLegacyManager::getExtraDataByStore($brand, $stDate, $endDate, $storeKey);
 			
 			#整合追加資料
 			$baseData = collect(array_filter($orderData))->merge(array_filter($extraData));
@@ -372,11 +372,12 @@ class OrderService
 		try
 		{
 			#Build export data for sheets
-			$export = $this->_buildExportData($sourceData['header'], $sourceData['data']);
+			$export = $this->_buildExportData($sourceData['purchaseData'], $sourceData['saleData']);
 			
+			$storeName = data_get($sourceData, 'storeInfo.storeName', '');
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_月初報表_?_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $storeName, $sourceData['searchDate']], '?_?_訂貨及銷售_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
@@ -386,7 +387,7 @@ class OrderService
 			foreach($export as $sheetKey => $sheetData)
 			{
 				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
-				$sheetName = ($sheetKey == 'qty') ? '月總量' : '月均量';
+				$sheetName = ($sheetKey == 'purchase') ? '訂貨' : '銷售';
 				$sheet->setName($sheetName);
 				
 				foreach($sheetData as $data)
@@ -411,21 +412,36 @@ class OrderService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportData($header, $data)
+	private function _buildExportData($purchase, $sale)
 	{
 		#Header row
-		$export['qty'][] = $header;
-		$export['avg'][] = $header;
+		$export['purchase'][] 	= $purchase['header'];
+		$export['sale'][] 		= $sale['header'];
 		
-		#只需要$key值
-		foreach($export as $key => &$row)
+		foreach($purchase['data'] as $data)
 		{
-			foreach($data[$key] as $rowData)
-			{
-				$row[] = $rowData;
-			}
+			$row = [];
+			$row[] = $data['shortCode'];
+			$row[] = $data['productName'];
+			$row[] = $data['qty'];
+			$row[] = $data['amount'];
+			$row[] = $data['memo'];
+			
+			$export['purchase'][] = $row;
+		}
+		
+		foreach($sale['data'] as $data)
+		{
+			$row = [];
+			$row[] = $data['erpNo'];
+			$row[] = $data['productName'];
+			$row[] = $data['qty'];
+			$row[] = $data['amount'];
+			
+			$export['sale'][] = $row;
 		}
 		
 		return $export;
 	}
 }
+		
