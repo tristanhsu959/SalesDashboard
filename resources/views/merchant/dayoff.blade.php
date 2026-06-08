@@ -1,16 +1,15 @@
  
-	<section x-data='storeDayoff(@json($viewModel->statistics))' class="store-list container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
+	<section x-data="storeDayoff(@js($viewModel->statisticsData()))" class="store-list container">
+		<article x-show="!response.hasResult" class="secondary-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		@else
-		<div class="area-content scrollbar">
+		
+		<div x-show="response.hasResult" class="area-content scrollbar">
 			<h6 x-text="statistics.startDate"></h6>
 			<!-- 區域 -->
-			<section class="statistics-area {{$viewModel->getBrandCode()}}">
+			<section class="statistics-area" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>
@@ -38,7 +37,7 @@
 			</section>
 			
 			<!-- 門店 -->
-			<section class="statistics-store {{$viewModel->getBrandCode()}}">
+			<section class="statistics-store" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>
@@ -61,5 +60,4 @@
 			</section>
 			
 		</div>
-		@endif
 	</section>

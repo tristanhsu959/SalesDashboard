@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@use('Illuminate\Support\Number')
 
 @push('styles')
     <link href="{{ asset('styles/merchant/list.css') }}" rel="stylesheet">
@@ -57,14 +56,27 @@
 		</nav>
 	</header>
 	
-@if($viewModel->status() === TRUE)	
-	@if(isset($viewModel->statistics['brandId'])) <!-- loading or not -->
+	<template x-if="response.status && response.isInit">
+		<!-- Loading -->
+		<section class="container">
+			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
+			<pre x-show="response.brandCode == 'bafang'" class="red-border">菜肉餡：Qty X 2.5<br/>新蔬食餡：Qty X 1.8</pre>
+		</section>
+	</template>
+	
+	<template x-if="!response.status">
+		<section class="container">
+			<article class="error-container border">
+				<div class="row">
+					<i>error</i><div class="max">查詢時發生錯誤，請重新查詢</div>
+				</div>
+			</article>
+		</section>
+	</template>
+	
+	<template x-if="response.status && !response.isInit">
 		@include($viewModel->getPartialView())
-	@else
-	<section class="container">
-		<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-	</section>
-	@endif
-@endif
+	</template>
+
 </div>
 @endsection

@@ -5,6 +5,7 @@ namespace App\ViewModels;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -18,7 +19,7 @@ use Illuminate\Support\Fluent;
 #門店資訊
 class MerchantViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct()
 	{
@@ -126,21 +127,17 @@ class MerchantViewModel extends Fluent
 	/*共用view所需的data*/
 	public function responseData()
 	{
-		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandCode 	= data_get($this->statistics, 'brandCode', NULL); #指有執行查詢才有存的brand
+		$response = $this->responseBaseData();
 		
-		$info['status'] 		= $this->status();
-		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
-		$info['hasData'] 		= ! empty($brandCode); #因可能有些功能沒下載,故不使用token判別
-		$info['brandCode']		= $brandCode;
-		$info['hasFilter']		= ($this->search['type'] == 'store');
-			
-		return $info;
-	}
-	
-	/*功能view所需的data*/
-	public function statisticsData()
-	{
-		return $this->statistics;
+		#filter tool
+		$type = data_get($this->statistics, 'modeType', NULL);
+		$info = data_get($this->statistics, 'info', []);
+		$dayoff = data_get($this->statistics, 'dayoff', []);
+		
+		$data = ($type == 'info') ? $info : $dayoff;
+		
+		$response['hasResult'] = !empty($data);
+		
+		return $response;
 	}
 }

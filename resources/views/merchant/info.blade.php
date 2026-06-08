@@ -1,15 +1,14 @@
  
-	<section x-data='storeInfo(@json($viewModel->statistics))' class="store-info container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
+	<section x-data="storeInfo(@js($viewModel->statisticsData()))" class="store-info container">
+		<article x-show="!response.hasResult" class="secondary-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		@else
-		<div class="store-content">
+		
+		<div x-show="response.hasResult" class="store-content">
 			<!-- 門店 -->
-			<section class="statistics-store scrollbar {{$viewModel->getBrandCode()}}">
+			<section class="statistics-store scrollbar" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>
@@ -30,5 +29,4 @@
 				</table>
 			</section>
 		</div>
-		@endif
 	</section>

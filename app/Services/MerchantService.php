@@ -32,7 +32,7 @@ class MerchantService
 	{
 		$this->_statistics = [
 			'brandId'		=> '', #export
-			'modeType'			=> '',
+			'modeType'		=> '',
 			'startDate'		=> '', #Y-m-d
 			'endDate'		=> '', #Y-m-d
             'info' 			=> [],
