@@ -3,6 +3,7 @@
 namespace App\Manager\Repositories;
 
 use App\Repositories\Repository;
+use App\Repositories\Traits\PurchaseReposTrait;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -12,34 +13,7 @@ use Illuminate\Support\Facades\DB;
 /* nOrder DB Common */
 class PurchaseRepository extends Repository
 {
-	/* 取對應nOrder的設定值
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getOpCenterNo($brandId)
-	{
-		#台北/高雄
-		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value)
-			return OpCenter::toValueArray();
-		
-		return [];
-	}
-	
-	public function getBrandNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		return $brand->shortCode();
-	}
-	
-	public function getFactoryNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		if ($brandId == Brand::BAFANG->value)
-			return [Factory::TP->value, Factory::KH->value];
-		else
-			return [Factory::TS->value, Factory::RL->value];
-	}
+	use PurchaseReposTrait;
 	
 	/* 取工廠清單
 	 * @params: int
@@ -66,7 +40,7 @@ class PurchaseRepository extends Repository
 		return $result;
 	}
 	
-	/* 取門店清單
+	/* 取門店清單(含蘿蔔)
 	 * @params: enum
 	 * @params: array
 	 * @return: array
@@ -110,9 +84,7 @@ class PurchaseRepository extends Repository
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
 			->whereIn('s.AreaId', $authAreaIds)
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
-			#->orderBy('s.OperationCenterId')
-			#->orderBy('ar.Id')
+			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->ddRawSql();
 			->get()
 			->toArray(); 
 		

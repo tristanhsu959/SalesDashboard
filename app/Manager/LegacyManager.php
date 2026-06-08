@@ -35,6 +35,8 @@ class LegacyManager
 			"isExtra" => true
 		]
 		*/
+		
+		#*****排程會呼叫此Function*****
 		$bafang 	= $this->getExtraDataByBafang($stDate, $endDate, FALSE); #false for all
 		$buygood	= $this->getExtraDataByBuygood($stDate, $endDate, FALSE);
 		

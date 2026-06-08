@@ -17,35 +17,6 @@ class PurchaseManager
 	{
 	}
 	
-	/* 取對應nOrder的設定值
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getOpCenterNo($brandId)
-	{
-		#台北/高雄
-		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value)
-			return OpCenter::toValueArray();
-		
-		return [];
-	}
-	
-	public function getBrandNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		return $brand->shortCode();
-	}
-	
-	public function getFactoryNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		if ($brandId == Brand::BAFANG->value)
-			return [Factory::TP->value, Factory::KH->value];
-		else
-			return [Factory::TS->value, Factory::RL->value];
-	}
-	
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array
@@ -99,6 +70,7 @@ class PurchaseManager
 	{
 		try
 		{
+			#取回data已排除開閉店
 			$storeList = $this->getStoreList($brand, $userAreaIds, $stDate, $endDate);
 			
 			#八方才有蘿蔔
@@ -145,33 +117,6 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	private function _mergeStoreOutput($brand, $storeList, $lbStoreList)
-	{
-		$lbSpecialStore = config('web.purchase.store.lbSpecialStore');
-		
-		#取得特殊的蘿蔔店(因老蘿蔔沒有八方, 故要特別處理)
-		$lbExcepts = collect($lbStoreList)->filter(function($item, $key) use($lbSpecialStore) {
-			return in_array($item['storeNo'], array_keys($lbSpecialStore));
-		})->toArray();
-		
-		#因storeList有過濾區域權限, 故蘿蔔也要
-		$storeKeys = array_merge(array_keys($storeList), array_keys($lbExcepts));
-		
-		#todo:待確認
-		$lbStoreList = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
-			return ! in_array($key, $storeKeys);
-		});
-		
-		$stores = $lbStoreList->merge($storeList)->sortBy('areaId')->toArray();
-		
-		#過濾出獨立的蘿蔔店
-		return $stores;
-	}
-	
-	/* Format store output
-	 * @params: array
-	 * @return: array
-	 */
 	private function _formatStoreOutput($brand, $storeList)
 	{
 		#To key-value
@@ -199,6 +144,26 @@ class PurchaseManager
 		
 		return $store;
 	}
+	
+	/* Format store output
+	 * @params: array
+	 * @return: array
+	 */
+	private function _mergeStoreOutput($brand, $storeList, $lbStoreList)
+	{
+		$storeKeys = collect($storeList)->pluck('storeKey')->toArray();
+		
+		#取出單蘿蔔店(如老蘿蔔沒有八方,所以沒有對應的storeKey)
+		$lbSpecials = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
+			return !in_array($item['storeKey'], $storeKeys);
+		});
+		
+		#Merge獨立的蘿蔔店
+		$stores = $lbSpecials->merge($storeList)->sortBy('areaId')->toArray();
+		
+		return $stores;
+	}
+	
 	
 	
 	
@@ -293,6 +258,11 @@ class PurchaseManager
 	 */
 	public function buildStoreKey($storeNo)
 	{
+		#特殊的蘿蔔店,因不符規則編碼規則,故要先處理
+		$lbSpecialStoreNos = config('web.purchase.store.lbSpecialStore');
+		$convertNo = data_get($lbSpecialStoreNos, $storeNo, NULL);
+		$storeNo = empty($convertNo) ? $storeNo : $convertNo;
+		
 		#新系統有前置碼/八方有蘿蔔尾碼1&2
 		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
 		$storeKey = Str::take($storeKey, 7);
