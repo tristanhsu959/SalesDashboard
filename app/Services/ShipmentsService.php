@@ -34,9 +34,9 @@ class ShipmentsService
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
-			'modeCalc'		=> '',
-			'modeBy'		=> '',
+			'modeType'		=> '', #store,factory
+			'modeCalc'		=> '', #日,月
+			'modeBy'		=> '', #keyword,category
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d

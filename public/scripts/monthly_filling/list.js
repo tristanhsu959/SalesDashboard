@@ -1,9 +1,9 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('searchReport', (searchData, options) => ({
-		searchData: {...searchData},
-		options: {...options},
+	Alpine.data('searchReport', (searchData) => ({
+		searchData: {...searchData.search},
+		options: {...searchData.options},
 		errors: new Set(),
 		
 		init() {

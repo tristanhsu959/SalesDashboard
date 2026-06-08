@@ -421,7 +421,7 @@ class FactoryService
 				
 				foreach($productList as $code => $name)
 				{
-					$row[] = data_get($factoryData, "{$month}.{$code}.{$type}");
+					$row[] = data_get($factoryData, "{$month}.{$code}.{$type}", 0);
 				}
 				
 				$rowData[] = $row;

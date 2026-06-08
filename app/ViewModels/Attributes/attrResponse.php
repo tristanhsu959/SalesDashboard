@@ -10,14 +10,12 @@ use Illuminate\Support\Fluent;
 trait attrResponse
 {
 	/* Statistics的回傳data */
-	public function responseData()
+	public function responseBaseData()
 	{
-		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandId 	= data_get($this->statistics, 'brandId', NULL);
+		$token = data_get($this->statistics, 'exportToken', NULL);
 		
 		$data['status'] 		= $this->status();
-		$data['isInit']			= empty($this->statistics); #判別是否有執行查詢
-		$data['hasResult'] 		= ! empty($brandId); #不用token,因不是都有下載
+		$data['isInit']			= empty($this->statistics);
 		$data['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
 		$data['brandCode']		= $this->brand->code(); #判別當前的功能brand, 故不能取自statistics
 			

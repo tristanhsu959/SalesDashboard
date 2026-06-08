@@ -1,13 +1,12 @@
  
-	<section x-data='statisticsStore(@json($viewModel->statistics))' class="store-list container">
-		@if($viewModel->isDataEmpty())
-		<article class="error-container border">
+	<section x-data="statisticsStore(@js($viewModel->statisticsData()))" class="store-list container">
+		<article x-show="!response.hasResult" class="secondary-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		@else
-		<div class="store-content">
+		
+		<div x-show="response.hasResult" class="store-content">
 			<div class="tabs cyan-text">
 				<template x-for="(sheetName, sheetId) in statistics.sheets" :key="sheetId">
 					<a x-text="sheetName" @click="activeProduct = sheetId" :data-ui="`#page-${sheetId}`" :class="activeProduct == sheetId ? 'active':''"></a>
@@ -17,7 +16,7 @@
 			<!-- 門店 -->
 			<template x-for="(sheetName, sheetId) in statistics.sheets" :key="sheetId">
 			<div class="page padding" :id="`page-${sheetId}`" >
-				<section class="statistics-shop scrollbar" :class="statistics.brandCode">
+				<section class="statistics-store scrollbar" :class="response.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>
@@ -40,5 +39,4 @@
 			</div>
 			</template>
 		</div>
-		@endif
 	</section>

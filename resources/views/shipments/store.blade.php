@@ -1,12 +1,12 @@
  
 	<section x-data="statisticsStore(@js($viewModel->statisticsData()))" class="store-list container">
-		<article x-show="!statistics.exportToken" class="error-container border">
+		<article x-show="!response.hasResult" class="secondary-container border">
 			<div class="row">
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
 		
-		<div x-show="statistics.exportToken" class="store-content">
+		<div x-show="response.hasResult" class="store-content">
 			<div class="tabs cyan-text">
 				<template x-for="(item, shortCode) in statistics.productList" :key="shortCode">
 					<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
@@ -19,7 +19,7 @@
 			<!-- 門店 -->
 			<template x-for="(name, shortCode) in statistics.productList" :key="shortCode">
 			<div class="page paddin" :class="{ 'active': activeProduct === shortCode }">
-				<section class="statistics-store scrollbar" :class="statistics.brandCode">
+				<section class="statistics-store scrollbar" :class="response.brandCode">
 					<table class="stripes">
 						<thead>
 							<tr>

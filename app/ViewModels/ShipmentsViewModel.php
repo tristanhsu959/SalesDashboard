@@ -6,6 +6,7 @@ use App\Services\ShipmentsService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -18,7 +19,7 @@ use Illuminate\Support\Fluent;
 
 class ShipmentsViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct(protected ShipmentsService $_service)
 	{
@@ -145,24 +146,18 @@ class ShipmentsViewModel extends Fluent
 		return $this->only('search', 'options');
 	}
 	
-	/*共用view所需的data*/
+	/*有額外資訊能獨立加入,故要寫在Base*/
 	public function responseData()
 	{
-		$token 		= data_get($this->statistics, 'exportToken', NULL);
-		$brandId	= data_get($this->statistics, 'brandId', NULL); #指有執行查詢才有存的brand
+		$response = $this->responseBaseData();
 		
-		$info['status'] 		= $this->status();
-		$info['exportAction'] 	= empty($token) ? '' : $this->getFormAction(FormAction::EXPORT);
-		$info['hasResult'] 		= ! empty($brandId); #因可能有些功能沒下載,故不使用token判別
-		$info['brandCode']		= $this->brand->code();
-		$info['hasFilter']		= ($this->search['type'] == 'store');
-			
-		return $info;
-	}
-	
-	/*功能view所需的data*/
-	public function statisticsData()
-	{
-		return $this->statistics;
+		#filter tool
+		$type = data_get($this->statistics, 'modeType', NULL);
+		$data = data_get($this->statistics, 'data', []);
+		
+		$response['hasFilter'] = ($type == 'store' && !empty($data));
+		$response['hasResult'] = !empty($data);
+		
+		return $response;
 	}
 }

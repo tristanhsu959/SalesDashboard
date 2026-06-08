@@ -125,7 +125,7 @@
 		</nav>
 	</header>
 	
-	<template x-if="response.status && !response.hasResult">
+	<template x-if="response.status && response.isInit">
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
@@ -143,7 +143,7 @@
 		</section>
 	</template>
 	
-	<template x-if="response.status && response.hasResult">
+	<template x-if="response.status && !response.isInit">
 		@include($viewModel->getPartialView())
 	</template>
 </div>

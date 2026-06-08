@@ -5,6 +5,7 @@ namespace App\ViewModels;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
+use App\ViewModels\Attributes\attrResponse;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Enums\Functions;
@@ -17,7 +18,7 @@ use Illuminate\Support\Fluent;
 
 class MonthlyFillingViewModel extends Fluent
 {
-	use attrStatus, attrActionBar, attrAllowAction;
+	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
 	public function __construct()
 	{
@@ -76,13 +77,11 @@ class MonthlyFillingViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction($isExport = FALSE) : string
+	public function getFormAction($formAction) : string
     {
-		#因export不會有頁面
-		$action = ($isExport) ? FormAction::EXPORT : $this->action;
 		$brandCode = $this->brand->code();
 		
-		return match($action)
+		return match($formAction)
 		{
 			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.monthly_filling.search')),
 			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.monthly_filling.export'), ['token' => $this->statistics['exportToken']]),
@@ -120,26 +119,22 @@ class MonthlyFillingViewModel extends Fluent
 		};
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	public function searchFormData()
 	{
-		$data = data_get($this->statistics, 'exportToken', NULL);
+		$this->set('search.formAction',  $this->getFormAction(FormAction::LIST));
 		
-		if (empty($data))
-			return TRUE;
-		else
-			return FALSE;
+		return $this->only('search', 'options');
 	}
 	
-	public function hasExportData()
+	/*有額外資訊能獨立加入,故要寫在Base*/
+	public function responseData()
 	{
-		if ($this->isDataEmpty() OR empty($this->statistics['exportToken']))
-			return FALSE;
-		else
-			return TRUE;
-	}
-	
-	public function getBrandCode()
-	{
-		return $this->brand->code();
+		$response = $this->responseBaseData();
+		
+		$data = data_get($this->statistics, 'data', []);
+		$response['hasResult'] = !empty($data);
+		
+		return $response;
 	}
 }

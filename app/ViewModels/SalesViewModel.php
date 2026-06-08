@@ -96,5 +96,15 @@ class SalesViewModel extends Fluent
 		
 		return $this->only('search', 'options');
 	}
-
+	
+	/*有額外資訊能獨立加入,故要寫在Base*/
+	public function responseData()
+	{
+		$response = $this->responseBaseData();
+		
+		$data = data_get($this->statistics, 'area.data', []);
+		$response['hasResult'] = !empty($data);
+		
+		return $response;
+	}
 }
