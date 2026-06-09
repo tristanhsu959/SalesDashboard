@@ -135,7 +135,9 @@ class DailyRevenueService
 		$currentUser = AppManager::getCurrentUser();
 		$userAreaIds = $currentUser->roleArea;
 		
-		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		if ($searchType == 'date') #有區間條件才要預設
+			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		
 		$functions 		= $this->parsingFunction($brand);
 		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
 		

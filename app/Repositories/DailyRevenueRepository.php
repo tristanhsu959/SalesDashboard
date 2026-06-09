@@ -110,15 +110,63 @@ class DailyRevenueRepository extends Repository
 					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
 				})
 				->whereNotIn('a.SHOP_ID', $excepts)
-				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.SALE_DATE as saleDate')
+				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId')
+				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
 				->selectRaw('sum(a.amount) as amount')
 				->selectRaw('sum(a.TOT_SALES) as totalSales')
 				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
 				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
-				->groupBy('a.SHOP_ID', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', 'a.SALE_DATE')
+				->groupBy('a.SHOP_ID', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', DB::raw('CAST(a.SALE_DATE AS DATE)'))
 				->get()
 				->toArray();
 		
 		return $result; 
 	}
+	
+	
+	/* 取營收客單統計資料By Month
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType)
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.sales.shop.except.{$configCode}");
+		
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else if ($brand == Brand::BUYGOOD)
+			$db = $this->connectBGPosErp();
+		else
+			return [];
+		
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
+		
+		$result = $db
+				->table(DB::raw('SHOP00 as a WITH(NOLOCK)'))
+				->join(DB::raw('SALE00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
+				#->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'a.SHOP_KIND')
+				->whereIn('a.gid', $authAreaIds)
+				->whereIn('a.SHOP_KIND', $shopType)
+				->whereNotIn('a.SHOP_ID', $excepts)
+				->where('b.STATUS', '=', 2) #3:作廢不計入
+				->where('b.SALE_DATE', '>=', $stDate)
+				->where('b.SALE_DATE', '<', $endDate)
+				#->select('a.SHOP_ID as shopId', 'c.Sk_name as typeName', 'a.gid as areaId')
+				->select('a.SHOP_ID as shopId')
+				->selectRaw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0) as saleDate')
+				->selectRaw('count(a.SHOP_ID) as visitors')
+				->selectRaw('sum(b.amount) as amount')
+				->selectRaw('sum(b.TOT_SALES) as totalSales')
+				->selectRaw('sum(b.TOT_EXTRA) as totalExtra')
+				->selectRaw('sum(b.TOT_DISCHARGE) as totalDischarge')
+				->groupBy('a.SHOP_ID', DB::raw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0)'))->ddRawSql();
+				/* ->get()
+				->toArray(); */
+		
+		return $result; 
+	}
+	
 }

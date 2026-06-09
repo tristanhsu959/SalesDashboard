@@ -131,6 +131,7 @@ class StoreService
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
+			
 			#去除shop id
 			$result = collect($result)->map(function($item, $key){
 				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
@@ -176,8 +177,10 @@ class StoreService
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
 			$temp['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
 			$temp['amount'] 		= $item['amount'];
-			$temp['totalSales']		= floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']);
-				
+			#發票金額 = amount OR totalSales + totalDischarge
+			#實銷金額 = totalSales + totalExtra + totalDischarge
+			$temp['totalSales']		= floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
+			
 			return $temp; 
 		});
 		

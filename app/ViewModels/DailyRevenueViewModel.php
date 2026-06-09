@@ -85,6 +85,7 @@ class DailyRevenueViewModel extends Fluent
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
+		$thisMonth = Carbon::now()->format('Y-m');
 		
 		#依brand預計不同
 		if (empty($stDate) && empty($endDate) && empty($shopType))
@@ -96,6 +97,7 @@ class DailyRevenueViewModel extends Fluent
 		$this->set('search.shopType', $shopType);
 		$this->set('search.shopName', $shopName);
 		$this->set('search.today', $today);
+		$this->set('search.thisMonth', $thisMonth);
 	}
 	
 	/* Output js */
@@ -111,7 +113,13 @@ class DailyRevenueViewModel extends Fluent
 	{
 		$response = $this->responseBaseData();
 		
-		$data = data_get($this->statistics, 'area.data', []);
+		$type = data_get($this->statistics, 'modeType', NULL);
+		
+		if ($type == 'date')
+			$data = data_get($this->statistics, 'area.data', []);
+		else
+			$data = data_get($this->statistics, 'data', []);
+		
 		$response['hasResult'] = !empty($data);
 		
 		return $response;

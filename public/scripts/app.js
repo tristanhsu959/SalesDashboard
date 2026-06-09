@@ -9,10 +9,10 @@ document.addEventListener('alpine:init', () => {
 	Alpine.store('toast', {
 		initialize(msg = '') {
             if (msg != '') {
-                // 延遲一小段時間確保 DOM 與 BeerCSS 完全就緒
-				setTimeout(() => {
-                    this.notify(msg);
-                }, 100);
+                //等待DOM渲染完畢
+				Alpine.nextTick(() => {
+					this.notify(msg);
+				});
             }
         },
 		

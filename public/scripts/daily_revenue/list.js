@@ -7,10 +7,29 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			if (searchData.stDate == '')
+			if (this.searchData.stDate == '')
 				this.searchData.stDate = this.searchData.today;
-			if (searchData.endDate == '')
+			if (this.searchData.endDate == '')
 				this.searchData.endDate = this.searchData.today;
+		},
+		
+		switchConditions(){
+			if (this.searchData.type == 'date')
+			{
+				this.$refs.searchStDate.type = 'date';
+				this.$refs.searchEndDate.disabled = false;
+				this.$refs.searchShopName.disabled = false;
+				
+				this.searchData.stDate = this.searchData.today;
+			}
+			else
+			{
+				this.$refs.searchStDate.type = 'month';
+				this.$refs.searchEndDate.disabled = true;
+				this.$refs.searchShopName.disabled = true;
+				
+				this.searchData.stDate = this.searchData.thisMonth;
+			}
 		},
 		
 		search() {
@@ -20,11 +39,13 @@ document.addEventListener('alpine:init', () => {
 				this.errors.add('stDate');
 			
 			if (this.searchData.stDate && this.searchData.endDate)
+			{
 				if (new Date(this.searchData.stDate) > new Date(this.searchData.endDate))
 				{
 					this.errors.add('endDate');
 					Alpine.store('toast').notify('結束日期不可小於開始日期');
 				}
+			}
 				
 			if (this.errors.size == 0)
 			{
@@ -39,10 +60,12 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
+			this.searchData.type = 'date';
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
 			this.searchData.shopName = '';
 			this.errors.clear();
+			this.switchConditions();
 		},
     }));
 	

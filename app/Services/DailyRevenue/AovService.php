@@ -35,9 +35,7 @@ class AovService
 			'brandCode'		=> '',
 			'modeType'		=> '',
 			'startDate'		=> '', #Y-m-d
-            'endDate'   	=> '',
-			'shop' 			=> [],
-			'area' 			=> [],
+			'data' 			=> [],
 			'exportName'	=> '',
 			'exportToken'	=> '', #export
 		];
@@ -98,14 +96,11 @@ class AovService
 	{
 		try
 		{
-			#1. Get all shops with area permission
-			$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
-			$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
-			
-			#2. Get data from DB
+			#以order的店數來計算,不用取店,因也無法判別open or close
+			#1. Get data from DB
 			$saleData = $this->_getDataFromDB($params);
 			
-			#3.build to base data
+			#2.build to base data
 			$this->_buildBaseData($params, array_filter($saleData)); 
 		}
 		catch(Exception $e)
@@ -125,12 +120,13 @@ class AovService
 		{
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$endDate 		= (new Carbon($stDate))->addMonth()->format('Y-m-d H:i:s');
 			$shopType 		= $params->shopType;
-			$shopName 		= $params->shopName;
+			$shopName 		= FALSE;
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
+			$result = $this->_repository->getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType);
+			dd($result);
 			#去除shop id
 			$result = collect($result)->map(function($item, $key){
 				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);

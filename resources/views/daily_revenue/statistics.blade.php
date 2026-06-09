@@ -20,7 +20,7 @@
 		<nav class="wrap">
 			<template x-for="(name, id) in options.mode.type" :key="id">
 				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+					<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
 					<span x-text="name"></span>
 				</label>
 			</template>
@@ -32,14 +32,14 @@
 			<label>開始日期</label>
 		</div>
 		
-		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
+		<div x-show="searchData.type == 'date'" class="space"></div>
+		<div x-show="searchData.type == 'date'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
 		
-		<div class="space"></div>
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
+		<div x-show="searchData.type == 'date'" class="space"></div>
+		<div x-show="searchData.type == 'date'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
 			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
 			<label>找店名</label>
 		</div>
@@ -115,6 +115,7 @@
 				@include('daily_revenue.area')
 				@include('daily_revenue.store')
 			</div>
-	</section>
+		</section>
+	</template>
 </div>
 @endsection
