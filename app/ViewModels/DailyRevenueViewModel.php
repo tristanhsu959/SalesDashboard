@@ -50,6 +50,12 @@ class DailyRevenueViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
+		$type = [
+			'date'	=> '日營收', #原計算方式
+			'aov'	=> '客單統計(月)', #Average Order Value
+		];
+		$this->set('options.mode.type', $type);
+
 		#根據poserp.shop_kind
 		$this->set('options.shopType', config('web.sales.shop.type'));
 	}
@@ -75,16 +81,16 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
+	public function keepSearchData($type = 'date', $stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
 		
+		#依brand預計不同
 		if (empty($stDate) && empty($endDate) && empty($shopType))
-		{
 			$shopType = ($this->brand == Brand::BAFANG) ? [1] : [1, 2]; #Default直營
-		}
 		
+		$this->set('search.type', $type);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
 		$this->set('search.shopType', $shopType);

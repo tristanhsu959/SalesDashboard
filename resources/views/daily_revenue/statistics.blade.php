@@ -16,6 +16,15 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
+		<div class="space"></div>
+		<nav class="wrap">
+			<template x-for="(name, id) in options.mode.type" :key="id">
+				<label class="radio field-red">
+					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>
 		
 		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
