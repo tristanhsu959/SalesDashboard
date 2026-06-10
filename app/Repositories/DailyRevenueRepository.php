@@ -155,16 +155,16 @@ class DailyRevenueRepository extends Repository
 				->where('b.SALE_DATE', '>=', $stDate)
 				->where('b.SALE_DATE', '<', $endDate)
 				#->select('a.SHOP_ID as shopId', 'c.Sk_name as typeName', 'a.gid as areaId')
-				->select('a.SHOP_ID as shopId')
+				->select('a.SHOP_ID as shopId', 'a.SHOP_KIND as shopKind', 'a.gid as areaId')
 				->selectRaw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0) as saleDate')
 				->selectRaw('count(a.SHOP_ID) as visitors')
 				->selectRaw('sum(b.amount) as amount')
 				->selectRaw('sum(b.TOT_SALES) as totalSales')
 				->selectRaw('sum(b.TOT_EXTRA) as totalExtra')
 				->selectRaw('sum(b.TOT_DISCHARGE) as totalDischarge')
-				->groupBy('a.SHOP_ID', DB::raw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0)'))->ddRawSql();
-				/* ->get()
-				->toArray(); */
+				->groupBy('a.SHOP_ID', 'a.SHOP_KIND', 'a.gid', DB::raw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0)'))#->ddRawSql();
+				->get()
+				->toArray();
 		
 		return $result; 
 	}

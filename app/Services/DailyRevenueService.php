@@ -40,6 +40,7 @@ class DailyRevenueService
             'endDate'   	=> '',
 			'shop' 			=> [],
 			'area' 			=> [],
+			'data'			=> [],
 			'exportToken'	=> '', #export
 		];
 	}
@@ -99,7 +100,7 @@ class DailyRevenueService
 			{
 				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
-				if ($params->type == 'date') #By門店
+				if ($params->type == 'store') #By門店
 					$service = app(storeService::class);
 				else if ($params->type == 'aov') #By月合併,不顯示店
 					$service = app(aovService::class);
@@ -135,7 +136,7 @@ class DailyRevenueService
 		$currentUser = AppManager::getCurrentUser();
 		$userAreaIds = $currentUser->roleArea;
 		
-		if ($searchType == 'date') #有區間條件才要預設
+		if ($searchType == 'store') #有區間條件才要預設
 			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		
 		$functions 		= $this->parsingFunction($brand);
@@ -169,7 +170,7 @@ class DailyRevenueService
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];
 		
-		if ($modeType == 'date')
+		if ($modeType == 'store')
 			$service = app(StoreService::class);
 		else if ($modeType == 'aov')
 			$service = app(aovService::class);

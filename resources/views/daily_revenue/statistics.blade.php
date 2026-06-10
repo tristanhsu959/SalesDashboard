@@ -32,14 +32,14 @@
 			<label>開始日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'date'" class="space"></div>
-		<div x-show="searchData.type == 'date'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
+		<div x-show="searchData.type == 'store'" class="space"></div>
+		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'date'" class="space"></div>
-		<div x-show="searchData.type == 'date'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
+		<div x-show="searchData.type == 'store'" class="space"></div>
+		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
 			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
 			<label>找店名</label>
 		</div>
@@ -99,23 +99,7 @@
 	</template>
 	
 	<template x-if="response.status && !response.isInit">
-		<section class="new-release-list container">
-			<article x-show="!response.hasResult" class="secondary-container border">
-				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
-				</div>
-			</article>
-			
-			<div x-show="response.hasResult" class="statistics">
-				<div class="tabs cyan-text">
-					<a class="active" data-ui="#tab-area">區域彙總</a>
-					<a data-ui="#tab-shop">店別明細</a>
-				</div>
-				
-				@include('daily_revenue.area')
-				@include('daily_revenue.store')
-			</div>
-		</section>
+		@include($viewModel->getPartialView())
 	</template>
 </div>
 @endsection

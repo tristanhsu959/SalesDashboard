@@ -51,7 +51,7 @@ class DailyRevenueViewModel extends Fluent
 	private function _setOptions()
 	{
 		$type = [
-			'date'	=> '日營收', #原計算方式
+			'store'	=> '日營收', #原計算方式
 			'aov'	=> '客單統計(月)', #Average Order Value
 		];
 		$this->set('options.mode.type', $type);
@@ -81,7 +81,7 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'date', $stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
+	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
@@ -100,6 +100,21 @@ class DailyRevenueViewModel extends Fluent
 		$this->set('search.thisMonth', $thisMonth);
 	}
 	
+	/* Partial view
+	 * @params: string
+	 * @return: string
+	 */
+	public function getPartialView()
+	{
+		$type = $this->get('search.type', NULL);
+		
+		return match($type)
+		{
+			'store'	=> 'daily_revenue.store',
+			'aov'	=> 'daily_revenue.aov',	 
+		};
+	}
+	
 	/* Output js */
 	public function searchFormData()
 	{
@@ -108,19 +123,20 @@ class DailyRevenueViewModel extends Fluent
 		return $this->only('search', 'options');
 	}
 	
-	/*有額外資訊能獨立加入,故要寫在Base*/
+	/*依不同功能的額外資訊,共用的在baseResponse */
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
 		
 		$type = data_get($this->statistics, 'modeType', NULL);
 		
-		if ($type == 'date')
+		if ($type == 'store')
 			$data = data_get($this->statistics, 'area.data', []);
 		else
 			$data = data_get($this->statistics, 'data', []);
 		
 		$response['hasResult'] = !empty($data);
+		$response['modeType'] = $type;
 		
 		return $response;
 	}

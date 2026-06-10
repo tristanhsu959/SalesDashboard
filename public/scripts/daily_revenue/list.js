@@ -11,12 +11,13 @@ document.addEventListener('alpine:init', () => {
 				this.searchData.stDate = this.searchData.today;
 			if (this.searchData.endDate == '')
 				this.searchData.endDate = this.searchData.today;
+			this.switchConditions();
 		},
 		
 		switchConditions(){
-			if (this.searchData.type == 'date')
+			if (this.searchData.type == 'store')
 			{
-				this.$refs.searchStDate.type = 'date';
+				this.$refs.searchStDate.type = 'date'; //input type
 				this.$refs.searchEndDate.disabled = false;
 				this.$refs.searchShopName.disabled = false;
 				
@@ -60,7 +61,7 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.type = 'date';
+			this.searchData.type = 'store';
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
 			this.searchData.shopName = '';
