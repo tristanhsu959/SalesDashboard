@@ -32,7 +32,8 @@ class AreaLib
 			24		=> 	Area::YCN, #BF
 			13		=> 	Area::YCN,
 			25		=> 	Area::YCN,
-			18		=> 	Area::YILAN, #BF
+			#18		=> 	Area::YILAN, #BF
+			18		=> 	Area::TAIPEI, #BF
 			15	 	=> 	Area::KAOHSIUNG, #BF
 			27	 	=> 	Area::KAOHSIUNG, #BF
 			16	 	=> 	Area::KAOHSIUNG,
@@ -67,7 +68,8 @@ class AreaLib
 			24		=> 	Area::YCN->value, #BF
 			13		=> 	Area::YCN->value,
 			25		=> 	Area::YCN->value,
-			18		=> 	Area::YILAN->value, #BF
+			#18		=> 	Area::YILAN->value, #BF
+			18		=> 	Area::TAIPEI->value, #BF
 			15	 	=> 	Area::KAOHSIUNG->value, #BF
 			27	 	=> 	Area::KAOHSIUNG->value, #BF
 			16	 	=> 	Area::KAOHSIUNG->value,
@@ -99,7 +101,7 @@ class AreaLib
 			
 			return match ($value) 
 			{
-				Area::TAIPEI->value		=> [1, 2, 3, 10002, 10003],
+				Area::TAIPEI->value		=> [1, 2, 3, 10002, 10003, 18],
 				Area::TCM->value		=> [6, 10004],
 				Area::CCT->value 		=> [9, 10005], # [9, 21, 10005]
 				Area::YCN->value		=> [12, 24],
@@ -124,7 +126,7 @@ class AreaLib
 				Area::CCT->value 		=> [10, 22],
 				Area::YCN->value		=> [13, 25],
 				Area::KAOHSIUNG->value 	=> [16, 28],
-				#Area::YILAN->value 		=> [],
+				Area::YILAN->value 		=> [], #無宜蘭
 				default => [],
 			};
 			

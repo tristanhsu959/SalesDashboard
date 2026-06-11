@@ -28,7 +28,7 @@
 			</p>
 			<p x-show="profile.roleArea.length > 0" class="row wrap auth-area">
 				<template x-for="areaId in profile.roleArea" :key="areaId">
-					<button class="chip round medium small-elevate secondary white-text">
+					<button x-show="options.area[areaId]" class="chip round medium small-elevate secondary white-text">
 						<span x-text="options.area[areaId]">Input</span>
 					</button >
 				</template>

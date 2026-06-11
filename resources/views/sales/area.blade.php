@@ -19,7 +19,7 @@
 						<template x-for="(pName, pId) in area.header.products" :key="pId">
 						<td>
 							<span x-show="!$store.sales.showAmount" x-text="areaData.products[pId]?.totalQty || 0"></span>
-							<span x-show="$store.sales.showAmount" x-text="'$' + Math.round(areaData.products[pId]?.totalAmount || 0)"></span>
+							<span x-show="$store.sales.showAmount" x-text="Helper.formatDollar(Math.round(areaData.products[pId]?.totalAmount || 0))"></span>
 						</td>
 						</template>
 					</tr>

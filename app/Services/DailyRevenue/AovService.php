@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Number;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -236,8 +237,8 @@ class AovService
 			$data['saleMonth'] 		= $items->pluck('saleMonth')->first();
 			$data['areaName']		= '全區';
 			$data['storeCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-			$data['amount']			= $items->pluck('amount')->sum();
-			$data['avgStore']		= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
+			$data['amount']			= $items->pluck('amount')->sum(); #合計營收
+			$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
 			$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
 			$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
 			$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
@@ -254,7 +255,7 @@ class AovService
 				$data['areaName']		= $items->pluck('areaName')->first();
 				$data['storeCount']		= $items->pluck('shopId')->unique()->count(); #店家數
 				$data['amount']			= $items->pluck('amount')->sum();
-				$data['avgStore']		= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
+				$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
 				$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
 				$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
 				$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
@@ -341,11 +342,11 @@ class AovService
 		$row[] = $srcData['saleMonth'];
 		$row[] = $srcData['areaName'];
 		$row[] = $srcData['storeCount']; #店家數
-		$row[] = $srcData['amount'];
-		$row[] = $srcData['avgStore']; #店均營收
+		$row[] = Number::currency($srcData['amount'], precision: 0);
+		$row[] = Number::currency($srcData['avgStoreAmount'], precision: 0); #店均營收
 		$row[] = $srcData['visitors']; #總來客
 		$row[] = $srcData['avgVisitors']; #店均來客
-		$row[] = $srcData['avgOrderValue']; #客單價
+		$row[] = Number::currency($srcData['avgOrderValue'], precision: 0); #客單價
 			
 		$export[] = $row;
 		

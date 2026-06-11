@@ -22,4 +22,11 @@ const Helper = {
 	removeError(errors, key) {
         return errors.delete(key);
     },
+	
+	formatDollar(num) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(num);
+    },
 };

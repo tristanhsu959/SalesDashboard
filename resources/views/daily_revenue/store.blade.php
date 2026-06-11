@@ -30,7 +30,7 @@
 							<td x-text="areaData.areaName"></td>
 							<td x-text="areaData.shopCount"></td>
 							<template x-for="(date, dateKey) in area.header.dayAmount" :key="dateKey">
-								<td x-text="'$'+ (areaData.dayAmount[date] || 0)"></td>
+								<td x-text="Helper.formatDollar(areaData.dayAmount[date] || 0)"></td>
 							</template>
 						</tr>
 						</template>
@@ -62,7 +62,7 @@
 							<td x-text="shopData.shopName"></td>
 							<td x-text="shopData.shopTypeName"></td>
 							<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
-								<td x-text="'$'+ (shopData.dayAmount[date] || 0)"></td>
+								<td x-text="Helper.formatDollar(shopData.dayAmount[date] || 0)"></td>
 							</template>
 						</tr>
 						</template>

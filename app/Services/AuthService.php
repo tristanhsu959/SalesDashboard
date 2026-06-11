@@ -89,6 +89,15 @@ class AuthService
 				$userInfo['roleArea'] 		= Area::getAll();
 			}
 			
+			#宜蘭已整併至大台北,但POS還是有宜蘭(但帳號管理已不會再有)
+			#自動綁定
+			$roleArea = collect($userInfo['roleArea']);
+			
+			if ($roleArea->contains(Area::TAIPEI->value))
+				$roleArea->push(Area::YILAN->value);
+			
+			$userInfo['roleArea'] = $roleArea->unique()->toArray();
+			
 			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態成功", [ __class__, __function__, __line__]);
 			
 			return $userInfo;

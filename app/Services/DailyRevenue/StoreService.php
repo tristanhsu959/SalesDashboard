@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Number;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -471,7 +472,8 @@ class StoreService
 			#要按Header的順序
 			foreach($srcData['header']['dayAmount'] as $colKey)
 			{
-				$row[] = data_get($area, "dayAmount.{$colKey}", 0);
+				$amount = data_get($area, "dayAmount.{$colKey}", 0);
+				$row[] = Number::currency($amount, precision: 0);
 			}
 			
 			$export[] = $row;
@@ -498,7 +500,8 @@ class StoreService
 			
 			foreach($srcData['header']['dayAmount'] as $colKey)
 			{
-				$row[] = data_get($shop, "dayAmount.{$colKey}", 0);
+				$amount = data_get($shop, "dayAmount.{$colKey}", 0);
+				$row[] = Number::currency($amount, precision: 0);
 			}
 			
 			$export[]= $row;

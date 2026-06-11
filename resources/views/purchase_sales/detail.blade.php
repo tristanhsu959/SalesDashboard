@@ -74,7 +74,7 @@
 									<td x-text="data['shortCode']"></td>
 									<td x-text="data['productName']"></td>
 									<td x-text="data['qty']"></td>
-									<td x-text="data['amount']"></td>
+									<td x-text="Helper.formatDollar(data['amount'])"></td>
 									<td x-text="data['memo']"></td>
 								</tr>
 								</template>
@@ -100,7 +100,7 @@
 									<td x-text="data['erpNo']"></td>
 									<td x-text="data['productName']"></td>
 									<td x-text="data['qty']"></td>
-									<td x-text="data['amount']"></td>
+									<td x-text="Helper.formatDollar(data['amount'])"></td>
 								</tr>
 								</template>
 							</tbody>

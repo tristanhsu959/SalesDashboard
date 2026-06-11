@@ -54,6 +54,10 @@ class DailyRevenueViewModel extends Fluent
 			'store'	=> '日營收', #原計算方式
 			'aov'	=> '客單統計(月)', #Average Order Value
 		];
+		
+		if ($this->brand == Brand::FJVEGGIE)
+			unset($type['aov']);
+		
 		$this->set('options.mode.type', $type);
 
 		#根據poserp.shop_kind

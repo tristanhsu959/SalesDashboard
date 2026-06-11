@@ -25,11 +25,11 @@
 										<td x-text="mainData['saleMonth']"></td>
 										<td x-text="mainData['areaName']"></td>
 										<td x-text="mainData['storeCount']"></td>
-										<td x-text="mainData['amount']"></td>
-										<td x-text="mainData['avgStore']"></td>
+										<td x-text="Helper.formatDollar(mainData['amount'])"></td>
+										<td x-text="Helper.formatDollar(mainData['avgStoreAmount'])"></td>
 										<td x-text="mainData['visitors']"></td>
 										<td x-text="mainData['avgVisitors']"></td>
-										<td x-text="mainData['avgOrderValue']"></td>
+										<td x-text="Helper.formatDollar(mainData['avgOrderValue'])"></td>
 									</tr>
 								</tbody>
 							</table>
@@ -58,11 +58,11 @@
 													<td x-text="detail['saleMonth']"></td>
 													<td x-text="detail['areaName']"></td>
 													<td x-text="detail['storeCount']"></td>
-													<td x-text="detail['amount']"></td>
-													<td x-text="detail['avgStore']"></td>
+													<td x-text="Helper.formatDollar(detail['amount'])"></td>
+													<td x-text="Helper.formatDollar(detail['avgStoreAmount'])"></td>
 													<td x-text="detail['visitors']"></td>
 													<td x-text="detail['avgVisitors']"></td>
-													<td x-text="detail['avgOrderValue']"></td>
+													<td x-text="Helper.formatDollar(detail['avgOrderValue'])"></td>
 												</tr>
 												</template>
 											</tbody>

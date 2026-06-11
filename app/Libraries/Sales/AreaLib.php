@@ -16,14 +16,14 @@ class AreaLib
 			'2'		=> 	Area::TCM,
 			'3'		=> 	Area::CCT,
 			'4'		=> 	Area::YCN,
-			'5'		=> 	Area::YILAN,
+			'5'		=> 	Area::TAIPEI, #Area::YILAN,
 			'6'	 	=> 	Area::KAOHSIUNG,
 			'A01'	=>  Area::TAIPEI,	
 			'A02'	=>  Area::TCM,	
 			'A03'	=>  Area::CCT,		
 			'A04'	=>  Area::YCN,
 			'A05'	=>  Area::KAOHSIUNG,
-			'A06'	=>  Area::YILAN,
+			'A06'	=>  Area::TAIPEI, #Area::YILAN,
 			default => Area::NONE,
 		};
 	}
@@ -37,14 +37,14 @@ class AreaLib
 			'2'		=> 	Area::TCM->value,
 			'3'		=> 	Area::CCT->value,
 			'4'		=> 	Area::YCN->value,
-			'5'		=> 	Area::YILAN->value,
+			'5'		=> 	Area::TAIPEI->value, #Area::YILAN->value,
 			'6'	 	=> 	Area::KAOHSIUNG->value,
 			'A01'	=>  Area::TAIPEI->value,	
 			'A02'	=>  Area::TCM->value,	
 			'A03'	=>  Area::CCT->value,		
 			'A04'	=>  Area::YCN->value,
 			'A05'	=>  Area::KAOHSIUNG->value,
-			'A06'	=>  Area::YILAN->value,
+			'A06'	=>  Area::TAIPEI->value, #Area::YILAN->value,
 			default => Area::NONE->value,
 		};
 	}
@@ -70,16 +70,16 @@ class AreaLib
 			
 			return match ($value) 
 			{
-				Area::TAIPEI->value		=> '1',
-				Area::TCM->value		=> '2',
-				Area::CCT->value 		=> '3',
-				Area::YCN->value		=> '4',
-				Area::YILAN->value 		=> '5',
-				Area::KAOHSIUNG->value 	=> '6',
+				Area::TAIPEI->value		=> ['1', '5'], #因pos還有宜蘭的id
+				Area::TCM->value		=> ['2'],
+				Area::CCT->value 		=> ['3'],
+				Area::YCN->value		=> ['4'],
+				Area::YILAN->value 		=> ['5'],
+				Area::KAOHSIUNG->value 	=> ['6'],
 				default => '0',
 			};
 			
-		})->toArray();
+		})->collapse()->toArray();
 	}
 	
 	#To Buygood shopgroup gid : toBuygoodId
@@ -90,16 +90,16 @@ class AreaLib
 			
 			return match ($value) 
 			{
-				Area::TAIPEI->value		=> 'A01',
-				Area::TCM->value		=> 'A02',
-				Area::CCT->value 		=> 'A03',
-				Area::YCN->value		=> 'A04',
-				Area::KAOHSIUNG->value 	=> 'A05',
-				Area::YILAN->value 		=> 'A06',
+				Area::TAIPEI->value		=> ['A01', 'A06'],
+				Area::TCM->value		=> ['A02'],
+				Area::CCT->value 		=> ['A03'],
+				Area::YCN->value		=> ['A04'],
+				Area::KAOHSIUNG->value 	=> ['A05'],
+				Area::YILAN->value 		=> ['A06'],
 				default => '0',
 			};
 			
-		})->toArray();
+		})->collapse()->toArray();
 	}
 	
 	#To Fj shopgroup gid(同bafang):toFjVeggieId
@@ -110,15 +110,15 @@ class AreaLib
 			
 			return match ($value) 
 			{
-				Area::TAIPEI->value		=> '1',
-				Area::TCM->value		=> '2',
-				Area::CCT->value 		=> '3',
-				Area::YCN->value		=> '4',
-				Area::YILAN->value 		=> '5',
-				Area::KAOHSIUNG->value 	=> '6',
+				Area::TAIPEI->value		=> ['1', '5'],
+				Area::TCM->value		=> ['2'],
+				Area::CCT->value 		=> ['3'],
+				Area::YCN->value		=> ['4'],
+				Area::YILAN->value 		=> ['5'],
+				Area::KAOHSIUNG->value 	=> ['6'],
 				default => '0',
 			};
 			
-		})->toArray();
+		})->collapse()->toArray();
 	}
 }
