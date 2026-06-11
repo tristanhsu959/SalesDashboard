@@ -40,7 +40,7 @@
 			</article>
 			
 			<div class="statistics">
-				<article class="store-info border s6">
+				<article class="store-info border">
 					<div class="search-date">
 						<div x-text="`${statistics.searchYear}.${statistics.searchMonth}`"></div>
 						<div class="day" x-text="statistics.searchDay"></div>

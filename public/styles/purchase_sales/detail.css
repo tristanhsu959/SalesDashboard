@@ -5,8 +5,7 @@ body main.app {
 
 section.purchase-sale-list {
 	.store-info {
-		width: 25%;
-		display: flex;
+		display: inline-flex;
 		background-color: #263238;
 		margin-right: .5rem;
 		color: #ce93d8;
