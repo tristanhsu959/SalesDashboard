@@ -14,6 +14,14 @@
 	<header class="page-nav">
 		<nav>
 			<a href="{{ route('product.create') }}" class="btn-create button circle"><i>add</i></a>
+			<nav class="no-space filter">
+				<div class="field label border prefix field-filter-dark small">
+					<i>filter_alt</i>
+					<input type="text" x-model="$store.productListStore.filter">
+					<label>篩選</label>
+				</div>
+				<button class="right-round" @click="$store.productListStore.filter = ''"><i>backspace</i></button>
+			</nav>
 		</nav>
 	</header>
 	
@@ -41,7 +49,7 @@
 				<template x-for="(brand, key) in brands">
 				<div class="page padding" :id="'page-' + key" :class="activeTab == key ? 'active':''">
 					<ul class="list border">
-						<template x-for="item in products[key]">
+						<template x-for="item in filterProducts(key)">
 						<li>
 							<span class="brand-label" x-text="item.productBrandId == 1 ? '八':'御'" :class="item.productBrandId == 1 ? 'bf':'bg'"></span>
 							<div class="max">

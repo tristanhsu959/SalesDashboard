@@ -69,9 +69,10 @@ class PurchaseProductService
 			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping($bgBrandId, FALSE);
 			
 			#下架沒有被設定成stop, 但erpNo似乎會是空值, 目前是全取
-			$list = collect($list)->map(function($items, $key) {
-				return collect($items)->unique('productNo')->map(function($item, $key){
-					$group = PurchaseManager::getGroupByShortCode($item['productNo']);
+			$list = collect($list)->map(function($items, $brandId) {
+				return collect($items)->unique('productNo')->map(function($item, $key) use($brandId){
+					
+					$group = PurchaseManager::getGroupByShortCode($brandId, $item['productNo']);
 					return array_merge($item, $group);
 				})->groupBy('groupId')->map(function($items, $key){
 					$temp['groupName'] 	= $items->pluck('groupName')->first();

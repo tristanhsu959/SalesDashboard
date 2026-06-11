@@ -5,6 +5,11 @@ document.addEventListener('alpine:init', () => {
 		tabIndex: Alpine.$persist(0),
 	});
 	
+	//filter cache
+	Alpine.store('productListStore', {
+		filter: '',
+	});
+	
 	Alpine.data('productList', (list, brands) => ({
 		products: list,
 		brands: brands,
@@ -25,6 +30,20 @@ document.addEventListener('alpine:init', () => {
 			const form = this.$refs.productListForm;
             form.action = url;
             form.submit();
+		},
+		
+		//filter
+		filterProducts(key) {
+			const searchKeyword = Alpine.store('productListStore').filter.toLowerCase();
+			
+			const list = Object.values(this.products[key]);
+			
+			const result = list.filter(product => 
+				String(product.productName || '').toLowerCase().includes(searchKeyword) ||
+				String(product.categoryName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
 		},
     }));
 });

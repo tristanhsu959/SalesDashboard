@@ -223,9 +223,9 @@ class PurchaseManager
 	 * @params: string
 	 * @return: array
 	 */
-	public function getGroupByShortCode($code)
+	public function getGroupByShortCode($brandId, $code)
 	{
-		$groupConfig = config('web.purchase.product_type.groupPrefix');
+		$groupConfig = config("web.purchase.product_type.groupPrefix.{$brandId}");
 		
 		foreach($groupConfig as $config)
 		{

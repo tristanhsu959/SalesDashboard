@@ -94,10 +94,11 @@ class ShipmentsService
 			"groupName" => "餡類"
 		]
 		*/
-		$list = collect($enableProducts)->map(function($item, $key) use($productMapping) {
+		$list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
+			
 			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
 			
-			$category = PurchaseManager::getGroupByShortCode($item['shortCode']);
+			$category = PurchaseManager::getGroupByShortCode($brandId, $item['shortCode']);
 			$item['groupId']	= $category['groupId'];
 			$item['groupName'] 	= $category['groupName'];
 			unset($item['brandId']);

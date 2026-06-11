@@ -27,6 +27,7 @@ class ProductService
 		try
 		{
 			$list = $this->_repository->getList();
+			
 			$list = collect($list)->map(function($item, $key){
 				$brandId = $item['productBrandId'];
 				$catId = $item['productCategory'];
@@ -34,7 +35,7 @@ class ProductService
 				$item['categoryName'] = config("web.sales.category.{$brandId}.{$catId}");
 				
 				return $item;
-			})->groupBy('productBrandId')->toArray();
+			})->sortBy('productCategory')->groupBy('productBrandId')->toArray();
 			
 			return ResponseLib::initialize($list)->success();
 		}
