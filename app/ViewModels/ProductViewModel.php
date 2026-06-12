@@ -21,6 +21,7 @@ class ProductViewModel extends Fluent
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= 'products';
 		$this->success();
+		$this->list			= [];
 	}
 	
 	/* initialize
@@ -50,9 +51,9 @@ class ProductViewModel extends Fluent
 	 * @params: 
 	 * @return: string
 	 */
-	public function getFormAction() : string
+	public function getFormAction($formAction) : string
     {
-		return match($this->action)
+		return match($formAction)
 		{
 			FormAction::CREATE => route('product.create.post'),
 			FormAction::UPDATE => route('product.update.post'),
@@ -80,11 +81,28 @@ class ProductViewModel extends Fluent
 		$this->set('formData.buygoodId', Brand::BUYGOOD->value); #給js用
 	}
 	
-	public function isDataEmpty()
+	/* Output js */
+	/*與統計不同,不使用trait*/
+	public function responseData()
 	{
-		if (empty(Arr::collapse($this->list)))
-			return TRUE;
-		else
-			return FALSE;
+		$response['status'] 	= $this->status();
+		$response['hasResult'] 	= !empty(Arr::collapse($this->list));
+		$response['createFormAction'] = route('product.create');
+		$response['options'] 	= $this->options;
+		
+		return $response;
+	}
+	
+	public function responseList()
+	{
+		return $this->only('list', 'options');
+	}
+	
+	public function responseDetail()
+	{
+		$response = $this->only('formData', 'options');
+		$response['options']['formAction'] = $this->getFormAction($this->action);
+		
+		return $response;
 	}
 }

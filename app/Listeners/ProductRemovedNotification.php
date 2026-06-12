@@ -6,7 +6,7 @@ use App\Events\ProductRemoved;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Repositories\NewReleaseSettingRepository;
-use App\Repositories\SalesSettingRepository;
+use App\Repositories\SalesProductRepository;
 use Exception;
 use Log;
 
@@ -17,7 +17,7 @@ class ProductRemovedNotification
      */
     public function __construct(
 		protected NewReleaseSettingRepository $_newItemRepository, 
-		protected SalesSettingRepository $_salesSettingRepository)
+		protected SalesProductRepository $_salesProductRepository)
     {
        
     }
@@ -31,7 +31,7 @@ class ProductRemovedNotification
 		{ 
 			$productId = $event->productId;
 			
-			$this->_salesSettingRepository->updateStatus($productId);
+			$this->_salesProductRepository->updateStatus($productId);
 			$this->_newItemRepository->updateStatus($productId);
 			
 		}

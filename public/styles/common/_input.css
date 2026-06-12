@@ -52,6 +52,7 @@
 	--surface: #fff3e0;
 }
 /* Others */
+
 /* dark bg */
 .filter {
 	.field-filter-dark {
@@ -64,6 +65,13 @@
 		input {
 			color: #fafafa;
 		}
+		select {
+			color: #fafafa;
+			option {
+				color: #333333;
+			}
+		}
+		
 		&:has(input:placeholder-shown) label {
 			color: var(--primary);
 		}
@@ -71,6 +79,7 @@
 			color: var(--primary);
 		}
 	}
+	
 	button {
 		background-color: #f48fb1;
 	}

@@ -113,4 +113,19 @@ class SalesProductRepository extends Repository
 			
 		return TRUE;
 	}
+	
+	/* Update status invoke by product setting
+	 * @params: int
+	 * @return: boolean
+	 */
+	public function updateStatus($productId)
+	{
+		$db = $this->connectSalesDashboard();
+		$db->table('sales_product_setting')
+			->where('salesProductId', '=', $productId)
+			->delete();
+			
+		return TRUE;
+	}
+	
 }

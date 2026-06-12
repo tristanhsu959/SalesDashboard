@@ -10,11 +10,12 @@
 
 @section('content')
 
-<form x-data='productForm(@json($viewModel->formData), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
-	<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
-	@csrf
 	
-	<section class="product-data container">
+<section x-data="productForm(@js($viewModel->responseDetail()))" class="product-data container">
+	<form :action="options.formAction" method="post" novalidate @submit.prevent="validate()">
+		<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
+		@csrf
+
 		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brandId')">
 			<i class="small red-text">asterisk</i>
 			<select x-model="formData.brandId" name="brandId" @change="initErpNoInput(); initCategory();">
@@ -63,7 +64,7 @@
 			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
 			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 		</nav>
-	</section>
-</form>
+	</form>
+</section>
 
 @endsection

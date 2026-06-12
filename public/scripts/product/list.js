@@ -1,22 +1,22 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.store('product', {
+	Alpine.store('productSetting', {
 		tabIndex: Alpine.$persist(0),
+		filterCat: {
+			1: '',
+			2: '',
+		},
 	});
 	
-	//filter cache
-	Alpine.store('productListStore', {
-		filter: '',
-	});
-	
-	Alpine.data('productList', (list, brands) => ({
-		products: list,
-		brands: brands,
+	Alpine.data('productList', (response) => ({
+		products: response.list,
+		brands: response.options.brands,
+		categories: response.options.categories,
 		activeTab: 0,
 		
 		init() {
-			this.activeTab = Alpine.store('product').tabIndex;
+			this.activeTab = Alpine.store('productSetting').tabIndex;
 			
 			if (! this.activeTab)
 				this.activeTab = 1;
@@ -33,14 +33,12 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		//filter
-		filterProducts(key) {
-			const searchKeyword = Alpine.store('productListStore').filter.toLowerCase();
-			
-			const list = Object.values(this.products[key]);
+		filterProducts(brandId) {
+			const searchCat	= Alpine.store('productSetting').filterCat[brandId].toLowerCase();
+			const list 		= Object.values(this.products[brandId]);
 			
 			const result = list.filter(product => 
-				String(product.productName || '').toLowerCase().includes(searchKeyword) ||
-				String(product.categoryName || '').toLowerCase().includes(searchKeyword)
+				String(product.categoryName || '').toLowerCase().includes(searchCat)
 			);
 			
 			return result;

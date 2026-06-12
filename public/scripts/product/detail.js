@@ -1,10 +1,10 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('productForm', (formData, options) => ({
-		initFormData: {...formData}, /*避免引用同一object位址*/
-		formData: {...formData},
-		options: {...options},
+	Alpine.data('productForm', (response) => ({
+		initFormData: {...response.formData}, /*避免引用同一object位址*/
+		formData: {...response.formData},
+		options: {...response.options},
 		hasSecondaryNo: false,
 		errors: new Set(),
 		
