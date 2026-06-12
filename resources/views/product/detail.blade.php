@@ -12,8 +12,8 @@
 
 	
 <section x-data="productForm(@js($viewModel->responseDetail()))" class="product-data container">
-	<form :action="options.formAction" method="post" novalidate @submit.prevent="validate()">
-		<input type="hidden" name="id" value="{{$viewModel->formData['id']}}" x-model="formData.id">
+	<form :action="formData.formAction" method="post" novalidate @submit.prevent="validate()">
+		<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 		@csrf
 
 		<div class="field label suffix border field-dark-blue w25 prefix" :class="Helper.hasError(errors, 'brandId')">

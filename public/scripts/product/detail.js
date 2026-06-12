@@ -14,7 +14,7 @@ document.addEventListener('alpine:init', () => {
 		
 		initErpNoInput() {
 			this.errors.delete('brandId');
-			this.hasSecondaryNo = (this.formData.brandId == formData.buygoodId);
+			this.hasSecondaryNo = (this.formData.brandId == response.formData.buygoodId);
 		},
 		
 		initCategory(){

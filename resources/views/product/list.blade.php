@@ -17,18 +17,18 @@
 			<a :href="response.createFormAction" class="btn-create button circle"><i>add</i></a>
 			
 			<template x-for="(brand, brandId) in response.options.brands">
-			<nav x-show="brandId == $store.productSetting.tabIndex" class="no-space filter">
-				<div class="field label suffix border field-filter-dark">
-					<select x-model="$store.productSetting.filterCat[brandId]" id="filterCat">
-						<option value="">全部</option>
-						<template x-for="(catName, catId) in response.options.categories[brandId]" :key="catId">
-							<option x-text="catName" :value="catName"></option>
-						</template>
-					</select>
-					<label>篩選分類</label>
-					<i>arrow_drop_down</i>
-				</div>
-			</nav>
+				<nav x-show="brandId == $store.productSetting.tabIndex" class="no-space filter">
+					<div class="field label suffix border field-filter-dark">
+						<select x-model="$store.productSetting.filterCat[brandId]" id="filterCat">
+							<option value="">全部</option>
+							<template x-for="(catName, catId) in response.options.categories[brandId]" :key="catId">
+								<option x-text="catName" :value="catName"></option>
+							</template>
+						</select>
+						<label>篩選分類</label>
+						<i>arrow_drop_down</i>
+					</div>
+				</nav>
 			</template>
 		</nav>
 	</header>
@@ -37,7 +37,7 @@
 		<section class="container">
 			<article class="error-container border">
 				<div class="row">
-					<i>error</i><div class="max">查詢時發生錯誤，請重新查詢</div>
+					<i>error</i><div class="max">讀取產品料號設定時發生錯誤，請重新查詢</div>
 				</div>
 			</article>
 		</section>
@@ -47,7 +47,7 @@
 		<section class="product-list container">
 			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
+					<i>info</i><div class="max">查無產品設定</div>
 				</div>
 			</article>
 			

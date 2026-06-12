@@ -1,10 +1,10 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('salesSettingForm', (formData, options) => ({
-		oriFormData: structuredClone(formData), //deep copy
-		formData: formData,
-		options: options,
+	Alpine.data('salesSettingForm', (response) => ({
+		oriFormData: structuredClone(response.formData), //deep copy
+		formData: response.formData,
+		options: response.options,
 		errors: new Set(),
 		
 		init() {

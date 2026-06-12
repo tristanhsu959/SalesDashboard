@@ -44,6 +44,7 @@ class SalesProductViewModel extends Fluent
 	{
 		$this->set('options.brands', Brand::toArray()); 
 		$this->set('options.products', $this->_service->getProductList()); 
+		$this->set('options.categories', config('web.sales.category'));
 	}
 	
 	/* Form submit action
@@ -71,6 +72,31 @@ class SalesProductViewModel extends Fluent
 		#不分brand
 		$this->set('formData.brandId', Brand::BAFANG); #default brand
 		$this->set('formData.productIds', $productIds);
+	}
+	
+	/* Output js */
+	/*與統計不同,不使用trait*/
+	public function responseData()
+	{
+		$response['status'] 	= $this->status();
+		$response['hasResult'] 	= !empty(Arr::collapse($this->list));
+		$response['updateFormAction'] = route('sales_product.update');
+		$response['options'] 	= $this->options;
+		
+		return $response;
+	}
+	
+	public function responseList()
+	{
+		return $this->only('list', 'options');
+	}
+	
+	public function responseDetail()
+	{
+		$response = $this->only('formData', 'options');
+		$response['formData']['formAction'] = $this->getFormAction($this->action);
+		
+		return $response;
 	}
 	
 	public function isDataEmpty()
