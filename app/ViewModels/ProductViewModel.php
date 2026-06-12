@@ -101,7 +101,7 @@ class ProductViewModel extends Fluent
 	public function responseDetail()
 	{
 		$response = $this->only('formData', 'options');
-		$response['options']['formAction'] = $this->getFormAction($this->action);
+		$response['formData']['formAction'] = $this->getFormAction($this->action);
 		
 		return $response;
 	}
