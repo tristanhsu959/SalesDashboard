@@ -16,6 +16,12 @@
 
 @section('content')
 <section class="section-wrapper container">
+	<section class="container">
+		<h6 class="red-text">Dashboard</h6>
+		<pre class="red-border"><i class="right-padding">commit</i>版本更新日期：2026-06-15</pre>
+		<pre class="red-border"><i class="right-padding">commit</i>版本更新後若查詢顯示空白頁，請按<code class="pink white-text tiny-padding round">Ctrl+F5</code>清除瀏覽器暫存</pre>
+	</section>
+	
 	<!--section class="container">
 		<h6 class="red-text">Release Notes</h6>
 		<pre class="red-border"><i class="right-padding">kid_star</i>銷售統計/出貨總量查詢：查詢可跨分類複選</pre>
