@@ -62,7 +62,7 @@
 			</div>
 			
 			<div x-show="searchData.by == 'category'" class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
-				<select x-model="searchData.category" name="searchCategory" @change="searchData.shortCodes = []">
+				<select x-model="searchData.category" name="searchCategory"> <!--@change="searchData.shortCodes = []"-->
 					<option value="">請選擇</option>
 					<template x-for="(name, catId) in options.category" :key="catId">
 						<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
@@ -70,6 +70,7 @@
 				</select>
 				<label>類別</label>
 				<i>arrow_drop_down</i>
+				<output x-text="`已選 ${searchData.shortCodes.length} 個項目`" class="red-text"></output>
 			</div>
 			
 			<template x-for="(products, catId) in options.products" :key="catId">
