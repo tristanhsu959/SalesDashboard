@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-    <link href="{{ asset('styles/home/purchase_board.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/home/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -16,6 +16,12 @@
 
 @section('content')
 <section class="section-wrapper container">
+	<!--section class="container">
+		<h6 class="red-text">Release Notes</h6>
+		<pre class="red-border"><i class="right-padding">kid_star</i>銷售統計/出貨總量查詢：查詢可跨分類複選</pre>
+		<pre class="red-border"><i class="right-padding">kid_star</i>門店營收：新增客單統計查詢</pre>
+		<pre class="red-border"><i class="right-padding">kid_star</i>門店進貨及銷售：新增功能(測試中)</pre>
+	</section-->
 	@if(!$viewModel->hasSetPassword())
 	<pre class="red-border">您尚未設定系統密碼，請點擊 <i class="orange circle small">person</i> 進行密碼設定</pre>
 	@endif
