@@ -79,7 +79,7 @@ class AreaLib
 				default => '0',
 			};
 			
-		})->collapse()->toArray();
+		})->collapse()->unique()->toArray();
 	}
 	
 	#To Buygood shopgroup gid : toBuygoodId
@@ -99,7 +99,7 @@ class AreaLib
 				default => '0',
 			};
 			
-		})->collapse()->toArray();
+		})->collapse()->unique()->toArray();
 	}
 	
 	#To Fj shopgroup gid(同bafang):toFjVeggieId
@@ -119,6 +119,6 @@ class AreaLib
 				default => '0',
 			};
 			
-		})->collapse()->toArray();
+		})->collapse()->unique()->toArray();
 	}
 }

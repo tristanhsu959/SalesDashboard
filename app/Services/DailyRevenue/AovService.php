@@ -121,7 +121,7 @@ class AovService
 		{
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($stDate))->addMonth()->format('Y-m-d H:i:s');
+			$endDate 		= (new Carbon($params->endDate))->addMonth()->format('Y-m-d H:i:s');
 			$shopType 		= $params->shopType;
 			$shopName 		= FALSE;
 			$userAreaIds 	= $params->userAreaIds;
@@ -155,16 +155,17 @@ class AovService
 		*/
 		
 		#再過濾一次, 這裏無法補全門店
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		#$saleData = PosManager::filterExceptStore($params->brand, $saleData);
 		
 		#先處理基本的計算
 		$baseData = collect($saleData)->map(function($item, $key){
+			
 			#因amount有可能是0
 			$totalSales = round(floatval($item['totalSales']) + floatval($item['totalDischarge']), 2); #不含折讓 
 			$amount		= round($item['amount'], 2);
 			
 			$temp['saleMonth'] 		= Carbon::parse($item['saleDate'])->format('Y-m');
-			$temp['shopId'] 		= $item['shopId'];
+			$temp['shopCount'] 		= intval($item['shopCount']);
 			$temp['shopKind'] 		= $item['shopKind'];
 			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
@@ -173,7 +174,7 @@ class AovService
 			
 			return $temp;
 		})->toArray();
-			
+		
 		$params->baseData = $baseData;
 	}
 	
@@ -234,36 +235,38 @@ class AovService
 		#全區總計By shop kind
 		$total = collect($baseData)->groupBy('shopKind')->map(function($items, $key) {
 			
-			$data['saleMonth'] 		= $items->pluck('saleMonth')->first();
-			$data['areaName']		= '全區';
-			$data['storeCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-			$data['amount']			= $items->pluck('amount')->sum(); #合計營收
-			$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
-			$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
-			$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
-			$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
-				
-			return $data;
-			
+			return $items->groupBy('saleMonth')->map(function($items, $key){
+				$data['saleMonth'] 		= $items->pluck('saleMonth')->first();
+				$data['areaName']		= '全區';
+				$data['storeCount']		= $items->pluck('shopCount')->sum(); #店家數
+				$data['amount']			= $items->pluck('amount')->sum(); #合計營收
+				$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
+				$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
+				$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
+				$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
+					
+				return $data;
+			})->sortKeys();
+
 		})->sortKeys()->toArray();
 		
 		#分區總計By shop kind
 		$subTotal = collect($baseData)->groupBy('shopKind')->map(function($items, $key) {
 			
-			$temp = $items->groupBy('areaId')->map(function($items, $key){
-				$data['saleMonth'] 		= $items->pluck('saleMonth')->first();
-				$data['areaName']		= $items->pluck('areaName')->first();
-				$data['storeCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-				$data['amount']			= $items->pluck('amount')->sum();
-				$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
-				$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
-				$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
-				$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
-				
-				return $data;
-			})->sortKeys()->values();
-			
-			return $temp;
+			return $items->groupBy('saleMonth')->map(function($items, $key){
+				return $items->groupBy('areaId')->map(function($items, $key){
+					$data['saleMonth'] 		= $items->pluck('saleMonth')->first();
+					$data['areaName']		= $items->pluck('areaName')->first();
+					$data['storeCount']		= $items->pluck('shopCount')->sum(); #店家數
+					$data['amount']			= $items->pluck('amount')->sum();
+					$data['avgStoreAmount']	= round(floatval($data['amount']) / intval($data['storeCount']), 2); #店均營收
+					$data['visitors']		= $items->pluck('visitors')->sum(); #總來客
+					$data['avgVisitors']	= round($data['visitors'] / $data['storeCount'], 2); #店均來客
+					$data['avgOrderValue']	= round($data['amount'] / $data['visitors'], 2); #客單價
+					
+					return $data;
+				})->sortKeys()->values();
+			})->sortKeys();
 			
 		})->sortKeys()->toArray();
 		
@@ -337,18 +340,21 @@ class AovService
 		#statistics data
 		if (empty($srcData))
 			return $export;
-			
-		$row = [];
-		$row[] = $srcData['saleMonth'];
-		$row[] = $srcData['areaName'];
-		$row[] = $srcData['storeCount']; #店家數
-		$row[] = Number::currency($srcData['amount'], precision: 0);
-		$row[] = Number::currency($srcData['avgStoreAmount'], precision: 0); #店均營收
-		$row[] = $srcData['visitors']; #總來客
-		$row[] = $srcData['avgVisitors']; #店均來客
-		$row[] = Number::currency($srcData['avgOrderValue'], precision: 0); #客單價
-			
-		$export[] = $row;
+		
+		foreach($srcData as $month => $data)
+		{
+			$row = [];
+			$row[] = $data['saleMonth'];
+			$row[] = $data['areaName'];
+			$row[] = $data['storeCount']; #店家數
+			$row[] = Number::currency($data['amount'], precision: 0);
+			$row[] = Number::currency($data['avgStoreAmount'], precision: 0); #店均營收
+			$row[] = $data['visitors']; #總來客
+			$row[] = $data['avgVisitors']; #店均來客
+			$row[] = Number::currency($data['avgOrderValue'], precision: 0); #客單價
+				
+			$export[] = $row;
+		}
 		
 		return $export;
 	}

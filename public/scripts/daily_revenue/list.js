@@ -18,18 +18,18 @@ document.addEventListener('alpine:init', () => {
 			if (this.searchData.type == 'store')
 			{
 				this.$refs.searchStDate.type = 'date'; //input type
-				this.$refs.searchEndDate.disabled = false;
+				this.$refs.searchEndDate.type = 'date';
 				this.$refs.searchShopName.disabled = false;
-				
 				this.searchData.stDate = this.searchData.today;
+				this.searchData.endDate = this.searchData.today;
 			}
-			else
+			else //aov
 			{
 				this.$refs.searchStDate.type = 'month';
-				this.$refs.searchEndDate.disabled = true;
+				this.$refs.searchEndDate.type = 'month';
 				this.$refs.searchShopName.disabled = true;
-				
 				this.searchData.stDate = this.searchData.thisMonth;
+				this.searchData.endDate = this.searchData.thisMonth;
 			}
 		},
 		
@@ -62,14 +62,35 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = 'store';
-			this.searchData.stDate = this.searchData.today;
-			this.searchData.endDate = this.searchData.today;
 			this.searchData.shopName = '';
 			this.errors.clear();
 			this.switchConditions();
 		},
     }));
 	
-	
+	Alpine.data('aovStatistics', (statistics) => ({
+		statisticsData: {...statistics.data},
+		expansion: new Set(),
+		
+		init() {
+			this.expansion.clear();;
+		},
+		
+		addExpansion(typeKey, month) {
+			const key = `${typeKey}-${month}`;
+			
+			if (this.expansion.has(key))
+				this.expansion.delete(key);
+			else
+				this.expansion.add(key);
+		},
+		
+		showDetail(typeKey, month) {
+			const key = `${typeKey}-${month}`;
+			
+			return this.expansion.has(key);
+		},
+		
+    }));
 });
 

@@ -147,7 +147,6 @@ class DailyRevenueRepository extends Repository
 		$result = $db
 				->table(DB::raw('SHOP00 as a WITH(NOLOCK)'))
 				->join(DB::raw('SALE00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
-				#->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'a.SHOP_KIND')
 				->whereIn('a.gid', $authAreaIds)
 				->whereIn('a.SHOP_KIND', $shopType)
 				->whereNotIn('a.SHOP_ID', $excepts)
@@ -155,14 +154,15 @@ class DailyRevenueRepository extends Repository
 				->where('b.SALE_DATE', '>=', $stDate)
 				->where('b.SALE_DATE', '<', $endDate)
 				#->select('a.SHOP_ID as shopId', 'c.Sk_name as typeName', 'a.gid as areaId')
-				->select('a.SHOP_ID as shopId', 'a.SHOP_KIND as shopKind', 'a.gid as areaId')
+				->select('a.SHOP_KIND as shopKind', 'a.gid as areaId')
 				->selectRaw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0) as saleDate')
+				->selectRaw('count(distinct a.SHOP_ID) as shopCount')
 				->selectRaw('count(a.SHOP_ID) as visitors')
 				->selectRaw('sum(b.amount) as amount')
 				->selectRaw('sum(b.TOT_SALES) as totalSales')
 				->selectRaw('sum(b.TOT_EXTRA) as totalExtra')
 				->selectRaw('sum(b.TOT_DISCHARGE) as totalDischarge')
-				->groupBy('a.SHOP_ID', 'a.SHOP_KIND', 'a.gid', DB::raw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0)'))#->ddRawSql();
+				->groupBy('a.SHOP_KIND', 'a.gid', DB::raw('DATEADD(month, DATEDIFF(month, 0, b.SALE_DATE), 0)'))#->ddRawSql();
 				->get()
 				->toArray();
 		
