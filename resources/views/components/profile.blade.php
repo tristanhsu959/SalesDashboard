@@ -55,7 +55,9 @@
 		<form :action="options.updateRoute" method="post" novalidate @submit.prevent="validate()">
 			<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 			@csrf
-			<h6 x-text="profile.displayName || profile.account"></h6>
+			
+			<h6><i>assignment_ind</i><span x-text="profile.displayName || profile.account"></span></h6>
+			
 			<div class="field label border field-purple prefix">
 				<i>
 					<label class="checkbox">
@@ -115,6 +117,7 @@
 				<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 			
 			</nav>
+			
 		</form>
 		</div>
 	</div>

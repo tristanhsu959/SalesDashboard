@@ -14,24 +14,22 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		<div class="field middle-align">
-			<nav class="wrap">
-				<template x-for="(name, id) in options.type" :key="id">
-					<label class="radio field-red">
-						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-						<span x-text="name"></span>
-					</label>
-				</template>
-			</nav>
-		</div>
-		<div class="space"></div>
+		
+		<nav class="wrap">
+			<template x-for="(name, id) in options.type" :key="id">
+				<label class="radio field-red">
+					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>
+		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'date')">
 			<input type="date" name="searchDate" maxlength="10" x-model="searchData.date" x-ref="searchDate" @input="errors.delete('date')" :max="searchData.today">
 			<label>查詢日期</label>
 		</div>
 		
 		<div x-show="searchData.type == 'area'">
-			<div class="space"></div>
 			<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'areaId')">
 				<select x-model="searchData.areaId" name="searchAreaId" :disabled="searchData.type != 'area'" @change="errors.delete('areaId')">
 					<option value="">請選擇</option>
@@ -45,7 +43,6 @@
 		</div>
 		
 		<div x-show="searchData.type == 'storeName'">
-			<div class="space"></div>
 			<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
 				<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName" :disabled="searchData.type != 'storeName'" @input="errors.delete('storeName')">
 				<label>門店名稱</label>

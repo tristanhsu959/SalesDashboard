@@ -37,13 +37,11 @@
 			</div>
 		</div>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="month" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.currentDate">
 			<label>開始日期</label>
 		</div>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="month" name="searchEndDate" maxlength="7" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.currentDate">
 			<label>結束日期</label>

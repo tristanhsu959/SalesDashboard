@@ -53,8 +53,9 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.stDate = '';
-			this.searchData.endDate = '';
+			this.searchData.stDate = this.searchData.today;
+			this.searchData.endDate = this.searchData.today;
+			this.searchData.shopName = '';
 			this.searchData.category = '';
 			this.searchData.productIds = [];
 			this.errors.clear();

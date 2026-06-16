@@ -16,7 +16,7 @@
 		@csrf
 		
 		<h5>查詢</h5>
-		<div class="space"></div>
+		
 		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'releaseId')">
 			<select x-model="searchData.releaseId" name="searchReleaseId" @change="initSearchStDate($event.target.value);" x-effect="$nextTick(() => $el.value = searchData.releaseId)">
 				<option value="0">請選擇</option>
@@ -28,13 +28,11 @@
 			<i>arrow_drop_down</i>
 		</div>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
 		</div>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
