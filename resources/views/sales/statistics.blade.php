@@ -34,10 +34,10 @@
 			<label>結束日期</label>
 		</div>
 		
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
+		<!--div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
 			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
 			<label>找店名</label>
-		</div>
+		</div-->
 		
 		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
 			<select x-model="searchData.category" name="searchCategory"><!-- @change="searchData.productIds = []"-->
