@@ -18,8 +18,8 @@
 <section class="section-wrapper container">
 	<section class="container">
 		<h6 class="red-text">Dashboard</h6>
-		<pre class="red-border"><i class="right-padding">commit</i>版本更新日期：2026-06-15</pre>
-		<pre class="red-border"><i class="right-padding">commit</i>版本更新後若查詢顯示空白頁，請按<code class="pink white-text tiny-padding round">Ctrl+F5</code>清除瀏覽器暫存</pre>
+		<!--pre class="red-border"><i class="right-padding">commit</i>版本更新日期：2026-06-15</pre-->
+		<pre class="red-border"><i class="right-padding">commit</i>因版本更新，查詢可能顯示空白，請按 <code class="grey white-text tiny-padding">Ctrl</code> + <code class="grey white-text tiny-padding">F5</code> 清除瀏覽器暫存</pre>
 	</section>
 	
 	<!--section class="container">
