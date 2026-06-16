@@ -86,8 +86,9 @@ form {
 	.statistics-aov {
 		margin-bottom: 1rem;
 		
-		ul li details ul li {
-			background-color: var(--background);
+		table tbody tr.area-detail {
+			background-color: #37474f;
+			color: #00e5ff;
 		}
 	}
 }
