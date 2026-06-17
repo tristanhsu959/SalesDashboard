@@ -64,14 +64,14 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchProductCodes)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchProductCodes);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -110,7 +110,7 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchProductCodes)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
 	{
 		$params = new Fluent();
 		
@@ -118,11 +118,21 @@ class PurchaseReportService
 		$userAreaIds = $currentUser->roleArea;
 		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes]);
+		
+		#處理areaIds
+		if (empty($searchAreaIds))
+			$searchAreaIds = $userAreaIds; #未選取全部
+		else
+		{
+			$searchAreaIds = collect($searchAreaIds)->filter(function($value, $key) use($userAreaIds){
+				return in_array($value, $userAreaIds);
+			});
+		}
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
-				->productCodes($searchProductCodes)
+				->areaIds($searchAreaIds)->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		
 		return $params;

@@ -104,7 +104,7 @@ class PerformanceService
 			$this->_getProductIdByCode($params);
 			
 			#2.Build params
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->areaIds, $params->stDate, $params->endDate);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -176,7 +176,7 @@ class PerformanceService
 			$brand 			= $params->brand;
 			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
 			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
-			$userAreaIds	= $params->userAreaIds;
+			$userAreaIds	= $params->areaIds;
 			$productIds 	= $params->productIds;
 			
 			$orderData = $this->_repository->getOrderDataByPerformance($brand, $userAreaIds, $stDate, $endDate, $productIds);

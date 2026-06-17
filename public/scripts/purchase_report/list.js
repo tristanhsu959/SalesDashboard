@@ -7,8 +7,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			this.searchData.stDate = this.searchData.today;
-			this.searchData.endDate = this.searchData.today;
+
 		},
 		
 		search() {
@@ -45,6 +44,7 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.type = Object.keys(this.options.mode.type)[0];
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
+			this.searchData.areaIds = []; 
 			this.errors.clear();
 		},
     }));

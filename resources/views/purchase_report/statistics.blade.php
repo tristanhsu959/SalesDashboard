@@ -35,6 +35,18 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
+		<fieldset class="light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.mode.areaList" :key="areaId">
+				<label class="checkbox">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+		</fieldset>
+
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

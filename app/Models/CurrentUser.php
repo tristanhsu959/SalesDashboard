@@ -100,11 +100,15 @@ class CurrentUser extends Fluent
 	public function getAreaPermissionsMap()
 	{
 		$areaList = Area::options();
-		dd($areaList);
-		if ($this->isSupervisor())
-			return config('web.menu.enabled');
 		
-		return $this->get('rolePermission', []);
+		if ($this->isSupervisor())
+			return $areaList;
+		
+		$areaList = collect($areaList)->filter(function($item, $key) {
+			return in_array($key, $this->roleArea);
+		})->toArray();
+		
+		return $areaList;
 	}
 	
 	/* Show available name

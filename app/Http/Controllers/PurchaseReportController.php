@@ -46,10 +46,11 @@ class PurchaseReportController extends Controller
 		$searchType			= $request->input('searchType');
 		$searchStDate		= $request->input('searchStDate');
 		$searchEndDate		= $request->input('searchEndDate');
-		$searchProductCodes	= $request->input('searchProductCodes', []);
+		$searchAreaIds		= $request->array('searchAreaIds');
+		$searchProductCodes	= $request->array('searchProductCodes'); #目前尚未用到
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchProductCodes); 
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -57,7 +58,7 @@ class PurchaseReportController extends Controller
 			'searchEndDate'	=> 'required',
         ]);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchProductCodes);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
