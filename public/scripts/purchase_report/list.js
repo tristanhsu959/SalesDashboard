@@ -7,7 +7,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-
+			console.log(searchData);
 		},
 		
 		search() {

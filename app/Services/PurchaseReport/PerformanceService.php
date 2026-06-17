@@ -213,7 +213,7 @@ class PerformanceService
 			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
 			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
-			$userAreaIds 	= $params->userAreaIds;
+			$userAreaIds 	= $params->areaIds;
 			
 			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
 			

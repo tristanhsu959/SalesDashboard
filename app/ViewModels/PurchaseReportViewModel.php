@@ -84,14 +84,16 @@ class PurchaseReportViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'performance', $searchStDate = '', $searchEndDate = '', $searchAreaIds = [], $searchProductCodes = [])
+	public function keepSearchData($searchType = 'performance', $searchStDate = NULL, $searchEndDate = NULL, $searchAreaIds = [], $searchProductCodes = [])
     {
+		$today = Carbon::now()->format('Y-m-d');
+		
 		$this->set('search.type', $searchType);
-		$this->set('search.stDate', $searchStDate);
-		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.stDate', $searchStDate ?? $today);
+		$this->set('search.endDate', $searchEndDate ?? $today);
 		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.productCodes', $searchProductCodes);
-		$this->set('search.today', Carbon::now()->format('Y-m-d')); 
+		$this->set('search.today', $today); 
 		$this->set('search.tomorrow', Carbon::tomorrow()->format('Y-m-d'));
 	}
 	

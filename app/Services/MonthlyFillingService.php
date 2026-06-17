@@ -65,7 +65,7 @@ class MonthlyFillingService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchType, $searchRange)
+	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchType, $searchRange)
 	{
 		try
 		{
@@ -92,7 +92,7 @@ class MonthlyFillingService
 					$service = app(FactoryService::class);
 				
 				#執行統計
-				$this->_statistics = $service->analysisStatisticsData($params);
+				$this->_statistics = $service->analysis($params);
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}

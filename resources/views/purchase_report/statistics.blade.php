@@ -39,14 +39,14 @@
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.mode.areaList" :key="areaId">
-				<label class="checkbox">
+				<label class="checkbox check-pink">
 					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
 					<span x-text="areaName"></span>
 				</label>
 				</template>
 			</nav>
 		</fieldset>
-
+		
 		<div class="space"></div>
 		<nav class="right-align group split">
 			<button type="submit" class="btn-search left-round large"><i>search</i>查詢</button>

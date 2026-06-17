@@ -50,7 +50,7 @@ class StoreService
 	 * @params: array
 	 * @return: array
 	 */
-	public function analysisStatisticsData($params)
+	public function analysis($params)
 	{
 		try
 		{
@@ -142,7 +142,7 @@ class StoreService
 			$codes		= array_map('strval', array_keys(config('web.purchase.monthly_filling.totalCount.code')));
 			
 			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
-			
+			dd($ids);
 			$ids = collect($ids)->map(function($item, $key){
 				return (int)$item;
 			})->toArray();

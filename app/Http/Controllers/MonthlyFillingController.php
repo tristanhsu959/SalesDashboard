@@ -64,7 +64,7 @@ class MonthlyFillingController extends Controller
 			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $function, $searchStDate, $searchEndDate, $searchType, $searchRange);
+		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate, $searchType, $searchRange);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

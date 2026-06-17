@@ -52,7 +52,7 @@ class FactoryService
 	 * @params: string
 	 * @return: array
 	 */
-	public function analysisStatisticsData($params)
+	public function analysis($params)
 	{
 		try
 		{
