@@ -40,7 +40,8 @@ class LocalLegacyRepository  extends Repository
 				})
 				->where('o.amount', '>', 0)
 				->whereIn('o.factoryNo', $factoryNos)
-				->get();
+				->get()
+				->toArray();
 				
 		return $result;
 	}

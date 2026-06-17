@@ -17,6 +17,7 @@ class PurchaseManager
 	{
 	}
 	
+	/******************** Store ********************/
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array
@@ -24,34 +25,26 @@ class PurchaseManager
 	 */
 	public function getStoreList($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
+		/*0 => array:9 [▼
+			"areaId" => 1
+			"storeNo" => "TP10600172"
+			"storeName" => "老蘿蔔店"
+			"posId" => ""
+			"closeDate" => null
+			"openDate" => "2007-10-02"
+			"areaName" => "大台北區"
+			"storeKey" => "1060017"
+		]
+		*/
+		
 		try
 		{
 			#取回的close date已+8
 			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
 			$store = $this->_repository->getStoreList($brand, $userAreaIds);
 			
-			#排除閉店:有值才檢查,start/end都要有
-			if (! empty($stDate) && ! empty($endDate))
-			{
-				$stDate	= Carbon::parse($stDate);
-				$endDate= Carbon::parse($endDate);
-				
-				$store = collect($store)->reject(function($item, $key) use($stDate, $endDate) {
-					
-					$openDate 	= empty($item['openDate']) ? NULL : Carbon::parse($item['openDate']);
-					$closeDate 	= empty($item['closeDate']) ? NULL : Carbon::parse($item['closeDate']);
-					
-					#在開始時間前己閉店
-					if (! is_null($closeDate) && $closeDate->lte($stDate))
-						return TRUE;
-					
-					#在結束時間後才開店
-					if (! is_null($openDate) && $openDate->gt($endDate))
-						return TRUE;
-				});
-			}
+			$store = $this->_filterActiveStoreByDate($store, $stDate, $endDate);
 			
-			#return format store
 			return $this->_formatStoreOutput($brand, $store);
 		}
 		catch(Exception $e)
@@ -78,26 +71,7 @@ class PurchaseManager
 			{
 				$lbStoreList = $this->_repository->getLbStoreList($brand, $userAreaIds);
 				
-				#排除閉店:有值才檢查,start/end都要有
-				if (! empty($stDate) && ! empty($endDate))
-				{
-					$stDate	= Carbon::parse($stDate);
-					$endDate= Carbon::parse($endDate);
-					
-					$lbStoreList = collect($lbStoreList)->reject(function($item, $key) use($stDate, $endDate) {
-						
-						$openDate 	= empty($item['openDate']) ? NULL : Carbon::parse($item['openDate']);
-						$closeDate 	= empty($item['closeDate']) ? NULL : Carbon::parse($item['closeDate']);
-						
-						#在開始時間前己閉店
-						if (! is_null($closeDate) && $closeDate->lte($stDate))
-							return TRUE;
-						
-						#在結束時間後才開店
-						if (! is_null($openDate) && $openDate->gt($endDate))
-							return TRUE;
-					});
-				}
+				$lbStoreList = $this->_filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
 				
 				$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
 				
@@ -111,6 +85,38 @@ class PurchaseManager
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料失敗');
 		}
+	}
+	
+	/* 開閉店排除依日期
+	 * @params: array
+	 * @return: array
+	 */
+	private function _filterActiveStoreByDate($storeList, $stDate, $endDate)
+	{
+		#排除閉店:有值才檢查,start/end都要有
+		if (! empty($stDate) && ! empty($endDate))
+		{
+			$stDate	= Carbon::parse($stDate);
+			$endDate= Carbon::parse($endDate);
+			
+			$storeList = collect($storeList)->reject(function($item, $key) use($stDate, $endDate) {
+				
+				$openDate 	= empty($item['openDate']) ? NULL : Carbon::parse($item['openDate']);
+				$closeDate 	= empty($item['closeDate']) ? NULL : Carbon::parse($item['closeDate']);
+				
+				#排除在開始時間前已閉店
+				if (! is_null($closeDate) && $closeDate->lte($stDate))
+					return TRUE;
+				
+				#排除在結束時間後才開店
+				if (! is_null($openDate) && $openDate->gt($endDate))
+					return TRUE;
+				
+				return FALSE;
+			})->toArray();
+		}
+		
+		return $storeList;
 	}
 	
 	/* Format store output
@@ -127,6 +133,7 @@ class PurchaseManager
 			
 			$area = AreaLib::toArea(intval($item['areaId']));
 			
+			$item['storeId']	= intval($item['storeId']);
 			$item['areaId']		= $area->value;
 			$item['areaName'] 	= $area->label();
 			#$item['area'] = Str::replace('-八方', '', $item['area']);
@@ -164,9 +171,40 @@ class PurchaseManager
 		return $stores;
 	}
 	
+	/* Build store key(新舊系統Mapping)
+	 * @params: string
+	 * @return: array
+	 */
+	public function buildStoreKey($storeNo)
+	{
+		#特殊的蘿蔔店,因不符規則編碼規則,故要先處理
+		$lbSpecialStoreNos = config('web.purchase.store.lbSpecialStore');
+		$convertNo = data_get($lbSpecialStoreNos, $storeNo, NULL);
+		$storeNo = empty($convertNo) ? $storeNo : $convertNo;
+		
+		#新系統有前置碼/八方有蘿蔔尾碼1&2
+		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		$storeKey = Str::take($storeKey, 7);
+		
+		return $storeKey;
+	}
 	
+	/* 過濾不計算的門店(如員購)
+	 * @params: string
+	 * @return: array
+	 */
+	public function filterOrderByStoreNo($brandId, $baseData)
+	{
+		$excepts = config("web.purchase.store.except.{$brandId}");
+		
+		$result = collect($baseData)->filter(function($item, $key) use($excepts){
+			return ! in_array($item['storeNo'], $excepts);
+		});
+		
+		return $result;
+	}
 	
-	
+	/******************** Factory ********************/
 	/* 取工廠清單
 	 * @params: int
 	 * @return: array
@@ -197,7 +235,13 @@ class PurchaseManager
 	public function getProductIdByShortCode($brandId, $shortCodes)
 	{
 		$result = $this->_repository->getProductIdByShortCode($brandId, $shortCodes);
-		return $result;
+		
+		#format to int
+		$ids = collect($result)->map(function($item, $key){
+			return (int)$item;
+		})->toArray();
+		
+		return $ids;
 	}
 	
 	/* 取對應的Product&Short code mapping
@@ -252,22 +296,6 @@ class PurchaseManager
 		return data_get($config, $code, 1);
 	}
 	
-	/* Build store key(新舊系統Mapping)
-	 * @params: string
-	 * @return: array
-	 */
-	public function buildStoreKey($storeNo)
-	{
-		#特殊的蘿蔔店,因不符規則編碼規則,故要先處理
-		$lbSpecialStoreNos = config('web.purchase.store.lbSpecialStore');
-		$convertNo = data_get($lbSpecialStoreNos, $storeNo, NULL);
-		$storeNo = empty($convertNo) ? $storeNo : $convertNo;
-		
-		#新系統有前置碼/八方有蘿蔔尾碼1&2
-		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
-		$storeKey = Str::take($storeKey, 7);
-		
-		return $storeKey;
-	}
+	
 	
 }
