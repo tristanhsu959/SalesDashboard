@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -512,11 +513,11 @@ class PerformanceService
 		try
 		{
 			#Build export data for sheets
-			$export = $this->_buildExportData($sourceData['sheets'], $sourceData['header'], $sourceData['data']);
+			$export = $this->_buildExportData($sourceData['report']);
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_月初報表_?_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
@@ -550,24 +551,12 @@ class PerformanceService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportData($sheets, $header, $data)
+	private function _buildExportData($reportData)
 	{
-		/*
-		"sheet" => array:4 [
-			"g1" => "餡"
-			"g2" => "粗細麵"
-			"g3" => "菜肉餡"
-			"g4" => "餛飩餡"
-		]
-		"tableHeader" => array:5 [
-			0 => "POS ID"
-			1 => "區域"
-			2 => "門店代號"
-			3 => "門店名稱"
-			4 => "2026-03"
-		]
-		*/
-		$export = [];
+		$data 			= $reportData['data'];
+		$sheets 		= $reportData['sheets'];
+		$header 		= $reportData['header'];
+		$amountFields 	= $reportData['amountFields'];
 		
 		#每個product要一個sheet
 		foreach($sheets as $key => $sheetName)
@@ -575,13 +564,22 @@ class PerformanceService
 			$export[$sheetName] = [];
 			$export[$sheetName][] = $header;
 			
-			$storeData = data_get($data, $key, []);
+			$storeData = data_get($data, $sheetName, []);
 			
 			if (empty($storeData))
 				continue;
 			
-			foreach($storeData as $rowData)
+			foreach($storeData as $key => $rowData)
 			{
+				#dollar format
+				$rowData = collect($rowData)->map(function($value, $key) use($amountFields){
+					
+					if (in_array($key, $amountFields))
+						$value = Number::currency($value, precision: 0);
+					
+					return $value;
+				})->values()->all();
+				
 				$export[$sheetName][] = $rowData;
 			}
 		}
