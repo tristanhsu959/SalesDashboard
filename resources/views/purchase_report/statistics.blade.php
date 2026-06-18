@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @push('styles')
-    <link href="{{ asset('styles/monthly_filling/list.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/purchase_report/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/monthly_filling/list.js') }}" defer></script>
+    <script src="{{ asset('scripts/purchase_report/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -14,39 +14,38 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		<div class="mode-group">
-			<div class="field middle-align">
-				<nav class="wrap">
-					<template x-for="(name, id) in options.mode.type" :key="id">
-						<label class="radio field-red">
-							<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-							<span x-text="name"></span>
-						</label>
-					</template>
-				</nav>
-			</div>
-			<div class="field middle-align">
-				<nav class="wrap">
-					<template x-for="(name, id) in options.mode.range" :key="id">
-						<label class="radio field-light-blue">
-							<input type="radio" name="searchRange" x-model="searchData.range" :value="id" @change="changeDateInput()">
-							<span x-text="name"></span>
-						</label>
-					</template>
-				</nav>
-			</div>
+		<div class="field label suffix round border field-light-blue">
+			<select x-model="searchData.type" name="searchType">
+				<template x-for="(name, typeId) in options.mode.type" :key="typeId">
+					<option x-text="name" :value="typeId" :selected="searchData.type == typeId"></option>
+				</template>
+			</select>
+			<label>報表類型</label>
+			<i>arrow_drop_down</i>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="month" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.currentDate">
+			<input type="date" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
 			<label>開始日期</label>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-			<input type="month" name="searchEndDate" maxlength="7" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.currentDate">
+			<input type="date" name="searchEndDate" maxlength="7" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.tomorrow">
 			<label>結束日期</label>
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
+		
+		<fieldset class="light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.mode.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+		</fieldset>
 		
 		<div class="space"></div>
 		<nav class="right-align group split">
@@ -65,12 +64,12 @@
 				<span>查詢</span>
 			</button>
 		
-			<template x-if="response.exportAction">
+			<!--template x-if="response.exportAction">
 			<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
 				<i>download_2</i>
 				<span>下載</span>
 			</a>
-			</template>
+			</template-->
 		</nav>
 	</header>
 	

@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Services\MonthlyFilling\FactoryService;
-use App\Services\MonthlyFilling\StoreService;
+use App\Services\PurchaseReport\PerformanceService;
 use App\Facades\AppManager;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -24,8 +23,8 @@ use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
-#月初報表(餡料)
-class MonthlyFillingService
+#訂貨相關報表
+class PurchaseReportService
 {
 	private $_statistics = [];
 	
@@ -51,7 +50,7 @@ class MonthlyFillingService
 	{
 		return match ($brand) 
 		{
-			Brand::BAFANG	=> Functions::BF_MONTHLY_FILLING, 
+			Brand::BAFANG	=> Functions::BF_PURCHASE_REPORT, 
         };
 	}
 	
@@ -65,18 +64,18 @@ class MonthlyFillingService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchType, $searchRange)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchStDate, $searchEndDate, $searchType, $searchRange);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
-				Log::channel('appServiceLog')->info('Get monthly filling data from cache');
+				Log::channel('appServiceLog')->info('Get purchase report data from cache');
 				
 				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				
@@ -84,12 +83,12 @@ class MonthlyFillingService
 			}
 			else
 			{
-				Log::channel('appServiceLog')->info('Get monthly filling data from db');
+				Log::channel('appServiceLog')->info('Get purchase report data from db');
 				
-				if ($params->type == 'store')
-					$service = app(StoreService::class);
+				if ($params->type == 'performance')
+					$service = app(PerformanceService::class);
 				else
-					$service = app(FactoryService::class);
+					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -111,32 +110,29 @@ class MonthlyFillingService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchStDate, $searchEndDate, $searchType, $searchRange)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
 	{
 		$params = new Fluent();
 		
 		$currentUser = AppManager::getCurrentUser();
 		$userAreaIds = $currentUser->roleArea;
 		
-		#轉換日期
-		if ($searchRange == 'year')
-		{
-			$year = Carbon::now()->year;
-			$searchStDate 	= Carbon::create($year)->startOfYear()->toDateString();
-			$searchEndDate 	= Carbon::create($year)->endOfYear()->toDateString();
-		}
-		else if ($searchRange == 'month')
-		{
-			$searchStDate = Carbon::createFromFormat('!Y-m', $searchStDate)->toDateString();
-			$searchEndDate = Carbon::createFromFormat('!Y-m', $searchEndDate)->endOfMonth()->toDateString();
-		}
-			
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes]);
+		
+		#處理areaIds
+		if (empty($searchAreaIds))
+			$searchAreaIds = $userAreaIds; #未選取全部
+		else
+		{
+			$searchAreaIds = collect($searchAreaIds)->filter(function($value, $key) use($userAreaIds){
+				return in_array($value, $userAreaIds);
+			})->toArray();
+		}
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
-				->stDate($searchStDate)->endDate($searchEndDate)
-				->type($searchType)->range($searchRange)
+				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
+				->areaIds($searchAreaIds)->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		
 		return $params;

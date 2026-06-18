@@ -16,16 +16,10 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.new_releases'),
 		],
 		[
-			'name' 		=> Functions::BF_SALES->label(), #銷售統計
+			'name' 		=> Functions::BF_SALES->label(), #銷售查詢
 			'code'		=> Functions::BF_SALES->value,
 			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
-		],
-		[
-			'name' 		=> Functions::BF_DAILY_REVENUE->label(), #門店營收
-			'code'		=> Functions::BF_DAILY_REVENUE->value,
-			'style' 	=> ['icon' => 'paid', 'color' => 'orange-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.daily_revenue'),
 		],
 		[
 			'name' 		=> Functions::BF_SHIPMENTS->label(), #出貨查詢
@@ -34,10 +28,22 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
 		],
 		[
+			'name' 		=> Functions::BF_PURCHASE_REPORT->label(), #出貨統計報表
+			'code'		=> Functions::BF_PURCHASE_REPORT->value,
+			'style' 	=> ['icon' => 'analytics', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_report'),
+		],
+		[
 			'name' 		=> Functions::BF_MONTHLY_FILLING->label(), #月初報表
 			'code'		=> Functions::BF_MONTHLY_FILLING->value,
 			'style' 	=> ['icon' => 'summarize', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.monthly_filling'),
+		],
+		[
+			'name' 		=> Functions::BF_DAILY_REVENUE->label(), #門店營收
+			'code'		=> Functions::BF_DAILY_REVENUE->value,
+			'style' 	=> ['icon' => 'paid', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.daily_revenue'),
 		],
 		[
 			'name' 		=> Functions::BF_MERCHANT->label(), #門店資訊
@@ -61,10 +67,16 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.new_releases'),
 		],
 		[
-			'name' 		=> Functions::BG_SALES->label(), #銷售統計
+			'name' 		=> Functions::BG_SALES->label(), #銷售查詢
 			'code'		=> Functions::BG_SALES->value,
 			'style' 	=> ['icon' => 'point_of_sale', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.sales'),
+		],
+		[
+			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨查詢
+			'code'		=> Functions::BG_SHIPMENTS->value,
+			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
 		],
 		/* [
 			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計
@@ -77,12 +89,6 @@ return [
 			'code'		=> Functions::BG_DAILY_REVENUE->value,
 			'style' 	=> ['icon' => 'paid', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.daily_revenue'),
-		],
-		[
-			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨查詢
-			'code'		=> Functions::BG_SHIPMENTS->value,
-			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
 		],
 		[
 			'name' 		=> Functions::BG_MERCHANT->label(), #門店資訊

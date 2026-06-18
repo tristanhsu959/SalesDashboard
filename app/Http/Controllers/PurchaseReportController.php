@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\MonthlyFillingService;
-use App\ViewModels\MonthlyFillingViewModel;
+use App\Services\PurchaseReportService;
+use App\ViewModels\PurchaseReportViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
@@ -14,9 +14,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class MonthlyFillingController extends Controller
+class PurchaseReportController extends Controller
 {
-	public function __construct(protected MonthlyFillingService $_service, protected MonthlyFillingViewModel $_viewModel)
+	public function __construct(protected PurchaseReportService $_service, protected PurchaseReportViewModel $_viewModel)
 	{
 	}
 	
@@ -31,7 +31,7 @@ class MonthlyFillingController extends Controller
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
+		return view('purchase_report.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -44,12 +44,13 @@ class MonthlyFillingController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType			= $request->input('searchType');
-		$searchRange		= $request->input('searchRange'); #日or月條件
 		$searchStDate		= $request->input('searchStDate');
 		$searchEndDate		= $request->input('searchEndDate');
+		$searchAreaIds		= $request->array('searchAreaIds');
+		$searchProductCodes	= $request->array('searchProductCodes'); #目前尚未用到
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchType, $searchRange); 
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -57,14 +58,7 @@ class MonthlyFillingController extends Controller
 			'searchEndDate'	=> 'required',
         ]);
 		
-		#年度不用檢查起迄
-        if ($searchRange != 'year' && $validator->fails()) 
-		{
-			$this->_viewModel->fail('查詢參數錯誤');
-			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
-		}
-		
-		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate, $searchType, $searchRange);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -73,7 +67,7 @@ class MonthlyFillingController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; 
 		
-		return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel); 
+		return view('purchase_report.statistics')->with('viewModel', $this->_viewModel); 
 	}
 	
 	/* Export
@@ -93,7 +87,7 @@ class MonthlyFillingController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('monthly_filling.statistics')->with('viewModel', $this->_viewModel);
+			return view('purchase_report.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

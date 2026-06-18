@@ -16,7 +16,7 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		<div class="space"></div>
+		
 		<nav class="wrap">
 			<template x-for="(name, id) in options.mode.type" :key="id">
 				<label class="radio field-red">
@@ -26,19 +26,16 @@
 			</template>
 		</nav>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
 		</div>
 		
-		<div class="space"></div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'store'" class="space"></div>
 		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
 			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
 			<label>找店名</label>

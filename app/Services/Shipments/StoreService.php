@@ -328,7 +328,7 @@ class StoreService
 		*/
 	}
 	
-	/* 依工廠
+	/* 依Store
 	 * @params: array
 	 * @return: array
 	 */

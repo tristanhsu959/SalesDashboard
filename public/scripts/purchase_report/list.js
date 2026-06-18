@@ -1,16 +1,7 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	//統計單位顯示
-	Alpine.store('sales', {
-		showAmount: Alpine.$persist(false),
-        
-		toggle() {
-           this.showAmount = ! this.showAmount;
-        }
-	});
-	
-	Alpine.data('searchSales', (searchData) => ({
+	Alpine.data('searchReport', (searchData) => ({
 		searchData: {...searchData.search},
 		options: {...searchData.options},
 		errors: new Set(),
@@ -24,6 +15,8 @@ document.addEventListener('alpine:init', () => {
 			
 			if (this.searchData.stDate == '')
 				this.errors.add('stDate');
+			if (this.searchData.endDate == '')
+				this.errors.add('endDate');
 			
 			if (this.searchData.stDate && this.searchData.endDate)
 			{
@@ -34,12 +27,6 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.productIds.length == 0)
-			{
-				this.errors.add('productIds');
-				Alpine.store('toast').notify('請勾選欲查詢產品');
-			}
-				
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
@@ -52,13 +39,28 @@ document.addEventListener('alpine:init', () => {
 				return false;
 		},
 		
+		
 		resetSearch() {
+			this.searchData.type = Object.keys(this.options.mode.type)[0];
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
-			this.searchData.shopName = '';
-			this.searchData.category = '';
-			this.searchData.productIds = [];
+			this.searchData.areaIds = []; 
 			this.errors.clear();
+		},
+    }));
+	
+	//營運概況
+	Alpine.data('statisticsPerformance', (data) => ({
+		statistics: {...data},
+		activeSheet: '',
+		
+		init() { console.log(this.statistics);
+			const keys = Object.keys(this.statistics.report.sheets);
+			
+			if (keys.length > 0)
+				this.activeSheet = keys[0];
+			
+			this.$nextTick(() => ui(`#page-${this.activeSheet}`));
 		},
     }));
 });

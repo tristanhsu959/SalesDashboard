@@ -1,5 +1,10 @@
 /* Web Common Style */
 
+/* Common field padding */
+#searchPanel .field {
+	margin-block-start: 1.5rem;
+}
+
 /* Toast Message */
 #notifyMsg {
 	--error: #f44336;

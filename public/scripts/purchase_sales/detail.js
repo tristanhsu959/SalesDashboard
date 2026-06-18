@@ -4,7 +4,7 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('statistics', (statistics) => ({
 		statistics: {...statistics},
 		
-		init() {
+		init() {console.log(this.statistics);
 			let searchDate = this.statistics.searchDate;
 			
 			objDate = new Date(searchDate);

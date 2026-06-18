@@ -10,6 +10,7 @@ use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MonthlyFillingController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PurchaseSalesController;
+use App\Http\Controllers\PurchaseReportController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -40,18 +41,18 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
 	});
 	
-	/* 出貨報表 
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE->value, ':')])->group(function(){
-		Route::get('purchase', [PurchaseController::class, 'showSearch'])->name('purchase');
-		Route::post('purchase/search', [PurchaseController::class, 'search'])->name('purchase.search');
-		Route::get('purchase/export/{token}', [PurchaseController::class, 'export'])->name('purchase.export');
-	});	*/
-	
 	/* 出貨總量查詢 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_SHIPMENTS->value, ':')])->group(function(){
 		Route::get('shipments', [ShipmentsController::class, 'showSearch'])->name('shipments');
 		Route::post('shipments/search', [ShipmentsController::class, 'search'])->name('shipments.search');
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
+	});	
+	
+	/* 出貨報表 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE_REPORT->value, ':')])->group(function(){
+		Route::get('purchase_report', [PurchaseReportController::class, 'showSearch'])->name('purchase_report');
+		Route::post('purchase_report/search', [PurchaseReportController::class, 'search'])->name('purchase_report.search');
+		Route::get('purchase_report/export/{token}', [PurchaseReportController::class, 'export'])->name('purchase_report.export');
 	});	
 	
 	/* 月初報表 */

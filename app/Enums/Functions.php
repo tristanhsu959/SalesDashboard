@@ -22,8 +22,8 @@ enum Functions : string
 	case BF_NEW_RELEASE			= 'bafang:new_releases';
 	case BF_SALES				= 'bafang:sales';
 	case BF_DAILY_REVENUE		= 'bafang:daily_revenue';
-	case BF_PURCHASE			= 'bafang:purchase';
 	case BF_SHIPMENTS			= 'bafang:shipments';
+	case BF_PURCHASE_REPORT		= 'bafang:purchase_report';
 	case BF_MONTHLY_FILLING		= 'bafang:monthly_filling';
 	case BF_MERCHANT			= 'bafang:merchant';
 	case BF_PURCHASE_SALES		= 'bafang:purchase_sales';
@@ -32,7 +32,7 @@ enum Functions : string
 	case BG_NEW_RELEASE			= 'buygood:new_releases';
 	case BG_SALES				= 'buygood:sales';
 	case BG_DAILY_REVENUE		= 'buygood:daily_revenue';
-	case BG_PURCHASE			= 'buygood:purchase';
+	#case BG_PURCHASE			= 'buygood:purchase';
 	case BG_SHIPMENTS			= 'buygood:shipments';
 	case BG_MERCHANT			= 'buygood:merchant';
 	case BG_PURCHASE_SALES		= 'buygood:purchase_sales';
@@ -60,19 +60,19 @@ enum Functions : string
 			
 			#八方
 			self::BF_NEW_RELEASE		=> '新品銷售',
+			self::BF_SALES 				=> '銷售查詢',
 			self::BF_SHIPMENTS 			=> '出貨總量查詢',
-			self::BF_PURCHASE 			=> '出貨統計',
-			self::BF_SALES 				=> '銷售統計',
-			self::BF_DAILY_REVENUE		=> '門店營收',
+			self::BF_PURCHASE_REPORT 	=> '出貨統計報表',
 			self::BF_MONTHLY_FILLING	=> '月初報表',
+			self::BF_DAILY_REVENUE		=> '門店營收',
 			self::BF_MERCHANT			=> '門店資訊',
 			self::BF_PURCHASE_SALES		=> '門店進貨及銷售',
 			
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',
+			self::BG_SALES 				=> '銷售查詢',
 			self::BG_SHIPMENTS 			=> '出貨總量查詢',
-			self::BG_PURCHASE 			=> '出貨統計',
-			self::BG_SALES 				=> '銷售統計',
+			#self::BG_PURCHASE 			=> '出貨統計報表',
 			self::BG_DAILY_REVENUE		=> '門店營收',
 			self::BG_MERCHANT			=> '門店資訊',
 			self::BG_PURCHASE_SALES		=> '門店進貨及銷售',

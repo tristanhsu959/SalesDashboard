@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoleGroup;
+use App\Enums\Area;
 use Illuminate\Support\Fluent;
 
 class CurrentUser extends Fluent
@@ -90,6 +91,24 @@ class CurrentUser extends Fluent
 			return config('web.menu.enabled');
 		
 		return $this->get('rolePermission', []);
+	}
+	
+	/* Get area permission key-value
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAreaPermissionsMap()
+	{
+		$areaList = Area::options();
+		
+		if ($this->isSupervisor())
+			return $areaList;
+		
+		$areaList = collect($areaList)->filter(function($item, $key) {
+			return in_array($key, $this->roleArea);
+		})->toArray();
+		
+		return $areaList;
 	}
 	
 	/* Show available name
