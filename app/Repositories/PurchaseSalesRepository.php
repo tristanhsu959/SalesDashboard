@@ -106,7 +106,7 @@ class PurchaseSalesRepository extends Repository
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		$brandId 	= $brand->value;
-		$orderStatus = config('web.purchase.order.status.active');
+		#$orderStatus = config('web.purchase.order.status.active');
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -133,7 +133,7 @@ class PurchaseSalesRepository extends Repository
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			->where('a.StoreId', '=', $storeId)
-			->whereIn('a.State', $orderStatus)
+			#->whereIn('a.State', $orderStatus)
 			->where('b.Money', '>', 0)
 			->where('p.ErpNo', '!=', '')
 			->get()

@@ -84,7 +84,7 @@ class ShipmentsRepository extends Repository
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
-			->where('a.State', '=', 'functionalized')
+			#->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->where('p.ErpNo', '!=', '')
 			->whereIn('s.AreaId', $authAreaIds)

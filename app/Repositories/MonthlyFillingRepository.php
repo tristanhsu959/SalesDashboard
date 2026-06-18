@@ -97,7 +97,7 @@ class MonthlyFillingRepository extends Repository
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
-			->where('a.State', '=', 'functionalized')
+			#->where('a.State', '=', 'functionalized') #audited
 			->where('b.Money', '>', 0)
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)
@@ -150,7 +150,7 @@ class MonthlyFillingRepository extends Repository
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
-			->where('a.State', '=', 'functionalized')
+			#->where('a.State', '=', 'functionalized')
 			->where('b.Money', '>', 0)
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)
