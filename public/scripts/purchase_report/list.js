@@ -7,7 +7,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			console.log(searchData);
+			
 		},
 		
 		search() {
@@ -54,7 +54,7 @@ document.addEventListener('alpine:init', () => {
 		statistics: {...data},
 		activeSheet: '',
 		
-		init() { 
+		init() { console.log(this.statistics);
 			const keys = Object.keys(this.statistics.report.sheets);
 			
 			if (keys.length > 0)

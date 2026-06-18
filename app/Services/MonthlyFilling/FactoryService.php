@@ -149,10 +149,7 @@ class FactoryService
 			$codes 	= collect($codes)->pluck('code')->all();
 			
 			#取norder DB對應的product id
-			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
-			$ids = collect($ids)->map(function($item, $key){
-				return (int)$item;
-			})->toArray();
+			$ids = PurchaseManager::getProductIdByShortCode($brandId, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');

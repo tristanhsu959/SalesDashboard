@@ -141,11 +141,7 @@ class StoreService
 			$brandId 	= $params->brand->value;
 			$codes		= array_map('strval', array_keys(config('web.purchase.monthly_filling.totalCount.code')));
 			
-			$ids = $this->_repository->getProductIdByCode($brandId, $codes);
-			dd($ids);
-			$ids = collect($ids)->map(function($item, $key){
-				return (int)$item;
-			})->toArray();
+			$ids = PurchaseManager::getProductIdByShortCode($brandId, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
@@ -216,7 +212,7 @@ class StoreService
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
 			
 			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
-				$storeKey = Str::take($item['storeNo'], 7);
+				$storeKey = Str::take($item['storeNo'], 7); #因舊系統是7碼＋(1|2)
 				return in_array($storeKey, $validStoreKeys);
 			})->toArray();
 			

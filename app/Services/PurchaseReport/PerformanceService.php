@@ -37,6 +37,7 @@ class PerformanceService
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
+			'areaIds'		=> [],
 			'report'		=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
@@ -80,6 +81,7 @@ class PerformanceService
 		$this->_statistics['brandCode']		= $params->brand->code();
 		$this->_statistics['startDate'] 	= $params->stDate;
 		$this->_statistics['endDate']		= $params->endDate;
+		$this->_statistics['areaIds']		= $params->areaIds;
 		$this->_statistics['report']		= $params->report;
 		
 		#無值不cache

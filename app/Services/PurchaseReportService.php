@@ -127,7 +127,7 @@ class PurchaseReportService
 		{
 			$searchAreaIds = collect($searchAreaIds)->filter(function($value, $key) use($userAreaIds){
 				return in_array($value, $userAreaIds);
-			});
+			})->toArray();
 		}
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)

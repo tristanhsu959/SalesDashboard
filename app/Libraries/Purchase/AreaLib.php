@@ -24,7 +24,8 @@ class AreaLib
 			7		=> 	Area::TCM,
 			20		=> 	Area::TCM,
 			9		=> 	Area::CCT, #BF
-			21		=> 	Area::CCT, #BF
+			#21		=> 	Area::CCT, #BF
+			21		=> 	Area::KAOHSIUNG, #歸在大高雄
 			10005	=> 	Area::CCT, #BF
 			10		=> 	Area::CCT,
 			22		=> 	Area::CCT,
@@ -60,7 +61,8 @@ class AreaLib
 			7		=> 	Area::TCM->value,
 			20		=> 	Area::TCM->value,
 			9		=> 	Area::CCT->value, #BF
-			21		=> 	Area::CCT->value, #BF
+			#21		=> 	Area::CCT->value, #BF
+			21		=> 	Area::KAOHSIUNG->value, #歸在大高雄
 			10005	=> 	Area::CCT->value, #BF
 			10		=> 	Area::CCT->value,
 			22		=> 	Area::CCT->value,
