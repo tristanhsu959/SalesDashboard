@@ -397,50 +397,65 @@ class PerformanceService
 			$areaData[$areaName] = [];
 			$sn = 1;
 			
-			foreach($areaGroup as $store)
+			foreach($areaGroup as $storeData)
 			{
-				$filling 	= collect($this->_getProductOutputBy($store, 'filling'));
-				$wrapper 	= collect($this->_getProductOutputBy($store, 'wrapper'));
-				$drink		= collect($this->_getProductOutputBy($store, 'drink'));
-				$opendays 	= data_get($store, 'openDays'); #營業天數
+				$configMap	= $this->_getConfigProductMap();
+				$opendays 	= data_get($storeData, 'openDays'); #營業天數
+				
+				$total = $this->_getProductOutput($storeData);
 				
 				$row = [];
-				$row[] = $sn;
-				$row[] = data_get($store, 'storeName');
-				$row[] = data_get($store, 'storeKey');
-				$row[] = data_get($store, 'openDate');
+				$row['sn']	= $sn;
+				$row['storeName'] 	= data_get($storeData, 'storeName');
+				$row['storeKey'] 	= data_get($storeData, 'storeKey');
+				$row['openDate']	= data_get($storeData, 'openDate');
 				
-				$totalFillingQty 	= $filling->pluck('qty')->sum();
-				$totalFillingAmount = $filling->pluck('amount')->sum();
+				#各餡量
+				foreach($total['filling'] as $code => $value) 
+				{
+					$row[$code] = $value['qty'];
+				}
 				
-				$totalWrapperQty 	= $wrapper->pluck('qty')->sum();
-				$totalWrapperAmount = $wrapper->pluck('amount')->sum();
+				$fillingQty 	= collect($total['filling'])->pluck('qty')->sum();
+				$fillingAmount 	= collect($total['filling'])->pluck('amount')->sum();
 				
-				$totalDrinkAmount 	= $drink->pluck('amount')->sum();
+				$row['fillingQty'] 		= $fillingQty; #餡料總和
+				$row['fillingAvg'] 		= empty($opendays) ? 0 : round($fillingQty / $opendays, 2); #餡料平均
+				$row['fillingAmount'] 	= $fillingAmount; 	#餡料銷售金額
 				
-				$row[] = $filling->pluck('qty')->all(); #各餡量
-				$row[] = $totalFillingQty;	#餡料總和
-				$row[] = empty($opendays) ? 0 : round($totalFillingQty / $opendays, 2); #餡料平均
-				$row[] = $totalFillingAmount; 	#餡料銷售金額
+				$wrapperQty 	= collect($total['wrapper'])->pluck('qty')->sum();
+				$wrapperAmount 	= collect($total['wrapper'])->pluck('amount')->sum();
 				
-				$row[] = $wrapper->pluck('qty')->all(); #各皮量
-				$row[] = $totalWrapperQty; 	#皮總和
-				$row[] = $totalWrapperAmount; #皮銷售金額
-				$row[] = empty($totalFillingQty) ? 0 : round($totalWrapperQty / $totalFillingQty, 2); #餡皮比率 (皮/餡)
+				#各皮量
+				foreach($total['wrapper'] as $code => $value) 
+				{
+					$row[$code] = $value['qty'];
+				}
 				
-				$row[] = $drink->pluck('qty')->all(); #各飲料量
-				$row[] = $drink->pluck('qty')->sum(); #飲料總和
+				$row['wrapperQty'] 		= $wrapperQty; 	#皮總和
+				$row['wrapperAmount'] 	= $wrapperAmount; #皮銷售金額
+				$row['wrapperRatio'] 	= empty($fillingQty) ? 0 : round($wrapperQty / $fillingQty, 2); #餡皮比率 (皮/餡)
 				
-				$row[] = $totalFillingAmount + $totalWrapperAmount + $totalDrinkAmount; #銷售總額
+				$drinkQty 		= collect($total['drink'])->pluck('qty')->sum();
+				$drinkAmount 	= collect($total['drink'])->pluck('amount')->sum();
 				
-				$row[] = $opendays; #營業天數
+				#各飲料量
+				foreach($total['drink'] as $code => $value) 
+				{
+					$row[$code] = $value['qty'];
+				}
+				
+				$row['drinkQty'] 	= $drinkQty; #飲料總和
+				$row['totalAmount'] = $fillingAmount + $wrapperAmount + $drinkAmount; #銷售總額
+				$row['openDays'] = $opendays; #營業天數
 				$sn++;
 				
-				$areaData[$areaName][] = collect($row)->flatten()->all();
+				$areaData[$areaName][] = $row;
 			}
 		}
 		
 		$params->set('report.sheets', array_keys($areaData));
+		$params->set('report.amountFields', ['fillingAmount', 'wrapperAmount', 'totalAmount']);
 		$params->set('report.data', $areaData);
 	}
 	
@@ -448,18 +463,44 @@ class PerformanceService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getProductOutputBy($storeData, $group)
+	private function _getProductOutput($storeData)
 	{
-		$config = config('web.purchase.report.performance');
-		$row = [];
+		$configMap = $this->_getConfigProductMap($storeData);
+		$result = [];
 		
-		foreach($config[$group] as $key => $setting)
+		foreach($configMap as $group => $items)
 		{
-			$code = $setting['code'];
-			$row[] = data_get($storeData, "products.{$code}", ['qty'=> 0, 'amount'=> 0]);
+			$result[$group] = [];
+			$row = [];
+			
+			foreach($items as $code => $name)
+			{
+				$row[$code] = [];
+				$row[$code]['qty'] 		= intval(data_get($storeData, "products.{$code}.qty", 0));
+				$row[$code]['amount'] 	= floatval(data_get($storeData, "products.{$code}.amount", 0));
+			}
+
+			$result[$group] = $row;
 		}
 		
-		return $row;
+		return $result;
+	}
+	
+	/* 依據config product codes 先處理資料
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getConfigProductMap()
+	{
+		$config = config('web.purchase.report.performance');
+		
+		$map = collect($config)->map(function($groups, $key){
+			return collect($groups)->mapWithKeys(function($item, $key){
+				return [$item['code'] => $item['name']];
+			})->all();;
+		})->all();
+		
+		return $map;
 	}
 	
 	/* Export data

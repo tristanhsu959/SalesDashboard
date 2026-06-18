@@ -54,7 +54,7 @@ document.addEventListener('alpine:init', () => {
 		statistics: {...data},
 		activeSheet: '',
 		
-		init() { console.log(this.statistics);
+		init() { 
 			const keys = Object.keys(this.statistics.report.sheets);
 			
 			if (keys.length > 0)
