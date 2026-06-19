@@ -64,12 +64,12 @@
 				<span>查詢</span>
 			</button>
 		
-			<!--template x-if="response.exportAction">
+			<template x-if="response.exportAction">
 			<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
 				<i>download_2</i>
 				<span>下載</span>
 			</a>
-			</template-->
+			</template>
 		</nav>
 	</header>
 	

@@ -28,8 +28,15 @@
 						<tbody>
 							<template x-for="(rowData, rowIdx) in statistics.report.data[sheetName]" :key="rowIdx">
 							<tr>
-								<template x-for="(row, idx) in rowData" :key="idx">
-									<td x-text="row"></td>
+								<template x-for="(row, rowKey) in rowData" :key="rowKey">
+ 									<td>
+										<template x-if="statistics.report.amountFields.includes(rowKey)">
+											<span x-text="Helper.formatDollar(row)" class="red-text"></span>
+										</template>
+										<template x-if="!statistics.report.amountFields.includes(rowKey)">
+											<span x-text="row"></span>
+										</template>
+									</td>
 								</template>
 							</tr>
 							</template>

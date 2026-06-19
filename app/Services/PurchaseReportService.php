@@ -152,15 +152,15 @@ class PurchaseReportService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export monthly filling data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export 營業概況 data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$modeType = $sourceData['modeType'];
 		
-		if ($modeType == 'store')
-			$service = app(StoreService::class);
+		if ($modeType == 'performance')
+			$service = app(PerformanceService::class);
 		else
-			$service = app(FactoryService::class);
+			return ResponseLib::initialize('檔案下載發生錯誤，請重新查詢')->fail();
 		
 		return $service->export($sourceData);
 	}

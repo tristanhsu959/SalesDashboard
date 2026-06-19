@@ -8,8 +8,8 @@ enum Functions : string
 {
 	case HOME					= 'home';
 	case USER					= 'user';
-	case ROLE 					= 'role';
-	case STORE_MAP 				= 'store_map';
+	case ROLE 					= 'role'; #deprecated
+	case STORE_MAP 				= 'store_map'; #deprecated
 		
 	#Product	
 	case PRODUCT 				= 'product';
@@ -54,7 +54,7 @@ enum Functions : string
 			#產品管理
 			self::PRODUCT 				=> '產品料號設定',
 			self::NEW_RELEASE_SETTING	=> '新品設定',
-			self::SALES_SETTING			=> '銷售設定',
+			self::SALES_SETTING			=> '銷售設定', #deprecated
 			self::SALES_PRODUCT			=> '銷售產品設定',
 			self::PURCHASE_PRODUCT		=> '出貨產品設定',
 			
@@ -62,20 +62,20 @@ enum Functions : string
 			self::BF_NEW_RELEASE		=> '新品銷售',
 			self::BF_SALES 				=> '銷售查詢',
 			self::BF_SHIPMENTS 			=> '出貨總量查詢',
-			self::BF_PURCHASE_REPORT 	=> '出貨統計報表',
+			self::BF_PURCHASE_REPORT 	=> '出貨統計報表(Beta)',
 			self::BF_MONTHLY_FILLING	=> '月初報表',
 			self::BF_DAILY_REVENUE		=> '門店營收',
 			self::BF_MERCHANT			=> '門店資訊',
-			self::BF_PURCHASE_SALES		=> '門店進貨及銷售',
+			self::BF_PURCHASE_SALES		=> '門店進貨及銷售(Beta)',
 			
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',
 			self::BG_SALES 				=> '銷售查詢',
 			self::BG_SHIPMENTS 			=> '出貨總量查詢',
-			#self::BG_PURCHASE 			=> '出貨統計報表',
+			#self::BG_PURCHASE 			=> '出貨統計報表(Beta)',
 			self::BG_DAILY_REVENUE		=> '門店營收',
 			self::BG_MERCHANT			=> '門店資訊',
-			self::BG_PURCHASE_SALES		=> '門店進貨及銷售',
+			self::BG_PURCHASE_SALES		=> '門店進貨及銷售(Beta)',
 			
 			#芳珍
 			self::FJ_DAILY_REVENUE		=> '門店營收',
