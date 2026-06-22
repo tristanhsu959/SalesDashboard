@@ -47,6 +47,7 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
 			'collation' => 'Chinese_PRC_CI_AS', 
         ],
+		
 		#梁社漢
 		'BGPosErp' => [
             'driver' => 'sqlsrv',
@@ -63,6 +64,7 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
 			'collation' => 'Chinese_PRC_CI_AS', 
         ],
+		
 		#芳珍
 		'FJPosErp' => [
             'driver' => 'sqlsrv',
@@ -80,6 +82,7 @@ return [
 			'collation' => 'Chinese_PRC_CI_AS', 
         ],
 		
+		#Local DB - Dashboard main db
 		'SalesDashboard' => [
             'driver' => 'mysql',
             'host' => env('LSD_DB_HOST', '127.0.0.1'),
@@ -113,6 +116,7 @@ return [
             'prefix_indexes' => true,
 			'fetch' => PDO::FETCH_ASSOC,
         ],
+		
 		#舊訂貨系統
 		'OrderTP' => [
             'driver' => 'sqlsrv',
@@ -170,6 +174,8 @@ return [
             'encrypt' => env('DB_ENCRYPT', 'yes'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
+		
+		#新系統
 		'NewOrder' => [
             'driver' => 'sqlsrv',
             'host' => env('NO_DB_HOST', 'bafang-prod-failover.database.windows.net'),
@@ -177,6 +183,20 @@ return [
             'database' => env('NO_DB_DATABASE', '8way-order-system-prod'),
             'username' => env('NO_DB_USERNAME', 'baway-usertristan'),
             'password' => env('NO_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'trust_server_certificate' => env('NO_DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+		
+		#八方點
+		'QuickOrder' => [
+            'driver' => 'sqlsrv',
+            'host' => env('QO_DB_HOST', 'bafangquickorder-mssql-server.database.windows.net'),
+			'port' => env('QO_DB_PORT', '1433'),
+            'database' => env('QO_DB_DATABASE', 'QuickerOrder'),
+            'username' => env('QO_DB_USERNAME', 'quickerorder-user'),
+            'password' => env('QO_DB_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,

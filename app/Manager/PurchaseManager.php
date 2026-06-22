@@ -39,7 +39,7 @@ class PurchaseManager
 		
 		try
 		{
-			#取回的close date已+8
+			#取回的openDate已+8hrs及轉換為Y-m-d
 			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
 			$store = $this->_repository->getStoreList($brand, $userAreaIds);
 			
@@ -55,8 +55,10 @@ class PurchaseManager
 	}
 	
 	/* Get store data by brand with LB stores(月初報表才會顯示特殊的蘿蔔店, 其它目前沒有顯示)
-	 * @params: int
+	 * @params: enum
 	 * @params: array
+	 * @params: string Y-m-d
+	 * @params: string Y-m-d
 	 * @return: array
 	 */
 	public function getStoreListWithLb($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
@@ -69,6 +71,7 @@ class PurchaseManager
 			#八方才有蘿蔔
 			if ($brand == Brand::BAFANG)
 			{
+				#取回的openDate已+8hrs及轉換為Y-m-d
 				$lbStoreList = $this->_repository->getLbStoreList($brand, $userAreaIds);
 				
 				$lbStoreList = $this->_filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
