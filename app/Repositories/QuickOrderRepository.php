@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Facades\PurchaseManager;
-use App\Libraries\Purchase\AreaLib;
+use App\Libraries\Sales\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -19,19 +19,64 @@ class QuickOrderRepository extends Repository
 		
 	}
 	
+	/* 取營收資料 SALE00(sd_sale00沒有全部,故不取此table)
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function getSaleFromPos($brand, $stDate, $endDate, $shopIds)
+	{
+		$configCode = $brand->code();
+		$excepts = config("web.sales.shop.except.{$configCode}");
+		
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else if ($brand == Brand::BUYGOOD)
+			$db = $this->connectBGPosErp();
+		else
+			return [];
+		
+		$result = $db
+				->table(DB::raw('SALE00 as a WITH(NOLOCK)'))
+				->where('a.SALE_DATE', '>=', $stDate)
+				->where('a.SALE_DATE', '<', $endDate)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->when(empty($shopIds), function ($query) use ($excepts) {
+					$query->whereNotIn('a.SHOP_ID', $excepts);
+				})
+				->when(! empty($shopIds), function ($query) use ($shopIds) {
+					$query->whereIn('a.SHOP_ID', $shopIds);
+				})
+				->select('a.SHOP_ID as shopId')
+				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
+				->selectRaw('count(a.SHOP_ID) as customers')
+				->selectRaw('sum(a.amount) as amount')
+				->selectRaw('sum(a.TOT_SALES) as totalSales')
+				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
+				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
+				->groupBy('a.SHOP_ID', DB::raw('CAST(a.SALE_DATE AS DATE)'))#->ddRawSql();
+				->get()
+				->toArray();
+		
+		return $result; 
+	}
+	
 	/* 取Product setting
 	 * @params: string
 	 * @params: string
 	 * @params: string
 	 * @return: array
 	 */
-	public function getOrders($brandCode, $stDate, $endDate)
+	public function getSaleFromQuickOrder($brandCode, $stDate, $endDate, $posIds)
 	{
 		$db = $this->connectQuickOrder();
 		
 		$result = $db
-			->table('Orders')
-			->fromRaw('Orders as o WITH(NOLOCK)')
+			->table(DB::raw('[Orders] as a WITH(NOLOCK)'))
+			#->fromRaw('Orders as o WITH(NOLOCK)')
 			->join('Stores as s', 's.storeId', '=', 'o.storeId')
 			->select('o.storeId')
 			->selectRaw('count(o.storeId) as customerCount, sum(o.price) as amount')

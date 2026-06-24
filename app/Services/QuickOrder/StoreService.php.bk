@@ -3,7 +3,7 @@
 namespace App\Services\QuickOrder;
 
 use App\Facades\AppManager;
-use App\Facades\PurchaseManager;
+use App\Facades\PosManager;
 use App\Repositories\QuickOrderRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -54,10 +54,6 @@ class StoreService
 	{
 		try
 		{
-			#無符合的posid可查
-			if ($this->_prepareParams($params) === FALSE)
-				return $this->_statistics;
-			
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
@@ -80,7 +76,7 @@ class StoreService
 	{
 		$this->_statistics['brandId']	= $params->brand->value;
 		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['type']		= $params->type;
+		$this->_statistics['modeType']	= $params->type;
 		$this->_statistics['startDate'] = $params->stDate;
 		$this->_statistics['endDate']	= $params->endDate;
 		$this->_statistics['shop']		= $params->shop;
@@ -96,120 +92,6 @@ class StoreService
 	
 	/* ====================== 主流程 End ====================== */
 	
-	/* PrepareParams
-	 * @params: array
-	 * @return: array
-	 */
-	private function _prepareParams($params)
-	{
-		try
-		{
-			#因不同來源要對齊,故先轉換成PosId, 且要先做判別
-		
-			#1. Get all shops with area permission
-			$this->_getActiveStoreList($params);
-			
-			#2. Get posIds
-			$this->_getPosIdsByParams($params);
-			
-			if ($params->type != 'all' && empty($params->posIds))
-				return FALSE;
-		
-			#3. 取要統計的門店清單
-			$this->_getOutputStores($params);
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception($e->getMessage());
-		}
-	}
-	
-	/* Get posIds
-	 * @params: fluent
-	 * @return: array
-	 */
-	private function _getActiveStoreList($params)
-	{
-		#以訂貨的為基準, 因八方點是用訂貨的store(取有權限的全部與查詢area無關)
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
-		
-		#須濾除廠區學區店, 因為沒有posid, 無法有銷售對應
-		$brandId = $params->brand->value;
-		$excepts = array_merge(config("web.quick_order.store.factoryStore.{$brandId}"), config("web.quick_order.store.except.{$brandId}"));
-		
-		$storeList = collect($storeList)->reject(function($item, $key) use($excepts){
-			return in_array($item['storeKey'], $excepts) OR empty($item['posId']);
-		})->all();
-		/* ->mapWithKeys(function($item, $key) {
-			return [$item['posId'] => $item];
-		}) */
-		
-		$params->allStores = $storeList;
-	}
-	
-	/* Get posIds
-	 * @params: fluent
-	 * @return: array
-	 */
-	private function _getPosIdsByParams($params)
-	{
-		#因八方點無area,且store來源不同, 故統一用posid來取值
-		
-		$posIds 	= [];
-		$areaIds 	= $params->areaIds;
-		$storeName 	= $params->storeName;
-		$stores		= collect($params->allStores);
-		
-		if (! empty($areaIds))
-		{
-			$posIds = $stores->filter(function($item, $key) use($areaIds){
-				return in_array($item['areaId'], $areaIds);
-			})->pluck('posId')->all();
-		}
-		else if (! empty($storeName))
-		{
-			$posIds = $stores->filter(function($item, $key) use($storeName){
-				return Str::contains($item['storeName'], $storeName);
-			})->pluck('posId')->all();
-		}
-		
-		$params->posIds = $posIds;
-	}
-	
-	/* Get store list for output
-	 * @params: fluent
-	 * @return: array
-	 */
-	private function _getOutputStores($params)
-	{
-		#依條件過濾最終要輸出的門店
-		
-		$posIds 	= $params->posIds;
-		$areaIds 	= $params->areaIds;
-		$allStores	= collect($params->allStores);
-		$storeList = [];
-		
-		if ($params->type == 'all')
-			$storeList = $allStores;
-		else if ($params->type == 'area')
-		{
-			$storeList = $allStores->filter(function($item, $key) use($areaIds){
-				return in_array($item['areaId'], $areaIds);
-			})->all();
-		}
-		else if ($params->type == 'storeName')
-		{
-			$storeList = $allStores->filter(function($item, $key) use($posIds){
-				return in_array($item['posId'], $posIds);
-			})->all();
-		}
-		
-		$params->storeList = $storeList;
-	}
-	
-	
-	
 	/* Get search data
 	 * @params: array
 	 * @return: array
@@ -218,17 +100,17 @@ class StoreService
 	{
 		try
 		{
-			#1. Get data from pos
-			$posData = $this->_getDataFromPos($params);
+			#1. Get all shops with area permission
+			$storeType = FALSE;
+			$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $storeType, $params->storeName); #all shops
+			$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $storeType, $params->storeName); #only active shops
 			
-			#2.build to base data
-			$this->_buildPosBaseData($params, array_filter($posData)); 
-			
-			#3. Get data from quick order
-			$qoData = $this->_getDataFromQuickOrder($params);
+			dd($params);
+			#2. Get data from DB
+			$saleData = $this->_getDataFromDB($params);
 			
 			#3.build to base data
-			$this->_buildBaseData($params, array_filter($posData)); 
+			$this->_buildBaseData($params, array_filter($saleData)); 
 		}
 		catch(Exception $e)
 		{
@@ -237,35 +119,29 @@ class StoreService
 		}
 	}
 	
-	
-	
-	
-	/* Get pos data
+	/* Get buy good data
 	 * @params: fluent
 	 * @return: array
 	 */
-	private function _getDataFromPos($params)
+	private function _getDataFromDB($params)
 	{
-		/* 0 => array:7 [
-			"shopId" => "0795"
-			"saleDate" => "2026-06-24"
-			"customers" => "59"
-			"amount" => "8537.0000"
-			"totalSales" => "8538.0000"
-			"totalExtra" => ".0000"
-			"totalDischarge" => "-1.0000"
-		] 
-		*/
 		try
 		{
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$posIds 		= $params->posIds;
+			$shopType 		= $params->shopType;
+			$shopName 		= $params->shopName;
+			$userAreaIds 	= $params->userAreaIds;
 			
-			#帶入的是查詢的area
-			$result = $this->_repository->getSaleFromPos($brand, $stDate, $endDate, $posIds);
+			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
 			
+			#去除shop id
+			$result = collect($result)->map(function($item, $key){
+				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
+				return $item;
+			})->toArray();
+				
 			return $result;
 		}
 		catch(Exception $e)
@@ -275,64 +151,192 @@ class StoreService
 		}
 	}
 	
-	/* POS基底資料(DB已計算Sum)
+	/* 基底資料(DB已計算Sum)
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildPosBaseData($params, $posData)
+	private function _buildBaseData($params, $saleData)
 	{
-		#以訂貨門店為基礎, 補全門店資訊
-		$storeList = $params->storeList;
+		/*
+		0 => array:8 [▼
+		  "shopId" => "0035"
+		  "shopName" => "0035中壢海華直營店"
+		  "areaId" => 3
+		  "areaName" => "桃竹苗區"
+		  "shopType" => "1"
+		  "shopTypeName" => "直營店"
+		  "saleDate" => "2026-05-10"
+		  "amount" => "18735.0000"
+		]
+		*/
 		
-		$posData = collect($posData)->mapWithKeys(function($item, $key){
-			return [$item['shopId'] => $item];
-		});
+		#即時營收取有效店家即可
+		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
 		
-		$baseData = collect($storeList)->map(function($item, $key) use($posData){
-			$data = data_get($posData, $item['posId']);
-			
-			$temp['storeNo'] 	= $item['storeNo'];
-			$temp['storeKey'] 	= $item['storeKey'];
-			$temp['posId'] 		= $item['posId'];
-			$temp['storeName'] 	= $item['storeName'];
-			$temp['areaId'] 	= $item['areaId'];
-			$temp['areaName']	= $item['areaName'];
-			
-			#二取一因可能有空值
+		$baseData = collect($saleData)->map(function($item, $key) {
+			$temp['shopId'] 		= $item['shopId'];
+			$temp['shopName'] 		= $item['shopName'];
+			$temp['shopTypeName']	= $item['typeName'];
+			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
+			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
+			$temp['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
+			$temp['amount'] 		= $item['amount'];
 			#發票金額 = amount OR totalSales + totalDischarge
 			#實銷金額 = totalSales + totalExtra + totalDischarge
-			$amount 	= floatval(data_get($data, 'amount', 0));
-			$totalSales = floatval(data_get($data, 'totalSales', 0) + data_get($data, 'totalDischarge', 0));
-			$temp['amount'] 	= empty($amount) ? $totalSales : $amount;
-			$temp['customers']	= data_get($data, 'customers', 0);
-			
-			$saleDate 	= data_get($data,'saleDate', NULL);
-			$temp['saleDate']	= empty($saleDate) ? '' : (new Carbon($saleDate))->format('Y-m-d');
-			$temp['saleWeek']	= empty($saleDate) ? '' : (new Carbon($saleDate))->isoFormat('\wWW');
-			$temp['saleMonth']	= empty($saleDate) ? '' : (new Carbon($saleDate))->format('Y-m');
+			$temp['totalSales']		= floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
 			
 			return $temp; 
-		})->all();
+		});
 		
-		$params->baseData = $baseData;
+		#補全未有銷售的門店資料(closedown = 0)
+		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
+		$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
+		
+		#重建
+		$filloutShops = $filloutShops->map(function($item, $key) use($params){
+			$temp['shopId'] 		= $item['shopId'];
+			$temp['shopName'] 		= $item['shopName'];
+			$temp['shopTypeName']	= $item['typeName'];
+			$temp['areaId'] 		= $item['areaId'];
+			$temp['areaName']		= $item['areaName'];
+			$temp['saleDate'] 		= $params->endDate;
+			$temp['amount'] 		= 0;
+			$temp['totalSales']		= 0;
+			
+			return $temp;
+		});
+		
+		$params->baseData = $baseData->merge($filloutShops)->sortBy('areaId')->toArray();
 	}
 	
+	/* Init input params
+	 * @params: 
+	 * @return: array
+	 */
+	private function _initParams()
+	{
+		$params = new Fluent();
+		
+		$userAreaIds = Area::getAll(); #全開
+		$searchMonths = $this->_buildMonthRange();
+		
+		$params->userAreaIds($userAreaIds)->searchMonths($searchMonths);
+		
+		return $params;
+	}
+	
+	/* 計算用參數
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildMonthRange()
+	{
+		$monthList 	= [];
+		
+		#By month
+		$st 	= Carbon::now()->startOfYear();
+		$end	= Carbon::now()->startOfMonth(); #因是用< end判別,故要取到下個月
+		$period = CarbonPeriod::create($st, '1 month', $end);
+		
+		foreach ($period as $month) 
+		{
+			$monthList[] = $month->format('Y-m');
+		}
+		
+		return $monthList;
+	}
 	
 	/* 取統計相關參數
 	 * @params: enums
 	 * @params: integer
 	 * @return: array
 	 */
-	private function _getDataFromQuickOrder($params)
+	private function _getDataByBafang($params)
 	{
-		$brandId = $params->brand->value;
-		$brandCode = config("web.quick_order.store.brandCode.{$brandId}");
+		$params->brand = Brand::BAFANG;
+		$params->set('bafang', []);
+		$data = [];
 		
-		$orderData = $this->_repository->getSaleFromQuickOrder($brandCode, $params->stDate, $params->endDate, $params->posIds);
+		#一個月一個月取
+		foreach($params->searchMonths as $month)
+		{
+			$args = new Fluent();
+			$args->brand($params->brand)->userAreaIds($params->userAreaIds)->searchMonths($params->searchMonths);
+			
+			$cacheKey = HelperLib::buildCacheKey([$args->brand->value, 'QuickOrder', $month]);
+			
+			$data[$month] = Cache::rememberForever($cacheKey, function () use($args, $month){
+				$args->stDate	= Carbon::parse($month)->format('Y-m-d');
+				$args->endDate	= Carbon::parse($month)->addMonth()->format('Y-m-d');
+				
+				#Prepare data(object default called by reference)
+				$this->_prepareData($args);
+				return $this->_outputByMonth($args);
+			});
+			
+			$currentMonth = now()->format('Y-m');
+			
+			if ($month == $currentMonth)
+				Cache::forget($cacheKey); #當月每次都要重算
+		}
 		
-		dd($orderData);
+		#綜合計算
+		$result = $this->_outputReport($data);
+		$params->set('bafang', $result);
+		
+		dd($params);
 	}
 	
+	/* 取統計相關參數
+	 * @params: enums
+	 * @params: integer
+	 * @return: array
+	 */
+	/* private function _prepareData($args)
+	{
+		try
+		{
+			#1.取時間內有效門店
+			$this->_getStoreListByMonth($args);
+			
+			#2.Get quick orders
+			$this->_getOrderByMonth($args);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	} */
+	
+	/* Short code to proudct id
+	 * @params: enum
+	 * @params: string
+	 * @return: array
+	 */
+	private function _getStoreListByMonth($args)
+	{
+		try
+		{
+			$storeList = PurchaseManager::getStoreList($args->brand, $args->userAreaIds, $args->stDate, $args->endDate);
+			
+			#只要有storeKey及area參數即可
+			$storeList = collect($storeList)->mapWithKeys(function($item, $key){
+				$temp['storeKey'] 	= $item['storeKey'];
+				$temp['areaId'] 	= $item['areaId'];
+				$temp['areaName'] 	= $item['areaName'];
+				
+				return [$item['storeKey'] => $temp];
+			})->all();
+			
+			$args->storeList = $storeList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
 	
 	/* Get order data
 	 * @params: enum

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
-use App\Services\QuickOrderService;
+use App\Services\QuickOrder\StoreService;
 use App\Repositories\QuickOrderRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -34,11 +34,12 @@ class QuickOrderService
 	{
 		$this->_statistics = [
 			'brandId'		=> '', #export
+			'brandCode'		=> '',
 			'type'			=> '',
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'shop' 			=> [],
-			'area' 			=> [],
+			'areaIds'		=> [],
+			'storeName'		=> '',
 			'data'			=> [],
 			'exportToken'	=> '', #export
 		];
@@ -76,14 +77,14 @@ class QuickOrderService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 			
 			#主要是for即時，故每次都query
 			if (Cache::has($params->cacheKey))
@@ -98,12 +99,7 @@ class QuickOrderService
 			{
 				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
-				if ($params->type == 'store') #By門店
-					$service = app(storeService::class);
-				else if ($params->type == 'aov') #By月合併,不顯示店
-					$service = app(aovService::class);
-				else
-					throw new Exception('查詢門店營收時發生錯誤');
+				$service = app(storeService::class);
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -127,23 +123,20 @@ class QuickOrderService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName)
 	{
 		$params = new Fluent();
 		
 		$currentUser = AppManager::getCurrentUser();
 		$userAreaIds = $currentUser->roleArea;
 		
-		if ($searchType == 'store') #有區間條件才要預設
-			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-		
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName]);
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
 				->type($searchType)
 				->stDate($searchStDate)->endDate($searchEndDate)
-				->shopType($searchShopType)->shopName($searchShopName)
+				->areaIds($searchAreaIds)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
 		
 		return $params;
