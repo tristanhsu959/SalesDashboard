@@ -1,5 +1,13 @@
 /* App Common Style */
 /* 不與Login共用 */
+:root, html, body {
+	/* font-size: 16px; */
+  
+	/* 須寫在這才有作用 */
+	legend {
+		font-size: .75rem;
+	}
+}
 
 body {
 	--scrollbar-width: calc(100vw - 100%);

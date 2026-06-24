@@ -18,9 +18,9 @@
 		<h5>查詢</h5>
 		
 		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.calc" :key="id">
+			<template x-for="(name, id) in options.type" :key="id">
 				<label class="radio field-red">
-					<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id" @change="switchConditions()">
+					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
 					<span x-text="name"></span>
 				</label>
 			</template>
@@ -36,20 +36,21 @@
 			<label>結束日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
-			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
-			<label>找店名</label>
-		</div>
-		
-		<div class="field middle-align">
-			<nav>
-				<template x-for="(name, id) in options.shopType" :key="id">
-					<label class="checkbox large">
-						<input type="checkbox" name="searchShopType[]" :value="id" x-model="searchData.shopType">
-						<span x-text="name"></span>
+		<fieldset x-show="searchData.type == 'area'" class="light-blue-border light-blue-text">
+			<legend class="title-small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areas" :key="areaId">
+					<label class="checkbox check-pink">
+						<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds" :disabled="searchData.type != 'area'">
+						<span x-text="areaName"></span>
 					</label>
 				</template>
 			</nav>
+		</fieldset>
+		
+		<div x-show="searchData.type == 'storeName'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.type != 'storeName'" @input="errors.delete('storeName')">
+			<label>找店名</label>
 		</div>
 		
 		<div class="space"></div>

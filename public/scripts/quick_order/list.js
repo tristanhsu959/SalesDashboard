@@ -7,41 +7,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			fpInstance = flatpickr(this.$refs.searchStDate, {
-					dateFormat: 'Y-m-d',
-                    locale: { firstDayOfWeek: 1 },
-                    onChange: (selectedDates, dateStr) => { selectedDate = dateStr }
-            });
-				
-			if (this.searchData.stDate == '')
-				this.searchData.stDate = this.searchData.today;
-			if (this.searchData.endDate == '')
-				this.searchData.endDate = this.searchData.today;
-			this.switchConditions();
-		},
-		
-		switchConditions(){
-			if (this.searchData.calc == 'day')
-			{
-				this.$refs.searchStDate.type = 'date'; //input type
-				this.$refs.searchEndDate.type = 'date';
-				this.searchData.stDate = this.searchData.today;
-				this.searchData.endDate = this.searchData.today;
-			}
-			else if (this.searchData.calc == 'week')
-			{
-				this.$refs.searchStDate.type = 'week';
-				this.$refs.searchEndDate.type = 'week';
-				this.searchData.stDate = this.searchData.thisMonth;
-				this.searchData.endDate = this.searchData.thisMonth;
-			}
-			else if (this.searchData.calc == 'month')
-			{
-				this.$refs.searchStDate.type = 'month';
-				this.$refs.searchEndDate.type = 'month';
-				this.searchData.stDate = this.searchData.thisMonth;
-				this.searchData.endDate = this.searchData.thisMonth;
-			}
+			
 		},
 		
 		search() {
@@ -58,7 +24,13 @@ document.addEventListener('alpine:init', () => {
 					Alpine.store('toast').notify('結束日期不可小於開始日期');
 				}
 			}
-				
+			
+			if (this.searchData.type == 'area' && this.searchData.areaIds.length == 0)
+			{
+				this.errors.add('areaIds');
+				Alpine.store('toast').notify('請勾選區域');
+			}
+			
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
@@ -72,10 +44,10 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.type = 'store';
-			this.searchData.shopName = '';
+			this.searchData.type = 'all';
+			this.searchData.areaId = [];
+			this.searchData.storeName = '';
 			this.errors.clear();
-			this.switchConditions();
 		},
     }));
 	

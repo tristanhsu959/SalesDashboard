@@ -46,13 +46,13 @@ class QuickOrderController extends Controller
 		$searchType		= $request->input('searchType');
 		$searchStDate	= $request->input('searchStDate'); #or Month
 		$searchEndDate	= $request->input('searchEndDate');
-		$searchShopType	= $request->input('searchShopType', array_keys(config('web.sales.shop.type'))); #未選取查全部
-		$searchShopName	= $request->input('searchShopName');
+		$searchAreaIds	= $request->array('searchAreaIds'); #未選取查全部
+		$searchStoreName= $request->input('searchStoreName');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -61,7 +61,7 @@ class QuickOrderController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('daily_revenue.statistics')->with('viewModel', $this->_viewModel);
+		return view('quick_order.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Export
@@ -82,7 +82,7 @@ class QuickOrderController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('daily_revenue.statistics')->with('viewModel', $this->_viewModel);
+			return view('quick_order.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

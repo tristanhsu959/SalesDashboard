@@ -51,19 +51,27 @@ class QuickOrderViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$calc = [
+		/* $calc = [
 			'day'	=> '日', 
 			'week'	=> '週', 
 			'month'	=> '月', 
 		];
 		
-		$this->set('options.mode.calc', $calc);
-
+		$this->set('options.calc', $calc);
+		*/
+		
+		$type = [
+			'all'		=> '全部店家', 
+			'area'		=> '找區域',
+			'storeName'	=> '找店名',
+		];
+		$this->set('options.type', $type);
+		
 		#區域選項須以使用者權限為主
 		$currentUser = AppManager::getCurrentUser();
 		$allowAreas = $currentUser->getAreaPermissionsMap();
 		
-		$this->set('options.mode.areaList', $allowAreas);
+		$this->set('options.areas', $allowAreas);
 	}
 	
 	/* Form submit action
@@ -87,13 +95,13 @@ class QuickOrderViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($calc = 'day', $stDate = NULL, $endDate = NULL, $areaIds = [], $storeName = '')
+	public function keepSearchData($type = 'all', $stDate = NULL, $endDate = NULL, $areaIds = [], $storeName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
 		$thisMonth = Carbon::now()->format('Y-m');
 		
-		$this->set('search.calc', $calc);
+		$this->set('search.type', $type);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
 		$this->set('search.areaIds', $areaIds);
