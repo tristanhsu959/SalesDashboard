@@ -11,6 +11,7 @@ use App\Http\Controllers\MonthlyFillingController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PurchaseSalesController;
 use App\Http\Controllers\PurchaseReportController;
+use App\Http\Controllers\QuickOrderController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -26,7 +27,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('new_releases/search', [NewReleaseController::class, 'search'])->name('new_releases.search');
 		Route::get('new_releases/export/{token}', [NewReleaseController::class, 'export'])->name('new_releases.export');
 	});
-
+	
 	/* 銷售報表 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_SALES->value, ':')])->group(function(){
 		Route::get('sales', [SalesController::class, 'showSearch'])->name('sales');
@@ -34,11 +35,11 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('sales/export/{token}', [SalesController::class, 'export'])->name('sales.export');
 	});	
 	
-	/* 本日營收 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_DAILY_REVENUE->value, ':')])->group(function(){
-		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
-		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
-		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
+	/* 八方點 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_QUICK_ORDER->value, ':')])->group(function(){
+		Route::get('quick_order', [QuickOrderController::class, 'showSearch'])->name('quick_order');
+		Route::post('quick_order/search', [QuickOrderController::class, 'search'])->name('quick_order.search');
+		Route::get('quick_order/export/{token}', [QuickOrderController::class, 'export'])->name('quick_order.export');
 	});
 	
 	/* 出貨總量查詢 */
@@ -61,6 +62,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('monthly_filling/search', [MonthlyFillingController::class, 'search'])->name('monthly_filling.search');
 		Route::get('monthly_filling/export/{token}', [MonthlyFillingController::class, 'export'])->name('monthly_filling.export');
 	});	
+	
+	/* 本日營收 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_DAILY_REVENUE->value, ':')])->group(function(){
+		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
+		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
+		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
+	});
 	
 	/* 門店資訊 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_MERCHANT->value, ':')])->group(function(){
