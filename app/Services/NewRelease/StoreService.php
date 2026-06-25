@@ -56,7 +56,7 @@ class StoreService
 		if (empty($baseData))
 			return FALSE;
 		
-		$header = ['areaName' => '區域', 'shopId' => '門店代號', 'shopName' => '門店名稱', 
+		$header = ['areaName' => '區域', 'shopId' => 'POS店號', 'storeKey' => '門店代號', 'shopName' => '門店名稱', 
 					'dayQty' => $params->dayRange, 
 					'totalQty' => '銷售總量', 'totalAvg' => '平均銷售數量'
 				];
@@ -64,6 +64,7 @@ class StoreService
 		$params->set('shop.header', $header);
 		
 		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($item, $key) use($totalDays) {
+			$temp['storeKey']	= $item->pluck('storeKey')->first();
 			$temp['shopId']		= $item->pluck('shopId')->first();
 			$temp['shopName'] 	= $item->pluck('shopName')->first();
 			$temp['areaId'] 	= $item->pluck('areaId')->first();
@@ -100,6 +101,7 @@ class StoreService
 			$row = [];
 			$row[] = data_get($data, 'areaName');
 			$row[] = data_get($data, 'shopId');
+			$row[] = data_get($data, 'storeKey');
 			$row[] = data_get($data, 'shopName');
 			
 			foreach($shopData['header']['dayQty'] as $date)

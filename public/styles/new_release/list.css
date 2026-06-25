@@ -26,11 +26,19 @@ form {
 			thead tr th {
 				/*fixed col*/
 				&:nth-of-type(3) {
+					width: 150px;
+					min-width: 150px;
+					max-width: 150px;
+					position: sticky;
+					left: 0;
+					z-index: 6;
+				}
+				&:nth-of-type(4) {
 					width: 200px;
 					min-width: 200px;
 					max-width: 200px;
 					position: sticky;
-					left: 0;
+					left: 150px;
 					z-index: 6;
 				}
 			}
@@ -48,6 +56,13 @@ form {
 					position: sticky;
 					z-index: 5;
 					left: 0;
+					background-color: var(--table-fixed-bg);
+					color: var(--table-fixed-color);
+				}
+				&:nth-of-type(4) {
+					position: sticky;
+					z-index: 5;
+					left: 150px;
 					background-color: var(--table-fixed-bg);
 					color: var(--table-fixed-color);
 				}

@@ -120,6 +120,17 @@ class PurchaseManager
 		return $storeList;
 	}
 	
+	/* 排除廠區學區店(手動因依情境不同)
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterFactoryStore($storeList)
+	{
+		return collect($storeList)->reject(function($item, $key) {
+			return empty($item['posId']) OR $item['posId'] == 'null';
+		})->toArray();
+	}
+	
 	/* Format store output
 	 * @params: array
 	 * @return: array
@@ -203,6 +214,18 @@ class PurchaseManager
 		});
 		
 		return $result;
+	}
+	
+	/* 過濾門店By posId (銷售功能呼叫用)
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterStoreByPosId($storeList, $posIds)
+	{
+		return collect($storeList)->reject(function($item, $key) use($posIds){
+			return in_array($item['posId'], $posIds);
+		})->all();
 	}
 	
 	/******************** Factory ********************/
