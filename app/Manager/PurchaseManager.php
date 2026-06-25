@@ -96,8 +96,9 @@ class PurchaseManager
 		#排除閉店:有值才檢查,start/end都要有
 		if (! empty($stDate) && ! empty($endDate))
 		{
+			#明日開店,前一天可訂貨, 故要加一天
 			$stDate	= Carbon::parse($stDate);
-			$endDate= Carbon::parse($endDate);
+			$endDate= Carbon::parse($endDate)->addDay();
 			
 			$storeList = collect($storeList)->reject(function($item, $key) use($stDate, $endDate) {
 				

@@ -249,7 +249,8 @@ class PerformanceService
 		$baseData = collect($baseData)->map(function($item, $key) use($storeList){
 			$storeKey = PurchaseManager::buildStoreKey($item['storeNo']);
 			$store = data_get($storeList, $storeKey);
-			
+			if (empty($store))
+				dd($item, $storeKey, $store);
 			$temp['expectedDate']	= $item['expectedDate'];
 			$temp['storeNo'] 		= $item['storeNo'];
 			$temp['storeKey'] 		= $storeKey;
