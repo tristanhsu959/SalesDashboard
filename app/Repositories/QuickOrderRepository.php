@@ -70,25 +70,33 @@ class QuickOrderRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getSaleFromQuickOrder($brandCode, $stDate, $endDate, $posIds)
+	public function getSaleFromQuickOrder($brand, $stDate, $endDate, $posIds)
 	{
+		$brandId 	= $brand->value;
+		$brandCode 	= config("web.quick_order.store.code.{$brandId}"); #八方點的code
+		$excepts 	= array_merge(config("web.quick_order.store.factoryStore.{$brandId}"), config("web.quick_order.store.except.{$brandId}"));
+		
 		$db = $this->connectQuickOrder();
 		
 		$result = $db
-			->table(DB::raw('[Orders] as a WITH(NOLOCK)'))
-			#->fromRaw('Orders as o WITH(NOLOCK)')
+			->table(DB::raw('[Orders] as o WITH(NOLOCK)'))
 			->join('Stores as s', 's.storeId', '=', 'o.storeId')
 			->select('o.storeId')
-			->selectRaw('count(o.storeId) as customerCount, sum(o.price) as amount')
-			->selectRaw('DATEADD(month, DATEDIFF(month, 0, o.orderTime), 0) as orderDate')
-			->where('o.orderTime', '>=', $stDate)
-			->where('o.orderTime', '<', $endDate)
+			->selectRaw('count(o.storeId) as customers, sum(o.price) as amount')
+			->selectRaw('CAST(o.time AS DATE) as saleDate')
+			->where('o.time', '>=', $stDate)
+			->where('o.time', '<', $endDate)
 			->where('o.isComplete', '=', 1)
 			->where('o.isRefund', '=', 0)
 			->where('s.brand', '=', $brandCode)
-			->whereNotIn('o.storeId', config('web.quick_order.store.except'))
+			->when(empty($posIds), function ($query) use ($excepts) {
+					$query->whereNotIn('o.posid', $excepts);
+			})
+			->when(! empty($posIds), function ($query) use ($posIds) {
+					$query->whereIn('o.posid', $posIds);
+			})
 			->groupBy('o.storeId')
-			->groupBy(DB::raw('DATEADD(month, DATEDIFF(month, 0, o.orderTime), 0)'))#->ddRawSql();
+			->groupBy(DB::raw('CAST(o.time AS DATE)'))#->ddRawSql();
 			->get()
 			->toArray();
 		

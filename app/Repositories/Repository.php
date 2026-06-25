@@ -98,9 +98,9 @@ class Repository
 	protected function connectQuickOrder($table = NULL)
 	{
 		if (empty($table))
-			return DB::connection('NewOrder');
+			return DB::connection('QuickOrder');
 		else
-			return DB::connection('NewOrder')->table($table); 
+			return DB::connection('QuickOrder')->table($table); 
 	}
 	
 	/* 原測試機已改為Local MySql */

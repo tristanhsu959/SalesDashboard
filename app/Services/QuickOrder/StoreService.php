@@ -59,7 +59,7 @@ class StoreService
 				return $this->_statistics;
 			
 			$this->_prepareData($params);
-			
+			dd($params->qoBaseData);
 			$this->_outputReport($params);
 		
 			$this->_generateStatistics($params);
@@ -228,7 +228,7 @@ class StoreService
 			$qoData = $this->_getDataFromQuickOrder($params);
 			
 			#3.build to base data
-			$this->_buildBaseData($params, array_filter($posData)); 
+			$this->_mergeQuickOrderToBaseData($params, array_filter($qoData)); 
 		}
 		catch(Exception $e)
 		{
@@ -291,12 +291,7 @@ class StoreService
 		$baseData = collect($storeList)->map(function($item, $key) use($posData){
 			$data = data_get($posData, $item['posId']);
 			
-			$temp['storeNo'] 	= $item['storeNo'];
 			$temp['storeKey'] 	= $item['storeKey'];
-			$temp['posId'] 		= $item['posId'];
-			$temp['storeName'] 	= $item['storeName'];
-			$temp['areaId'] 	= $item['areaId'];
-			$temp['areaName']	= $item['areaName'];
 			
 			#二取一因可能有空值
 			#發票金額 = amount OR totalSales + totalDischarge
@@ -312,9 +307,9 @@ class StoreService
 			$temp['saleMonth']	= empty($saleDate) ? '' : (new Carbon($saleDate))->format('Y-m');
 			
 			return $temp; 
-		})->all();
+		})->values();
 		
-		$params->baseData = $baseData;
+		$params->posBaseData = $baseData;
 	}
 	
 	
@@ -325,12 +320,54 @@ class StoreService
 	 */
 	private function _getDataFromQuickOrder($params)
 	{
-		$brandId = $params->brand->value;
-		$brandCode = config("web.quick_order.store.brandCode.{$brandId}");
+		try
+		{
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$posIds 		= $params->posIds;
+			
+			#帶入的是查詢的area
+			$result = $this->_repository->getSaleFromQuickOrder($brand, $stDate, $endDate, $posIds);
+			
+			return $result;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取八方點訂單資料失敗');
+		}
+	}
+	
+	/* Merge to POS基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _mergeQuickOrderToBaseData($params, $qoData)
+	{
+		#以訂貨門店為基礎, 補全門店資訊
+		$storeList = $params->storeList;
 		
-		$orderData = $this->_repository->getSaleFromQuickOrder($brandCode, $params->stDate, $params->endDate, $params->posIds);
+		$qoData = collect($qoData)->mapWithKeys(function($item, $key){
+			return [$item['storeId'] => $item];
+		});
 		
-		dd($orderData);
+		$baseData = collect($storeList)->map(function($item, $key) use($qoData){
+			$data = data_get($qoData, $item['storeKey']);
+			
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['amount'] 	= floatval(data_get($data, 'amount', 0));
+			$temp['customers']	= data_get($data, 'customers', 0);
+			
+			$saleDate = data_get($data,'saleDate', NULL);
+			$temp['saleDate']	= empty($saleDate) ? '' : (new Carbon($saleDate))->format('Y-m-d');
+			$temp['saleWeek']	= empty($saleDate) ? '' : (new Carbon($saleDate))->isoFormat('\wWW');
+			$temp['saleMonth']	= empty($saleDate) ? '' : (new Carbon($saleDate))->format('Y-m');
+			
+			return $temp; 
+		})->values();
+		
+		$params->qoBaseData = $baseData;
 	}
 	
 	
