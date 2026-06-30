@@ -23,10 +23,12 @@ const Helper = {
         return errors.delete(key);
     },
 	
-	formatDollar(num) {
+	formatDollar(num, digits) {
+		digits = digits || 0;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'USD',
+			 maximumFractionDigits: digits
         }).format(num);
     },
 };

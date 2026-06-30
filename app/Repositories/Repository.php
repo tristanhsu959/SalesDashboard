@@ -94,6 +94,15 @@ class Repository
 			return DB::connection('NewOrder')->table($table); 
 	}
 	
+	#八方點
+	protected function connectQuickOrder($table = NULL)
+	{
+		if (empty($table))
+			return DB::connection('QuickOrder');
+		else
+			return DB::connection('QuickOrder')->table($table); 
+	}
+	
 	/* 原測試機已改為Local MySql */
 	/*protected function connectSaleDashboard($table = NULL)
 	{

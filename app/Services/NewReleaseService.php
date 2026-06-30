@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\NewReleaseRepository;
 use App\Services\NewRelease\StoreService;
 use App\Services\NewRelease\AreaService;
@@ -198,6 +199,10 @@ class NewReleaseService
 			
 			#4. Build base data
 			#會有false的無效array, 用array_filter去除
+			$this->_getDataFromDB($params);
+			
+			#5. Build base data
+			#會有false的無效array, 用array_filter去除
 			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
@@ -273,64 +278,11 @@ class NewReleaseService
 	private function _getStoreList($params)
 	{
 		$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
-		$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
-	}
-	
-	/* 基底資料
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _buildBaseData($params)
-	{
-		/*
-		[
-		330002 => [
-			"shopId" => "350001"
-			"saleDate" => "2025-09-22"
-			"qty" => "4"
-			"shopName" => "御廚竹南博愛店"
-			"areaId" => 3
-			"areaName" => "桃竹苗區"
-		]
-		*/
-		$saleData = array_filter($this->_getDataFromDB($params));
+		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
 		
-		#要改成所有店家統計(含閉店)
-		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		$allShopList = collect($params->allShopList)->groupBy('shopId');
-		
-		#DB有濾一遍了,只是預防萬一
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
-		
-		#gid在pos manager已處理成統一area id
-		$baseData = collect($saleData)->map(function($item, $key) use($allShopList) {
-			$shop = $allShopList->get($item['shopId'])->first();
-			
-			$item['saleDate']	= (new Carbon($item['saleDate']))->format('Y-m-d');
-			$item['shopName'] 	= is_null($shop) ? 'NotFound' : $shop['shopName'];
-			$item['areaId'] 	= is_null($shop) ? 0 : $shop['areaId'];
-			$item['areaName']	= $shop['areaName'];
-
-			return $item; 
-		});
-		
-		#補全未有銷售的門店資料(只需補active store)
-		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
-		
-		#重建
-		$filloutShops = collect($filloutShops)->map(function($item, $key) {
-			$temp['shopId'] 	= $item['shopId'];
-			$temp['saleDate'] 	= $this->_statistics['endDate'];
-			$temp['qty'] 		= 0;
-			$temp['shopName'] 	= $item['shopName'];
-			$temp['areaId'] 	= $item['areaId'];
-			$temp['areaName']	= $item['areaName'];
-			
-			return $temp;
-		});
-		
-		$params->baseData = $baseData->merge($filloutShops)->toArray();
+		#改Mapping訂貨門店/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
 	
 	/* Get main data & mapping data
@@ -354,7 +306,7 @@ class NewReleaseService
 			
 			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
 				
-			return $saleData;
+			$params->saleData = $saleData;
 		}
 		catch(Exception $e)
 		{
@@ -362,6 +314,77 @@ class NewReleaseService
 			throw new Exception('讀取POS系統訂單資料失敗');
 		}
 	}
+	
+	
+	/* 基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildBaseData($params)
+	{
+		/*
+		[
+		330002 => [
+			"shopId" => "350001"
+			"saleDate" => "2025-09-22"
+			"qty" => "4"
+			"shopName" => "御廚竹南博愛店"
+			"areaId" => 3
+			"areaName" => "桃竹苗區"
+		]
+		*/
+		$saleData = array_filter($params->saleData);
+		
+		#要改成所有店家統計(含閉店)
+		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
+		$saleStoreList = collect($params->allShopList)->mapWithKeys(function($item, $key){
+			return [$item['shopId'] => $item]; #posId
+		});
+		
+		$purchaseStoreList = collect($params->storeList)->mapWithKeys(function($item, $key){
+			return [$item['posId'] => $item]; #posId
+		});
+		
+		#DB有濾一遍了,只是預防萬一
+		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		
+		#gid在pos manager已處理成統一area id
+		$baseData = collect($saleData)->map(function($item, $key) use($saleStoreList, $purchaseStoreList) {
+			
+			$store	= data_get($purchaseStoreList, $item['shopId'], NULL); 
+			$shop 	= data_get($saleStoreList, $item['shopId'], NULL);
+			
+			
+			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
+			$item['shopName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['shopName']);
+			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
+			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
+			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
+			
+			return $item; 
+		});
+		
+		#補全未有銷售的門店資料(只需補active store)
+		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
+		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
+		$filloutShops = PurchaseManager::filterStoreByPosId($purchaseStoreList, $saleShopIds);
+		
+		#重建
+		$filloutShops = collect($filloutShops)->map(function($item, $key) use($params){
+			$temp['shopId'] 	= $item['posId'];
+			$temp['saleDate'] 	= $params->endDate;
+			$temp['qty'] 		= 0;
+			$temp['shopName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName']	= $item['areaName'];
+			$temp['storeKey']	= $item['storeKey'];
+			
+			return $temp;
+		});
+		
+		$params->baseData = $baseData->merge($filloutShops)->toArray();
+	}
+	
 	
 	/* ========================== 統計 ========================== */
 	/* 取使用者可讀取區域資料(原主邏輯不動)

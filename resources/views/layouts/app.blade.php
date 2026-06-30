@@ -18,6 +18,7 @@
 		<link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 		<link href="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.css" rel="stylesheet">
+		<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" >
 		<link href="{{ asset('styles/include.css') }}" rel="stylesheet" />
 		<link href="{{ asset('styles/app.css') }}" rel="stylesheet" />
 		@stack('styles')
@@ -25,6 +26,7 @@
 		<!-- Scripts -->
 		<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@4.0.7/dist/cdn/beer.min.js" defer></script>
 		<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js" defer></script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
 		<script src="{{ asset('scripts/util.js') }}" defer></script>
 		<script src="{{ asset('scripts/helper.js') }}" defer></script>
 		<script src="{{ asset('scripts/app.js') }}" defer></script>

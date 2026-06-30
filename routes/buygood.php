@@ -9,6 +9,7 @@ use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PurchaseSalesController;
+use App\Http\Controllers\EzOrderPosController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -31,11 +32,11 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('sales/export/{token}', [SalesController::class, 'export'])->name('sales.export');
 	});
 	
-	/* 本日營收 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_DAILY_REVENUE->value, ':')])->group(function(){
-		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
-		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
-		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
+	/* 八方點 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_EZORDER_POS->value, ':')])->group(function(){
+		Route::get('ezorder_pos', [EzOrderPosController::class, 'showSearch'])->name('ezorder_pos');
+		Route::post('ezorder_pos/search', [EzOrderPosController::class, 'search'])->name('ezorder_pos.search');
+		Route::get('ezorder_pos/export/{token}', [EzOrderPosController::class, 'export'])->name('ezorder_pos.export');
 	});
 	
 	/* 出貨報表 */
@@ -51,6 +52,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('shipments/search', [ShipmentsController::class, 'search'])->name('shipments.search');
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
 	});	
+	
+	/* 本日營收 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_DAILY_REVENUE->value, ':')])->group(function(){
+		Route::get('daily_revenue', [DailyRevenueController::class, 'showSearch'])->name('daily_revenue');
+		Route::post('daily_revenue/search', [DailyRevenueController::class, 'search'])->name('daily_revenue.search');
+		Route::get('daily_revenue/export/{token}', [DailyRevenueController::class, 'export'])->name('daily_revenue.export');
+	});
 	
 	/* 門店資訊 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_MERCHANT->value, ':')])->group(function(){

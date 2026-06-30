@@ -96,8 +96,9 @@ class PurchaseManager
 		#排除閉店:有值才檢查,start/end都要有
 		if (! empty($stDate) && ! empty($endDate))
 		{
+			#明日開店,前一天可訂貨, 故要加一天
 			$stDate	= Carbon::parse($stDate);
-			$endDate= Carbon::parse($endDate);
+			$endDate= Carbon::parse($endDate)->addDay();
 			
 			$storeList = collect($storeList)->reject(function($item, $key) use($stDate, $endDate) {
 				
@@ -117,6 +118,17 @@ class PurchaseManager
 		}
 		
 		return $storeList;
+	}
+	
+	/* 排除廠區學區店(手動因依情境不同)
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterFactoryStore($storeList)
+	{
+		return collect($storeList)->reject(function($item, $key) {
+			return empty($item['posId']) OR $item['posId'] == 'null';
+		})->toArray();
 	}
 	
 	/* Format store output
@@ -202,6 +214,18 @@ class PurchaseManager
 		});
 		
 		return $result;
+	}
+	
+	/* 過濾門店By posId (銷售功能呼叫用)
+	 * @params: array
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterStoreByPosId($storeList, $posIds)
+	{
+		return collect($storeList)->reject(function($item, $key) use($posIds){
+			return in_array($item['posId'], $posIds);
+		})->all();
 	}
 	
 	/******************** Factory ********************/

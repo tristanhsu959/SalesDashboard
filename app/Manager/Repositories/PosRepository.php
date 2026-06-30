@@ -39,7 +39,7 @@ class PosRepository extends Repository
 		
 		$result = $db->table('SHOP00 as a')
 			->join('shop_kind as b', 'b.sk_id', '=', 'a.shop_kind')
-			->select('a.SHOP_ID as shopId', 'a.SHOP_NAME as shopName', 'a.gid as areaId', 'a.closedown')
+			->select('a.SHOP_ID as shopId', 'a.SHOP_NAME as shopName', 'a.gid as areaId', 'a.closedown', 'a.erp_shopid as storeKey')
 			->addSelect('b.sk_id as typeId', 'b.Sk_name as typeName')
 			#->where('a.closedown', '=', 0)
 			->whereIn('a.gid', $authAreaIds)

@@ -183,6 +183,20 @@ return [
             'trust_server_certificate' => env('NO_DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 		
+		#八方點
+		'QuickOrder' => [
+            'driver' => 'sqlsrv',
+            'host' => env('QO_DB_HOST', 'bafangquickorder-mssql-server.database.windows.net'),
+			'port' => env('QO_DB_PORT', '1433'),
+            'database' => env('QO_DB_DATABASE', 'QuickerOrder'),
+            'username' => env('QO_DB_USERNAME', 'quickerorder-user'),
+            'password' => env('QO_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'trust_server_certificate' => env('NO_DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+		
 		#春節預購更新car no(暫時放在此, 不設env)
 		'LunarCarNo' => [
             'driver' => 'mysql',

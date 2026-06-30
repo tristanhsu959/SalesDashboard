@@ -81,7 +81,7 @@ table {
 }
 
 /* Page table common */
-.page {
+.page, .statistics-list {
 	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area.grid-table {
