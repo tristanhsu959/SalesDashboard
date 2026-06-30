@@ -73,7 +73,7 @@ class ProductService
 		$statistics['hasResult']	= FALSE;
 		
 		#無值不cache
-		if (! empty($statistics['store']))
+		if (! empty($statistics['store']['data']))
 		{
 			$statistics['hasResult']	= TRUE;
 			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin

@@ -43,6 +43,7 @@ class NewReleaseService
 			'shop' 			=> [],
 			'top' 			=> [],
 			'last' 			=> [],
+			'hasResult'		=> FALSE,
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
@@ -169,13 +170,15 @@ class NewReleaseService
 		$this->_statistics['area']			= $params->area;
 		$this->_statistics['top']			= $params->top;
 		$this->_statistics['last']			= $params->last;
+		$this->_statistics['hasResult']		= FALSE;
 		$this->_statistics['exportName']	= $params->productName;
 		$this->_statistics['exportToken']	= '';
 		
 		#無值不cache
-		if (! empty(Arr::flatten($this->_statistics['shop'])))
+		if (! empty($this->_statistics['area']['data']))
 		{
-			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
+			$this->_statistics['hasResult']		= TRUE;
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}

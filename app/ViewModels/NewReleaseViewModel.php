@@ -95,9 +95,7 @@ class NewReleaseViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
-		
-		$data = data_get($this->statistics, 'area.data', []);
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;
 	}
