@@ -1,12 +1,11 @@
 @extends('layouts.app')
-@use('Illuminate\Support\Number')
 
 @push('styles')
-    <link href="{{ asset('styles/quick_order/list.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/ezorder_pos/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/quick_order/list.js') }}" defer></script>
+    <script src="{{ asset('scripts/ezorder_pos/list.js') }}" defer></script>
 @endpush
 
 @section('content')

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\QuickOrderService;
-use App\ViewModels\QuickOrderViewModel;
+use App\Services\EzOrderPosService;
+use App\ViewModels\EzOrderPosViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
@@ -13,9 +13,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
-class QuickOrderController extends Controller
+class EzOrderPosController extends Controller
 {
-	public function __construct(protected QuickOrderService $_service, protected QuickOrderViewModel $_viewModel)
+	public function __construct(protected EzOrderPosService $_service, protected EzOrderPosViewModel $_viewModel)
 	{
 	}
 	
@@ -30,7 +30,7 @@ class QuickOrderController extends Controller
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('quick_order.statistics')->with('viewModel', $this->_viewModel);
+		return view('ezorder_pos.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -46,13 +46,11 @@ class QuickOrderController extends Controller
 		$searchType		= $request->input('searchType');
 		$searchStDate	= $request->input('searchStDate'); #or Month
 		$searchEndDate	= $request->input('searchEndDate');
-		$searchAreaIds	= $request->array('searchAreaIds'); #未選取查全部
-		$searchStoreName= $request->input('searchStoreName');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -61,7 +59,7 @@ class QuickOrderController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('quick_order.statistics')->with('viewModel', $this->_viewModel);
+		return view('ezorder_pos.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Export
@@ -72,7 +70,6 @@ class QuickOrderController extends Controller
 	{
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
-		//$token 	= $request->query('token');
 		
 		$this->_viewModel->initialize($brand, $function);
 		$this->_viewModel->keepSearchData();
@@ -82,7 +79,7 @@ class QuickOrderController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('quick_order.statistics')->with('viewModel', $this->_viewModel);
+			return view('ezorder_pos.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

@@ -51,29 +51,13 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
-	Alpine.data('aovStatistics', (statistics) => ({
-		statisticsData: {...statistics.data},
-		expansion: new Set(),
+	Alpine.data('statistics', (statistics) => ({
+		header: {...statistics.header},
+		data: {...statistics.data},
 		
 		init() {
-			this.expansion.clear();;
 		},
 		
-		addExpansion(typeKey, month) {
-			const key = `${typeKey}-${month}`;
-			
-			if (this.expansion.has(key))
-				this.expansion.delete(key);
-			else
-				this.expansion.add(key);
-		},
-		
-		showDetail(typeKey, month) {
-			const key = `${typeKey}-${month}`;
-			
-			return this.expansion.has(key);
-		},
-		
-    }));
+	}));
 });
 

@@ -9,7 +9,7 @@ use App\Http\Controllers\DailyRevenueController;
 use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PurchaseSalesController;
-use App\Http\Controllers\QuickOrderController;
+use App\Http\Controllers\EzOrderPosController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -33,10 +33,10 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	});
 	
 	/* 八方點 */
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_QUICK_ORDER->value, ':')])->group(function(){
-		Route::get('quick_order', [QuickOrderController::class, 'showSearch'])->name('quick_order');
-		Route::post('quick_order/search', [QuickOrderController::class, 'search'])->name('quick_order.search');
-		Route::get('quick_order/export/{token}', [QuickOrderController::class, 'export'])->name('quick_order.export');
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_EZORDER_POS->value, ':')])->group(function(){
+		Route::get('ezorder_pos', [EzOrderPosController::class, 'showSearch'])->name('ezorder_pos');
+		Route::post('ezorder_pos/search', [EzOrderPosController::class, 'search'])->name('ezorder_pos.search');
+		Route::get('ezorder_pos/export/{token}', [EzOrderPosController::class, 'export'])->name('ezorder_pos.export');
 	});
 	
 	/* 出貨報表 */

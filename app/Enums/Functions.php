@@ -21,7 +21,7 @@ enum Functions : string
 	#Bafang	
 	case BF_NEW_RELEASE			= 'bafang:new_releases';
 	case BF_SALES				= 'bafang:sales';
-	case BF_QUICK_ORDER			= 'bafang:quick_order';
+	case BF_EZORDER_POS			= 'bafang:ezorder_pos';
 	case BF_DAILY_REVENUE		= 'bafang:daily_revenue';
 	case BF_SHIPMENTS			= 'bafang:shipments';
 	case BF_PURCHASE_REPORT		= 'bafang:purchase_report';
@@ -32,7 +32,7 @@ enum Functions : string
 	#Buygood	
 	case BG_NEW_RELEASE			= 'buygood:new_releases';
 	case BG_SALES				= 'buygood:sales';
-	case BG_QUICK_ORDER			= 'buygood:quick_order';
+	case BG_EZORDER_POS			= 'buygood:ezorder_pos';
 	case BG_DAILY_REVENUE		= 'buygood:daily_revenue';
 	#case BG_PURCHASE			= 'buygood:purchase';
 	case BG_SHIPMENTS			= 'buygood:shipments';
@@ -63,7 +63,7 @@ enum Functions : string
 			#八方
 			self::BF_NEW_RELEASE		=> '新品銷售',
 			self::BF_SALES 				=> '銷售查詢',
-			self::BF_QUICK_ORDER		=> '八方點統計',
+			self::BF_EZORDER_POS		=> '八方點統計',
 			self::BF_SHIPMENTS 			=> '出貨總量查詢',
 			self::BF_PURCHASE_REPORT 	=> '出貨統計報表(Beta)',
 			self::BF_MONTHLY_FILLING	=> '月初報表',
@@ -74,7 +74,7 @@ enum Functions : string
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',
 			self::BG_SALES 				=> '銷售查詢',
-			self::BG_QUICK_ORDER		=> '八方點統計',
+			self::BG_EZORDER_POS		=> '八方點統計',
 			self::BG_SHIPMENTS 			=> '出貨總量查詢',
 			#self::BG_PURCHASE 			=> '出貨統計報表(Beta)',
 			self::BG_DAILY_REVENUE		=> '門店營收',

@@ -17,7 +17,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
-class QuickOrderViewModel extends Fluent
+class EzOrderPosViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
@@ -61,9 +61,9 @@ class QuickOrderViewModel extends Fluent
 		*/
 		
 		$type = [
-			'all'		=> '全部店家', 
-			'area'		=> '找區域',
-			'storeName'	=> '找店名',
+			'store'		=> '依門店', 
+			#'area'		=> '找區域',
+			#'storeName'	=> '找店名', #取消此條件
 		];
 		$this->set('options.type', $type);
 		
@@ -84,8 +84,8 @@ class QuickOrderViewModel extends Fluent
 		
 		return match($formAction)
 		{
-			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.quick_order.search')),
-			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.quick_order.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.ezorder_pos.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.ezorder_pos.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -95,7 +95,7 @@ class QuickOrderViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'all', $stDate = NULL, $endDate = NULL, $areaIds = [], $storeName = '')
+	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL)
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
@@ -104,8 +104,6 @@ class QuickOrderViewModel extends Fluent
 		$this->set('search.type', $type);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
-		$this->set('search.areaIds', $areaIds);
-		$this->set('search.storeName', $storeName);
 		$this->set('search.today', $today);
 		$this->set('search.thisMonth', $thisMonth);
 	}
@@ -116,14 +114,12 @@ class QuickOrderViewModel extends Fluent
 	 */
 	public function getPartialView()
 	{
-		return 'quick_order.store';
-		/* $type = $this->get('search.type', NULL);
+		$type = $this->get('search.type', NULL);
 		
 		return match($type)
 		{
-			'store'	=> 'daily_revenue.store',
-			'aov'	=> 'daily_revenue.aov',	 
-		}; */
+			'store'	=> 'ezorder_pos.store',
+ 		};
 	}
 	
 	/* Output js */
@@ -138,17 +134,6 @@ class QuickOrderViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
-		
-		$type = data_get($this->statistics, 'modeType', NULL);
-		
-		if ($type == 'store')
-			$data = data_get($this->statistics, 'area.data', []);
-		else
-			$data = data_get($this->statistics, 'data', []);
-		
-		$response['hasResult'] = !empty($data);
-		$response['modeType'] = $type;
-		
 		return $response;
 	}
 }

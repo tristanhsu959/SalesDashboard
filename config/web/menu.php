@@ -22,10 +22,10 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
 		],
 		[
-			'name' 		=> Functions::BF_QUICK_ORDER->label(), #八方點
-			'code'		=> Functions::BF_QUICK_ORDER->value,
+			'name' 		=> Functions::BF_EZORDER_POS->label(), #八方點
+			'code'		=> Functions::BF_EZORDER_POS->value,
 			'style' 	=> ['icon' => 'qr_code_scanner', 'color' => 'orange-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.quick_order'),
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.ezorder_pos'),
 		],
 		[
 			'name' 		=> Functions::BF_SHIPMENTS->label(), #出貨查詢
@@ -79,10 +79,10 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.sales'),
 		],
 		[
-			'name' 		=> Functions::BG_QUICK_ORDER->label(), #八方點
-			'code'		=> Functions::BG_QUICK_ORDER->value,
+			'name' 		=> Functions::BG_EZORDER_POS->label(), #八方點
+			'code'		=> Functions::BG_EZORDER_POS->value,
 			'style' 	=> ['icon' => 'qr_code_scanner', 'color' => 'cyan-text'],
-			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.quick_order'),
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.ezorder_pos'),
 		],
 		[
 			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨查詢
