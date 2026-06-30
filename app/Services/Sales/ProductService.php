@@ -279,6 +279,8 @@ class ProductService
 			$item['productName']= empty($product) ? '' : $product['productName'];
 			
 			return $item;
+		})->reject(function($item, $key){
+			return empty($item);
 		});
 		
 		#補全未有銷售的門店資料(closedown = 0)
@@ -286,9 +288,6 @@ class ProductService
 		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
 		
 		$filloutShops = collect($storeList)->reject(function($item, $key) use($saleShopIds) {
-			#過濾出無銷售且為active門店
-			if (empty($item['posId']))
-				dd($item);
 			return in_array($item['posId'], $saleShopIds);
 		});
 		
