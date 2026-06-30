@@ -45,17 +45,15 @@ class SalesController extends Controller
 		$brand 		= $this->_service->parsingBrand($request->segments());
 		$function 	= $this->_service->parsingFunction($brand);
 		
-		$searchType			= $request->input('searchType', 'product'); #預留
 		$searchStDate		= $request->input('searchStDate');
 		$searchEndDate		= $request->input('searchEndDate');
-		$searchShopName		= $request->input('searchShopName');
 		$searchCategory		= $request->input('searchCategory');
 		$searchProductIds	= $request->array('searchProductIds');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchShopName, $searchCategory, $searchProductIds);
+		$this->_viewModel->keepSearchData($searchStDate, $searchEndDate, $searchCategory, $searchProductIds);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopName, $searchCategory, $searchProductIds);
+		$response = $this->_service->getStatistics($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

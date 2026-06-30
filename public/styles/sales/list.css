@@ -35,7 +35,7 @@ form {
 		table {
 			thead tr th {
 				/*fixed col*/
-				&:nth-of-type(3) {
+				&:nth-of-type(4) {
 					width: 200px;
 					min-width: 200px;
 					max-width: 200px;
@@ -55,6 +55,10 @@ form {
 					color: var(--table-fixed-color);
 				}
 				&:nth-of-type(3) {
+					background-color: var(--table-fixed-bg);
+					color: var(--table-fixed-color);
+				}
+				&:nth-of-type(4) {
 					position: sticky;
 					z-index: 5;
 					left: 0;

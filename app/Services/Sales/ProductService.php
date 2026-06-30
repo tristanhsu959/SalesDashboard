@@ -4,6 +4,7 @@ namespace App\Services\Sales;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\SalesRepository;
 use App\Services\Sales\StoreService;
 use App\Services\Sales\AreaService;
@@ -33,18 +34,6 @@ class ProductService
 	
 	public function __construct(protected SalesRepository $_repository)
 	{
-		#default
-		$this->_statistics = [
-			'brandId'		=> '', #export
-			'startDate'		=> '', #Y-m-d
-            'endDate'   	=> '',
-			'modeType'		=> '',
-			'shopName'   	=> '',
-			'shop' 			=> [],
-			'area' 			=> [],
-			'productList'	=> [],
-			'exportToken'	=> '',
-		];
 	}
 	
 	/* Search data
@@ -59,9 +48,7 @@ class ProductService
 			
 			$this->_outputReport($params);
 		
-			$this->_generateStatistics($params);
-			
-			return $this->_statistics;
+			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)
 		{
@@ -75,23 +62,28 @@ class ProductService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['brandId']		= $params->brand->value;
-		$this->_statistics['brandCode']		= $params->brand->code();
-		$this->_statistics['startDate'] 	= $params->stDate;
-		$this->_statistics['endDate']		= $params->endDate;
-		$this->_statistics['modeType']		= $params->type;
-		$this->_statistics['shop']			= $params->shop;
-		$this->_statistics['area']			= $params->area;
-		$this->_statistics['productList']	= $params->productList;
+		$statistics['brandId']		= $params->brand->value;
+		$statistics['brandCode']	= $params->brand->code();
+		$statistics['startDate'] 	= $params->stDate;
+		$statistics['endDate']		= $params->endDate;
+		$statistics['store']		= $params->store;
+		$statistics['area']			= $params->area;
+		$statistics['productList']	= $params->productList;
+		$statistics['exportToken']	= '';
+		$statistics['hasResult']	= FALSE;
 		
 		#無值不cache
-		if (! empty(Arr::flatten($this->_statistics['shop'])))
+		if (! empty($statistics['store']))
 		{
-			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
-			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
+			$statistics['hasResult']	= TRUE;
+			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			Cache::put($params->cacheKey, $statistics, now()->addMinutes(10));
 		}
+		
+		return $statistics;
 	}
 	
+	/* ====================== Prepare data ====================== */
 	/* Get search data
 	 * @params: array
 	 * @return: array
@@ -109,7 +101,10 @@ class ProductService
 			#3. Get all shops with area permission
 			$this->_getStoreList($params);
 			
-			#4.build to base data
+			#4.get data
+			$this->_getDataFromDB($params);
+			
+			#5.build to base data
 			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
@@ -192,9 +187,53 @@ class ProductService
 	 */
 	private function _getStoreList($params)
 	{
-		$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
-		$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
+		$params->allStoreList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
+		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
+		
+		##20260630:改用訂貨門店來mapping/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
+	
+	/* Get buy good data
+	 * @params: fluent
+	 * @return: array
+	 */
+	private function _getDataFromDB($params)
+	{
+		try
+		{
+			/* Return format */
+			/*
+			array:9 [
+				"shopId" => "103002"
+				"productId" => "UC06000002"
+				"price_sum" => 111 => price * qty + discount
+				"qty_sum" => 99
+				"shopName" => "御廚重慶北直營店"
+				"gid" => "A01"
+				"productName" => "炸雞腿飯"
+			]
+			*/
+			
+			$brand 			= $params->brand;
+			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$primaryIds 	= $params->primaryIds;
+			$secondaryIds 	= $params->secondaryIds;
+			$userAreaIds 	= $params->userAreaIds;
+			
+			$result = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
+			
+			$params->saleData = $result;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取POS系統訂單資料失敗');
+		}
+	}
+	
 	
 	/* Rebuild data format
 	 * @params: Fluent
@@ -216,6 +255,83 @@ class ProductService
 			"productName" => "橙汁排骨"
 		]
 		*/
+		
+		$saleData = PosManager::filterExceptStore($params->brand, $params->saleData);
+		$productList = $params->productList; 
+		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
+			return [$item['posId'] => $item];
+		})->all();
+		
+		$baseData = collect($saleData)->map(function($item, $key) use($productList, $storeList) {
+			$store 	= data_get($storeList, $item['shopId'], NULL); 
+			$product= data_get($productList, $item['erpNo'], NULL);
+			
+			if (is_null($store))
+				return '';
+			
+			$item['storeKey'] 	= $store['storeKey'];
+			$item['shopName'] 	= $store['storeName'];
+			$item['areaId'] 	= $store['areaId'];
+			$item['areaName']	= $store['areaName'];
+			
+			#轉換成系統設定Id and Name
+			$item['productId']	= empty($product) ? 0 : $product['productId'];
+			$item['productName']= empty($product) ? '' : $product['productName'];
+			
+			return $item;
+		});
+		
+		#補全未有銷售的門店資料(closedown = 0)
+		$saleShopIds = array_filter($baseData->pluck('shopId')->unique()->values()->toArray());
+		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
+		
+		$filloutShops = collect($storeList)->reject(function($item, $key) use($saleShopIds) {
+			#過濾出無銷售且為active門店
+			if (empty($item['posId']))
+				dd($item);
+			return in_array($item['posId'], $saleShopIds);
+		});
+		
+		#因每個統計內容不同, 故無法寫在trait class
+		$filloutShops = collect($filloutShops)->map(function($item, $key) {
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['shopId'] 	= $item['posId'];
+			$temp['shopName'] 	= $item['storeName'];
+			$temp['erpNo'] 		= '';
+			$temp['price'] 		= 0;
+			$temp['qty'] 		= 0;
+			$temp['discount'] 	= 0;
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName']	= $item['areaName'];
+			$temp['productId'] 	= 0;
+			$temp['productName']= '';
+			
+			return $temp;
+		});
+		
+		$params->baseData = $baseData->merge($filloutShops)->toArray();
+	}
+	
+	/* Rebuild data format
+	 * @params: Fluent
+	 * @params: array
+	 * @return: array
+	 */
+	/* private function _buildBaseData($params)
+	{
+		/* 重整資料格式/命名/區域
+		array:11 [
+			"shopId" => "100001"
+			"shopName" => "御廚中正南昌店"
+			"erpNo" => "UC00000042"
+			"price_sum" => "360.0"
+			"qty_sum" => "3"
+			"areaId" => 1
+			"areaName" => "大台北區"
+			"productId" => 2
+			"productName" => "橙汁排骨"
+		]
+		*
 		
 		$saleData = array_filter($this->_getDataFromDB($params));
 		
@@ -262,46 +378,10 @@ class ProductService
 		});
 		
 		$params->baseData = $baseData->merge($filloutShops)->toArray();
-	}
+	} */
 	
-	/* Get buy good data
-	 * @params: fluent
-	 * @return: array
-	 */
-	private function _getDataFromDB($params)
-	{
-		try
-		{
-			/* Return format */
-			/*
-			array:9 [
-				"shopId" => "103002"
-				"productId" => "UC06000002"
-				"price_sum" => 111 => price * qty + discount
-				"qty_sum" => 99
-				"shopName" => "御廚重慶北直營店"
-				"gid" => "A01"
-				"productName" => "炸雞腿飯"
-			]
-			*/
-			
-			$brand 			= $params->brand;
-			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$primaryIds 	= $params->primaryIds;
-			$secondaryIds 	= $params->secondaryIds;
-			$userAreaIds 	= $params->userAreaIds;
-			
-			$result = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $userAreaIds);
-			
-			return $result;
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception('讀取POS系統訂單資料失敗');
-		}
-	}
+	/* ====================== Prepare data End ====================== */
+	
 	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
@@ -433,8 +513,8 @@ class ProductService
 			]
 		]
 		*/
-		$params->set('shop.header', []);
-		$params->set('shop.data', []);
+		$params->set('store.header', []);
+		$params->set('store.data', []);
 		$baseData = $params->baseData;
 		
 		#會有無設定區域權限的狀況, 須判別
@@ -444,14 +524,16 @@ class ProductService
 		#array_merge key不會保留
 		$header = [
 			'areaName'	=> '區域', 
-			'shopId'	=> '門店代號', 
+			'shopId'	=> 'POS店號',
+			'storeKey'	=> '門店代號', 
 			'shopName' 	=> '門店名稱',
 			'products' 	=> $params->productHeader
 		];
 		
-		$params->set('shop.header', $header);
+		$params->set('store.header', $header);
 		
 		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($items, $key) {
+			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
 			$temp['shopId'] 	= $items->pluck('shopId')->first();
 			$temp['shopName'] 	= $items->pluck('shopName')->first();
 			$temp['areaId'] 	= $items->pluck('areaId')->first();
@@ -474,7 +556,7 @@ class ProductService
 			return $temp;	
 		})->values()->all();
 		
-		$params->set('shop.data', $result);
+		$params->set('store.data', $result);
 	}
 	
 	/* Export data
@@ -489,7 +571,7 @@ class ProductService
 		{
 			#Build export data
 			list($export['區域彙總-數量'], $export['區域彙總-金額']) = $this->_buildAreaExport($sourceData['area']);
-			list($export['店別明細-數量'], $export['店別明細-金額']) = $this->_buildStoreExport($sourceData['shop']);
+			list($export['店別明細-數量'], $export['店別明細-金額']) = $this->_buildStoreExport($sourceData['store']);
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
@@ -585,10 +667,12 @@ class ProductService
 			
 			$rowQty[]	= $data['areaName'];
 			$rowQty[]	= $data['shopId'];
+			$rowQty[]	= $data['storeKey'];
 			$rowQty[]	= $data['shopName'];
 			
 			$rowAmount[]= $data['areaName'];
 			$rowAmount[]= $data['shopId'];
+			$rowAmount[]= $data['storeKey'];
 			$rowAmount[]= $data['shopName'];
 			
 			foreach($shopData['header']['products'] as $productId => $productName)

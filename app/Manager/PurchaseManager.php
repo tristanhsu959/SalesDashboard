@@ -120,7 +120,7 @@ class PurchaseManager
 		return $storeList;
 	}
 	
-	/* 排除廠區學區店(手動因依情境不同)
+	/* 排除廠區學區店(因依情境不同手動呼叫,只針對沒有POS的)
 	 * @params: array
 	 * @return: array
 	 */

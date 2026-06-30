@@ -55,13 +55,6 @@ class SalesViewModel extends Fluent
 		
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
-		
-		$type = [
-			'product'	=> '找產品', 
-			'store'		=> '找門店', 
-		];
-		
-		$this->set('options.mode.type', $type); #因可能有多組不同選項群組
 	}
 	
 	/* Form submit action
@@ -85,15 +78,13 @@ class SalesViewModel extends Fluent
 	 * @params: date
 	 * @return: void
 	 */
-	public function keepSearchData($type = 'product', $searchStDate = NULL, $searchEndDate = NULL, $searchShopName = NULL, $searchCategory = '', $searchProductIds = [])
+	public function keepSearchData($searchStDate = NULL, $searchEndDate = NULL, $searchCategory = '', $searchProductIds = [])
     {
 		$today = now()->format('Y-m-d');
 		
-		$this->set('search.type', $type);
 		$this->set('search.stDate', $searchStDate ?? $today); 
 		$this->set('search.endDate', $searchEndDate ?? $today);
 		$this->set('search.category', $searchCategory);
-		$this->set('search.shopName', $searchShopName);
 		$this->set('search.productIds', $searchProductIds);
 		$this->set('search.today', $today);
 	}
@@ -110,9 +101,7 @@ class SalesViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
-		
-		$data = data_get($this->statistics, 'area.data', []);
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;
 	}

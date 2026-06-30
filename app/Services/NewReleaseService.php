@@ -161,15 +161,16 @@ class NewReleaseService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['brandId']	= $params->brand->value;
-		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['startDate'] = $params->stDate;
-		$this->_statistics['endDate']	= $params->endDate;
-		$this->_statistics['shop']		= $params->shop;
-		$this->_statistics['area']		= $params->area;
-		$this->_statistics['top']		= $params->top;
-		$this->_statistics['last']		= $params->last;
-		$this->_statistics['exportName']= $params->productName;
+		$this->_statistics['brandId']		= $params->brand->value;
+		$this->_statistics['brandCode']		= $params->brand->code();
+		$this->_statistics['startDate'] 	= $params->stDate;
+		$this->_statistics['endDate']		= $params->endDate;
+		$this->_statistics['shop']			= $params->shop;
+		$this->_statistics['area']			= $params->area;
+		$this->_statistics['top']			= $params->top;
+		$this->_statistics['last']			= $params->last;
+		$this->_statistics['exportName']	= $params->productName;
+		$this->_statistics['exportToken']	= '';
 		
 		#無值不cache
 		if (! empty(Arr::flatten($this->_statistics['shop'])))

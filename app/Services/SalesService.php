@@ -36,9 +36,7 @@ class SalesService
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'modeType'		=> '',
-			'shopName'   	=> '',
-			'shop' 			=> [],
+			'store'			=> [],
 			'area' 			=> [],
 			'productList'	=> [],
 			'exportToken'	=> '',
@@ -109,7 +107,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopName, $searchCategory, $searchProductIds)
+	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds)
 	{
 		try
 		{
@@ -117,7 +115,7 @@ class SalesService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			#Params都用pass(保留service可複用空間)
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopName, $searchCategory, $searchProductIds);
+			$params = $this->_initParams($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -131,10 +129,7 @@ class SalesService
 			{
 				Log::channel('appServiceLog')->info('Get sales data from db');
 				
-				if ($params->type == 'product')
-					$service = app(ProductService::class);
-				else
-					throw new Exception('查詢銷售統計時發生錯誤');
+				$service = app(ProductService::class);
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -156,7 +151,7 @@ class SalesService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopName, $searchCategory, $searchProductIds)
+	private function _initParams($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds)
 	{
 		$params = new Fluent();
 		
@@ -168,8 +163,8 @@ class SalesService
 		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds]);
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
-				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
-				->shopName($searchShopName)->category($searchCategory)->productIds($searchProductIds)
+				->stDate($searchStDate)->endDate($searchEndDate)
+				->category($searchCategory)->productIds($searchProductIds)
 				->cacheKey($cacheKey);
 		
 		return $params;
@@ -192,12 +187,8 @@ class SalesService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
 		
-		if ($modeType == 'product')
-			$service = app(ProductService::class);
-		else
-			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
+		$service = app(ProductService::class);
 		
 		return $service->export($sourceData);
 	}
