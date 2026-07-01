@@ -131,6 +131,29 @@ class PurchaseManager
 		})->toArray();
 	}
 	
+	/* 排除類型(依config,因pos及訂貨定義不同, 只能用名稱濾)
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterStoreByTypeName($storeList, $type = [])
+	{
+		$configType = config('web.sales.shop.type');
+		$configTypeKeys = array_keys($configType);
+		
+		$type = collect($type);
+		$isAll = ($type->isEmpty() OR collect($configTypeKeys)->diff($type)->isEmpty());
+		
+		if ($isAll)
+			return $storeList;
+		
+		$typeName = data_get($configType, "$type[0]");
+		
+		#因id不同,只能用Name過濾
+		return collect($storeList)->filter(function($item, $key) use($typeName) {
+			return $item['typeName'] == $typeName;
+		})->toArray();
+	}
+	
 	/* Format store output
 	 * @params: array
 	 * @return: array

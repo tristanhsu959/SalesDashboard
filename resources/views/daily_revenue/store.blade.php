@@ -46,7 +46,7 @@
 					<thead>
 						<tr>
 							<th x-text="shop.header.areaName"></th>
-							<th x-text="shop.header.shopId"></th>
+							<th x-text="shop.header.storeKey"></th>
 							<th x-text="shop.header.shopName"></th>
 							<th x-text="shop.header.shopTypeName"></th>
 							<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
@@ -58,7 +58,7 @@
 						<template x-for="(shopData, shopId) in shop.data" :key="shopId">
 						<tr>
 							<td x-text="shopData.areaName"></td>
-							<td x-text="shopData.shopId"></td>
+							<td x-text="shopData.storeKey"></td>
 							<td x-text="shopData.shopName"></td>
 							<td x-text="shopData.shopTypeName"></td>
 							<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">

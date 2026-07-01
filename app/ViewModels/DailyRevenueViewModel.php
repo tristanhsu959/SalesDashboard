@@ -139,7 +139,7 @@ class DailyRevenueViewModel extends Fluent
 		else
 			$data = data_get($this->statistics, 'data', []);
 		
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		$response['modeType'] = $type;
 		
 		return $response;
