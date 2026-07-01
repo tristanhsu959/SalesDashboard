@@ -339,6 +339,12 @@ class NewReleaseService
 		*/
 		$saleData = array_filter($params->saleData);
 		
+		if (empty($saleData))
+		{
+			$params->baseData = [];
+			return;
+		}
+		
 		#要改成所有店家統計(含閉店)
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
 		$saleStoreList = collect($params->allShopList)->mapWithKeys(function($item, $key){

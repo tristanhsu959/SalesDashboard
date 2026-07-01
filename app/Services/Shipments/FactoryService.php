@@ -88,10 +88,12 @@ class FactoryService
 		$this->_statistics['productList'] 	= $params->productList;
 		$this->_statistics['factoryList'] 	= $params->factoryList;
 		$this->_statistics['data'] 			= $params->data;
+		$this->_statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
 		if (! empty($params->data))
 		{
+			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			$name = [];
 			$name[] = ($params->type == 'store') ? '門店' : '工廠';
@@ -352,7 +354,10 @@ class FactoryService
 		$orderData = $params->baseData;
 		
 		if (empty($orderData))
-			return [];
+		{
+			$params->data = [];
+			return;
+		}
 		
 		$modeCalc = $params->calc;
 		

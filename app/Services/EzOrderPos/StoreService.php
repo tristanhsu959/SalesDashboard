@@ -212,6 +212,9 @@ class StoreService
 	 */
 	private function _buildBaseData($params)
 	{
+		if (empty($params->posData))
+			return;
+		
 		#要先整理門店一致以便與ezorder對齊(依訂貨門店)
 		#因八方點已是訂貨門店, 故只要處理POS
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
@@ -281,6 +284,12 @@ class StoreService
 	 */
 	private function _parsingByStore($params)
 	{
+		if (empty($params->ezorderData) && empty($params->posData))
+		{
+			$params->data = [];
+			return;
+		}
+		
 		#合併data
 		$ezorderData = collect($params->ezorderData)->mapWithKeys(function($item, $key){
 			return [$item['storeKey'] => $item];

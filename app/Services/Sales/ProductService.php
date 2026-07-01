@@ -256,6 +256,12 @@ class ProductService
 		]
 		*/
 		
+		if (empty($params->saleData))
+		{
+			$params->baseData = [];
+			return;
+		}
+		
 		$saleData = PosManager::filterExceptStore($params->brand, $params->saleData);
 		$productList = $params->productList; 
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){

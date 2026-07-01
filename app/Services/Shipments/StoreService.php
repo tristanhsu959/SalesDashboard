@@ -89,11 +89,14 @@ class StoreService
 		$this->_statistics['productList'] 	= $params->productList;
 		$this->_statistics['storeList'] 	= $params->storeList;
 		$this->_statistics['data'] 			= $params->data;
+		$this->_statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
 		if (! empty($params->data))
 		{
+			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			
 			$name = [];
 			$name[] = ($params->type == 'store') ? '門店' : '工廠';
 			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
@@ -349,7 +352,10 @@ class StoreService
 		$orderData = $params->baseData;
 		
 		if (empty($orderData))
-			return [];
+		{
+			$params->data = [];
+			return;
+		}
 		
 		$modeCalc = $params->calc;
 		
@@ -436,7 +442,7 @@ class StoreService
 	private function _buildExportData($sourceData)
 	{
 		$export = [];
-		$outputHeader = array_merge(['POS ID', '區域', '門店代號', '門店名稱'], $sourceData['dateList']);
+		$outputHeader = array_merge(['區域', 'POS店號', '門店代號', '門店名稱'], $sourceData['dateList']);
 		
 		#每個product要一個sheet
 		foreach($sourceData['productList'] as $shortCode => $item)
@@ -454,8 +460,8 @@ class StoreService
 			foreach($sourceData['storeList'] as $index => $store)
 			{
 				$row = [];
-				$row[] = $store['posId'];
 				$row[] = $store['areaName'];
+				$row[] = $store['posId'];
 				$row[] = $store['storeNo'];
 				$row[] = $store['storeName'];
 				

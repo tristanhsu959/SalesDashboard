@@ -156,7 +156,7 @@ class ShipmentsViewModel extends Fluent
 		$data = data_get($this->statistics, 'data', []);
 		
 		$response['hasFilter'] = ($type == 'store' && !empty($data));
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;
 	}
