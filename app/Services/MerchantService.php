@@ -87,7 +87,7 @@ class MerchantService
 			{
 				Log::channel('appServiceLog')->info('Get mechant data from cache');
 				
-				$statistics = Cache::get($cacheKey); #cache data is response format
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
@@ -96,8 +96,10 @@ class MerchantService
 				
 				if ($searchType == 'info')
 					$service = app(InfoService::class);
-				else
+				else if ($searchType == 'dayOff')
 					$service = app(DayoffService::class);
+				else
+					throw new Exception('無法識別查詢條件');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -135,8 +137,8 @@ class MerchantService
 		$userAreaIds	= $currentUser->roleArea;
 		$functions		= $this->parsingFunction($brand);
 		
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
 		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
@@ -168,7 +170,7 @@ class MerchantService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$modeType = $sourceData['type'];
 		
 		if ($modeType == 'info')
 			$service = app(InfoService::class);

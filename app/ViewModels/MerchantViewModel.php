@@ -128,15 +128,7 @@ class MerchantViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
-		
-		#filter tool
-		$type = data_get($this->statistics, 'modeType', NULL);
-		$info = data_get($this->statistics, 'info', []);
-		$dayoff = data_get($this->statistics, 'dayoff', []);
-		
-		$data = ($type == 'info') ? $info : $dayoff;
-		
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;
 	}

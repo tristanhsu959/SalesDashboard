@@ -49,9 +49,9 @@
 					<tbody>
 						<template x-for="(store, idx) in statistics.dayoff.store" :key="idx">
 						<tr x-show="store.areaId == activeAreaId || activeAreaId == 0">
-							<td x-text="store.posId"></td>
 							<td x-text="store.areaName"></td>
-							<td x-text="store.storeNo"></td>
+							<td x-text="store.posId"></td>
+							<td x-text="store.storeKey"></td>
 							<td x-text="store.storeName"></td>
 						</tr>
 						</template>

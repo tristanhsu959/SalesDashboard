@@ -78,11 +78,13 @@ class AovService
 		$this->_statistics['data']			= $params->data;
 		$this->_statistics['exportName']	= '';
 		$this->_statistics['exportToken']	= '';
+		$this->_statistics['hasResult']		= FALSE;
 		
 		#無值不cache
 		if (! empty(Arr::flatten($this->_statistics['data']['total'])))
 		{
-			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
+			$this->_statistics['hasResult']		= TRUE;
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(20));
 		}
 	}
@@ -99,10 +101,10 @@ class AovService
 		{
 			#以order的店數來計算,不用取店,因也無法判別open or close
 			#1. Get data from DB
-			$saleData = $this->_getDataFromDB($params);
+			$this->_getDataFromDB($params);
 			
 			#2.build to base data
-			$this->_buildBaseData($params, array_filter($saleData));
+			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
 		{
@@ -128,7 +130,7 @@ class AovService
 			
 			$result = $this->_repository->getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType);
 			
-			return $result;
+			$params->saleData = array_filter($result);
 		}
 		catch(Exception $e)
 		{
@@ -141,7 +143,7 @@ class AovService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($params, $saleData)
+	private function _buildBaseData($params)
 	{
 		/*
 		0 => array:6 [
@@ -156,6 +158,8 @@ class AovService
 		
 		#再過濾一次, 這裏無法補全門店
 		#$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		
+		$saleData = $params->saleData;
 		
 		#先處理基本的計算
 		$baseData = collect($saleData)->map(function($item, $key){

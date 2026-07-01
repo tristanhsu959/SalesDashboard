@@ -27,9 +27,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class InfoService
 {
-	private $_userAreaIds	= FALSE;
-	private $_statistics	= [];
-   
 	public function __construct(protected MerchantRepository $_repository)
 	{
 		
@@ -49,8 +46,7 @@ class InfoService
 			
 			$this->_outputReport($params);
 			
-			$this->_generateStatistics($params);
-			dd($params);
+			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)
 		{
@@ -64,26 +60,24 @@ class InfoService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['type']			= $params->type;
-		$this->_statistics['brandId']		= $params->brand->value; 
-		$this->_statistics['brandCode']		= $params->brand->code(); 
-		$this->_statistics['startDate'] 	= $params->stDate; 
-		$this->_statistics['info'] 			= $params->infoData;
-		$this->_statistics['productList'] 	= $params->productList;
-		$this->_statistics['storeList'] 	= $params->storeList;
-		$this->_statistics['data'] 			= $params->data;
+		$statistics['brandId']		= $params->brand->value; 
+		$statistics['brandCode']	= $params->brand->code(); 
+		$statistics['type']			= $params->type;
+		$statistics['startDate'] 	= $params->stDate; 
+		$statistics['info'] 		= $params->info;
+		$statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
-		if (! empty($params->data))
+		if (! empty($params->info['store']))
 		{
-			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
-			$name = [];
-			$name[] = ($params->type == 'store') ? '門店' : '工廠';
-			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
+			$statistics['hasResult'] 	= TRUE;
+			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			$statistics['exportName'] 	= '門店資訊';
 			
-			$this->_statistics['exportName'] = Arr::join($name, '_');
-			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
+			Cache::put($params->cacheKey, $statistics, now()->addMinutes(10));
 		}
+		
+		return $statistics;
 	}
 	
 	/* ====================== 主流程 End ====================== */
@@ -111,15 +105,9 @@ class InfoService
 	
 		try
 		{
-			$infoData = $this->_repository->getStoreInfoList($params->brand, $params->userAreaIds);
+			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->userAreaIds);
 			
-			$infoData = collect($infoData)->map(function($item, $key){
-				
-				
-				return $item;
-			})->all();
-			
-			$params->infoData = $infoData;
+			$params->storeList = $storeList;
 		}
 		catch(Exception $e)
 		{
@@ -159,10 +147,10 @@ class InfoService
 	{
 		try
 		{
-			$infoData = $params->infoData;
+			$storeList = $params->storeList;
 			
 			#先處理area為了可以排序
-			$store = collect($infoData)->map(function($item, $key){
+			$store = collect($storeList)->map(function($item, $key){
 				$item['posId'] 		= (empty($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
 				$item['salesName']	= (empty($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
