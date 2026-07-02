@@ -3,6 +3,7 @@
 namespace App\Services\Merchant;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
@@ -26,9 +27,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class DayoffService
 {
-	private $_userAreaIds	= FALSE;
-	private $_statistics	= [];
-   
 	public function __construct(protected MerchantRepository $_repository)
 	{
 		
@@ -46,12 +44,13 @@ class DayoffService
 			/* 暫不判別
 			$currentUser = AppManager::getCurrentUser();
 			$this->_userAreaIds = $currentUser->roleArea; */
-			$this->_statistics = $params;
 			
 			#執行統計
-			$storeData = $this->_getDataFromDB();
+			$this->_getDataFromDB($params);
 			
-			return $this->_outputReport($storeData);
+			$this->_outputReport($params);
+			
+			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)
 		{
@@ -59,13 +58,39 @@ class DayoffService
 		}
 	}
 	
+	/* Generate statistics data
+	 * @params: object
+	 * @return: array
+	 */
+	private function _generateStatistics($params)
+	{
+		$statistics['brandId']		= $params->brand->value; 
+		$statistics['brandCode']	= $params->brand->code(); 
+		$statistics['type']			= $params->type;
+		$statistics['startDate'] 	= $params->stDate; 
+		$statistics['areaDayoff'] 	= $params->areaDayoff;
+		$statistics['dayoff'] 		= $params->dayoff;
+		$statistics['hasResult'] 	= FALSE;
+		
+		#無值不cache
+		if (! empty($params->areaDayoff['store']))
+		{
+			$statistics['hasResult'] 	= TRUE;
+			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			$statistics['exportName'] 	= '店休資訊';
+			
+			Cache::put($params->cacheKey, $statistics, now()->addMinutes(10));
+		}
+		
+		return $statistics;
+	}
 	/* ====================== 主流程 End ====================== */
 	
 	/* Get order data
 	 * @params: 
 	 * @return: array
 	 */
-	private function _getDataFromDB()
+	private function _getDataFromDB($params)
 	{
 		/*0 => array:11 [
 			"areaId" => "21"
@@ -79,13 +104,14 @@ class DayoffService
 	
 		try
 		{
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			$stDate		= (new Carbon($this->_statistics['startDate']))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($this->_statistics['endDate']))->format('Y-m-d 23:59:59');
+			$brand 		= $params->brand;
+			$stDate		= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
+			$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
+			$userAreaIds= $params->userAreaIds;
 			
-			$data = $this->_repository->getDayoffList($brand, $stDate, $endDate, $this->_userAreaIds);
+			$result = $this->_repository->getDayoffList($brand, $stDate, $endDate, $userAreaIds);
 			
-			return $data;
+			$params->storeList = $result;
 		}
 		catch(Exception $e)
 		{
@@ -101,17 +127,15 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($storeData)
+	private function _outputReport($params)
 	{
 		try
 		{
 			#1.Build area statistics
-			$this->_statistics['areaDayoff'] = $this->_buildDayoffByArea($storeData);
+			$this->_buildDayoffByArea($params);
 			
 			#2.Build store info
-			$this->_statistics['dayoff'] = $this->_buildDayoffByDetail($storeData);
-			
-			return $this->_statistics;
+			$this->_buildDayoffByDetail($params);
 		}
 		catch(Exception $e)
 		{
@@ -124,10 +148,12 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildDayoffByArea($storeData)
+	private function _buildDayoffByArea($params)
 	{
 		try
 		{
+			$storeData = $params->storeList;
+			
 			#Statistics dayoff
 			$dayoffData = collect($storeData)->map(function($item, $key) {
 				$area = AreaLib::toArea(intval($item['areaId']));
@@ -159,7 +185,7 @@ class DayoffService
 			$area['header'] = ['區域', '店家數', '店休數']; /*['區域', '店家數', '店休數', '佔比'];*/
 			$area['store'] = $dayoffData->merge([$summary])->toArray();
 			
-			return $area;
+			$params->areaDayoff = $area;
 		}
 		catch(Exception $e)
 		{
@@ -172,10 +198,12 @@ class DayoffService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildDayoffByDetail($storeData)
+	private function _buildDayoffByDetail($params)
 	{
 		try
 		{
+			$storeData = $params->storeList;
+			
 			$dayoffData = collect($storeData)->filter(function($item, $key){
 					return intval($item['money']) <= 0;
 			})->map(function($item, $key){
@@ -188,18 +216,18 @@ class DayoffService
 				return $item;
 			})->sortBy('areaId')->values()->map(function($item, $key) {
 				$temp['areaId']		= $item['areaId'];
-				$temp['posId'] 		= $item['posId'];
 				$temp['areaName'] 	= $item['areaName'];
-				$temp['storeNo']	= $item['storeNo'];
+				$temp['posId'] 		= $item['posId'];
+				$temp['storeKey']	= PurchaseManager::buildStoreKey($item['storeNo']);
 				$temp['storeName']	= $item['storeName'];
 				
 				return $temp;
 			})->toArray(); 
 			
-			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱'];
+			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱'];
 			$info['store']	= $dayoffData;
 			
-			return $info;
+			$params->dayoff = $info;
 		}
 		catch(Exception $e)
 		{

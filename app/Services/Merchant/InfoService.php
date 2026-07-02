@@ -3,6 +3,7 @@
 namespace App\Services\Merchant;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -25,9 +27,6 @@ use OpenSpout\Common\Entity\Row;
 #partial Service
 class InfoService
 {
-	private $_userAreaIds	= FALSE;
-	private $_statistics	= [];
-   
 	public function __construct(protected MerchantRepository $_repository)
 	{
 		
@@ -42,20 +41,43 @@ class InfoService
 	{
 		try
 		{
-			/* 暫不判別
-			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser->roleArea; */
-			$this->_statistics = $params;
+			#Get data
+			$this->_getDataFromDB($params);
 			
-			#執行統計
-			$infoData = $this->_getDataFromDB();
+			$this->_outputReport($params);
 			
-			return $this->_outputReport($infoData);
+			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)
 		{
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* Generate statistics data
+	 * @params: object
+	 * @return: array
+	 */
+	private function _generateStatistics($params)
+	{
+		$statistics['brandId']		= $params->brand->value; 
+		$statistics['brandCode']	= $params->brand->code(); 
+		$statistics['type']			= $params->type;
+		$statistics['startDate'] 	= $params->stDate; 
+		$statistics['info'] 		= $params->info;
+		$statistics['hasResult'] 	= FALSE;
+		
+		#無值不cache
+		if (! empty($params->info['store']))
+		{
+			$statistics['hasResult'] 	= TRUE;
+			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
+			$statistics['exportName'] 	= '門店資訊';
+			
+			Cache::put($params->cacheKey, $statistics, now()->addMinutes(10));
+		}
+		
+		return $statistics;
 	}
 	
 	/* ====================== 主流程 End ====================== */
@@ -64,7 +86,7 @@ class InfoService
 	 * @params: 
 	 * @return: array
 	 */
-	private function _getDataFromDB()
+	private function _getDataFromDB($params)
 	{
 		/*0 => array:11 [
 			"areaId" => "21"
@@ -83,10 +105,9 @@ class InfoService
 	
 		try
 		{
-			$brand = Brand::tryFrom($this->_statistics['brandId']);
-			$infoData = $this->_repository->getStoreInfoList($brand, $this->_userAreaIds);
+			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->userAreaIds);
 			
-			return $infoData;
+			$params->storeList = $storeList;
 		}
 		catch(Exception $e)
 		{
@@ -101,14 +122,12 @@ class InfoService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _outputReport($infoData)
+	private function _outputReport($params)
 	{
 		try
 		{
 			#1.Build store info
-			$this->_statistics['info'] = $this->_buildInfo($infoData);
-			
-			return $this->_statistics;
+			$this->_buildInfo($params);
 		}
 		catch(Exception $e)
 		{
@@ -124,24 +143,28 @@ class InfoService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildInfo($infoData)
+	private function _buildInfo($params)
 	{
 		try
 		{
+			$storeList = $params->storeList;
+			
 			#先處理area為了可以排序
-			$store = collect($infoData)->map(function($item, $key){
-				$item['posId'] 		= (is_null($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
-				$item['salesName']	= (is_null($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
+			$store = collect($storeList)->map(function($item, $key){
+				$item['posId'] 		= (empty($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
+				$item['salesName']	= (empty($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
+				$item['storeKey'] 	= PurchaseManager::buildStoreKey($item['storeNo']);
 				
 				return $item;
 			})->sortBy('areaId')->values()->map(function($item, $key) {
-				$temp['posId'] 		= $item['posId'];
 				$temp['areaName'] 	= $item['areaName'];
-				$temp['storeNo']	= $item['storeNo'];
+				#$temp['storeNo']	= $item['storeNo'];
+				$temp['posId'] 		= $item['posId'];
+				$temp['storeKey'] 	= $item['storeKey'];
 				$temp['storeName']	= $item['storeName'];
 				$temp['address']	= $item['address'];
 				$temp['storePhone']	= $item['storePhone'];
@@ -154,10 +177,10 @@ class InfoService
 				return $temp;
 			})->toArray(); 
 			
-			$info['header'] = ['PosId', '區域', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
+			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
 			$info['store']	= $store;
 			
-			return $info;
+			$params->info = $info;
 		}
 		catch(Exception $e)
 		{

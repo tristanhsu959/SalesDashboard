@@ -4,6 +4,7 @@ namespace App\Services\DailyRevenue;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
+use App\Facades\PurchaseManager;
 use App\Repositories\DailyRevenueRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Sales\AreaLib;
@@ -80,11 +81,13 @@ class StoreService
 		$this->_statistics['endDate']	= $params->endDate;
 		$this->_statistics['shop']		= $params->shop;
 		$this->_statistics['area']		= $params->area;
+		$this->_statistics['hasResult']	= FALSE;
 		
-		#無值不cache
+		#無值不cache,因有補全門店,故hasResult應該都是TRUE
 		if (! empty(Arr::flatten($this->_statistics['shop'])))
 		{
-			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
+			$this->_statistics['hasResult']		= TRUE;
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}
@@ -99,21 +102,35 @@ class StoreService
 	{
 		try
 		{
-			#1. Get all shops with area permission
-			$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
-			$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
+			#1. Get Store
+			$this->_getStoreList($params);
 			
 			#2. Get data from DB
-			$saleData = $this->_getDataFromDB($params);
+			$this->_getDataFromDB($params);
 			
 			#3.build to base data
-			$this->_buildBaseData($params, array_filter($saleData)); 
+			$this->_buildBaseData($params); 
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		#20260701:改用訂貨門店來mapping/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
+		#$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
+		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
+		
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		#營收要排除無POS
+		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
 	
 	/* Get buy good data
@@ -133,13 +150,13 @@ class StoreService
 			
 			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
 			
-			#去除shop id
-			$result = collect($result)->map(function($item, $key){
+			#去除shop id(已不需要)
+			/* $result = collect($result)->map(function($item, $key){
 				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
 				return $item;
-			})->toArray();
+			})->toArray(); */
 				
-			return $result;
+			$params->saleData = array_filter($result);
 		}
 		catch(Exception $e)
 		{
@@ -152,7 +169,7 @@ class StoreService
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _buildBaseData($params, $saleData)
+	private function _buildBaseData($params)
 	{
 		/*
 		0 => array:8 [▼
@@ -168,31 +185,48 @@ class StoreService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		$saleData	= PosManager::filterExceptStore($params->brand, $params->saleData);
 		
-		$baseData = collect($saleData)->map(function($item, $key) {
+		$storeList 	= PurchaseManager::filterStoreByTypeName($params->storeList, $params->shopType);
+		
+		$storeList 	= collect($storeList)->mapWithKeys(function($item, $key){
+			return [$item['posId'] => $item];
+		});
+		
+		$baseData = collect($saleData)->map(function($item, $key) use($storeList){
+			$store = data_get($storeList, $item['shopId'], NULL);
+			
+			if (empty($store))
+				return '';
+			
+			$temp['storeKey'] 		= $store['storeKey'];
 			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $item['shopName'];
+			$temp['shopName'] 		= $store['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
-			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
-			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
-			$temp['saleDate']		= (new Carbon($item['saleDate']))->format('Y-m-d');
-			$temp['amount'] 		= $item['amount'];
+			$temp['areaId'] 		= $store['areaId'];
+			$temp['areaName']		= $store['areaName'];
+			$temp['saleDate']		= Carbon::parse($item['saleDate'])->format('Y-m-d');
+			
 			#發票金額 = amount OR totalSales + totalDischarge
-			#實銷金額 = totalSales + totalExtra + totalDischarge
-			$temp['totalSales']		= floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
+			#實銷金額 = totalSales( + totalExtra + totalDischarge),應該只有totalSales?
+			$amount 	= $item['amount'];
+			$totalSales = floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
+			$temp['amount'] 		= empty($amount) ? $totalSales : $amount;
 			
 			return $temp; 
 		});
 		
 		#補全未有銷售的門店資料(closedown = 0)
-		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
+		$saleShopIds = $baseData->pluck('shopId')->filter()->unique()->values()->toArray();
+		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
 		
 		#重建
-		$filloutShops = $filloutShops->map(function($item, $key) use($params){
-			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $item['shopName'];
+		$filloutShops = $storeList->reject(function($item, $key) use($saleShopIds){
+			return in_array($item['posId'], $saleShopIds);
+		})->map(function($item, $key) use($params){
+			$temp['storeKey'] 		= $item['storeKey'];
+			$temp['shopId'] 		= $item['posId'];
+			$temp['shopName'] 		= $item['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName']		= $item['areaName'];
@@ -299,10 +333,8 @@ class StoreService
 			$temp['dayAmount'] = $items->groupBy('saleDate')->mapWithKeys(function($items, $date) {
 				#因amount會有0的狀況
 				$amount			= $items->pluck('amount')->sum();
-				$totalSales		= $items->pluck('totalSales')->sum();
-				$finalAmount 	= empty($amount) ? $totalSales : $amount;
 				
-				return [$date => round($finalAmount, 2)];
+				return [$date => round($amount, 2)];
 			})->filter(function($item, $key){
 				return $key > 0;
 			})->toArray();
@@ -315,10 +347,8 @@ class StoreService
 		$result['total']['shopCount'] 	= collect($baseData)->pluck('shopId')->unique()->count(); 
 		$result['total']['dayAmount'] 	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
 			$amount		= $items->pluck('amount')->sum();
-			$totalSales	= $items->pluck('totalSales')->sum();
-			$finalAmount= empty($amount) ? $totalSales : $amount;
 			
-			return [$date => round($finalAmount)];
+			return [$date => round($amount)];
 		})->filter(function($item, $key){
 			return $key > 0;
 		})->toArray();
@@ -353,7 +383,7 @@ class StoreService
 		if (empty($baseData))
 			return [];
 		
-		$header = ['areaName' => '區域', 'shopId' => '門店代號', 'shopName' => '門店名稱', 'shopTypeName' => '類型',
+		$header = ['areaName' => '區域', 'storeKey' => '門店代號', 'shopName' => '門店名稱', 'shopTypeName' => '類型',
 					'dayAmount' => $params->dayRange
 				];
 		$params->set('shop.header', $header);
@@ -361,7 +391,7 @@ class StoreService
 		#Sum已在DB計算, 這裏只要format output
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
 			
-			$temp['shopId'] 		= $items->pluck('shopId')->first();
+			$temp['storeKey'] 		= $items->pluck('storeKey')->first();
 			$temp['shopName'] 		= $items->pluck('shopName')->first();
 			$temp['shopTypeName'] 	= $items->pluck('shopTypeName')->first();
 			$temp['areaId'] 		= $items->pluck('areaId')->first();
@@ -375,10 +405,10 @@ class StoreService
 					return [];
 				
 				$amount			= $items->pluck('amount')->sum();
-				$totalSales		= $items->pluck('totalSales')->sum();
-				$finalAmount 	= empty($amount) ? $totalSales : $amount;
+				#$totalSales		= $items->pluck('totalSales')->sum();
+				#$finalAmount 	= empty($amount) ? $totalSales : $amount;
 				
-				return [$saleDate => round($finalAmount, 2)];
+				return [$saleDate => round($amount, 2)];
 
 			})->filter(function($item, $key){
 				return $key > 0;
@@ -390,16 +420,16 @@ class StoreService
 		->sortBy('areaId')
 		->toArray();
 		
-		$result['total']['shopId'] 		= ''; 
+		$result['total']['storeKey'] 	= ''; 
 		$result['total']['shopName'] 	= '總計'; 
 		$result['total']['shopTypeName']= ''; 
 		$result['total']['areaName'] 	= ''; 
 		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
 			$amount		= $items->pluck('amount')->sum();
-			$totalSales	= $items->pluck('totalSales')->sum();
-			$finalAmount= empty($amount) ? $totalSales : $amount;
+			#$totalSales	= $items->pluck('totalSales')->sum();
+			#$finalAmount= empty($amount) ? $totalSales : $amount;
 			
-			return [$date => round($finalAmount, 2)];
+			return [$date => round($amount, 2)];
 		})->toArray();
 		
 		$params->set('shop.data',  $result);
@@ -494,7 +524,7 @@ class StoreService
 		{
 			$row = [];
 			$row[] = $shop['areaName'];
-			$row[] = $shop['shopId'];
+			$row[] = $shop['storeKey'];
 			$row[] = $shop['shopName'];
 			$row[] = $shop['shopTypeName'];
 			

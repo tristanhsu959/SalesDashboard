@@ -84,10 +84,13 @@ class PerformanceService
 		$this->_statistics['endDate']		= $params->endDate;
 		$this->_statistics['areaIds']		= $params->areaIds;
 		$this->_statistics['report']		= $params->report;
+		$this->_statistics['hasResult']		= FALSE;
 		
 		#無值不cache
+		#因有補全門店,故基本上不會有空值,故hasResult應該都會是TRUE
 		if (! empty(Arr::flatten($this->_statistics['report'])))
 		{
+			$this->_statistics['hasResult']		= TRUE;
 			$this->_statistics['exportName']	= '營運概況';
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(15));
@@ -237,6 +240,7 @@ class PerformanceService
 	{
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
+		
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
 			return [$item['storeKey'] => $item];
 		})->toArray();
@@ -350,9 +354,6 @@ class PerformanceService
 	 */
 	private function _parsingByStore($params)
 	{
-		if (empty($params->baseData))
-			return [];
-		
 		#依區->門店->產品
 		$result = collect($params->baseData)->groupBy('areaId')->map(function($items, $key){
 			

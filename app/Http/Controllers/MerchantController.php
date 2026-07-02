@@ -44,7 +44,7 @@ class MerchantController extends Controller
 		
 		#query params
 		$searchType		= $request->input('searchType');
-		$searchStDate	= $request->input('searchStDate');
+		$searchStDate	= $request->input('searchStDate', '');
 		
 		$this->_viewModel->initialize($brand, $function);
 		$this->_viewModel->keepSearchData($searchType, $searchStDate);

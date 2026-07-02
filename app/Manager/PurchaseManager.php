@@ -120,7 +120,7 @@ class PurchaseManager
 		return $storeList;
 	}
 	
-	/* 排除廠區學區店(手動因依情境不同)
+	/* 排除廠區學區店(因依情境不同手動呼叫,只針對沒有POS的)
 	 * @params: array
 	 * @return: array
 	 */
@@ -128,6 +128,29 @@ class PurchaseManager
 	{
 		return collect($storeList)->reject(function($item, $key) {
 			return empty($item['posId']) OR $item['posId'] == 'null';
+		})->toArray();
+	}
+	
+	/* 排除類型(依config,因pos及訂貨定義不同, 只能用名稱濾)
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterStoreByTypeName($storeList, $type = [])
+	{
+		$configType = config('web.sales.shop.type');
+		$configTypeKeys = array_keys($configType);
+		
+		$type = collect($type);
+		$isAll = ($type->isEmpty() OR collect($configTypeKeys)->diff($type)->isEmpty());
+		
+		if ($isAll)
+			return $storeList;
+		
+		$typeName = data_get($configType, "$type[0]");
+		
+		#因id不同,只能用Name過濾
+		return collect($storeList)->filter(function($item, $key) use($typeName) {
+			return $item['typeName'] == $typeName;
 		})->toArray();
 	}
 	

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Carbon\CarbonPeriod;
 use Exception;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
@@ -32,7 +33,7 @@ class MerchantService
 	{
 		$this->_statistics = [
 			'brandId'		=> '', #export
-			'modeType'		=> '',
+			'type'			=> '',
 			'startDate'		=> '', #Y-m-d
 			'endDate'		=> '', #Y-m-d
             'info' 			=> [],
@@ -80,25 +81,13 @@ class MerchantService
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$currentUser = AppManager::getCurrentUser();
-			$userAreaIds = $currentUser->roleArea; #
+			$params = $this->_initParams($brand, $searchType, $searchStDate);
 			
-			#Check cache
-			$functions = $this->parsingFunction($brand);
-			$searchEndDate = $searchStDate; #目前只有單日查詢
-			#$cacheKey = implode(':', [$functions->value, $searchType, $searchStDate]);
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
-			
-			$this->_statistics['modeType']	= $searchType;
-			$this->_statistics['brandId']	= $brand->value; 
-			$this->_statistics['startDate'] = ($searchType == 'info') ? '' : (new Carbon($searchStDate))->format('Y-m-d'); 
-			$this->_statistics['endDate'] 	= $this->_statistics['startDate'];
-			
-			if (Cache::has($cacheKey))
+			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get mechant data from cache');
 				
-				$statistics = Cache::get($cacheKey); #cache data is response format
+				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
@@ -107,19 +96,21 @@ class MerchantService
 				
 				if ($searchType == 'info')
 					$service = app(InfoService::class);
-				else
+				else if ($searchType == 'dayOff')
 					$service = app(DayoffService::class);
+				else
+					throw new Exception('無法識別查詢條件');
 				
 				#執行統計
-				$this->_statistics = $service->analysis($this->_statistics);
+				$this->_statistics = $service->analysis($params);
 				
 				#無值不cache
-				if (! empty(Arr::flatten($this->_statistics['info'])) OR ! empty(Arr::flatten($this->_statistics['dayoff'])))
+				/* if (! empty(Arr::flatten($this->_statistics['info'])) OR ! empty(Arr::flatten($this->_statistics['dayoff'])))
 				{
 					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
 					$this->_statistics['exportName']	= ($searchType == 'info') ? '門店資訊' : '店休資訊';
 					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				}
+				} */
 				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
@@ -128,6 +119,32 @@ class MerchantService
 		{
 			return ResponseLib::initialize($this->_statistics)->fail($e->getMessage());
 		}
+	}
+	
+	/* Init input params
+	 * @params: enums
+	 * @params: string
+	 * @params: string
+	 * @params: array
+	 * @params: string
+	 * @return: array
+	 */
+	private function _initParams($brand, $searchType, $searchStDate)
+	{
+		$params = new Fluent();
+		
+		$currentUser	= AppManager::getCurrentUser();
+		$userAreaIds	= $currentUser->roleArea;
+		$functions		= $this->parsingFunction($brand);
+		
+		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
+		
+		$params->brand($brand)->userAreaIds($userAreaIds)
+				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
+				->cacheKey($cacheKey);
+		
+		return $params;
 	}
 	
 	/* Export data
@@ -153,7 +170,7 @@ class MerchantService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$modeType = $sourceData['type'];
 		
 		if ($modeType == 'info')
 			$service = app(InfoService::class);

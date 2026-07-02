@@ -43,6 +43,7 @@ class NewReleaseService
 			'shop' 			=> [],
 			'top' 			=> [],
 			'last' 			=> [],
+			'hasResult'		=> FALSE,
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
@@ -161,20 +162,23 @@ class NewReleaseService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['brandId']	= $params->brand->value;
-		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['startDate'] = $params->stDate;
-		$this->_statistics['endDate']	= $params->endDate;
-		$this->_statistics['shop']		= $params->shop;
-		$this->_statistics['area']		= $params->area;
-		$this->_statistics['top']		= $params->top;
-		$this->_statistics['last']		= $params->last;
-		$this->_statistics['exportName']= $params->productName;
+		$this->_statistics['brandId']		= $params->brand->value;
+		$this->_statistics['brandCode']		= $params->brand->code();
+		$this->_statistics['startDate'] 	= $params->stDate;
+		$this->_statistics['endDate']		= $params->endDate;
+		$this->_statistics['shop']			= $params->shop;
+		$this->_statistics['area']			= $params->area;
+		$this->_statistics['top']			= $params->top;
+		$this->_statistics['last']			= $params->last;
+		$this->_statistics['hasResult']		= FALSE;
+		$this->_statistics['exportName']	= $params->productName;
+		$this->_statistics['exportToken']	= '';
 		
 		#無值不cache
-		if (! empty(Arr::flatten($this->_statistics['shop'])))
+		if (! empty($this->_statistics['area']['data']))
 		{
-			$this->_statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
+			$this->_statistics['hasResult']		= TRUE;
+			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}
@@ -334,6 +338,12 @@ class NewReleaseService
 		]
 		*/
 		$saleData = array_filter($params->saleData);
+		
+		if (empty($saleData))
+		{
+			$params->baseData = [];
+			return;
+		}
 		
 		#要改成所有店家統計(含閉店)
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位

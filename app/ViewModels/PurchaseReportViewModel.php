@@ -125,7 +125,7 @@ class PurchaseReportViewModel extends Fluent
 		$response = $this->responseBaseData();
 		
 		$data = data_get($this->statistics, 'report', []);
-		$response['hasResult'] = !empty($data);
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;
 	}

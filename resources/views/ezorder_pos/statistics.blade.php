@@ -25,6 +25,15 @@
 			</template>
 		</nav>
 		
+		<nav class="wrap">
+			<template x-for="(name, id) in options.by" :key="id">
+				<label class="radio field-light-blue">
+					<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>
+		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
@@ -35,20 +44,20 @@
 			<label>結束日期</label>
 		</div>
 		
-		<fieldset x-show="searchData.type == 'area'" class="light-blue-border light-blue-text">
+		<!--fieldset x-show="searchData.by == 'area'" class="light-blue-border light-blue-text">
 			<legend class="title-small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areas" :key="areaId">
 					<label class="checkbox check-pink">
-						<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds" :disabled="searchData.type != 'area'">
+						<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds" :disabled="searchData.by != 'area'">
 						<span x-text="areaName"></span>
 					</label>
 				</template>
 			</nav>
-		</fieldset>
+		</fieldset-->
 		
-		<div x-show="searchData.type == 'storeName'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
-			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.type != 'storeName'" @input="errors.delete('storeName')">
+		<div x-show="searchData.by == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.by != 'store'" @input="errors.delete('storeName')">
 			<label>找店名</label>
 		</div>
 		
