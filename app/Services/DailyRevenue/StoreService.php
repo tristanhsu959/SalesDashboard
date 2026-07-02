@@ -208,7 +208,7 @@ class StoreService
 			$temp['saleDate']		= Carbon::parse($item['saleDate'])->format('Y-m-d');
 			
 			#發票金額 = amount OR totalSales + totalDischarge
-			#實銷金額 = totalSales + totalExtra + totalDischarge
+			#實銷金額 = totalSales( + totalExtra + totalDischarge),應該只有totalSales?
 			$amount 	= $item['amount'];
 			$totalSales = floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
 			$temp['amount'] 		= empty($amount) ? $totalSales : $amount;
