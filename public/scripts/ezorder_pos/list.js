@@ -25,12 +25,6 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.type == 'area' && this.searchData.areaIds.length == 0)
-			{
-				this.errors.add('areaIds');
-				Alpine.store('toast').notify('請勾選區域');
-			}
-			
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
@@ -44,8 +38,10 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.type = 'all';
-			this.searchData.areaId = [];
+			this.searchData.type = 'ez';
+			this.searchData.by = 'store';
+			this.searchData.stDate = this.searchData.today;
+			this.searchData.endDate = this.searchData.today;
 			this.searchData.storeName = '';
 			this.errors.clear();
 		},

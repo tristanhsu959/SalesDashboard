@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Services\EzOrderPos\StoreService;
+use App\Services\EzOrderPos\AreaService;
 use App\Repositories\EzOrderPosRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -36,6 +37,7 @@ class EzOrderPosService
 			'brandId'		=> '', 
 			'brandCode'		=> '',
 			'type'			=> '',
+			'bt'			=> '',
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'areaIds'		=> [],
@@ -77,23 +79,25 @@ class EzOrderPosService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate);
+			$params = $this->_initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName);
 			
 			$statistics = Cache::remember($params->cacheKey, 600, function () use($params){
 				
 				Log::channel('appServiceLog')->info('Get ezorder statistics from db');
 				
-				if ($params->type == 'store')
+				if ($params->by == 'store')
 					$service = app(StoreService::class);
+				else if ($params->by == 'area')
+					$service = app(AreaService::class);
 				else
-					throw new Exception('無法識別查詢類別');
+					throw new Exception('無法識別查詢類型');
 				
 				#執行統計
 				return $service->analysis($params);
@@ -103,9 +107,7 @@ class EzOrderPosService
 			if (! $statistics['hasResult'])
 				Cache::forget($params->cacheKey);
 			
-			$this->_statistics = $statistics;
-			
-			return ResponseLib::initialize($this->_statistics)->success();
+			return ResponseLib::initialize($statistics)->success();
 		}
 		catch(Exception $e)
 		{
@@ -123,7 +125,7 @@ class EzOrderPosService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate)
+	private function _initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName)
 	{
 		$params = new Fluent();
 		
@@ -131,11 +133,11 @@ class EzOrderPosService
 		$userAreaIds = $currentUser->roleArea;
 		
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);
 		
 		$params->brand($brand)->userAreaIds($userAreaIds)
-				->type($searchType)
-				->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->by($searchBy)
+				->stDate($searchStDate)->endDate($searchEndDate)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
 		
 		return $params;
@@ -160,10 +162,12 @@ class EzOrderPosService
 		
 		$sourceData = Cache::get($cacheKey);
 		
-		$type = $sourceData['type'];
+		$by = $sourceData['by'];
 		
-		if ($type == 'store')
+		if ($by == 'store')
 			$service = app(StoreService::class);
+		else if ($by == 'area')
+			$service = app(AreaService::class);
 		else
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
 		

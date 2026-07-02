@@ -25,7 +25,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class StoreService
+class AreaService
 {
    
 	public function __construct(protected EzOrderPosRepository $_repository)
@@ -60,12 +60,12 @@ class StoreService
 		$statistics['by']			= $params->by;
 		$statistics['startDate'] 	= $params->stDate;
 		$statistics['endDate']		= $params->endDate;
-		$statistics['store']['header']	= $params->header;
-		$statistics['store']['data']	= $params->data;
+		$statistics['area']['header']	= $params->header;
+		$statistics['area']['data']	= $params->data;
 		$statistics['hasResult']	= FALSE;
 		
 		#無值不cache
-		if (! empty($statistics['store']['data']))
+		if (! empty($statistics['area']['data']))
 		{
 			$statistics['exportToken'] = bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $statistics, now()->addMinutes(10));
@@ -296,11 +296,11 @@ class StoreService
 	{
 		try
 		{
+			$this->_buildStoreInfo($params);
+			
 			$this->_buildHeader($params);
 			
-			$this->_parsingByStore($params);
-			
-			return $params;
+			$this->_parsingByArea($params);
 		}
 		catch(Exception $e)
 		{
@@ -309,39 +309,13 @@ class StoreService
 		}
 	}
 	
-	/* Header資料
-	 * @params: collection
-	 * @return: array
-	 */
-	private function _buildHeader($params)
-	{
-		$header = [
-			'storeKey' 		=> '門店代號', 
-			'storeName'		=> '門店名稱', 
-			'areaName'		=> '區域', 
-			'businessDays'	=> '營業天數',
-			'ezOrderCount'	=> '八方點訂單數',
-			'ezAmount'		=> '八方點總金額',
-			'posOrderCount'	=> 'POS訂單數',
-			'posAmount'		=> 'POS總金額',
-			'avgOrderValue'	=> '平均客單價',
-			'avgDayAmount'	=> '平均日營收',
-			'visitorPercent'=> '來客數佔比',
-			'amountPercent'	=> '業績佔比'
-		];
-		
-		if ($params->type == 'ez')
-			$params->header = collect($header)->only(['storeKey', 'storeName', 'areaName', 'businessDays', 'ezOrderCount', 'ezAmount'])->values()->all();
-		else if ($params->type == 'ezpos')
-			$params->header = collect($header)->values()->all();
-	}
-	
 	/* Parsing data
 	 * @params: collection
 	 * @return: array
 	 */
-	private function _parsingByStore($params)
+	private function _buildStoreInfo($params)
 	{
+		#因八方點無Area, 故要先整合Store data
 		if (empty($params->ezorderData) && empty($params->posData))
 		{
 			$params->data = [];
@@ -357,15 +331,13 @@ class StoreService
 			return [$item['storeKey'] => $item];
 		});
 		
-		$type = $params->type;
-		
-		$data = collect($params->storeList)->map(function($item, $key) use($ezorderData, $posData, $type){
+		#整併八方點及POS data
+		$data = collect($params->storeList)->map(function($item, $key) use($ezorderData, $posData){
 			
 			$ezOrder	= data_get($ezorderData, $item['storeKey'], NULL);
 			$posOrder 	= data_get($posData, $item['storeKey'], NULL);
 			
-			$temp['storeKey'] 		= $item['storeKey'];
-			$temp['storeName'] 		= $item['storeName'];
+			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName'] 		= $item['areaName'];
 			$temp['businessDays'] 	= intval(data_get($posOrder, 'businessDays', 0));
 			
@@ -376,6 +348,60 @@ class StoreService
 			#POS
 			$temp['posOrderCount'] 	= intval(data_get($posOrder, 'orderCount', 0));
 			$temp['posAmount'] 		= round(data_get($posOrder, 'amount', 0), 2);
+			
+			return $temp;
+		})->all();
+		
+		$params->storeData = array_filter($data);
+	}
+	
+	/* Header資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildHeader($params)
+	{
+		$header = [
+			'areaName'		=> '區域', 
+			'areaStores'	=> '門店數', 
+			'businessDays'	=> '營業天數',
+			'ezOrderCount'	=> '八方點訂單數',
+			'ezAmount'		=> '八方點總金額',
+			'posOrderCount'	=> 'POS訂單數',
+			'posAmount'		=> 'POS總金額',
+			'avgOrderValue'	=> '平均客單價',
+			'avgDayAmount'	=> '平均日營收',
+			'visitorPercent'=> '來客數佔比',
+			'amountPercent'	=> '業績佔比'
+		];
+		
+		if ($params->type == 'ez')
+			$params->header = collect($header)->only(['areaName', 'areaStores', 'businessDays', 'ezOrderCount', 'ezAmount'])->values()->all();
+		else if ($params->type == 'ezpos')
+			$params->header = collect($header)->values()->all();
+	}
+	
+	/* Parsing data
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _parsingByArea($params)
+	{
+		$type = $params->type;
+		
+		$data = collect($params->storeData)->groupBy('areaId')->map(function($items, $key) use($type){
+			
+			$temp['areaName'] 		= $items->pluck('areaName')->first();
+			$temp['areaStores'] 	= $items->pluck('areaId')->sum();
+			$temp['businessDays'] 	= $items->pluck('businessDays')->sum();
+			
+			#八方點
+			$temp['ezOrderCount'] 	= $items->pluck('ezOrderCount')->sum();
+			$temp['ezAmount'] 		= round($items->pluck('ezAmount')->sum(), 2);
+			
+			#POS
+			$temp['posOrderCount'] 	= $items->pluck('posOrderCount')->sum();
+			$temp['posAmount'] 		= round($items->pluck('posAmount')->sum(), 2);
 			
 			#總計
 			$temp['avgOrderAmount'] = empty($temp['posOrderCount']) ? 0 : round($temp['posAmount'] / $temp['posOrderCount'], 2); #平均客單價
@@ -393,7 +419,7 @@ class StoreService
 			$temp['amountPercent'] 	= Number::percentage($temp['amountPercent'], precision: 2); 
 			
 			if ($type == 'ez')
-				return collect($temp)->only(['storeKey', 'storeName', 'areaName', 'businessDays', 'ezOrderCount', 'ezAmount'])->values()->all();
+				return collect($temp)->only(['areaName', 'areaStores', 'businessDays', 'ezOrderCount', 'ezAmount'])->values()->all();
 			else
 				return collect($temp)->values()->all();
 		})->all();
@@ -456,9 +482,13 @@ class StoreService
 	private function _buildExportData($sourceData)
 	{
 		$export = [];
-		$export[] = $sourceData['store']['header'];
 		
-		foreach($sourceData['store']['data'] as $data)
+		$by = ($sourceData['by'] == 'store') ? 'store' : 'area';
+		$exportData = data_get($sourceData, $by, []);
+		
+		$export[] = $exportData['header'];
+		
+		foreach($exportData['data'] as $data)
 		{
 			/* 
 			$data['ezAmount'] 			= Number::currency($data['ezAmount'], precision: 2);

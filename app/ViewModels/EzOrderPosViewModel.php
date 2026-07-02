@@ -51,27 +51,23 @@ class EzOrderPosViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		/* $calc = [
-			'day'	=> '日', 
-			'week'	=> '週', 
-			'month'	=> '月', 
-		];
-		
-		$this->set('options.calc', $calc);
-		*/
-		
 		$type = [
-			'store'		=> '依門店', 
-			#'area'		=> '找區域',
-			#'storeName'	=> '找店名', #取消此條件
+			'ez'	=> '八方點', 
+			'ezpos'	=> '八方點及銷售', 
 		];
 		$this->set('options.type', $type);
 		
+		$by = [
+			'store'	=> '依門店', 
+			'area'	=> '依區域', 
+		];
+		$this->set('options.by', $by);
+		
 		#區域選項須以使用者權限為主
-		$currentUser = AppManager::getCurrentUser();
+		/* $currentUser = AppManager::getCurrentUser();
 		$allowAreas = $currentUser->getAreaPermissionsMap();
 		
-		$this->set('options.areas', $allowAreas);
+		$this->set('options.areas', $allowAreas); */
 	}
 	
 	/* Form submit action
@@ -95,15 +91,17 @@ class EzOrderPosViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL)
+	public function keepSearchData($type = 'ez', $by = 'store', $stDate = NULL, $endDate = NULL, $storeName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
 		$thisMonth = Carbon::now()->format('Y-m');
 		
 		$this->set('search.type', $type);
+		$this->set('search.by', $by);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
+		$this->set('search.storeName', $storeName);
 		$this->set('search.today', $today);
 		$this->set('search.thisMonth', $thisMonth);
 	}
@@ -114,11 +112,12 @@ class EzOrderPosViewModel extends Fluent
 	 */
 	public function getPartialView()
 	{
-		$type = $this->get('search.type', NULL);
+		$by = $this->get('search.by', 'store');
 		
-		return match($type)
+		return match($by)
 		{
 			'store'	=> 'ezorder_pos.store',
+			'area'	=> 'ezorder_pos.area',
  		};
 	}
 	
@@ -134,6 +133,8 @@ class EzOrderPosViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
+		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
+		
 		return $response;
 	}
 }
