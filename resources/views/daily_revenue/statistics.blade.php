@@ -1,12 +1,13 @@
 @extends('layouts.app')
 @use('Illuminate\Support\Number')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/daily_revenue/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/daily_revenue/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/daily_revenue/list.js') }}" defer></script>
 @endpush
 
 @section('content')

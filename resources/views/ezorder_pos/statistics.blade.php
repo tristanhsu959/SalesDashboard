@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/ezorder_pos/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/ezorder_pos/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/ezorder_pos/list.js') }}" defer></script>
 @endpush
 
 @section('content')

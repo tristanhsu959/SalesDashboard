@@ -16,6 +16,20 @@ enum OpCenter : string
 		};
     }
 	
+	/* Area values,只有處理supervisor時呼叫(自動設為全權限)
+	 * @params:  
+	 * @return: array
+	 */
+	public static function getAll() : array
+	{
+		$list = [];
+		
+		$list[] = self::TAIPEI->value;
+		$list[] = self::KAOHSIUNG->value;
+		
+		return $list;
+	}
+	
 	public static function toArray(): array 
 	{
         return collect(self::cases())->mapWithKeys(function ($case) {

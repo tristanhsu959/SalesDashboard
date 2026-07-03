@@ -1,7 +1,8 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('scripts')
-    <script src="{{ asset('scripts/signin.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/signin.js') }}" defer></script>
 @endpush
 
 @section('content')

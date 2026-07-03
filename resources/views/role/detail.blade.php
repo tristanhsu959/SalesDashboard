@@ -3,13 +3,14 @@
 @use('App\Enums\Area')
 @use('App\Enums\RoleGroup')
 @use('App\Enums\Brand')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
 	<link href="{{ asset('styles/role/detail.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/role/detail.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/role/detail.js') }}" defer></script>
 @endpush
 
 @section('content')

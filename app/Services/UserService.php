@@ -110,9 +110,10 @@ class UserService
 		try
 		{
 			$result = $this->_repository->getById($id);
-			$result['opCenter'] 	= $result['roleArea']['opCenter'];
-			$result['salesArea'] 	= $result['roleArea']['sales'];
-			$result['purchaseArea'] = $result['roleArea']['purchase'];
+			
+			$result['opCenter'] 		= data_get($result, 'roleArea.opCenter', []);
+			$result['salesArea'] 		= data_get($result, 'roleArea.sales', []);
+			$result['purchaseArea'] 	= data_get($result, 'roleArea.purchase', []);
 			
 			return ResponseLib::initialize($result)->success();
 		}

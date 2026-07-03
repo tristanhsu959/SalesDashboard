@@ -1,12 +1,13 @@
 @extends('layouts.app')
 @use('App\Enums\Brand')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/new_release_setting/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/new_release_setting/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/new_release_setting/list.js') }}" defer></script>
 @endpush
 
 @section('content')
