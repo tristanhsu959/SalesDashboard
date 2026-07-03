@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoleGroup;
+use App\Enums\OpCenter;
 use App\Enums\Area;
 use Illuminate\Support\Fluent;
 
@@ -93,19 +94,61 @@ class CurrentUser extends Fluent
 		return $this->get('rolePermission', []);
 	}
 	
+	/* Get opcenter permission key-value
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getOpCenterPermissionsMap()
+	{
+		$opList = OpCenter::options();
+		
+		if ($this->isSupervisor())
+			return $opList;
+		
+		$authOps = $this->get('roleArea.opCenter', [])
+		
+		$opList = collect($opList)->filter(function($item, $key) use($authOps) {
+			return in_array($key, $authOps);
+		})->toArray();
+		
+		return $opList;
+	}
+	
 	/* Get area permission key-value
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAreaPermissionsMap()
+	public function getSalesAreaPermissionsMap()
 	{
 		$areaList = Area::options();
 		
 		if ($this->isSupervisor())
 			return $areaList;
 		
-		$areaList = collect($areaList)->filter(function($item, $key) {
-			return in_array($key, $this->roleArea);
+		$authAreas = $this->get('roleArea.sales', [])
+		
+		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
+			return in_array($key, $authAreas);
+		})->toArray();
+		
+		return $areaList;
+	}
+	
+	/* Get area permission key-value
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getPurchaseAreaPermissionsMap()
+	{
+		$areaList = Area::options();
+		
+		if ($this->isSupervisor())
+			return $areaList;
+		
+		$authAreas = $this->get('roleArea.purchase', [])
+		
+		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
+			return in_array($key, $authAreas);
 		})->toArray();
 		
 		return $areaList;
