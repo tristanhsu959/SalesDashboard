@@ -17,10 +17,10 @@ section.user-data {
 		}
 	}
 	
-	.role-permission {
+	.role-permission, .area-permission {
 		ul.list li {
 			&:hover {
-				background-color: #f3e5f5;
+				background-color: #e1bee7;
 			}
 		}
 	}

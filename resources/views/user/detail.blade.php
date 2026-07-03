@@ -104,7 +104,7 @@
 			
 			<!--區域權限-->
 			<div class="page padding" id="page-sales-area" :class="activeTab == 'sales-area' ? 'active':''">
-				<fieldset class="sales-area-permission field-blue fieldset required surface-container-high">
+				<fieldset class="area-permission field-blue fieldset required surface-container-high">
 					<ul class="list border">
 						<template x-for="(areaName, areaId) in options.salesAreas" :key="areaId">
 						<li>
@@ -113,7 +113,7 @@
 								<div x-text="areaName"></div>
 							</div>
 							<label class="switch field-dark-blue">
-								<input x-model="formData.salesArea" type="checkbox" name="salesArea[]" :value="areaId">
+								<input x-model="formData.area.sales" type="checkbox" name="area[sales][]" :value="areaId">
 								<span></span>
 							</label>
 						</li>
@@ -132,7 +132,7 @@
 			</div>
 
 			<div class="page padding" id="page-purchase-area" :class="activeTab == 'purchase-area' ? 'active':''">
-				<fieldset class="purchase-op-permission field-red fieldset required surface-container-high">
+				<fieldset class="area-permission field-red fieldset required surface-container-high">
 					<legend>指定營運中心(未指定則依品牌判別)</legend>
 					<ul class="list border">
 						<template x-for="(opName, opId) in options.opCenters" :key="opId">
@@ -142,14 +142,14 @@
 								<div x-text="opName"></div>
 							</div>
 							<label class="switch field-red">
-								<input x-model="formData.opCenter" type="checkbox" name="opCenter[]" :value="opId">
+								<input x-model="formData.area.opCenter" type="checkbox" name="area[opCenter][]" :value="opId">
 								<span></span>
 							</label>
 						</li>
 						</template>
 					</ul>
 				</fieldset>
-				<fieldset class="purchase-area-permission field-blue fieldset required">
+				<fieldset class="area-permission field-blue fieldset required surface-container-high">
 					<ul class="list border">
 						<template x-for="(areaName, areaId) in options.purchaseAreas" :key="areaId">
 						<li>
@@ -158,7 +158,7 @@
 								<div x-text="areaName"></div>
 							</div>
 							<label class="switch field-dark-blue">
-								<input x-model="formData.purchaseArea" type="checkbox" name="purchaseArea[]" :value="areaId">
+								<input x-model="formData.area.purchase" type="checkbox" name="area[purchase][]" :value="areaId">
 								<span></span>
 							</label>
 						</li>

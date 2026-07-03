@@ -76,7 +76,7 @@ class UserViewModel extends Fluent
 	 */
 	public function keepFormData($id = 0, $account = '',  $password = '',
 						$displayName = '', $department = '', $email = '', $description = '', $isActive = TRUE, 
-						$permission = [], $opCenter = [], $salesArea = [], $purchaseArea = [],  
+						$permission = [], $area = [],  
 						$updateAt = '', $hasSetPassword = FALSE)
     {
 		#info
@@ -93,9 +93,9 @@ class UserViewModel extends Fluent
 		$this->set('formData.permission', $permission);
 		
 		#default全部營運中心
-		$this->set('formData.opCenter', $opCenter);
-		$this->set('formData.salesArea', $salesArea);
-		$this->set('formData.purchaseArea', $purchaseArea);
+		$this->set('formData.area.opCenter', data_get($area, 'opCenter', []));
+		$this->set('formData.area.sales', data_get($area, 'sales', []));
+		$this->set('formData.area.purchase', data_get($area, 'purchase', []));
 		
 		$this->set('formData.updateAt', $updateAt);
 		$this->set('formData.hasSetPassword', $hasSetPassword);

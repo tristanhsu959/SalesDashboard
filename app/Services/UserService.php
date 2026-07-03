@@ -52,7 +52,7 @@ class UserService
 	 * @return: array
 	 */
 	public function createUser($account, $password, $displayName, $department, $email, $description, $isActive, 
-								$permission, $opCenter, $salesArea, $purchaseArea)
+								$permission, $areaPermission)
 	{
 		try
 		{
@@ -63,10 +63,9 @@ class UserService
 			#2.Hash password
 			$password = Hash::make($password);
 			
-			#3. Merge area permission
-			$areaPermission['opCenter'] = $opCenter;
-			$areaPermission['sales'] 	= $salesArea;
-			$areaPermission['purchase'] = $purchaseArea;
+			#3. Convert area permission
+			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
+			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
 			
 			#4. Create user
 			$this->_repository->insert($account, $password, $displayName, $department, $email, $description, $isActive, 
@@ -111,10 +110,6 @@ class UserService
 		{
 			$result = $this->_repository->getById($id);
 			
-			$result['opCenter'] 		= data_get($result, 'roleArea.opCenter', []);
-			$result['salesArea'] 		= data_get($result, 'roleArea.sales', []);
-			$result['purchaseArea'] 	= data_get($result, 'roleArea.purchase', []);
-			
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -132,7 +127,7 @@ class UserService
 	 * @return: array
 	 */
 	public function updateUser($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
-								$permission, $opCenter, $salesArea, $purchaseArea)
+								$permission, $areaPermission)
 	{
 		try
 		{
@@ -144,10 +139,9 @@ class UserService
 			if (! empty($password))
 				$password = Hash::make($password);
 			
-			#3. Merge area permission
-			$areaPermission['opCenter'] = $opCenter;
-			$areaPermission['sales'] 	= $salesArea;
-			$areaPermission['purchase'] = $purchaseArea;
+			#3. Convert area permission
+			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
+			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
 			
 			#4. Update user
 			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
