@@ -66,7 +66,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function insert($account, $password, $displayName, $department, $email, $isActive, $roleGroupId, $permission, $area, $description)
+	public function insert($account, $password, $displayName, $department, $email, $description, $isActive, $roleGroupId, $permission, $area)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();
@@ -167,7 +167,7 @@ class UserRepository extends Repository
 	 * @params: int
 	 * @return: boolean
 	 */
-	public function update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
+	public function update($id, $account, $password, $displayName, $department, $email, $description, $isActive, $permission, $area)
 	{
 		$db = $this->connectSalesDashboard();
 		$db->beginTransaction();

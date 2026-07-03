@@ -51,7 +51,8 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
+	public function createUser($account, $password, $displayName, $department, $email, $description, $isActive, 
+								$permission, $opCenter, $salesArea, $purchaseArea)
 	{
 		try
 		{
@@ -62,8 +63,14 @@ class UserService
 			#2.Hash password
 			$password = Hash::make($password);
 			
-			#3. Create user
-			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area, $description);
+			#3. Merge area permission
+			$areaPermission['opCenter'] = $opCenter;
+			$areaPermission['sales'] 	= $salesArea;
+			$areaPermission['purchase'] = $purchaseArea;
+			
+			#4. Create user
+			$this->_repository->insert($account, $password, $displayName, $department, $email, $description, $isActive, 
+										RoleGroup::USER->value, $permission, $areaPermission);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -103,6 +110,10 @@ class UserService
 		try
 		{
 			$result = $this->_repository->getById($id);
+			$result['opCenter'] 	= $result['roleArea']['opCenter'];
+			$result['salesArea'] 	= $result['roleArea']['sales'];
+			$result['purchaseArea'] = $result['roleArea']['purchase'];
+			
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -119,7 +130,8 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
+	public function updateUser($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
+								$permission, $opCenter, $salesArea, $purchaseArea)
 	{
 		try
 		{
@@ -131,8 +143,14 @@ class UserService
 			if (! empty($password))
 				$password = Hash::make($password);
 			
-			#3. Update user
-			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description);
+			#3. Merge area permission
+			$areaPermission['opCenter'] = $opCenter;
+			$areaPermission['sales'] 	= $salesArea;
+			$areaPermission['purchase'] = $purchaseArea;
+			
+			#4. Update user
+			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
+										$permission, $areaPermission);
 			
 			return ResponseLib::initialize()->success();
 		}

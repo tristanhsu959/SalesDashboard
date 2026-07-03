@@ -9,9 +9,9 @@ document.addEventListener('alpine:init', () => {
 		}
 	});
 	
-    Alpine.data('userList', (list, options) => ({
-		list: list,
-		options: {...options},
+    Alpine.data('userList', (response, list) => ({
+		response: response,
+		list: {...list},
 		
 		init(){},
 		
@@ -21,7 +21,7 @@ document.addEventListener('alpine:init', () => {
 		
 		get filterUsers() {
 			const searchKeyword = Alpine.store('userFilter').filter.toLowerCase();
-			const list = Object.values(this.list);
+			const list = Object.values(this.list.data);
 			
 			const result = list.filter(user => 
 				String(user.userAccount || '').toLowerCase().includes(searchKeyword) ||

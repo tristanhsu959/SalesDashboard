@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@use('App\Enums\Area')
 
 @push('styles')
     <link href="{{ asset('styles/user/list.css') }}" rel="stylesheet">
@@ -11,11 +10,12 @@
 
 @section('content')
 <!-- Content -->
+<div x-data="userList(@js($viewModel->listResponseData()), @js($viewModel->listData()))" class="content-wrapper">
 	<header class="page-nav">
 		<nav>
-			<a href="{{ route('user.create') }}" class="btn-create button circle"><i>add</i></a>
-			@if (! empty($viewModel->list))
-			<nav class="no-space filter">
+			<a :href="list.createRoute" class="btn-create button circle"><i>add</i></a>
+			
+			<nav x-show="response.hasResult" class="no-space filter">
 				<div class="field label border prefix field-filter-dark small">
 					<i>filter_alt</i>
 					<input type="text" x-model="$store.userFilter.filter">
@@ -23,21 +23,19 @@
 				</div>
 				<button class="right-round" @click="$store.userFilter.reset()"><i>backspace</i></button>
 			</nav>
-			@endif
 		</nav>
 	</header>
 	
-@if($viewModel->status() === TRUE)	
-	<form x-data='userList(@json($viewModel->list), @json($viewModel->options))' action="" method="post" x-ref="userListForm">
+	<form x-show="response.status" action="" method="post" x-ref="userListForm">
 		@csrf
 		<section class="user-list container">
-			<article x-show="list.length == 0" class="error-container border">
+			<article x-show="list.data.length == 0" class="error-container border">
 				<div class="row">
 					<i>info</i><div class="max">查無符合資料</div>
 				</div>
 			</article>
 			
-			<table x-show="list.length > 0" class="stripes border odd-cyan">
+			<table x-show="list.data.length > 0" class="stripes border odd-cyan">
 				<thead>
 					<tr>
 						<th class="min">#</th>
@@ -64,14 +62,13 @@
 						</td>
 						<td class="min" x-text="user.updateAt"></td>
 						<td class="right-align action">
-							<a :href="'{{ route('user.update', ['id' => 'USER_ID']) }}'.replace('USER_ID', user.userId)" class="btn-edit button circle small" :disabled="user.roleGroup == options.supervisorGroupId">
+							<a :href="list.updateRoute.replace('_ID', user.userId)" class="btn-edit button circle small" :disabled="user.roleGroup == list.supervisorGroupId">
 								<i class="small">edit</i>
 							</a>
-							<a @click.prevent="confirmDelete($el.href)" :href="'{{ route('user.delete', ['id' => 'USER_ID']) }}'.replace('USER_ID', user.userId)" class="btn-delete button circle small" :disabled="user.roleGroup == options.supervisorGroupId">
+							<a @click.prevent="confirmDelete($el.href)" :href="list.deleteRoute.replace('_ID', user.userId)" class="btn-delete button circle small" :disabled="user.roleGroup == list.supervisorGroupId">
 								<i class="small">delete</i>
 							</a>
 						</td>
-						
 					</tr>
 				</template>
 				</tbody>
@@ -79,6 +76,7 @@
 			
 		</section>
 	</form>
-@endif
+
+</div>
 <!-- Content -->
 @endsection
