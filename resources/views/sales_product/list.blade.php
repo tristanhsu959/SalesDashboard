@@ -18,7 +18,7 @@
 			
 			<template x-for="(brand, brandId) in response.options.brands">
 				<nav x-show="brandId == $store.salesProductSetting.tabIndex" class="no-space filter">
-					<div class="field label suffix border field-filter-dark">
+					<div class="field label suffix border field-filter-dark small">
 						<select x-model="$store.salesProductSetting.filterCat[brandId]" id="filterCat">
 							<option value="">全部</option>
 							<template x-for="(catName, catId) in response.options.categories[brandId]" :key="catId">
