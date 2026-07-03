@@ -112,7 +112,7 @@ class AuthService
 			$userInfo['rolePermission'] 		= Functions::getAll();
 			$userInfo['roleArea']['opCenter'] 	= OpCenter::getAll();
 			$userInfo['roleArea']['sales'] 		= Area::getAll();
-			$userInfo['roleArea']['purchase'] 	= [1];#Area::getAll();
+			$userInfo['roleArea']['purchase'] 	= Area::getAll();
 		}
 				
 		#宜蘭已整併至大台北,但POS還是有宜蘭(但帳號管理已不會再有), 自動綁定

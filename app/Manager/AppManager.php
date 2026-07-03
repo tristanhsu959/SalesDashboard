@@ -51,7 +51,11 @@ class AppManager
 		if ($currentUser->isSupervisor())
 			return TRUE;
 		
-		return empty($currentUser['roleArea']) ? FALSE : TRUE;
+		if (empty($currentUser['roleArea']['sales']) && empty($currentUser['roleArea']['purchase']))
+			return FALSE;
+		else
+			return TRUE;
+		#return empty($currentUser['roleArea']) ? FALSE : TRUE;
 	}
 	
 	/* 清除登入資訊|Menu

@@ -1,12 +1,11 @@
 
-<dialog x-data='userProfile(@json($currentUser["profile"]), @json($currentUser["options"]))' class="left small" id="profile">
+<dialog x-data="userProfile(@js($currentUser['profile']), @js($currentUser['options']))" class="left small" id="profile">
 	<header>
 		<nav>
 			<h6 class="max">Profile</h6>
 			<button class="transparent circle large" data-ui="#profile"><i>close</i></button>
 		</nav>
 	</header>
-	<div class="space"></div>
 	<div class="dialog-body">
 		<div class="info-head">
 			<i class="fill">person_pin</i>
@@ -22,17 +21,33 @@
 				<span x-text="profile.department"></span>
 				<!--span x-text="profile.title"></span-->
 			</p>
-			<p>
-				<span>管理區域</span>
-				<span x-show="profile.roleArea.length <= 0 " class="text-danger">未設定</span>
-			</p>
-			<p x-show="profile.roleArea.length > 0" class="row wrap auth-area">
-				<template x-for="areaId in profile.roleArea" :key="areaId">
-					<button x-show="options.area[areaId]" class="chip round medium small-elevate secondary white-text">
-						<span x-text="options.area[areaId]">Input</span>
-					</button >
-				</template>
-			</p>
+			<div>
+				<p>
+					<span>管理區域</span>
+					<span x-text="profile.roleArea.sales.length > 0 ? '銷售':'未設定'" class="red-text"></span>
+				</p>
+				<p x-show="profile.roleArea.sales.length > 0" class="row wrap auth-area">
+					<template x-for="areaId in profile.roleArea.sales" :key="areaId">
+						<button x-show="options.area[areaId]" class="chip round small small-elevate primary white-text">
+							<span x-text="options.area[areaId]"></span>
+						</button >
+					</template>
+				</p>
+			</div>
+			
+			<div>
+				<p>
+					<span>管理區域</span>
+					<span x-text="profile.roleArea.purchase.length > 0 ? '訂貨':'未設定'" class="red-text"></span>
+				</p>
+				<p x-show="profile.roleArea.purchase.length > 0" class="row wrap auth-area">
+					<template x-for="areaId in profile.roleArea.purchase" :key="areaId">
+						<button x-show="options.area[areaId]" class="chip round small small-elevate secondary white-text">
+							<span x-text="options.area[areaId]"></span>
+						</button >
+					</template>
+				</p>
+			</div>
 			<!--p x-text="profile.company"></p-->
 		</div>
 	</div>
@@ -56,7 +71,9 @@
 			<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 			@csrf
 			
-			<h6><i>assignment_ind</i><span x-text="profile.displayName || profile.account"></span></h6>
+			<h6><i class="blue-text">assignment_ind</i><span x-text="profile.displayName || profile.account"></span></h6>
+			
+			<p class="red-text medium-text"><i class="small">info</i><span>請勾選要編輯的欄位</span></p>
 			
 			<div class="field label border field-purple prefix">
 				<i>
@@ -109,8 +126,6 @@
 				</button>
 			</nav>
 			<output class="red-text small-text">英文+數字六個字元以上</output>
-			
-			<p class="red-text medium-text"><i class="small">info</i><span>請勾選要編輯的欄位</span></p>
 			
 			<nav class="toolbar">
 				<button type="submit" class="button btn-save btn-primary slow-ripple" :disabled="fieldEnabled.length <= 0">儲存</button>
