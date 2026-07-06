@@ -11,6 +11,7 @@ use App\Services\NewRelease\AreaService;
 use App\Services\NewRelease\RankingService;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -142,14 +143,15 @@ class NewReleaseService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$opCenter		= PosManager::getOpCenterNo($brand);
+		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->releaseId($searchReleaseId)->stDate($searchStDate)->endDate($searchEndDate)
 				->cacheKey($cacheKey);
 		
@@ -285,7 +287,7 @@ class NewReleaseService
 		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
 		
 		#改Mapping訂貨門店/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$storeList = PurchaseManager::getStoreList($params->opCenter, $params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
 		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
 	

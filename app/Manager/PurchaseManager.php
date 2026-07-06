@@ -17,13 +17,45 @@ class PurchaseManager
 	{
 	}
 	
+	/* 取對應nOrder的設定值
+	 * @params: int
+	 * @return: array
+	 */
+	public function getOpCenterNo($brandId)
+	{
+		#分營運中心:台北/高雄
+		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value OR $brandId == Brand::FJVEGGIE->value)
+			return OpCenter::toValueArray();
+		
+		return [];
+	}
+	
+	public function getBrandNo($brandId)
+	{
+		$brand = Brand::tryFrom($brandId);
+		return $brand->shortCode();
+	}
+	
+	public function getFactoryNo($brandId)
+	{
+		#銷售不分工廠:台北/高雄
+		if ($brandId == Brand::BAFANG->value)
+			return [Factory::TP->value, Factory::KH->value];
+		else if ($brandId == Brand::BUYGOOD->value)
+			return [Factory::TS->value, Factory::RL->value];
+		else if ($brandId == Brand::FJVEGGIE->value)
+			return [Factory::TP->value, Factory::KH->value]; #同八方
+		else 
+			return [];
+	}
+	
 	/******************** Store ********************/
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreList($opCenter, $brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		/*0 => array:9 [▼
 			"areaId" => 1
@@ -41,11 +73,11 @@ class PurchaseManager
 		{
 			#取回的close date已+8
 			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
-			$store = $this->_repository->getStoreList($brand, $userAreaIds);
+			$store = $this->_repository->getStoreList($opCenter, $brand, $userAreaIds);
 			
 			$store = $this->_filterActiveStoreByDate($store, $stDate, $endDate);
 			
-			return $this->_formatStoreOutput($brand, $store);
+			return $this->_formatStoreOutput($store);
 		}
 		catch(Exception $e)
 		{
@@ -73,7 +105,7 @@ class PurchaseManager
 				
 				$lbStoreList = $this->_filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
 				
-				$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
+				$lbStoreList = $this->_formatStoreOutput($lbStoreList);
 				
 				return $this->_mergeStoreOutput($brand, $storeList, $lbStoreList);
 			}
@@ -158,10 +190,10 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	private function _formatStoreOutput($brand, $storeList)
+	private function _formatStoreOutput($storeList)
 	{
 		#To key-value
-		$store = collect($storeList)->map(function($item, $key) use($brand) {
+		$store = collect($storeList)->map(function($item, $key) {
 			
 			if (is_null($item['posId']) OR $item['posId'] == 'null')
 				$item['posId'] =  '';
@@ -191,7 +223,7 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	private function _mergeStoreOutput($brand, $storeList, $lbStoreList)
+	private function _mergeStoreOutput($storeList, $lbStoreList)
 	{
 		$storeKeys = collect($storeList)->pluck('storeKey')->toArray();
 		

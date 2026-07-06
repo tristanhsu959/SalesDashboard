@@ -5,6 +5,7 @@ namespace App\Manager;
 use App\Manager\Repositories\PosRepository;
 use App\Libraries\Sales\AreaLib;
 use App\Libraries\HelperLib;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Area;
 use Illuminate\Support\Str;
@@ -18,6 +19,40 @@ class PosManager
 {
 	public function __construct(protected PosRepository $_repository)
 	{
+	}
+	
+	/* 取對應nOrder的設定值
+	 * @params: int
+	 * @return: array
+	 */
+	public function getOpCenterNo($brand)
+	{
+		#銷售不分營運中心:台北/高雄
+		return OpCenter::toValueArray();
+		
+		/* if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value OR $brandId == Brand::FJVEGGIE->value)
+			return OpCenter::toValueArray();
+		
+		return []; */
+	}
+	
+	public function getBrandNo($brandId)
+	{
+		$brand = Brand::tryFrom($brandId);
+		return $brand->shortCode();
+	}
+	
+	public function getFactoryNo($brandId)
+	{
+		#銷售不分工廠:台北/高雄
+		if ($brandId == Brand::BAFANG->value)
+			return [Factory::TP->value, Factory::KH->value];
+		else if ($brandId == Brand::BUYGOOD->value)
+			return [Factory::TS->value, Factory::RL->value];
+		else if ($brandId == Brand::FJVEGGIE->value)
+			return [Factory::TP->value, Factory::KH->value]; #同八方
+		else 
+			return [];
 	}
 	
 	/* 取全部店家(含閉店)

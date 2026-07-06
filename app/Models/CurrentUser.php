@@ -94,18 +94,29 @@ class CurrentUser extends Fluent
 		return $this->get('rolePermission', []);
 	}
 	
+	/* Get opcenter permission key
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getOpCenterPermissions()
+	{
+		$opList = $this->getOpCenterPermissionsMap();
+		
+		return array_keys($opList);
+	}
+	
 	/* Get opcenter permission key-value
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getOpCenterPermissionsMap()
+	public function getOpCenterPermissionMap()
 	{
 		$opList = OpCenter::options();
 		
 		if ($this->isSupervisor())
 			return $opList;
 		
-		$authOps = $this->get('roleArea.opCenter', [])
+		$authOps = $this->get('roleArea.opCenter', []);
 		
 		$opList = collect($opList)->filter(function($item, $key) use($authOps) {
 			return in_array($key, $authOps);
@@ -114,18 +125,29 @@ class CurrentUser extends Fluent
 		return $opList;
 	}
 	
+	/* Get area permission key
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getSalesAreaPermissions()
+	{
+		$areaList = $this->getSalesAreaPermissionMap();
+		
+		return array_keys($areaList);
+	}
+	
 	/* Get area permission key-value
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getSalesAreaPermissionsMap()
+	public function getSalesAreaPermissionMap()
 	{
 		$areaList = Area::options();
 		
 		if ($this->isSupervisor())
 			return $areaList;
 		
-		$authAreas = $this->get('roleArea.sales', [])
+		$authAreas = $this->get('roleArea.sales', []);
 		
 		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
 			return in_array($key, $authAreas);
@@ -138,14 +160,25 @@ class CurrentUser extends Fluent
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getPurchaseAreaPermissionsMap()
+	public function getPurchaseAreaPermissions()
+	{
+		$areaList = $this->getPurchaseAreaPermissionMap();
+		
+		return array_keys($areaList);
+	}
+	
+	/* Get area permission key-value
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getPurchaseAreaPermissionMap()
 	{
 		$areaList = Area::options();
 		
 		if ($this->isSupervisor())
 			return $areaList;
 		
-		$authAreas = $this->get('roleArea.purchase', [])
+		$authAreas = $this->get('roleArea.purchase', []);
 		
 		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
 			return in_array($key, $authAreas);

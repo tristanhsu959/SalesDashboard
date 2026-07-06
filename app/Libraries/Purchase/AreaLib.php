@@ -93,7 +93,7 @@ class AreaLib
 			return [];
 	}
 	
-	#To Bafang shopgroup gid
+	#To Bafang area id
 	public static function toBafangId($srcIds): array
 	{
 		return collect($srcIds)->map(function ($value, int $key) {
@@ -103,17 +103,17 @@ class AreaLib
 			{
 				Area::TAIPEI->value		=> [1, 2, 3, 10002, 10003, 18],
 				Area::TCM->value		=> [6, 10004],
-				Area::CCT->value 		=> [9, 10005], # [9, 21, 10005]
+				Area::CCT->value 		=> [9, 21, 10005], # [9, 10005]
 				Area::YCN->value		=> [12, 24],
 				Area::YILAN->value 		=> [18],
-				Area::KAOHSIUNG->value 	=> [15, 27, 19, 30, 21], #因高雄有包含部份南廠中彰投(21)
+				Area::KAOHSIUNG->value 	=> [15, 27, 19, 30], #因高雄有包含部份南廠中彰投(21),因加了營運中心判別,故已不需要
 				default => [],
 			};
 			
 		})->collapse()->toArray();
 	}
 	
-	#To Buygood shopgroup gid : toBuygoodId
+	#To Buygood area id : toBuygoodId
 	public static function toBuygoodId($srcIds): array
 	{
 		return collect($srcIds)->map(function ($value, int $key) {

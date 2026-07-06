@@ -3,7 +3,7 @@
 namespace App\Manager\Repositories;
 
 use App\Repositories\Repository;
-use App\Repositories\Traits\PurchaseReposTrait;
+#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /* nOrder DB Common */
 class PurchaseRepository extends Repository
 {
-	use PurchaseReposTrait;
+	#use PurchaseReposTrait;
 	
 	/* 取工廠清單
 	 * @params: int
@@ -41,14 +41,16 @@ class PurchaseRepository extends Repository
 	}
 	
 	/* 取門店清單(含蘿蔔)
+	 * @params: array
 	 * @params: enum
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $userAreaIds)
+	public function getStoreList($opCenter, $brand, $userAreaIds)
 	{
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$brandId 		= $brand->value;
+		$brandCode 		= $brand->shortCode();
+		$authAreaIds	= AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -59,17 +61,17 @@ class PurchaseRepository extends Repository
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId', 'bt.Name as typeName')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($brandCode) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->where('bd.No',  $brandCode);
 					/* 取八方+蘿蔔condition
 					->where(function ($query) use ($brandId) {
 						$query->where('bd.No', $this->getBrandNo($brandId))
@@ -78,12 +80,14 @@ class PurchaseRepository extends Repository
 						  });
 					}); */
 			})
+			/* 可不用判別工廠
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) 
+			*/
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->ddRawSql();
 			->get()
