@@ -144,8 +144,8 @@ class NewReleaseService
 		$params = new Fluent();
 		
 		$currentUser 	= AppManager::getCurrentUser();
-		$opCenter		= PosManager::getOpCenterNo($brand);
 		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
+		$opCenter		= PosManager::getOpCenterNo($brand);
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
@@ -283,11 +283,11 @@ class NewReleaseService
 	 */
 	private function _getStoreList($params)
 	{
-		$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
+		#$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
 		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
 		
 		#改Mapping訂貨門店/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
-		$storeList = PurchaseManager::getStoreList($params->opCenter, $params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
 	
@@ -364,17 +364,29 @@ class NewReleaseService
 		$baseData = collect($saleData)->map(function($item, $key) use($saleStoreList, $purchaseStoreList) {
 			
 			$store	= data_get($purchaseStoreList, $item['shopId'], NULL); 
-			$shop 	= data_get($saleStoreList, $item['shopId'], NULL);
+			#$shop 	= data_get($saleStoreList, $item['shopId'], NULL);
 			
+			if (is_null($store))
+				return '';
 			
+			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
+			$item['shopName'] 	= $store['storeName'];
+			$item['areaId'] 	= $store['areaId'];
+			$item['areaName']	= $store['areaName'];
+			$item['storeKey'] 	= $store['storeKey'];
+			
+			/*
 			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
 			$item['shopName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['shopName']);
 			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
 			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
 			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
+			*/
 			
 			return $item; 
-		});
+		})->reject(function($item, $key){
+			return empty($item);
+		});;
 		
 		#補全未有銷售的門店資料(只需補active store)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();

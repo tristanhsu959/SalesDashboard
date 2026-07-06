@@ -3,7 +3,7 @@
 namespace App\Manager\Repositories;
 
 use App\Repositories\Repository;
-use App\Repositories\Traits\PurchaseReposTrait;
+#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -11,7 +11,7 @@ use App\Enums\Factory;
 #舊訂貨系統in Local
 class LocalLegacyRepository  extends Repository
 {
-	use PurchaseReposTrait;
+	#use PurchaseReposTrait;
 	
 	public function __construct()
 	{

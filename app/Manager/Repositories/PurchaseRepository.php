@@ -46,7 +46,7 @@ class PurchaseRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($opCenter, $brand, $userAreaIds)
+	public function getStoreList($brand, $opCenter, $userAreaIds)
 	{
 		$brandId 		= $brand->value;
 		$brandCode 		= $brand->shortCode();

@@ -55,7 +55,7 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($opCenter, $brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreList($brand, $opCenter, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		/*0 => array:9 [▼
 			"areaId" => 1
@@ -73,7 +73,7 @@ class PurchaseManager
 		{
 			#取回的close date已+8
 			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
-			$store = $this->_repository->getStoreList($opCenter, $brand, $userAreaIds);
+			$store = $this->_repository->getStoreList($brand, $opCenter, $userAreaIds);
 			
 			$store = $this->_filterActiveStoreByDate($store, $stDate, $endDate);
 			

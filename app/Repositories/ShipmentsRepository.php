@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PurchaseReposTrait;
+#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
@@ -15,7 +15,7 @@ use Exception;
 
 class ShipmentsRepository extends Repository
 {
-	use PurchaseReposTrait;
+	#use PurchaseReposTrait;
 	
 	public function __construct()
 	{

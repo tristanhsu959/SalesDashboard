@@ -155,14 +155,15 @@ class SalesService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
+		$opCenter		= PosManager::getOpCenterNo($brand); #不分取全部
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->category($searchCategory)->productIds($searchProductIds)
 				->cacheKey($cacheKey);
