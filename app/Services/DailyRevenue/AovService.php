@@ -165,7 +165,7 @@ class AovService
 		$baseData = collect($saleData)->map(function($item, $key){
 			
 			#因amount有可能是0
-			$totalSales = round(floatval($item['totalSales']) + floatval($item['totalDischarge']), 2); #不含折讓 
+			$totalSales = round(floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']), 2); #不含折讓 
 			$amount		= round($item['amount'], 2);
 			
 			$temp['saleMonth'] 		= Carbon::parse($item['saleDate'])->format('Y-m');

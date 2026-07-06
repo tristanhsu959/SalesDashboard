@@ -161,7 +161,7 @@ class SalesService
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds]);
 		
 		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)

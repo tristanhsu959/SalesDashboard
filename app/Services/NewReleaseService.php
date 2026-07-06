@@ -149,7 +149,7 @@ class NewReleaseService
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 		
 		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->releaseId($searchReleaseId)->stDate($searchStDate)->endDate($searchEndDate)
@@ -386,7 +386,7 @@ class NewReleaseService
 			return $item; 
 		})->reject(function($item, $key){
 			return empty($item);
-		});;
+		});
 		
 		#補全未有銷售的門店資料(只需補active store)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();

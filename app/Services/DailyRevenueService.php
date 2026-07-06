@@ -133,16 +133,17 @@ class DailyRevenueService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
+		$opCenter		= PosManager::getOpCenterNo($brand);
 		
 		if ($searchType == 'store') #有區間條件才要預設
 			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->type($searchType)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->shopType($searchShopType)->shopName($searchShopName)

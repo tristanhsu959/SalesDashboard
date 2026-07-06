@@ -128,7 +128,7 @@ class StoreService
 		#$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
 		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
 		
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 		#營收要排除無POS
 		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
@@ -207,13 +207,15 @@ class StoreService
 			$temp['areaName']		= $store['areaName'];
 			$temp['saleDate']		= Carbon::parse($item['saleDate'])->format('Y-m-d');
 			
-			#發票金額 = amount OR totalSales + totalDischarge
-			#實銷金額 = totalSales( + totalExtra + totalDischarge),應該只有totalSales?
-			$amount 	= $item['amount'];
-			$totalSales = floatval($item['totalSales']) + floatval($item['totalDischarge']); #+ floatval($item['totalExtra']) 
-			$temp['amount'] 		= empty($amount) ? $totalSales : $amount;
+			#發票金額 = amount OR totalSales + totalExtra + totalDischarge
+			#實銷金額 = totalSales, 應該只有totalSales?
+			$amount 		= $item['amount'];
+			$totalSales 	= floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']);
+			$temp['amount'] = empty($amount) ? $totalSales : $amount;
 			
 			return $temp; 
+		})->reject(function($item, $key){
+			return empty($item);
 		});
 		
 		#補全未有銷售的門店資料(closedown = 0)
