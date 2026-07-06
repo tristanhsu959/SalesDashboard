@@ -326,9 +326,10 @@ class PurchaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductShortCode($brandId)
+	public function getProductShortCode($brand, $opCenter)
 	{
 		$enableCodes = config('web.purchase.product_type.shortCode.enabled');
+		$brandNo = $brand->shortCode();
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -336,24 +337,24 @@ class PurchaseRepository extends Repository
 			->join('Product as p', 'p.Id', '=', 'a.ProductId')
 			->select('p.OldNo as productNo', 'p.Name as productName')
 			->where('a.ShelfStatus', '=', 1)
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as op')
 					->whereColumn('op.Id', 'p.OperationCenterId')
-					->whereIn('op.No', $this->getOpCenterNo($brandId));
+					->whereIn('op.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($brandNo) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 'a.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->where('bd.No',  $brandNo);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'a.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+					->whereIn('ft.No',  ['TW_TP', 'TW_KH']);
+			}) */
 			#先全抓
 			/* ->where(function ($query) use ($enableCodes) {
 				foreach ($enableCodes as $pattern) 

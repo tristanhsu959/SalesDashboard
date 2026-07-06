@@ -18,7 +18,7 @@ class PurchaseProductService
 	{
 	}
 	
-	/* 取設定清單(要整合Name)
+	/* 取出貨產品設定清單(要整合Name)
 	 * @params: 
 	 * @return: array
 	 */
@@ -29,8 +29,8 @@ class PurchaseProductService
 			$bfBrandId = Brand::BAFANG->value;
 			$bgBrandId = Brand::BUYGOOD->value;
 			
-			$productMapping[$bfBrandId] = PurchaseManager::getProductShortCodeMapping($bfBrandId);
-			$productMapping[$bgBrandId] = PurchaseManager::getProductShortCodeMapping($bgBrandId);
+			$productMapping[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG);
+			$productMapping[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD);
 			
 			$list = $this->_repository->getSetting();
 			
@@ -65,8 +65,8 @@ class PurchaseProductService
 			
 			
 			#要分開取, 因short code是不分brand
-			$list[$bfBrandId] = PurchaseManager::getProductShortCodeMapping($bfBrandId, FALSE);
-			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping($bgBrandId, FALSE);
+			$list[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG, FALSE);
+			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD, FALSE);
 			
 			#下架沒有被設定成stop, 但erpNo似乎會是空值, 目前是全取
 			$list = collect($list)->map(function($items, $brandId) {

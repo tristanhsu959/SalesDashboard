@@ -326,18 +326,23 @@ class PurchaseManager
 	 * @params: boolean
 	 * @return: array
 	 */
-	public function getProductShortCodeMapping($brandId, $returnMapping = TRUE)
+	public function getProductShortCodeMapping($brand, $returnMapping = TRUE)
 	{
-		$productMapping = $this->_repository->getProductShortCode($brandId);
+		#取所有產品
+		$opCenter = $this->getOpCenterNo($brand, []); #所有營運中心
+		$productMapping = $this->_repository->getProductShortCode($brand, $opCenter);
+		
+		#因不分工廠, 現狀會有重複, 要再濾除
+		$productMapping = collect($productMapping)->unique('productNo');
 		
 		if ($returnMapping === TRUE)
 		{
-			$productMapping = collect($productMapping)->mapWithKeys(function($item, $key){
+			$productMapping = $productMapping->mapWithKeys(function($item, $key){
 				return [$item['productNo'] => $item['productName']];
-			})->toArray();
+			});
 		}
 		
-		return $productMapping;
+		return $productMapping->all();
 	}
 	
 	/* 取對應的Group設定值

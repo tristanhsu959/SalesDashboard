@@ -17,7 +17,7 @@ class ProductController extends Controller
 	{
 	}
 	
-	/* 列表
+	/* POS料號列表
 	 * @params: request
 	 * @return: view
 	 */
