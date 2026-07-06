@@ -105,7 +105,7 @@ class InfoService
 	
 		try
 		{
-			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->userAreaIds);
+			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->opCenter, $params->userAreaIds);
 			
 			$params->storeList = $storeList;
 		}

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Facades\PosManager;
 use App\Facades\PurchaseManager;
 use App\Services\EzOrderPos\StoreService;
 use App\Services\EzOrderPos\AreaService;
@@ -129,13 +130,14 @@ class EzOrderPosService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
+		$opCenter		= PosManager::getOpCenterNo($brand);
 		
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->type($searchType)->by($searchBy)
 				->stDate($searchStDate)->endDate($searchEndDate)->storeName($searchStoreName)
 				->cacheKey($cacheKey);

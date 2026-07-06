@@ -21,7 +21,7 @@ class HelperLib
 	 */
 	public static function buildCacheKey(array $params)
 	{
-		$keys[] = $params;
+		$keys[] = array_filter($params);
 		$keys = Arr::whereNotNull(Arr::flatten($keys));
 		
 		return implode(':', $keys);

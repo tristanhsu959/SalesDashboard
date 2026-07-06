@@ -76,6 +76,7 @@ class DayoffService
 		if (! empty($params->areaDayoff['store']))
 		{
 			$statistics['hasResult'] 	= TRUE;
+			$statistics['dayoffCount']	= collect($params->areaDayoff['store'])->pluck('dayoffCount')->sum();
 			$statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			$statistics['exportName'] 	= '店休資訊';
 			
@@ -105,11 +106,12 @@ class DayoffService
 		try
 		{
 			$brand 		= $params->brand;
+			$opCenter	= $params->opCenter;
 			$stDate		= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
 			$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
 			$userAreaIds= $params->userAreaIds;
 			
-			$result = $this->_repository->getDayoffList($brand, $stDate, $endDate, $userAreaIds);
+			$result = $this->_repository->getDayoffList($brand, $opCenter, $stDate, $endDate, $userAreaIds);
 			
 			$params->storeList = $result;
 		}

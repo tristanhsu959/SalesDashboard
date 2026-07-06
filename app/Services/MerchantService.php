@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Services\Merchant\InfoService;
 use App\Services\Merchant\DayoffService;
 use App\Repositories\MerchantRepository;
@@ -133,14 +134,17 @@ class MerchantService
 	{
 		$params = new Fluent();
 		
+		#此功能暫不分區域權限
 		$currentUser	= AppManager::getCurrentUser();
-		$userAreaIds	= $currentUser->roleArea;
+		$userAreaIds	= Area::options(); #$currentUser->getPurchaseAreaPermissions();
+		$userOpCenter	= [];#$currentUser->getOpCenterPermissions();
+		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter); 
 		$functions		= $this->parsingFunction($brand);
 		
 		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
 				->cacheKey($cacheKey);
 		

@@ -26,9 +26,10 @@ class MerchantRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreInfoList($brand, $userAreaIds)
+	public function getStoreInfoList($brand, $opCenter, $userAreaIds)
 	{
 		$brandId = $brand->value;
+		$brandNo = $brand->shortCode();
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		$db = $this->connectNewOrder();
@@ -44,33 +45,30 @@ class MerchantRepository extends Repository
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
 			->addSelect('f.Name as factoryName', 'w.Name as warehouse', 'c.Name as carNo')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($brandNo) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->where('bd.No',  $brandNo);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->whereNull('s.CloseDate')
 			->when($authAreaIds, function ($query, $authAreaIds) {
 				// 只有當 $role 為 true（或非空值）時，才會執行這裡
 				return $query->whereIn('s.AreaId', $authAreaIds);
 			})
-			#->whereIn('s.AreaId', $authAreaIds)
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
-			#->orderBy('s.OperationCenterId')
-			#->orderBy('ar.Id')
 			->get()
 			->toArray(); 
 		
@@ -82,9 +80,10 @@ class MerchantRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getDayoffList($brand, $stDate, $endDate, $userAreaIds)
+	public function getDayoffList($brand, $opCenter, $stDate, $endDate, $userAreaIds)
 	{
 		$brandId = $brand->value;
+		$brandNo = $brand->shortCode();
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
 		
 		#To utc
@@ -108,24 +107,24 @@ class MerchantRepository extends Repository
 				#->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($brandNo) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->where('bd.No',  $brandNo);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('s.OpenDate', '<=', $endDate) #不含未來開店
 			->whereNull('s.CloseDate') #只取有效門店
 			->when($authAreaIds, function ($query, $authAreaIds) {

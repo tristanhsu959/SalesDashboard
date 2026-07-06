@@ -18,22 +18,20 @@ class PurchaseManager
 	}
 	
 	/* 取對應nOrder的設定值
-	 * @params: int
+	 * @params: enum
 	 * @return: array
 	 */
-	public function getOpCenterNo($brandId)
+	public function getOpCenterNo($brand, $authOpCenter)
 	{
+		#有設定則使用設定值
+		if (! empty($authOpCenter))
+			return $authOpCenter;
+		
 		#分營運中心:台北/高雄
-		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value OR $brandId == Brand::FJVEGGIE->value)
+		if ($brand == Brand::BAFANG OR $brand == Brand::BUYGOOD OR $brand == Brand::FJVEGGIE)
 			return OpCenter::toValueArray();
 		
 		return [];
-	}
-	
-	public function getBrandNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		return $brand->shortCode();
 	}
 	
 	public function getFactoryNo($brandId)

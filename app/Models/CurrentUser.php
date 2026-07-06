@@ -100,7 +100,7 @@ class CurrentUser extends Fluent
 	 */
 	public function getOpCenterPermissions()
 	{
-		$opList = $this->getOpCenterPermissionsMap();
+		$opList = $this->getOpCenterPermissionMap();
 		
 		return array_keys($opList);
 	}

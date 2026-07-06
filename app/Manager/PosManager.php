@@ -36,25 +36,6 @@ class PosManager
 		return []; */
 	}
 	
-	public function getBrandNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		return $brand->shortCode();
-	}
-	
-	public function getFactoryNo($brandId)
-	{
-		#銷售不分工廠:台北/高雄
-		if ($brandId == Brand::BAFANG->value)
-			return [Factory::TP->value, Factory::KH->value];
-		else if ($brandId == Brand::BUYGOOD->value)
-			return [Factory::TS->value, Factory::RL->value];
-		else if ($brandId == Brand::FJVEGGIE->value)
-			return [Factory::TP->value, Factory::KH->value]; #同八方
-		else 
-			return [];
-	}
-	
 	/* 取全部店家(含閉店)
 	 * @params: enum
 	 * @params: array

@@ -114,7 +114,7 @@ class StoreService
 	private function _getActiveStoreList($params)
 	{
 		#以訂貨的為基準, 因八方點是用訂貨的store(取有權限的全部與查詢area無關)
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 		
 		#須濾除廠區學區店(依八方點的條件,雖有些店有PosId,但仍濾除)
 		$brandId = $params->brand->value;
