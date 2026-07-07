@@ -19,19 +19,19 @@ class PurchaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getFactoryList($brandId)
+	public function getFactoryList($opCenter, $factoryNos)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Factory as f')
 			->select('f.No as factoryNo', 'f.Name as factoryName')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'f.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereIn('f.No', $this->getFactoryNo($brandId))
+			->whereIn('f.No', $factoryNos)
 			->where('f.IsEnable', '=', 1)
 			->orderBy('f.Id')
 			->get()
@@ -227,18 +227,18 @@ class PurchaseRepository extends Repository
 			->fromRaw('Product as a WITH(NOLOCK)')
 			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
 			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'st.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.IsStop', '=', 0)
 			->where('a.Name', 'like', "%{$name}%")
 			->groupBy('a.Id')

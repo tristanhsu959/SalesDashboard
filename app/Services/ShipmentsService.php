@@ -161,6 +161,7 @@ class ShipmentsService
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
+				#先取Product Id
 				$this->_getProductId($params);
 				
 				if ($params->type == 'store')
@@ -225,8 +226,8 @@ class ShipmentsService
 	{
 		try
 		{
-			#取產品不分營運中心,不然可能會取不到
-			$opCenter = PurchaseManager::getOpCenterNo($params->brand, []);
+			#取資料都不分營運中心,不然可能會取不到
+			$opCenter = PurchaseManager::getOpCenterNo($params->brand);
 			
 			if ($params->by == 'keyword')
 				$params->productIds = PurchaseManager::getProductIdByName($params->brand, $opCenter, $params->keyword);

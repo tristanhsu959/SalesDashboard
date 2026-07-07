@@ -160,7 +160,7 @@ class StoreService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
-			$opCenter	= $params->opCenter;
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
 			$userAreaIds= $params->userAreaIds;
 			
 			#已包含蘿蔔訂單
@@ -187,7 +187,7 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->shortCodes;
-			$opCenter		= $params->opCenter;
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
 			$userAreaIds 	= $params->userAreaIds;
 			
 			#維持原狀,不判別opCenter, 最後由門店一起過濾
@@ -219,6 +219,8 @@ class StoreService
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
 		
+		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
+		
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
@@ -226,6 +228,9 @@ class StoreService
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
+		})->filter(function($item, $key) use($authStoreKeys){
+			
+			return in_array($item['storeKey'], $authStoreKeys);
 		})->toArray();
 	
 		$params->baseData = $baseData;

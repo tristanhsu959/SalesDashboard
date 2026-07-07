@@ -114,7 +114,7 @@ class FactoryService
 	{
 		try
 		{
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 			
 			$orderData = $this->_getDataFromDB($params);
 			
@@ -155,9 +155,11 @@ class FactoryService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
+			$userAreaIds= $params->userAreaIds;
 			
 			#已包含蘿蔔訂單
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -180,9 +182,10 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes	= $params->shortCodes;
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -212,13 +215,19 @@ class FactoryService
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
 		
+		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
+		
 		#處理包裝轉換
+		#因工廠沒門店, 要先濾除
 		$baseData = collect($baseData)->map(function($item, $key){
 			
 			$item['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
+		})->filter(function($item, $key) use($authStoreKeys){
+			
+			return in_array($item['storeKey'], $authStoreKeys);
 		})->toArray();
 			
 		$params->baseData = $baseData;
@@ -321,8 +330,9 @@ class FactoryService
 	{
 		try
 		{
-			$brandId = $params->brand->value;
-			$factory = PurchaseManager::getFactoryList($brandId);
+			#代授權OpCenter,若要取全部工廠則代入全部
+			$opCenter = PurchaseManager::getOpCenterNo($params->brand);
+			$factory = PurchaseManager::getFactoryList($params->brand, $opCenter);
 			
 			$params->factoryList = $factory;
 		}

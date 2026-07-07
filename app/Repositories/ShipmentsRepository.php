@@ -62,6 +62,7 @@ class ShipmentsRepository extends Repository
 			->table('Order as a')
 			->fromRaw('[Order] as a WITH(NOLOCK)')
 			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
+			#->join(DB::raw('OperationCenter as op WITH(NOLOCK)'), 'op.Id', '=', 'a.OperationCenterId')
 			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
 			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'a.StoreId')
 			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')

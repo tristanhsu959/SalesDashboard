@@ -21,31 +21,56 @@ class PurchaseManager
 	 * @params: enum
 	 * @return: array
 	 */
-	public function getOpCenterNo($brand, $authOpCenter)
+	public function getOpCenterNo($brand, $authOpCenter = [])
 	{
-		#有設定則使用設定值
-		if (! empty($authOpCenter))
+		#只有八方中彰投營運中心有影響,御廚都只有台北
+		#有設定則使用設定值,不然預設是全部營運中心
+		$defaultOpCenter = OpCenter::toValueArray();
+		
+		if ($brand == Brand::BAFANG && ! empty($authOpCenter))
 			return $authOpCenter;
 		
-		#分營運中心:台北/高雄
-		if ($brand == Brand::BAFANG OR $brand == Brand::BUYGOOD OR $brand == Brand::FJVEGGIE)
-			return OpCenter::toValueArray();
-		
-		return [];
+		return $defaultOpCenter;
 	}
 	
-	public function getFactoryNo($brandId)
+	/* Factory No
+	 * @params: enum
+	 * @return: array
+	 */
+	public function getFactoryNo($brand)
 	{
-		#台北/高雄
-		if ($brandId == Brand::BAFANG->value)
+		#台北/高雄(預留,可不用判別工廠)
+		if ($brand == Brand::BAFANG)
 			return [Factory::TP->value, Factory::KH->value];
-		else if ($brandId == Brand::BUYGOOD->value)
+		else if ($brand == Brand::BUYGOOD)
 			return [Factory::TS->value, Factory::RL->value];
-		else if ($brandId == Brand::FJVEGGIE->value)
+		else if ($brand == Brand::FJVEGGIE)
 			return [Factory::TP->value, Factory::KH->value]; #同八方
 		else 
 			return [];
 	}
+	
+	/******************** Factory ********************/
+	/* 取工廠清單
+	 * @params: int
+	 * @return: array
+	 */
+	public function getFactoryList($brand, $opCenter, $returnMapping = TRUE)
+	{
+		$factoryNos = $this->getFactoryNo($brand);
+		$factory = $this->_repository->getFactoryList($opCenter, $factoryNos);
+		
+		#To key-value
+		if ($returnMapping === TRUE)
+		{
+			$factory = collect($factory)->mapWithKeys(function($item, $key){
+				return [$item['factoryNo'] => $item['factoryName']];
+			})->toArray();
+		}
+			
+		return $factory;
+	}
+	
 	
 	/******************** Store ********************/
 	/* Get store data by brand
@@ -96,6 +121,7 @@ class PurchaseManager
 	{
 		try
 		{
+			#只有門店才過濾營運中心, 用門店濾資料
 			#取回data已排除開閉店
 			$storeList = $this->getStoreList($brand, $opCenter, $userAreaIds, $stDate, $endDate);
 			
@@ -306,33 +332,14 @@ class PurchaseManager
 		})->all();
 	}
 	
-	/******************** Factory ********************/
-	/* 取工廠清單
-	 * @params: int
-	 * @return: array
-	 */
-	public function getFactoryList($brandId, $returnMapping = TRUE)
-	{
-		$factory = $this->_repository->getFactoryList($brandId);
-		
-		#To key-value
-		if ($returnMapping === TRUE)
-		{
-			$factory = collect($factory)->mapWithKeys(function($item, $key){
-				return [$item['factoryNo'] => $item['factoryName']];
-			})->toArray();
-		}
-			
-		return $factory;
-	}
-	
 	/******************** Product ********************/
 	/* Get product id */
 	public function getProductIdByName($brand, $opCenter, $name)
 	{
 		$brandId = $brand->value;
 		
-		$result = $this->_repository->getProductIdByName($brandId, $name);
+		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
+		
 		return $result;
 	}
 	
