@@ -209,7 +209,7 @@ class StoreService
 			
 			#發票金額 = amount OR totalSales + totalExtra + totalDischarge
 			#實銷金額 = totalSales, 應該只有totalSales?
-			$amount 		= $item['amount'];
+			$amount 		= floatval($item['amount']);
 			$totalSales 	= floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']);
 			$temp['amount'] = empty($amount) ? $totalSales : $amount;
 			

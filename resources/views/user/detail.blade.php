@@ -133,7 +133,7 @@
 
 			<div class="page padding" id="page-purchase-area" :class="activeTab == 'purchase-area' ? 'active':''">
 				<fieldset class="area-permission field-red fieldset required surface-container-high">
-					<legend>指定營運中心(未指定則依品牌判別)</legend>
+					<legend>指定營運中心(主要影響中彰投區門店|未指定則依品牌判別)</legend>
 					<ul class="list border">
 						<template x-for="(opName, opId) in options.opCenters" :key="opId">
 						<li class="red-text">

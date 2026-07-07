@@ -75,7 +75,10 @@ class PurchaseManager
 			
 			$store = $this->_filterActiveStoreByDate($store, $stDate, $endDate);
 			
-			return $this->_formatStoreOutput($store);
+			#為避免訂貨沒有更新POS Id, 因門店已有濾權限, 全取即可
+			$ezorderPosIds = $this->_getPosIdFromEzOrder($brand);
+			
+			return $this->_formatStoreOutput($store, $ezorderPosIds);
 		}
 		catch(Exception $e)
 		{
@@ -84,7 +87,7 @@ class PurchaseManager
 		}
 	}
 	
-	/* Get store data by brand with LB stores(月初報表才會顯示特殊的蘿蔔店, 其它目前沒有顯示)
+	/* Get store data by brand with LB stores(月初報表或訂貨才會顯示特殊的蘿蔔店, 其它目前沒有顯示)
 	 * @params: int
 	 * @params: array
 	 * @return: array
@@ -96,7 +99,7 @@ class PurchaseManager
 			#取回data已排除開閉店
 			$storeList = $this->getStoreList($brand, $opCenter, $userAreaIds, $stDate, $endDate);
 			
-			#八方才有蘿蔔
+			#八方北廠才有蘿蔔
 			if ($brand == Brand::BAFANG)
 			{
 				$lbStoreList = $this->_repository->getLbStoreList($brand, $opCenter, $userAreaIds);
@@ -117,6 +120,7 @@ class PurchaseManager
 		}
 	}
 	
+	/********************** Filter Or Format Features **********************/
 	/* 開閉店排除依日期
 	 * @params: array
 	 * @return: array
@@ -156,6 +160,11 @@ class PurchaseManager
 	 */
 	public function filterFactoryStore($storeList)
 	{
+		#ezorder定義的名單,全濾不影響
+		#$excepts = config('web.ezorder.store');
+		#$excepts = collect($excepts)->forget('code')->flatten()->all();
+		
+		#只濾除沒POS的
 		return collect($storeList)->reject(function($item, $key) {
 			return empty($item['posId']) OR $item['posId'] == 'null';
 		})->toArray();
@@ -184,32 +193,48 @@ class PurchaseManager
 		})->toArray();
 	}
 	
+	/* Get pos id from ezorder
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getPosIdFromEzOrder($brand)
+	{
+		$ids = $this->_repository->getPosIdFromEzOrder($brand);
+		
+		$ids = collect($ids)->mapWithKeys(function($item, $key){
+			return [$item['storeKey'] => $item['posId']];
+		})->all();
+		
+		return array_filter($ids);
+	}
+	
 	/* Format store output
 	 * @params: array
 	 * @return: array
 	 */
-	private function _formatStoreOutput($storeList)
+	private function _formatStoreOutput($storeList, $ezorderPosIds = [])
 	{
 		#To key-value
-		$store = collect($storeList)->map(function($item, $key) {
+		#因訂貨功能不需要POS Id,但此階段不能先排除,因不知道是誰來呼叫
+		$store = collect($storeList)->map(function($item, $key) use($ezorderPosIds) {
 			
-			if (is_null($item['posId']) OR $item['posId'] == 'null')
+			#因有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
+			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
+			#有些No沒有TP/KH要注意
+			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
+			
+			$ezPosId = data_get($ezorderPosIds, $item['storeKey'], '');
+			
+			if (empty($item['posId']) OR $item['posId'] == 'null')
 				$item['posId'] =  '';
+			
+			$item['posId'] =  empty($ezPosId) ? $item['posId'] : $ezPosId;
 			
 			$area = AreaLib::toArea(intval($item['areaId']));
 			
 			$item['storeId']	= intval($item['storeId']);
 			$item['areaId']		= $area->value;
 			$item['areaName'] 	= $area->label();
-			#$item['area'] = Str::replace('-八方', '', $item['area']);
-			#$item['area'] = Str::replace('-御廚', '', $item['area']);
-			
-			#要改成有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
-			#有些No沒有TP/KH要注意
-								
-			#存下storeKey
-			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
 			
 			return $item;
 		})->sortBy('areaId')->values()->all();

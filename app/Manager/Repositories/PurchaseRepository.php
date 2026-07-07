@@ -143,7 +143,6 @@ class PurchaseRepository extends Repository
 		return $result;
 	}
 	
-	
 	/* 取有效門店清單(only id:計算用)
 	 * @params: enum
 	 * @params: array
@@ -185,6 +184,31 @@ class PurchaseRepository extends Repository
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))
 			->get()
 			->toArray(); 
+		
+		return $result;
+	}
+	
+	/* 取Product setting
+	 * @params: string
+	 * @params: string
+	 * @params: string
+	 * @return: array
+	 */
+	public function getPosIdFromEzOrder($brand)
+	{
+		$brandId 	= $brand->value;
+		$brandCode 	= config("web.ezorder.store.code.{$brandId}"); #八方點的code
+		
+		$db = $this->connectQuickOrder();
+		
+		$result = $db
+			->table(DB::raw('Stores as s WITH(NOLOCK)'))
+			->select('s.storeId as storeKey', 'posid as posId')
+			->where('s.brand', '=', $brandCode)
+			->where('s.posid', '!=', '')
+			->where('s.posid', '!=', 'null')
+			->get()
+			->toArray();
 		
 		return $result;
 	}

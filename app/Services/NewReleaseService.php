@@ -288,6 +288,7 @@ class NewReleaseService
 		
 		#改Mapping訂貨門店/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
 		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+		
 		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
 	}
 	
@@ -349,11 +350,11 @@ class NewReleaseService
 		
 		#要改成所有店家統計(含閉店)
 		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		$saleStoreList = collect($params->allShopList)->mapWithKeys(function($item, $key){
+		/* $saleStoreList = collect($params->allShopList)->mapWithKeys(function($item, $key){
 			return [$item['shopId'] => $item]; #posId
-		});
+		}); */
 		
-		$purchaseStoreList = collect($params->storeList)->mapWithKeys(function($item, $key){
+		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
 			return [$item['posId'] => $item]; #posId
 		});
 		
@@ -361,11 +362,12 @@ class NewReleaseService
 		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
 		
 		#gid在pos manager已處理成統一area id
-		$baseData = collect($saleData)->map(function($item, $key) use($saleStoreList, $purchaseStoreList) {
+		$baseData = collect($saleData)->map(function($item, $key) use($storeList) {
 			
-			$store	= data_get($purchaseStoreList, $item['shopId'], NULL); 
+			$store	= data_get($storeList, $item['shopId'], NULL); 
 			#$shop 	= data_get($saleStoreList, $item['shopId'], NULL);
 			
+			#對應不到表示無權限
 			if (is_null($store))
 				return '';
 			
@@ -391,7 +393,7 @@ class NewReleaseService
 		#補全未有銷售的門店資料(只需補active store)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
 		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
-		$filloutShops = PurchaseManager::filterStoreByPosId($purchaseStoreList, $saleShopIds);
+		$filloutShops = PurchaseManager::filterStoreByPosId($storeList, $saleShopIds);
 		
 		#重建
 		$filloutShops = collect($filloutShops)->map(function($item, $key) use($params){

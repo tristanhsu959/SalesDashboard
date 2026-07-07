@@ -119,7 +119,7 @@ class AreaService
 		
 		#須濾除廠區學區店(依八方點的條件,雖有些店有PosId,但仍濾除)
 		$brandId = $params->brand->value;
-		$excepts = array_merge(config("web.ezorder_pos.store.factoryStore.{$brandId}"), config("web.ezorder_pos.store.except.{$brandId}"));
+		$excepts = array_merge(config("web.ezorder.store.factoryStore.{$brandId}"), config("web.ezorder.store.except.{$brandId}"));
 		
 		$storeList = collect($storeList)->reject(function($item, $key) use($excepts){
 			return in_array($item['storeKey'], $excepts) OR empty($item['posId']);
