@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Facades\PurchaseManager;
 use App\Manager\Repositories\LocalLegacyRepository;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
 use Illuminate\Support\Str;
@@ -18,14 +19,37 @@ class LocalLegacyManager
 	{
 	}
 	
+	public function getFactoryNoByOpCenter($brand, $authOpCenter)
+	{
+		if ($brand == Brand::BAFANG)
+		{
+			$authFactoryNo = [];
+			
+			if (in_array(OpCenter::TAIPEI->value, $authOpCenter))
+				$authFactoryNo[] = Factory::TP->value;
+			
+			if (in_array(OpCenter::KAOHSIUNG->value, $authOpCenter))
+				$authFactoryNo[] = Factory::KH->value;
+			
+			return $authFactoryNo;
+		}
+		else if ($brand == Brand::BUYGOOD)
+			return [Factory::TS->value, Factory::RL->value];
+		else
+			return [];
+	}
+	
 	/* 取追加
 	 * @params: datetime
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getExtraDataByProduct($brand, $stDate, $endDate, $productCodes)
+	public function getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes)
 	{
-		$data = $this->_repository->getExtraData($brand->value, $stDate, $endDate, $productCodes);
+		#架構不同,用factoryNo判別
+		$factoryNos = $this->getFactoryNoByOpCenter($brand, $opCenter);
+		
+		$data = $this->_repository->getExtraData($brand, $factoryNos, $stDate, $endDate, $productCodes);
 		
 		return $data;
 	}

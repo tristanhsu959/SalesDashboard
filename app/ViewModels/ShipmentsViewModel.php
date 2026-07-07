@@ -53,7 +53,7 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
-		list($category, $products) = $this->_service->getEnableProducts($this->brand->value);
+		list($category, $products) = $this->_service->getEnableProducts($this->brand);
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
 	}

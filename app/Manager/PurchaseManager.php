@@ -36,7 +36,7 @@ class PurchaseManager
 	
 	public function getFactoryNo($brandId)
 	{
-		#銷售不分工廠:台北/高雄
+		#台北/高雄
 		if ($brandId == Brand::BAFANG->value)
 			return [Factory::TP->value, Factory::KH->value];
 		else if ($brandId == Brand::BUYGOOD->value)
@@ -89,23 +89,23 @@ class PurchaseManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreListWithLb($brand, $userAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreListWithLb($brand, $opCenter, $userAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		try
 		{
 			#取回data已排除開閉店
-			$storeList = $this->getStoreList($brand, $userAreaIds, $stDate, $endDate);
+			$storeList = $this->getStoreList($brand, $opCenter, $userAreaIds, $stDate, $endDate);
 			
 			#八方才有蘿蔔
 			if ($brand == Brand::BAFANG)
 			{
-				$lbStoreList = $this->_repository->getLbStoreList($brand, $userAreaIds);
+				$lbStoreList = $this->_repository->getLbStoreList($brand, $opCenter, $userAreaIds);
 				
 				$lbStoreList = $this->_filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
 				
 				$lbStoreList = $this->_formatStoreOutput($lbStoreList);
 				
-				return $this->_mergeStoreOutput($brand, $storeList, $lbStoreList);
+				return $this->_mergeStoreOutput($storeList, $lbStoreList);
 			}
 			else
 				return $storeList;
@@ -303,15 +303,19 @@ class PurchaseManager
 	
 	/******************** Product ********************/
 	/* Get product id */
-	public function getProductIdByName($brandId, $name)
+	public function getProductIdByName($brand, $opCenter, $name)
 	{
+		$brandId = $brand->value;
+		
 		$result = $this->_repository->getProductIdByName($brandId, $name);
 		return $result;
 	}
 	
-	public function getProductIdByShortCode($brandId, $shortCodes)
+	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
 	{
-		$result = $this->_repository->getProductIdByShortCode($brandId, $shortCodes);
+		$brandId = $brand->value;
+		
+		$result = $this->_repository->getProductIdByShortCode($brandId, $opCenter, $shortCodes);
 		
 		#format to int
 		$ids = collect($result)->map(function($item, $key){

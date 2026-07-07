@@ -26,8 +26,10 @@ class ShipmentsRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getEnableProducts($brandId)
+	public function getEnableProducts($brand)
 	{
+		$brandId = $brand->value;
+		
 		#取後台的enabled product
 		$db = $this->connectSalesDashboard();
 		$result = $db
@@ -47,7 +49,7 @@ class ShipmentsRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $userAreaIds)
+	public function getOrderDataByProductId($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
@@ -70,18 +72,18 @@ class ShipmentsRepository extends Repository
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.ErpNo as erpNo', 'p.OldNo as shortCode', 'p.Memo as memo')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized')

@@ -23,10 +23,10 @@ class LocalLegacyRepository  extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getExtraData($brandId, $stDate, $endDate, $productCodes)
+	public function getExtraData($brand, $factoryNos, $stDate, $endDate, $productCodes)
 	{
 		#只能用factory no來分brand
-		$factoryNos = $this->getFactoryNo($brandId);
+		$brandId = $brand->value;
 		
 		$db = $this->connectSalesDashboard();
 		#union all有點慢

@@ -79,12 +79,14 @@ class ShipmentsService
 	 * @params: int
 	 * @return: string
 	 */
-	public function getEnableProducts($brandId)
+	public function getEnableProducts($brand)
 	{
-		$enableProducts = $this->_repository->getEnableProducts($brandId);
+		$brandId = $brand->value;
+		
+		$enableProducts = $this->_repository->getEnableProducts($brand);
 		
 		#Build product mapping
-		$productMapping = PurchaseManager::getProductShortCodeMapping($brandId);
+		$productMapping = PurchaseManager::getProductShortCodeMapping($brand);
 		
 		#Build options
 		/*array:4 [
@@ -94,6 +96,7 @@ class ShipmentsService
 			"groupName" => "餡類"
 		]
 		*/
+		
 		$list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
 			
 			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
@@ -192,18 +195,20 @@ class ShipmentsService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getPurchaseAreaPermissions();
+		$userOpCenter	= $currentUser->getOpCenterPermissions();
+		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter);
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		
 		if ($searchBy == 'keyword')
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
 		else
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->type($searchType)->calc($searchCalc)->by($searchBy)
 				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)
@@ -217,10 +222,10 @@ class ShipmentsService
 		try
 		{
 			if ($params->by == 'keyword')
-				$params->productIds = PurchaseManager::getProductIdByName($params->brand->value,  $params->keyword);
+				$params->productIds = PurchaseManager::getProductIdByName($params->brand, $params->opCenter, $params->keyword);
 			else
-				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand->value, $params->shortCodes);
-		
+				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand, $params->opCenter, $params->shortCodes);
+			
 			if (empty($params->productIds))
 				throw new Exception('查無此產品');
 		}

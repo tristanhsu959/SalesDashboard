@@ -117,7 +117,7 @@ class StoreService
 	{
 		try
 		{
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 			
 			$orderData = $this->_getDataFromDB($params);
 			
@@ -160,9 +160,11 @@ class StoreService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
+			$opCenter	= $params->opCenter;
+			$userAreaIds= $params->userAreaIds;
 			
 			#已包含蘿蔔訂單
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -185,9 +187,11 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->shortCodes;
+			$opCenter		= $params->opCenter;
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			#維持原狀,不判別opCenter, 最後由門店一起過濾
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();

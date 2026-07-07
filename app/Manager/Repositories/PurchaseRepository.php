@@ -101,7 +101,7 @@ class PurchaseRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getLbStoreList($brand, $userAreaIds)
+	public function getLbStoreList($brand, $opCenter, $userAreaIds)
 	{
 		$brandId = $brand->value;
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
@@ -114,11 +114,11 @@ class PurchaseRepository extends Repository
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
@@ -126,12 +126,12 @@ class PurchaseRepository extends Repository
 					->whereColumn('bd.Id', 's.BrandId')
 					->where('bd.No',  Brand::LUOBO->shortCode());
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			#->whereNull('s.CloseDate')
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
@@ -195,7 +195,7 @@ class PurchaseRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getProductIdByName($brandId, $name)
+	public function getProductIdByName($brandId, $opCenter, $name)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -230,7 +230,7 @@ class PurchaseRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getProductIdByShortCode($brandId, $shortCodes)
+	public function getProductIdByShortCode($brandId, $opCenter, $shortCodes)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -238,21 +238,21 @@ class PurchaseRepository extends Repository
 			->fromRaw('Product as a WITH(NOLOCK)')
 			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
 			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+					->whereIn('ft.No',  ['TW_TP', 'TW_KH']);
+			}) */
 			->where('a.IsStop', '=', 0)
 			->whereIn('a.OldNo', $shortCodes)
-			->groupBy('a.Id')
+			->groupBy('a.Id')#->ddRawSql();
 			->get()
 			->pluck('Id')
 			->toArray();
