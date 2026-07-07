@@ -55,15 +55,15 @@ class AreaService
 	 */
 	private function _generateStatistics($params)
 	{
-		$statistics['brandId']		= $params->brand->value;
-		$statistics['brandCode']	= $params->brand->code();
-		$statistics['type']			= $params->type;
-		$statistics['by']			= $params->by;
-		$statistics['startDate'] 	= $params->stDate;
-		$statistics['endDate']		= $params->endDate;
+		$statistics['brandId']			= $params->brand->value;
+		$statistics['brandCode']		= $params->brand->code();
+		$statistics['type']				= $params->type;
+		$statistics['by']				= $params->by;
+		$statistics['startDate'] 		= $params->stDate;
+		$statistics['endDate']			= $params->endDate;
 		$statistics['area']['header']	= $params->header;
-		$statistics['area']['data']	= $params->data;
-		$statistics['hasResult']	= FALSE;
+		$statistics['area']['data']		= $params->data;
+		$statistics['hasResult']		= FALSE;
 		
 		#無值不cache
 		if (! empty($statistics['area']['data']))
@@ -263,6 +263,7 @@ class AreaService
 			return [$item['posId'] => $item['storeKey']];
 		});
 		
+		#若沒有查POS營收, 都要取到0
 		$baseData = collect($params->posData)->map(function($item, $key) use($storeList){
 			$temp['storeKey'] 	= data_get($storeList, $item['shopId'], NULL);
 			
@@ -273,8 +274,8 @@ class AreaService
 			#二取一因可能有空值
 			#發票金額 = amount OR totalSales + totalDischarge
 			#實銷金額 = totalSales + totalExtra + totalDischarge
-			$amount 	= floatval(data_get($item, 'amount', 0));
-			$totalSales = floatval(data_get($item, 'totalSales', 0) + data_get($item, 'totalDischarge', 0));
+			$amount 		= floatval(data_get($item, 'amount', 0));
+			$totalSales 	= floatval(data_get($item, 'totalSales', 0)) + floatval(data_get($item, 'totalExtra', 0)) + floatval(data_get($item, 'totalDischarge', 0));
 			$temp['amount'] 		= empty($amount) ? $totalSales : $amount;
 			$temp['orderCount']		= data_get($item, 'orderCount', 0);
 			$temp['businessDays']	= data_get($item, 'businessDays', 0);

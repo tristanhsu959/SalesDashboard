@@ -275,8 +275,8 @@ class StoreService
 			#二取一因可能有空值
 			#發票金額 = amount OR totalSales + totalDischarge
 			#實銷金額 = totalSales + totalExtra + totalDischarge
-			$amount 	= floatval(data_get($item, 'amount', 0));
-			$totalSales = floatval(data_get($item, 'totalSales', 0) + data_get($item, 'totalDischarge', 0));
+			$amount 		= floatval(data_get($item, 'amount', 0));
+			$totalSales 	= floatval(data_get($item, 'totalSales', 0)) + floatval(data_get($item, 'totalExtra', 0)) + floatval(data_get($item, 'totalDischarge', 0));
 			$temp['amount'] 		= empty($amount) ? $totalSales : $amount;
 			$temp['orderCount']		= data_get($item, 'orderCount', 0);
 			$temp['businessDays']	= data_get($item, 'businessDays', 0);
