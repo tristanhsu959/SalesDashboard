@@ -4,7 +4,9 @@ document.addEventListener('alpine:init', () => {
 	//統計單位顯示
 	Alpine.store('sales', {
 		showAmount: Alpine.$persist(false),
-        
+        showFilter: Alpine.$persist(false),
+		filter: '',
+		
 		toggle() {
            this.showAmount = ! this.showAmount;
         }
@@ -16,7 +18,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			
+			Alpine.store('sales').showFilter = false;
 		},
 		
 		search() {
@@ -60,6 +62,29 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.productIds = [];
 			this.errors.clear();
 		},
+    }));
+	
+	Alpine.data('statisticsStore', (store) => ({
+		store: {...store},
+		
+		init() { 
+		},
+		
+		get filterStore() {
+			const searchKeyword = Alpine.store('sales').filter.toLowerCase();
+			
+			const list = Object.values(this.store.data);
+			
+			const result = list.filter(store => 
+				String(store.shopId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
+				String(store.shopName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
+	
     }));
 });
 

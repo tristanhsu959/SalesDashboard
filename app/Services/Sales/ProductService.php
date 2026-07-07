@@ -71,6 +71,7 @@ class ProductService
 		$statistics['productList']	= $params->productList;
 		$statistics['exportToken']	= '';
 		$statistics['hasResult']	= FALSE;
+		$statistics['hasFilter']	= TRUE;
 		
 		#無值不cache
 		if (! empty($statistics['store']['data']))
@@ -264,6 +265,7 @@ class ProductService
 		
 		$saleData = PosManager::filterExceptStore($params->brand, $params->saleData);
 		$productList = $params->productList; 
+		
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
 			return [$item['posId'] => $item];
 		})->all();

@@ -1,5 +1,5 @@
 	<!-- 門店 -->
-	<div x-data="{store:@js($viewModel->statisticsData('store'))}" class="page padding" id="tab-shop">
+	<div x-data="statisticsStore(@js($viewModel->statisticsData('store')))" class="page padding" id="tab-shop">
 		<section class="statistics-store scrollbar" :class="response.brandCode">
 			<table class="stripes">
 				<thead>
@@ -14,7 +14,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<template x-for="(storeData, idx) in store.data" :key="idx">
+					<template x-for="(storeData, idx) in filterStore" :key="idx">
 					<tr>
 						<td x-text="storeData.areaName"></td>
 						<td x-text="storeData.shopId"></td>

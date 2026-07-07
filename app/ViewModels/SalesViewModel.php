@@ -102,6 +102,7 @@ class SalesViewModel extends Fluent
 	{
 		$response = $this->responseBaseData();
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
+		$response['hasFilter'] = data_get($this->statistics, 'hasFilter', FALSE);
 		
 		return $response;
 	}

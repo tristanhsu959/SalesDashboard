@@ -85,6 +85,16 @@
 					<span>下載</span>
 				</a>
 			</template>
+			<template x-if="response.hasResult && response.hasFilter">
+				<nav  x-show="$store.sales.showFilter" class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.sales.filter">
+						<label>篩選</label>
+					</div>
+					<button class="right-round" @click="$store.sales.filter = ''"><i>backspace</i></button>
+				</nav>
+			</template>
 			<template x-if="response.hasResult">
 				<label class="switch icon">
 					<input type="checkbox" x-model="$store.sales.showAmount">
@@ -123,8 +133,8 @@
 			
 			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
-					<a class="active" data-ui="#tab-area">區域彙總</a>
-					<a data-ui="#tab-shop">店別明細</a>
+					<a class="active" data-ui="#tab-area" @click="$store.sales.showFilter = 0">區域彙總</a>
+					<a data-ui="#tab-shop" @click="$store.sales.showFilter = 1">店別明細</a>
 				</div>
 			
 				@include('sales.area')
