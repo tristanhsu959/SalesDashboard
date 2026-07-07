@@ -361,6 +361,7 @@ class StoreService
 			return;
 		}
 		
+		#這裏再處理無權限門店
 		$modeCalc = $params->calc;
 		
 		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) use($modeCalc) {

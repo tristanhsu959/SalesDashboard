@@ -12,7 +12,8 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			
+			if (this.searchData.by == 'store')
+				Alpine.store('ezorderPos').showFilter = true;
 		},
 		
 		search() {

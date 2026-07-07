@@ -85,7 +85,7 @@ class ShipmentsService
 		
 		$enableProducts = $this->_repository->getEnableProducts($brand);
 		
-		#Build product mapping
+		#Get product mapping
 		$productMapping = PurchaseManager::getProductShortCodeMapping($brand);
 		
 		#Build options
@@ -107,7 +107,7 @@ class ShipmentsService
 			unset($item['brandId']);
 			return $item;
 		})->toArray();
-			
+		
 		#要分成category & product對應
 		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
 			$temp['catId'] = $items->pluck('groupId')->unique()->first();
@@ -217,14 +217,21 @@ class ShipmentsService
 		return $params;
 	}
 	
+	/* 以short code取得product id
+	 * @params: array
+	 * @return: array
+	 */
 	private function _getProductId($params)
 	{
 		try
 		{
+			#取產品不分營運中心,不然可能會取不到
+			$opCenter = PurchaseManager::getOpCenterNo($params->brand, []);
+			
 			if ($params->by == 'keyword')
-				$params->productIds = PurchaseManager::getProductIdByName($params->brand, $params->opCenter, $params->keyword);
+				$params->productIds = PurchaseManager::getProductIdByName($params->brand, $opCenter, $params->keyword);
 			else
-				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand, $params->opCenter, $params->shortCodes);
+				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand, $opCenter, $params->shortCodes);
 			
 			if (empty($params->productIds))
 				throw new Exception('查無此產品');
