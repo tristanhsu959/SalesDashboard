@@ -135,6 +135,9 @@ class EzOrderPosViewModel extends Fluent
 		$response = $this->responseBaseData();
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
+		$by = data_get($this->statistics, 'by', '');
+		$response['hasFilter'] = ($by == 'store');
+		
 		return $response;
 	}
 }

@@ -71,7 +71,6 @@ class ProductService
 		$statistics['productList']	= $params->productList;
 		$statistics['exportToken']	= '';
 		$statistics['hasResult']	= FALSE;
-		$statistics['hasFilter']	= TRUE;
 		
 		#無值不cache
 		if (! empty($statistics['store']['data']))

@@ -1,6 +1,11 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
+	Alpine.store('ezorderPos', {
+		showFilter: Alpine.$persist(false),
+		filter: '',
+	});
+	
 	Alpine.data('search', (searchData) => ({
 		searchData: {...searchData.search},
 		options: {...searchData.options},
@@ -47,13 +52,27 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
-	Alpine.data('statistics', (statistics) => ({
+	Alpine.data('statisticsData', (statistics) => ({
 		header: {...statistics.header},
 		data: {...statistics.data},
 		
 		init() {
+			
 		},
 		
+		get filterStore() {
+			const searchKeyword = Alpine.store('ezorderPos').filter.toLowerCase();
+			
+			const list = Object.values(this.data);
+			
+			const result = list.filter(store => 
+				String(store[0] || '').toLowerCase().includes(searchKeyword) ||
+				String(store[1] || '').toLowerCase().includes(searchKeyword) ||
+				String(store[2] || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
 	}));
 });
 

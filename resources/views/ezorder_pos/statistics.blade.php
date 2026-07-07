@@ -85,6 +85,17 @@
 					<span>下載</span>
 				</a>
 			</template>
+			
+			<template x-if="response.hasResult && response.hasFilter">
+				<nav  x-show="$store.ezorderPos.showFilter" class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.ezorderPos.filter">
+						<label>篩選</label>
+					</div>
+					<button class="right-round" @click="$store.ezorderPos.filter = ''"><i>backspace</i></button>
+				</nav>
+			</template>
 		</nav>
 	</header>
 	
