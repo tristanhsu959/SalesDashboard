@@ -86,11 +86,12 @@ class StoreService
 		$this->_statistics['sheets']		= $params->sheets;
 		$this->_statistics['header']		= $params->header;
 		$this->_statistics['data']			= $params->data;
+		$this->_statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
 		if (! empty(Arr::flatten($this->_statistics['data'])))
 		{
-			
+			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportName']	= '餡量BY店';
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
@@ -111,7 +112,7 @@ class StoreService
 			
 			#2.Build params
 			$params->productGroup	= config('web.purchase.monthly_filling.totalCount.group');
-			$params->storeList 		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$params->storeList 		= PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -138,10 +139,11 @@ class StoreService
 	{
 		try
 		{
-			$brandId 	= $params->brand->value;
+			$brand	 	= $params->brand;
 			$codes		= array_map('strval', array_keys(config('web.purchase.monthly_filling.totalCount.code')));
+			$opCenter 	= PurchaseManager::getOpCenterNo($brand);
 			
-			$ids = PurchaseManager::getProductIdByShortCode($brandId, $codes);
+			$ids = PurchaseManager::getProductIdByShortCode($brand, $opCenter, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
@@ -179,9 +181,11 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
 			$userAreaIds	= $params->userAreaIds;
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand); #all op center
 			$productIds 	= $params->productIds;
 			
-			$orderData = $this->_repository->getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds);
+			#取資料先不分OpCenter
+			$orderData = $this->_repository->getOrderDataByStore($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -204,9 +208,10 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -234,6 +239,8 @@ class StoreService
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
 		
+		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
+		
 		#處理包裝轉換
 		#因追加在舊系統,故要改成storeKey做為主要關聯
 		$baseData = collect($baseData)->map(function($item, $key){
@@ -244,8 +251,11 @@ class StoreService
 			$temp['qty'] 			= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $temp;
-		})->toArray();
+		})->filter(function($item, $key) use($authStoreKeys){
 			
+			return in_array($item['storeKey'], $authStoreKeys);
+		})->toArray();
+		
 		$params->baseData = $baseData;
 	}
 	

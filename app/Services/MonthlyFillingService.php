@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Services\MonthlyFilling\FactoryService;
 use App\Services\MonthlyFilling\StoreService;
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
 use App\Enums\Brand;
@@ -115,8 +116,10 @@ class MonthlyFillingService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getPurchaseAreaPermissions();
+		$userOpCenter	= $currentUser->getOpCenterPermissions();
+		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter);
 		
 		#轉換日期
 		if ($searchRange == 'year')
@@ -132,9 +135,9 @@ class MonthlyFillingService
 		}
 			
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userOpCenter, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->type($searchType)->range($searchRange)
 				->cacheKey($cacheKey);

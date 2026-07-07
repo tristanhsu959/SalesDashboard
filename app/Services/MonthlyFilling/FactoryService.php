@@ -87,11 +87,12 @@ class FactoryService
 		$this->_statistics['endDate']		= $params->endDate;
 		$this->_statistics['header']		= $params->header;
 		$this->_statistics['data']			= $params->data;
+		$this->_statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
 		if (! empty(Arr::flatten($this->_statistics['data'])))
 		{
-			
+			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportName']	= '各餡月均量';
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
@@ -111,11 +112,11 @@ class FactoryService
 			$this->_getProductIdByCode($params);
 			
 			#2.Build params
-			$params->productList 	= config('web.purchase.monthly_filling.monthly');
-			$params->factoryList 	= $this->_getFactoryList($params);
+			$params->productList = config('web.purchase.monthly_filling.monthly');
+			$this->_getFactoryList($params);
 			
 			#因追加的關係才抓storeList
-			$params->storeList		= PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -142,14 +143,15 @@ class FactoryService
 	{
 		try
 		{
-			$brandId= $params->brand->value;
-			$codes	= config('web.purchase.monthly_filling.monthly');
+			$brand		= $params->brand;
+			$codes		= config('web.purchase.monthly_filling.monthly');
+			$opCenter 	= PurchaseManager::getOpCenterNo($brand);
 			
 			#非0開頭會變成int(sql會convert error)
 			$codes 	= collect($codes)->pluck('code')->all();
 			
 			#取norder DB對應的product id
-			$ids = PurchaseManager::getProductIdByShortCode($brandId, $codes);
+			$ids = PurchaseManager::getProductIdByShortCode($brand, $opCenter, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
@@ -175,14 +177,11 @@ class FactoryService
 	{
 		try
 		{
-			$brandId = $params->brand->value;
-			$factory = PurchaseManager::getFactoryList($brandId);
+			#代授權OpCenter,若要取全部工廠則代入全部
+			$opCenter 	= PurchaseManager::getOpCenterNo($params->brand);
+			$factory 	= PurchaseManager::getFactoryList($params->brand, $opCenter);
 			
-			/* $factory = collect($factory)->mapWithKeys(function($item, $key){
-				return [$item['factoryNo'] => $item['factoryName']];
-			})->toArray(); */
-			
-			return $factory;
+			$params->factoryList = $factory;
 		}
 		catch(Exception $e)
 		{
@@ -210,10 +209,12 @@ class FactoryService
 			$brand 		= $params->brand;
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			#$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
+			$opCenter	= $params->opCenter; #因DB直接Group,故直接帶設定
 			$userAreaIds= $params->userAreaIds;
 			$productIds = $params->productIds;
 			
-			$orderData = $this->_repository->getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $userAreaIds);
+			$orderData = $this->_repository->getOrderDataByFactory($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -236,9 +237,10 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -276,7 +278,7 @@ class FactoryService
 			
 			return $temp;
 		})->toArray();
-			
+		
 		$params->baseData = $baseData;
 	}
 	/* ====================== 主流程 End ====================== */
@@ -394,9 +396,9 @@ class FactoryService
 		if (empty($parsingData))
 			return [];
 		
-		$productList= collect($params->productList)->pluck('name', 'code')->toArray();
-		$factoryList= $params->factoryList;
-		$monthList	= $params->monthList;
+		$productList	= collect($params->productList)->pluck('name', 'code')->toArray();
+		$factoryList	= $params->factoryList;
+		$monthList		= $params->monthList;
 		
 		$params->header = array_merge(['出貨工廠', '年月'], array_values($productList));
 		
