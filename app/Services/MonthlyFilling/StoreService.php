@@ -141,7 +141,7 @@ class StoreService
 		{
 			$brand	 	= $params->brand;
 			$codes		= array_map('strval', array_keys(config('web.purchase.monthly_filling.totalCount.code')));
-			$opCenter 	= PurchaseManager::getOpCenterNo($brand);
+			$opCenter 	= PurchaseManager::getOpCenterNo($brand, $params->opCenter);
 			
 			$ids = PurchaseManager::getProductIdByShortCode($brand, $opCenter, $codes);
 			
@@ -181,7 +181,7 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->format('Y-m-d 23:59:59');
 			$userAreaIds	= $params->userAreaIds;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand); #all op center
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); #all op center
 			$productIds 	= $params->productIds;
 			
 			#取資料先不分OpCenter
@@ -208,7 +208,7 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);

@@ -145,7 +145,7 @@ class FactoryService
 		{
 			$brand		= $params->brand;
 			$codes		= config('web.purchase.monthly_filling.monthly');
-			$opCenter 	= PurchaseManager::getOpCenterNo($brand);
+			$opCenter 	= PurchaseManager::getOpCenterNo($brand, $params->opCenter);
 			
 			#非0開頭會變成int(sql會convert error)
 			$codes 	= collect($codes)->pluck('code')->all();
@@ -209,8 +209,7 @@ class FactoryService
 			$brand 		= $params->brand;
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			#$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
-			$opCenter	= $params->opCenter; #因DB直接Group,故直接帶設定
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); 
 			$userAreaIds= $params->userAreaIds;
 			$productIds = $params->productIds;
 			
@@ -237,7 +236,7 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->productCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);

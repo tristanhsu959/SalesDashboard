@@ -160,7 +160,7 @@ class StoreService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
-			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); #all op center
 			$userAreaIds= $params->userAreaIds;
 			
 			#已包含蘿蔔訂單
@@ -187,7 +187,7 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes 	= $params->shortCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
 			$userAreaIds 	= $params->userAreaIds;
 			
 			#維持原狀,不判別opCenter, 最後由門店一起過濾

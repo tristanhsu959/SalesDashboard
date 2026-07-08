@@ -155,7 +155,7 @@ class FactoryService
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productIds	= $params->productIds;
-			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #all op center
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); #all op center
 			$userAreaIds= $params->userAreaIds;
 			
 			#已包含蘿蔔訂單
@@ -182,7 +182,7 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes	= $params->shortCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand);
+			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
@@ -330,7 +330,7 @@ class FactoryService
 	{
 		try
 		{
-			#代授權OpCenter,若要取全部工廠則代入全部
+			#輸出用,故取全部工廠
 			$opCenter = PurchaseManager::getOpCenterNo($params->brand);
 			$factory = PurchaseManager::getFactoryList($params->brand, $opCenter);
 			

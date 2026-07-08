@@ -227,7 +227,8 @@ class ShipmentsService
 		try
 		{
 			#取資料都不分營運中心,不然可能會取不到
-			$opCenter = PurchaseManager::getOpCenterNo($params->brand);
+			#$opCenter = PurchaseManager::getOpCenterNo($params->brand);
+			$opCenter = PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
 			
 			if ($params->by == 'keyword')
 				$params->productIds = PurchaseManager::getProductIdByName($params->brand, $opCenter, $params->keyword);
