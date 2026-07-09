@@ -58,7 +58,7 @@ class PurchaseReportViewModel extends Fluent
 		
 		#區域選項須以使用者權限為主
 		$currentUser = AppManager::getCurrentUser();
-		$allowAreas = $currentUser->getAreaPermissionsMap();
+		$allowAreas = $currentUser->getPurchaseAreaPermissionMap();
 		
 		$this->set('options.mode.areaList', $allowAreas);
 	}

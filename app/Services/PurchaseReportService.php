@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\PurchaseReport\PerformanceService;
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
 use App\Enums\Brand;
@@ -114,15 +115,17 @@ class PurchaseReportService
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		$currentUser 	= AppManager::getCurrentUser();
+		$userAreaIds 	= $currentUser->getPurchaseAreaPermissions();
+		$userOpCenter	= $currentUser->getOpCenterPermissions();
+		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter);
 		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes]);
 		
-		#處理areaIds
+		#處理查詢areaIds
 		if (empty($searchAreaIds))
-			$searchAreaIds = $userAreaIds; #未選取全部
+			$searchAreaIds = $userAreaIds; #未選取則取全部
 		else
 		{
 			$searchAreaIds = collect($searchAreaIds)->filter(function($value, $key) use($userAreaIds){
@@ -130,9 +133,9 @@ class PurchaseReportService
 			})->toArray();
 		}
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
-				->areaIds($searchAreaIds)->productCodes($searchProductCodes)
+				->searchAreaIds($searchAreaIds)->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		
 		return $params;
