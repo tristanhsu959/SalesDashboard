@@ -80,7 +80,7 @@ class MerchantRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getDayoffList($brand, $opCenter, $stDate, $endDate, $userAreaIds)
+	public function getDayoffList($brand, $opCenter, $userAreaIds, $stDate, $endDate)
 	{
 		$brandId = $brand->value;
 		$brandNo = $brand->shortCode();
@@ -96,14 +96,14 @@ class MerchantRepository extends Repository
 			->table('Store as s')
 			->fromRaw('Store as s WITH(NOLOCK)')
 			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
-			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 's.Id')
-			->leftJoin(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
-			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			#->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 's.Id')
+			#->leftJoin(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
+			->select('s.No as storeNo')
 			->addSelect(['money' => $db->table('Order as o')
 				->select('o.Money')
 				->whereColumn('o.StoreId', 's.Id')
 				->where('o.ExpectedDate', '>=', $stDate)
-				->where('o.ExpectedDate', '<=', $endDate)
+				->where('o.ExpectedDate', '<', $endDate)
 				#->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
@@ -113,12 +113,19 @@ class MerchantRepository extends Repository
 					->whereColumn('oc.Id', 's.OperationCenterId')
 					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandNo) {
+			->whereExists(function ($query) use($brand) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.No',  PurchaseManager::getBrandShortCode($brand));
+			})
+			#有判別brand不會抓到蘿蔔店
+			/* ->whereExists(function ($query) use($brandNo) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
 					->where('bd.No',  $brandNo);
-			})
+			}) */
 			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')

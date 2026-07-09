@@ -79,6 +79,12 @@ class ShipmentsRepository extends Repository
 					->whereColumn('oc.Id', 'a.OperationCenterId')
 					->whereIn('oc.No', $opCenter);
 			})
+			->whereExists(function ($query) use($brand) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.No',  PurchaseManager::getBrandShortCode($brand));
+			})
 			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')

@@ -46,7 +46,7 @@ class DayoffService
 			$this->_userAreaIds = $currentUser->roleArea; */
 			
 			#執行統計
-			$this->_getDataFromDB($params);
+			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
 			
@@ -87,6 +87,28 @@ class DayoffService
 	}
 	/* ====================== 主流程 End ====================== */
 	
+	/* 取統計相關參數
+	 * @params: enums
+	 * @params: integer
+	 * @return: array
+	 */
+	private function _prepareData($params)
+	{
+		try
+		{
+			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+			
+			$this->_getDataFromDB($params);
+			
+			$this->_buildBaseData($params);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
 	/* Get order data
 	 * @params: 
 	 * @return: array
@@ -106,20 +128,48 @@ class DayoffService
 		try
 		{
 			$brand 		= $params->brand;
-			$opCenter	= $params->opCenter;
 			$stDate		= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
 			$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
+			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #全部opCenter
 			$userAreaIds= $params->userAreaIds;
 			
-			$result = $this->_repository->getDayoffList($brand, $opCenter, $stDate, $endDate, $userAreaIds);
+			$result = $this->_repository->getDayoffList($brand, $opCenter, $userAreaIds, $stDate, $endDate);
 			
-			$params->storeList = $result;
+			$params->orderData = $result;
 		}
 		catch(Exception $e)
 		{
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取店休資料失敗');
 		}
+	}
+	
+	/* 基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _buildBaseData($params)
+	{
+		#先整合八方及蘿蔔資料
+		$orderData = collect($params->orderData)->map(function($item, $key){
+			
+			$temp['storeKey'] 	= PurchaseManager::buildStoreKey($item['storeNo']);
+			$temp['amount']		= intval($item['money']);
+			
+			return $temp;
+		})->groupBy('storeKey')->map(function($items, $key){
+			return $items->pluck('amount')->sum();
+		});
+		
+		#Merge to store
+		
+		$baseData = collect($params->storeList)->map(function($item, $key) use($orderData){
+			
+			$item['noOrder'] = empty(data_get($orderData, $item['storeKey'], 0));
+			return $item;
+		})->all();
+		
+		$params->baseData = $baseData;
 	}
 	
 	/* ========================== 統計 ========================== */
@@ -154,24 +204,17 @@ class DayoffService
 	{
 		try
 		{
-			$storeData = $params->storeList;
+			$storeData = $params->baseData;
 			
 			#Statistics dayoff
-			$dayoffData = collect($storeData)->map(function($item, $key) {
-				$area = AreaLib::toArea(intval($item['areaId']));
-				$item['areaId']		= $area->value;
-				$item['areaName']	= $area->label();
+			$dayoffData = collect($storeData)->groupBy('areaId')->map(function($items, $key) {
 				
-				return $item;
-			})->sortBy('areaId')->groupBy('areaId')->values()->map(function($items, $key) {
 				$temp['areaId']		= $items->pluck('areaId')->first();
 				$temp['areaName']	= $items->pluck('areaName')->first();
-				$temp['total']		= $items->count();
+				$temp['total']		= $items->count(); #門店數
+				$temp['dayoffCount']= $items->pluck('noOrder')->sum();
 				
-				$temp['dayoffCount']= $items->filter(function($item, $key){
-					return intval($item['money']) <= 0;
-				})->count();
-				
+				#佔不提供佔比(上頭指示)
 				#$temp['percent']	= round(intval($temp['dayoffCount']) / intval($temp['total']) * 100, 2);
 				
 				return $temp;
@@ -204,27 +247,20 @@ class DayoffService
 	{
 		try
 		{
-			$storeData = $params->storeList;
+			$storeData = $params->baseData;
 			
 			$dayoffData = collect($storeData)->filter(function($item, $key){
-					return intval($item['money']) <= 0;
-			})->map(function($item, $key){
-				$item['posId'] 	= (is_null($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
-				
-				$area = AreaLib::toArea(intval($item['areaId']));
-				$item['areaId']		= $area->value;
-				$item['areaName']	= $area->label();
-				
-				return $item;
-			})->sortBy('areaId')->values()->map(function($item, $key) {
+				return $item['noOrder'];
+			})->map(function($item, $key) {
+				#只取需要欄位
 				$temp['areaId']		= $item['areaId'];
 				$temp['areaName'] 	= $item['areaName'];
 				$temp['posId'] 		= $item['posId'];
-				$temp['storeKey']	= PurchaseManager::buildStoreKey($item['storeNo']);
+				$temp['storeKey']	= $item['storeKey'];
 				$temp['storeName']	= $item['storeName'];
 				
 				return $temp;
-			})->toArray(); 
+			})->values()->all(); 
 			
 			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱'];
 			$info['store']	= $dayoffData;

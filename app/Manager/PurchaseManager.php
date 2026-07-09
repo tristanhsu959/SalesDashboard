@@ -33,6 +33,19 @@ class PurchaseManager
 		return $defaultOpCenter;
 	}
 	
+	/* 取對應nOrder的設定值
+	 * @params: enum
+	 * @return: array
+	 */
+	public function getBrandShortCode($brand)
+	{
+		#只有八方蘿蔔
+		if ($brand == Brand::BAFANG)
+			return [Brand::BAFANG->shortCode(), Brand::LUOBO->shortCode()];
+		else
+			return [$brand->shortCode()];
+	}
+	
 	/* Factory No
 	 * @params: enum
 	 * @return: array

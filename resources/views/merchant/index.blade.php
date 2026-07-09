@@ -25,8 +25,8 @@
 			</template>
 		</nav>
 		
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow" :disabled="searchData.type == 'info'">
+		<div x-show="searchData.type == 'dayOff'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
+			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow" :disabled="searchData.type != 'dayOff'">
 			<label>查詢日期</label>
 		</div>
 		

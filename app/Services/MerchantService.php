@@ -136,9 +136,9 @@ class MerchantService
 		
 		#此功能暫不分區域權限
 		$currentUser	= AppManager::getCurrentUser();
-		$userAreaIds	= Area::options(); #$currentUser->getPurchaseAreaPermissions();
-		$userOpCenter	= [];#$currentUser->getOpCenterPermissions();
-		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter); 
+		$userAreaIds	= Area::getAll(); #$currentUser->getPurchaseAreaPermissions();
+		$userOpCenter	= $currentUser->getOpCenterPermissions();
+		$opCenter		= PurchaseManager::getOpCenterNo($brand); 
 		$functions		= $this->parsingFunction($brand);
 		
 		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 

@@ -71,13 +71,13 @@
 		</div>
 		
 		<template x-for="(products, catId) in options.products" :key="catId">
-			<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="light-blue-border fieldset">
+			<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="light-blue-border fieldset product-list">
 				<legend><i class="small red-text">asterisk</i><span class="light-blue-text">請勾選產品</span></legend>
 				<template x-for="(item, idx) in products" :key="idx">
 					<div class="row">
 						<label class="checkbox large s3 check-amber">
 							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode">
-							<span x-text="item.productName"></span>
+							<span x-text="`${item.shortCode} ${item.productName}`"></span>
 						</label>
 					</div>
 				</template>
