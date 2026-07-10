@@ -68,4 +68,9 @@ form {
 			}
 		}
 	}
+	
+	dialog.store-detail {
+		position: absolute;
+		bottom: 0;
+	}
 }

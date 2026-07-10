@@ -54,7 +54,7 @@
 			
 			<form x-data="productList(@js($viewModel->responseList()))" action="" method="post" x-ref="productListForm">
 			@csrf
-			<div class="list-wrapper">
+			<div x-show="response.hasResult" class="list-wrapper">
 				<div class="tabs">
 					<template x-for="(brand, brandId) in brands" :key="brandId">
 						<a :data-ui="`#page-${brandId}`" :class="activeTab == brandId ? 'active':''" @click="$store.productSetting.tabIndex = brandId" class="tab-pink">
@@ -88,8 +88,8 @@
 					</div>
 					</template>
 				</div>
-			</section>
-		</form>
+			</form>
+		</section>
 	</template>
 </div>
 <!-- Content -->

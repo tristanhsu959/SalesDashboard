@@ -55,6 +55,12 @@ class SalesViewModel extends Fluent
 		
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
+		
+		$type = [
+			'total'	=> '總量', 
+			#'store'	=> '單門店逐日',
+		];
+		$this->set('options.mode.type', $type);
 	}
 	
 	/* Form submit action
@@ -78,12 +84,14 @@ class SalesViewModel extends Fluent
 	 * @params: date
 	 * @return: void
 	 */
-	public function keepSearchData($searchStDate = NULL, $searchEndDate = NULL, $searchCategory = '', $searchProductIds = [])
+	public function keepSearchData($searchType = 'total', $searchStDate = NULL, $searchEndDate = NULL, $searchStoreName = '', $searchCategory = '', $searchProductIds = [])
     {
 		$today = now()->format('Y-m-d');
 		
+		$this->set('search.type', $searchType); 
 		$this->set('search.stDate', $searchStDate ?? $today); 
 		$this->set('search.endDate', $searchEndDate ?? $today);
+		$this->set('search.storeName', $searchStoreName);
 		$this->set('search.category', $searchCategory);
 		$this->set('search.productIds', $searchProductIds);
 		$this->set('search.today', $today);
@@ -102,7 +110,7 @@ class SalesViewModel extends Fluent
 	{
 		$response = $this->responseBaseData();
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
-		$response['hasFilter'] = TRUE; #目前沒分type
+		$response['hasFilter'] = TRUE; 
 		
 		return $response;
 	}

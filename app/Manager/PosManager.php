@@ -131,7 +131,7 @@ class PosManager
 		return $result;
 	}
 	
-	/* 補全門店判別
+	/* 補全門店判別(門店已改同步訂貨)
 	 * @params: array
 	 * @return: array
 	 */
@@ -140,7 +140,7 @@ class PosManager
 		#改用active shop來判過濾即可
 		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
 			#過濾出無銷售且為active門店
-			return ! in_array($item['shopId'], $saleShopIds);
+			return ! in_array($item['posId'], $saleShopIds);
 		});
 		
 		return $result;

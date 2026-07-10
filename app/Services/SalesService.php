@@ -34,8 +34,10 @@ class SalesService
 		#default
 		$this->_statistics = [
 			'brandId'		=> '', #export
+			'type'			=> '',
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
+			'storeName'		=> '',
 			'store'			=> [],
 			'area' 			=> [],
 			'productList'	=> [],
@@ -107,7 +109,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds)
 	{
 		try
 		{
@@ -115,7 +117,7 @@ class SalesService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			#Params都用pass(保留service可複用空間)
-			$params = $this->_initParams($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -129,7 +131,13 @@ class SalesService
 			{
 				Log::channel('appServiceLog')->info('Get sales data from db');
 				
-				$service = app(ProductService::class);
+				if ($params->type == 'total')
+					$service = app(ProductService::class);
+				/* else if ($params->type == 'store')
+					$service = app(StoreService::class);
+				 */
+				else
+					throw new Exception('無法識別查詢條件'); 
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -151,7 +159,7 @@ class SalesService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds)
 	{
 		$params = new Fluent();
 		
@@ -161,10 +169,11 @@ class SalesService
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchStDate, $searchEndDate, $searchCategory, $searchProductIds]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds]);
 		
 		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
-				->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
+				->storeName($searchStoreName)
 				->category($searchCategory)->productIds($searchProductIds)
 				->cacheKey($cacheKey);
 		

@@ -7,6 +7,8 @@ document.addEventListener('alpine:init', () => {
         showFilter: Alpine.$persist(false),
 		filter: '',
 		
+		storeDetail: [],
+		
 		toggle() {
            this.showAmount = ! this.showAmount;
         }
@@ -36,6 +38,12 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
+			if (this.searchData.type == 'store' && this.searchData.storeName == '')
+				this.errors.add('storeName');
+			
+			if (this.searchData.category == '')
+				this.errors.add('category');
+			
 			if (this.searchData.productIds.length == 0)
 			{
 				this.errors.add('productIds');
@@ -64,8 +72,31 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
-	Alpine.data('statisticsStore', (store) => ({
+	Alpine.data('statisticsStore', (store, detail) => ({
 		store: {...store},
+		
+		init() { 
+		},
+		
+		get filterStore() {
+			const searchKeyword = Alpine.store('sales').filter.toLowerCase();
+			
+			const list = Object.values(this.store.data);
+			
+			const result = list.filter(store => 
+				String(store.shopId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
+				String(store.shopName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
+	
+    }));
+	
+	Alpine.data('storeDetail', (detail) => ({
+		detail: {...detail},
 		
 		init() { 
 		},
