@@ -157,7 +157,7 @@ class AovService
 		*/
 		
 		#再過濾一次, 這裏無法補全門店
-		#$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		#$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
 		$saleData = $params->saleData;
 		

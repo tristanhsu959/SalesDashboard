@@ -119,13 +119,29 @@ class PosManager
 	 * @params: collection
 	 * @return: array
 	 */
-	public function filterExceptStore($brand, $data)
+	public function filterDataByExceptStore($brand, $data)
 	{
 		$code = $brand->code();
 		$excepts = config("web.sales.shop.except.{$code}");
 		
 		$result = collect($data)->filter(function($item, $key) use($excepts){
 			return ! in_array($item['shopId'], $excepts);
+		});
+		
+		return $result;
+	}
+	
+	/* 排除特殊複合店
+	 * @params: collection
+	 * @return: array
+	 */
+	public function filterSpecialStore($brand, $storeList)
+	{
+		$code = $brand->code();
+		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$code}");
+		
+		$result = collect($storeList)->filter(function($item, $key) use($excepts){
+			return ! in_array($item['storeKey'], $excepts);
 		});
 		
 		return $result;

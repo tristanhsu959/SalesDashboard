@@ -359,7 +359,7 @@ class NewReleaseService
 		});
 		
 		#DB有濾一遍了,只是預防萬一
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
 		#gid在pos manager已處理成統一area id
 		$baseData = collect($saleData)->map(function($item, $key) use($storeList) {

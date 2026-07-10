@@ -171,7 +171,7 @@ class StoreService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) {
 			$temp['shopId'] 		= $item['shopId'];

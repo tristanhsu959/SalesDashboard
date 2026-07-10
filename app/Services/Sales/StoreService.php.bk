@@ -286,7 +286,7 @@ class StoreService
 			return;
 		}
 		
-		$saleData = PosManager::filterExceptStore($params->brand, $params->saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $params->saleData);
 		$productList = $params->productList; 
 		
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
@@ -371,7 +371,7 @@ class StoreService
 		$allShopList = collect($params->allShopList)->groupBy('shopId');
 		
 		#過濾無效店家
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) use($productList, $allShopList) {
 			$shop = $allShopList->get($item['shopId'])->first(); 

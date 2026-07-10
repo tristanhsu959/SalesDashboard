@@ -197,7 +197,9 @@ class ProductService
 		
 		##20260630:改用訂貨門店來mapping/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
 		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+		$storeList = PosManager::filterSpecialStore($params->brand, $storeList);
 		$params->storeList = PurchaseManager::filterFactoryStore($storeList); #無PosId
+		
 	}
 	
 	/* 取查詢的門店資料
@@ -291,7 +293,7 @@ class ProductService
 			return;
 		}
 		
-		$saleData = PosManager::filterExceptStore($params->brand, $params->saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $params->saleData);
 		$productList = $params->productList; 
 		
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){

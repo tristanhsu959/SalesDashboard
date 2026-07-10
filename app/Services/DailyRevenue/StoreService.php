@@ -185,7 +185,7 @@ class StoreService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData	= PosManager::filterExceptStore($params->brand, $params->saleData);
+		$saleData	= PosManager::filterDataByExceptStore($params->brand, $params->saleData);
 		
 		$storeList 	= PurchaseManager::filterStoreByTypeName($params->storeList, $params->shopType);
 		
