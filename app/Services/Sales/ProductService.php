@@ -536,31 +536,48 @@ class ProductService
 		if (empty($baseData))
 			return FALSE;
 		
-		#array_merge key不會保留
-		$header = ['productName'	=> '品名'];
-		$header = array_merge($header, $params->dayRange);
+		$dayRange 	= $params->dayRange;
+		$header		= collect(['品名'])->merge($dayRange)->values()->all();
 		$params->set('detail.header', $header);
 		
 		#Deatail by day
-		$result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) {
+		$result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) use($products, $dayRange) {
 			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
-			$temp['shopId'] 	= $items->pluck('shopId')->first();
 			$temp['shopName'] 	= $items->pluck('shopName')->first();
-			$temp['areaId'] 	= $items->pluck('areaId')->first();
-			$temp['areaName'] 	= $items->pluck('areaName')->first();
 				
 			#因有補全的門店,故會有key=0的狀況	
-			$temp['products'] = $items->groupBy('productId')->map(function($items, $key){
+			$temp['products'] = $items->groupBy('productId')->map(function($items, $key) use($dayRange) {
 				
-				return $items->groupBy('saleDate')->map(function($items, $key){
+				$dayItems = $items->groupBy('saleDate');
+				
+				#按日期順序
+				return collect($dayRange)->map(function($date, $key) use($dayItems){
+					
+					$data = $dayItems->get($date, collect([]));
+					
+					if ($data->isEmpty())
+					{
+						$temp['totalQty'] 	= 0;
+						$temp['totalAmount']= 0;
+					}
+					else
+					{	
+						$temp['totalQty'] 	= $data->pluck('qty')->sum();
+						$temp['totalAmount']= round($data->pluck('amount')->sum(), 2);
+					}
+					
+					return $temp;
+				});
+				/* return $items->groupBy('saleDate')->map(function($items, $key){
 					$temp['totalQty'] 	= $items->pluck('qty')->sum();
 					$temp['totalAmount']=  round($items->pluck('amount')->sum(), 2);
 				
 					return $temp;
-				})->all();
-				
-			})->filter(function($item, $key){
-				return $key != 0;
+				})->sortKeys()->all(); */
+			
+			})->mapWithKeys(function($item, $key) use($products) {
+				$productName = data_get($products, $key);
+				return [$productName => $item];
 			})->toArray();
 			
 			return $temp;	

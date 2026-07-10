@@ -19,7 +19,7 @@
 						<td x-text="storeData.areaName"></td>
 						<td x-text="storeData.shopId"></td>
 						<td x-text="storeData.storeKey"></td>
-						<td><button class="transparent circle small purple-text"><i>more_vert</i></button><span x-text="storeData.shopName"></span></td>
+						<td><button class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey })"><i>more_vert</i></button><span x-text="storeData.shopName"></span></td>
 						
 						<template x-for="(pName, pId) in store.header.products" :key="pId">
 							<td>
@@ -34,44 +34,39 @@
 		</section>
 	</div>
 	
-	<dialog x-data="storeDetail(@js($viewModel->statisticsData('detail')))" class="store-detail left">
+	<dialog x-data="storeDetail(@js($viewModel->statisticsData('detail')))" @active-store.window="openDetail($event.detail.id)" id="salesDetail" class="store-detail bottom scroll">
 		<div class="row">
 			<div class="left-align max">
-				<h5 class="">Bottom</h5>
-				<div>Some text here</div>
+				<h5 x-text="detail?.storeName || ''" class="purple-text"></h5>
+				<div x-text="detail?.storeKey || ''"></div>
 			</div>
 			<nav class="right-align">
-				<button class="transparent circle"><i>close</i></button >
+				<button class="transparent circle" @click="ui('#salesDetail');"><i>close</i></button >
 			</nav>
 		</div>
 		
 		<table class="stripes">
 			<thead>
 				<tr>
-					<th x-text="detail.header.productName"></th>
-					<template x-for="pName in store.header.products" :key="pName">
-						<th x-text="pName"></th>
+					<template x-for="(headName, idx) in header" :key="idx">
+						<th x-text="headName"></th>
 					</template>
 				</tr>
 			</thead>
 			<tbody>
-				<template x-for="(storeData, idx) in filterStore" :key="idx">
+				<template x-for="(dayData, name) in detail.products" :key="name">
 				<tr>
-					<td x-text="storeData.areaName"></td>
-					<td x-text="storeData.shopId"></td>
-					<td x-text="storeData.storeKey"></td>
-					<td x-text="storeData.shopName"></td>
-					<template x-for="(pName, pId) in store.header.products" :key="pId">
+					<td x-text="name"></td>
+					<template x-for="(saleData, date) in dayData" :key="date">
 						<td>
-							<span x-show="!$store.sales.showAmount" x-text="storeData.products[pId]?.totalQty || 0"></span>
-							<span x-show="$store.sales.showAmount" x-text="Helper.formatDollar(Math.round(storeData.products[pId]?.totalAmount || 0))"></span>
+							<span x-show="!$store.sales.showAmount" x-text="saleData.totalQty"></span>
+							<span x-show="$store.sales.showAmount" x-text="Helper.formatDollar(Math.round(saleData.totalAmount))"></span>
 						</td>
 					</template>
 				</tr>
 				</template>
 			</tbody>
 		</table>
-		
 		
 	</dialog>
 

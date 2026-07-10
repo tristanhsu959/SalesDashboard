@@ -95,25 +95,29 @@ document.addEventListener('alpine:init', () => {
 	
     }));
 	
-	Alpine.data('storeDetail', (detail) => ({
-		detail: {...detail},
+	Alpine.data('storeDetail', (detailData) => ({
+		header: {...detailData.header},
+		data: {...detailData.data},
+		detail: {
+			storeName: '',
+			storeKey: '',
+			products: {},
+		},
 		
 		init() { 
 		},
 		
-		get filterStore() {
-			const searchKeyword = Alpine.store('sales').filter.toLowerCase();
+		openDetail(storeKey) {
+			const data = this.data[storeKey];
 			
-			const list = Object.values(this.store.data);
-			
-			const result = list.filter(store => 
-				String(store.shopId || '').toLowerCase().includes(searchKeyword) ||
-				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
-				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
-				String(store.shopName || '').toLowerCase().includes(searchKeyword)
-			);
-			
-			return result;
+			if (data)
+			{
+				this.detail.storeKey 	= data.storeKey;
+				this.detail.storeName 	= data.shopName;
+				this.detail.products 	= data.products;
+				
+				ui('#salesDetail');
+			}
 		},
 	
     }));
