@@ -37,6 +37,8 @@ class MerchantService
 			'type'			=> '',
 			'startDate'		=> '', #Y-m-d
 			'endDate'		=> '', #Y-m-d
+			'opCenterIds'	=> [],
+			'areaIds'		=> [],
             'info' 			=> [],
 			'dayoff' 		=> [],
 			'areaDayoff'	=> [],
@@ -75,14 +77,14 @@ class MerchantService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -105,14 +107,6 @@ class MerchantService
 				#執行統計
 				$this->_statistics = $service->analysis($params);
 				
-				#無值不cache
-				/* if (! empty(Arr::flatten($this->_statistics['info'])) OR ! empty(Arr::flatten($this->_statistics['dayoff'])))
-				{
-					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					$this->_statistics['exportName']	= ($searchType == 'info') ? '門店資訊' : '店休資訊';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				} */
-				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
 		}
@@ -130,21 +124,21 @@ class MerchantService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate)
+	private function _initParams($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds)
 	{
 		$params = new Fluent();
 		
-		#此功能暫不分區域權限
-		$currentUser	= AppManager::getCurrentUser();
-		$userAreaIds	= Area::getAll(); #$currentUser->getPurchaseAreaPermissions();
-		$userOpCenter	= $currentUser->getOpCenterPermissions();
-		$opCenter		= PurchaseManager::getOpCenterNo($brand); 
+		$allowPurchaseBrandIds	= AppManager::getAllowPurchaseBrandId($brand, $searchOpCenterIds);
+		$allowAreaIds	= AppManager::getAllowPurchaseAreas($searchAreaIds);
 		$functions		= $this->parsingFunction($brand);
 		
-		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate]);
+		$searchStDate 	= ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
+		$searchEndDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->addDay()->format('Y-m-d');
 		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowPurchaseBrandIds, $allowAreaIds, $searchType, $searchStDate]);
+		
+		$params->brand($brand)->allowPurchaseBrandIds($allowPurchaseBrandIds)
+				->allowAreaIds($allowAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
 				->cacheKey($cacheKey);
 		

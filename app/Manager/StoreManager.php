@@ -10,80 +10,12 @@ use App\Enums\Factory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 
-/* New Order sys Common */
-class PurchaseManager
+/* 因同步訂貨,故抽出獨立 */
+class StoreManager
 {
 	public function __construct(protected PurchaseRepository $_repository)
 	{
 	}
-	
-	/* 取對應nOrder的設定值
-	 * @params: enum
-	 * @return: array
-	 */
-	public function getOpCenterNo($brand, $authOpCenter = [])
-	{
-		#只有八方中彰投營運中心有影響,御廚都只有台北
-		#有設定則使用設定值,不然預設是全部營運中心
-		$defaultOpCenter = OpCenter::toValueArray();
-		
-		if ($brand == Brand::BAFANG && ! empty($authOpCenter))
-			return $authOpCenter;
-		
-		return $defaultOpCenter;
-	}
-	
-	/* 取對應nOrder的設定值
-	 * @params: enum
-	 * @return: array
-	 */
-	public function getBrandShortCode($brand)
-	{
-		#只有八方蘿蔔
-		if ($brand == Brand::BAFANG)
-			return [Brand::BAFANG->shortCode(), Brand::LUOBO->shortCode()];
-		else
-			return [$brand->shortCode()];
-	}
-	
-	/* Factory No
-	 * @params: enum
-	 * @return: array
-	 */
-	public function getFactoryNo($brand)
-	{
-		#台北/高雄(預留,可不用判別工廠)
-		if ($brand == Brand::BAFANG)
-			return [Factory::TP->value, Factory::KH->value];
-		else if ($brand == Brand::BUYGOOD)
-			return [Factory::TS->value, Factory::RL->value];
-		else if ($brand == Brand::FJVEGGIE)
-			return [Factory::TP->value, Factory::KH->value]; #同八方
-		else 
-			return [];
-	}
-	
-	/******************** Factory ********************/
-	/* 取工廠清單
-	 * @params: int
-	 * @return: array
-	 */
-	public function getFactoryList($brand, $opCenter, $returnMapping = TRUE)
-	{
-		$factoryNos = $this->getFactoryNo($brand);
-		$factory = $this->_repository->getFactoryList($opCenter, $factoryNos);
-		
-		#To key-value
-		if ($returnMapping === TRUE)
-		{
-			$factory = collect($factory)->mapWithKeys(function($item, $key){
-				return [$item['factoryNo'] => $item['factoryName']];
-			})->toArray();
-		}
-			
-		return $factory;
-	}
-	
 	
 	/******************** Store ********************/
 	/* Get store data by brand
@@ -345,89 +277,6 @@ class PurchaseManager
 			return in_array($item['posId'], $posIds);
 		})->all();
 	}
-	
-	/******************** Product ********************/
-	/* Get product id */
-	public function getProductIdByName($brand, $opCenter, $name)
-	{
-		$brandId = $brand->value;
-		
-		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
-		
-		return $result;
-	}
-	
-	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
-	{
-		$brandId = $brand->value;
-		
-		$result = $this->_repository->getProductIdByShortCode($brandId, $opCenter, $shortCodes);
-		
-		#format to int
-		$ids = collect($result)->map(function($item, $key){
-			return (int)$item;
-		})->toArray();
-		
-		return $ids;
-	}
-	
-	/* 取對應的Product&Short code mapping
-	 * @params: int
-	 * @params: boolean
-	 * @return: array
-	 */
-	public function getProductShortCodeMapping($brand, $returnMapping = TRUE)
-	{
-		#取所有產品
-		$opCenter = $this->getOpCenterNo($brand, []); #所有營運中心
-		$productMapping = $this->_repository->getProductShortCode($brand, $opCenter);
-		
-		#因不分工廠, 現狀會有重複, 要再濾除
-		$productMapping = collect($productMapping)->unique('productNo');
-		
-		if ($returnMapping === TRUE)
-		{
-			$productMapping = $productMapping->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			});
-		}
-		
-		return $productMapping->all();
-	}
-	
-	/* 取對應的Group設定值
-	 * @params: string
-	 * @return: array
-	 */
-	public function getGroupByShortCode($brandId, $code)
-	{
-		$groupConfig = config("web.purchase.product_type.groupPrefix.{$brandId}");
-		
-		foreach($groupConfig as $config)
-		{
-			if (Str::startsWith($code, $config['pattern']))
-			{
-				$group['groupId'] 	= $config['id'];
-				$group['groupName'] = $config['name'];
-				
-				return $group;
-			}
-		}
-		
-		return ['groupId' => '', 'groupName' => ''];
-	}
-	
-	/* 取對應的Group設定值
-	 * @params: string
-	 * @return: array
-	 */
-	public function getPackagingScale($code)
-	{
-		$config = config('web.purchase.product_type.packagingScale');
-		
-		return data_get($config, $code, 1);
-	}
-	
 	
 	
 }

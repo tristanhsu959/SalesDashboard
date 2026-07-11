@@ -61,6 +61,12 @@ button, a {
 
 /* Table, Grid Define */
 table {
+	caption {
+		border-radius: unset;
+		padding-left: .5rem;
+		color: #444;
+	}
+			
 	tbody {
 		tr td.action {
 			width: 100px;

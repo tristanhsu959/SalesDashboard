@@ -121,8 +121,8 @@ class PosManager
 	 */
 	public function filterDataByExceptStore($brand, $data)
 	{
-		$code = $brand->code();
-		$excepts = config("web.sales.shop.except.{$code}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		$result = collect($data)->filter(function($item, $key) use($excepts){
 			return ! in_array($item['shopId'], $excepts);
@@ -137,8 +137,8 @@ class PosManager
 	 */
 	public function filterSpecialStore($brand, $storeList)
 	{
-		$code = $brand->code();
-		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$code}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}");
 		
 		$result = collect($storeList)->filter(function($item, $key) use($excepts){
 			return ! in_array($item['storeKey'], $excepts);

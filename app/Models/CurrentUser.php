@@ -56,6 +56,18 @@ class CurrentUser extends Fluent
 		$this->fill($info);
 	}
 	
+	/* Show available name
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAvailableName()
+	{
+		$account 	= $this->get('account');
+		$name 		= $this->get('displayName', NULL);
+		
+		return empty($name) ? $account : $name;
+	}
+	
 	/* 內建Supervisor (RoleGroup)
 	 * @params:  
 	 * @return: boolean
@@ -65,6 +77,21 @@ class CurrentUser extends Fluent
 		$roleGroup = $this->get('roleGroup', 0);
 		
 		return ($roleGroup == RoleGroup::SUPERVISOR->value);
+	}
+	
+	/* Auth permission of function by current user
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasFunctionPermission($functionKey)
+	{
+		if ($this->isSupervisor())
+			return TRUE;
+		
+		$permissions	= $this->get('rolePermission', []);
+		$allowFunctions	= array_values($permissions); #Key same as code
+		
+		return in_array($functionKey, $allowFunctions);
 	}
 	
 	#改為只有判別功能,無CRUD
@@ -81,6 +108,7 @@ class CurrentUser extends Fluent
 		
 		return in_array($functionKey, $permissions);
 	}
+	
 	
 	/* Get permission
 	 * @params: 
@@ -187,30 +215,7 @@ class CurrentUser extends Fluent
 		return $areaList;
 	}
 	
-	/* Show available name
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function getAvailableName()
-	{
-		$account 	= $this->get('account');
-		$name 		= $this->get('displayName', NULL);
-		
-		return empty($name) ? $account : $name;
-	}
 	
-	/* Auth permission of function by current user
-	 * @params: string
-	 * @return: boolean
-	 */
-	public function hasFunctionPermission($functionKey)
-	{
-		if ($this->isSupervisor())
-			return TRUE;
-		
-		$permissions	= $this->get('rolePermission', []);
-		$allowFunctions	= array_values($permissions); #Key same as code
-		
-		return in_array($functionKey, $allowFunctions);
-	}
+	
+	
 }

@@ -41,8 +41,7 @@ class InfoService
 	{
 		try
 		{
-			#Get data
-			$this->_getDataFromDB($params);
+			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
 			
@@ -82,6 +81,25 @@ class InfoService
 	
 	/* ====================== 主流程 End ====================== */
 	
+	/* Get search data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _prepareData($params)
+	{
+		try
+		{
+			#1. Get data from DB
+			$this->_getDataFromDB($params);
+
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
 	/* Get order data
 	 * @params: 
 	 * @return: array
@@ -105,7 +123,7 @@ class InfoService
 	
 		try
 		{
-			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->opCenter, $params->userAreaIds);
+			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->allowPurchaseBrandIds, $params->allowAreaIds);
 			
 			$params->storeList = $storeList;
 		}

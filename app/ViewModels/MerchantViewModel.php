@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -32,8 +33,7 @@ class MerchantViewModel extends Fluent
 	
 	/* initialize
 	 * @params: enum
-	 * @params: string
-	 * @params: string
+	 * @params: enum
 	 * @return: void
 	 */
 	public function initialize($brand , $function)
@@ -51,21 +51,20 @@ class MerchantViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->_setSearchMode();
-		//$this->set('options.shopType', config('web.sales.shop.type'));
-	}
-	
-	/* 查詢選項
-	 * @params:  
-	 * @return: void
-	 */
-	private function _setSearchMode()
-	{
+		$currentUser 	= AppManager::getCurrentUser();
+		$opCenter 		= $currentUser->getOpCenterPermissionMap();
+		$areaPermission = $currentUser->getSalesAreaPermissionMap();
+		$hasOpCenter 	= ($this->brand == Brand::BAFANG); #八方才有
+		
 		$type = [
 			'info'		=> '門店資訊', 
 			'dayOff'	=> '店休資訊',
 		];
-		$this->set('options.mode.type', $type);
+		
+		$this->set('options.type', $type);
+		$this->set('options.opCenterList', $opCenter);
+		$this->set('options.areaList', $areaPermission);
+		$this->set('options.hasOpCenter', $hasOpCenter);
 	}
 	
 	/* Form submit action
@@ -90,12 +89,11 @@ class MerchantViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'info', $stDate = '')
+	public function keepSearchData($type = 'info', $stDate = '', $opCenterIds = [], $areaIds = [])
     {
-		if (empty($stDate) && empty($endDate) && empty($shopType))
-			$shopType[] = 1; #Default直營
-		
 		$this->set('search.type', $type);
+		$this->set('search.opCenterIds', $opCenterIds);
+		$this->set('search.areaIds', $areaIds);
 		$this->set('search.stDate', $stDate);
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));
 		$this->set('search.tomorrow', Carbon::tomorrow()->format('Y-m-d'));
@@ -129,6 +127,7 @@ class MerchantViewModel extends Fluent
 	{
 		$response = $this->responseBaseData();
 		$response['hasResult'] 	= data_get($this->statistics, 'hasResult', FALSE);
+		#顯示列表判別用
 		$response['dayoffCount']= data_get($this->statistics, 'dayoffCount', 0);
 		
 		return $response;

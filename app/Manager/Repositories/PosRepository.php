@@ -22,8 +22,8 @@ class PosRepository extends Repository
 	 */
 	public function getStoreList($brand, $userAreaIds, $type = FALSE, $name = FALSE)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();
@@ -63,8 +63,8 @@ class PosRepository extends Repository
 	 */
 	public function getHptransStoreList($brand, $userAreaIds, $type = FALSE, $name = FALSE)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();

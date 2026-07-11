@@ -2,7 +2,7 @@
 
 /* Common field padding */
 #searchPanel {
-	min-width: 320px;
+	max-width: 360px;
 	.field {
 		margin-block-start: 1.5rem;
 	}

@@ -5,11 +5,12 @@
 				<i>info</i><div class="max">查無符合資料</div>
 			</div>
 		</article>
-		
-		<div x-show="response.hasResult" class="store-content">
+			
+		<div x-show="response.hasResult" class="store-content no-padding">
 			<!-- 門店 -->
 			<section class="statistics-store scrollbar" :class="response.brandCode">
 				<table class="stripes">
+					<caption class="left-align" x-text="`共${statistics.info.store.length}家門店`"></caption>
 					<thead>
 						<tr>
 							<template x-for="(name, idx) in statistics.info.header" :key="idx">

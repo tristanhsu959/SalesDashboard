@@ -17,6 +17,7 @@ class AppManager
 		
 	}
 	
+	/******************** User Basic ********************/
 	/* hasAuth
 	 * @params: 
 	 * @return: boolean
@@ -185,4 +186,59 @@ class AppManager
 		
 		return $menu;
 	}
+	/******************** User Basic End ********************/
+	
+	
+	/******************** User Auth Filter ********************/
+	/* 過濾查詢條件與使用者授權 */
+	/* 訂貨DB相關,都轉成BrandId取資料
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowPurchaseBrandId($brand, $filterOpCenters = [])
+	{
+		$brandId = $brand->value;
+		$brandMapConfig = config('web.purchase.op_center.brandMap');
+		$allowOpCenters = $this->getAllowOpCenter($filterOpCenters);
+		
+		$allowBrandIds = collect($brandMapConfig)->filter(function($items, $key) use($allowOpCenters) {
+			return in_array($key, $allowOpCenters);
+		})->map(function($items, $key) use($brandId){
+			return $items[$brandId];
+		})->values()->all();
+		
+		return $allowBrandIds;
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowOpCenter($filterOpCenters = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authOpCenters = $currentUser->getOpCenterPermissions();
+		
+		if (empty($filterOpCenters))
+			return $authOpCenters;
+		else
+			return $filterOpCenters;
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowPurchaseAreas($filterAreas = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authAreas = $currentUser->getPurchaseAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return $filterAreas;
+	}
+	
+	/******************** User Auth Filter End ********************/
 }

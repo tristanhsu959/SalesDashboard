@@ -17,7 +17,7 @@
 		<h5>查詢</h5>
 		
 		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.type" :key="id">
+			<template x-for="(name, id) in options.type" :key="id">
 				<label class="radio field-red">
 					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
 					<span x-text="name"></span>
@@ -25,10 +25,36 @@
 			</template>
 		</nav>
 		
-		<div x-show="searchData.type == 'dayOff'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow" :disabled="searchData.type != 'dayOff'">
 			<label>查詢日期</label>
 		</div>
+		
+		<fieldset class="field light-blue-border light-blue-text">
+			<legend class="small">選擇營運中心</legend>
+			<nav class="wrap">
+				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="opId" name="searchOpCenterIds[]" x-model="searchData.opCenterIds" :disabled="!options.hasOpCenter">
+					<span x-text="opName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全營運中心(南北廠)</output>
+		</fieldset>
+		
+		<fieldset class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全區</output>
+		</fieldset>
 		
 		<div class="space"></div>
 		<nav class="right-align group split">

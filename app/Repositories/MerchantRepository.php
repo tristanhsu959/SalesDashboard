@@ -26,11 +26,11 @@ class MerchantRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreInfoList($brand, $opCenter, $userAreaIds)
+	public function getStoreInfoList($brand, $allowBrandIds, $allowAreaIds)
 	{
 		$brandId = $brand->value;
-		$brandNo = $brand->shortCode();
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$allowAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$excepts = config("web.purchase.store.except.{$brandId}");
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -45,17 +45,18 @@ class MerchantRepository extends Repository
 			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
 			->addSelect('f.Name as factoryName', 'w.Name as warehouse', 'c.Name as carNo')
-			->whereExists(function ($query) use($opCenter) {
+			/* ->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 's.OperationCenterId')
 					->whereIn('oc.No', $opCenter);
-			})
-			->whereExists(function ($query) use($brandNo) {
+			}) 
+			*/
+			->whereExists(function ($query) use($allowBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $brandNo);
+					->whereIn('bd.Id',  $allowBrandIds);
 			})
 			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
@@ -64,11 +65,11 @@ class MerchantRepository extends Repository
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			}) */
 			->whereNull('s.CloseDate')
-			->when($authAreaIds, function ($query, $authAreaIds) {
+			->when($allowAreaIds, function ($query, $allowAreaIds) {
 				// 只有當 $role 為 true（或非空值）時，才會執行這裡
-				return $query->whereIn('s.AreaId', $authAreaIds);
+				return $query->whereIn('s.AreaId', $allowAreaIds);
 			})
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
+			->whereNotIn('s.No', $excepts)#->ddRawSql();
 			->get()
 			->toArray(); 
 		

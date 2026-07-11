@@ -25,8 +25,8 @@ class DailyRevenueRepository extends Repository
 	 */
 	public function getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();
@@ -132,8 +132,8 @@ class DailyRevenueRepository extends Repository
 	 */
 	public function getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();

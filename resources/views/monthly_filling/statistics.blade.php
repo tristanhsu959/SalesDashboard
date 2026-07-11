@@ -15,29 +15,24 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		<div class="mode-group">
-			<div class="field middle-align">
-				<nav class="wrap">
-					<template x-for="(name, id) in options.mode.type" :key="id">
-						<label class="radio field-red">
-							<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-							<span x-text="name"></span>
-						</label>
-					</template>
-				</nav>
-			</div>
-			<div class="field middle-align">
-				<nav class="wrap">
-					<template x-for="(name, id) in options.mode.range" :key="id">
-						<label class="radio field-light-blue">
-							<input type="radio" name="searchRange" x-model="searchData.range" :value="id" @change="changeDateInput()">
-							<span x-text="name"></span>
-						</label>
-					</template>
-				</nav>
-			</div>
-		</div>
+		<nav class="wrap">
+			<template x-for="(name, id) in options.mode.type" :key="id">
+				<label class="radio field-red">
+					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>
 		
+		<nav class="wrap">
+			<template x-for="(name, id) in options.mode.range" :key="id">
+				<label class="radio field-light-blue">
+					<input type="radio" name="searchRange" x-model="searchData.range" :value="id" @change="changeDateInput()">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>		
+				
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="month" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.currentDate">
 			<label>開始日期</label>
