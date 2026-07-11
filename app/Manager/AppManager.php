@@ -237,7 +237,7 @@ class AppManager
 		if (empty($filterAreas))
 			return $authAreas;
 		else
-			return $filterAreas;
+			return array_map('intval', $filterAreas);
 	}
 	
 	/******************** User Auth Filter End ********************/

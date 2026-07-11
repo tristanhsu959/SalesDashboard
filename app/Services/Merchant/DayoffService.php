@@ -4,6 +4,7 @@ namespace App\Services\Merchant;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
@@ -41,11 +42,6 @@ class DayoffService
 	{
 		try
 		{
-			/* 暫不判別
-			$currentUser = AppManager::getCurrentUser();
-			$this->_userAreaIds = $currentUser->roleArea; */
-			
-			#執行統計
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
@@ -95,8 +91,11 @@ class DayoffService
 	private function _prepareData($params)
 	{
 		try
-		{
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+		{	
+			#店休改為不含蘿蔔,廠區店
+			$storeList = StoreManager::getStoreList($params->brand, $params->allowPurchaseBrandIds, $params->allowAreaIds, $params->stDate, $params->endDate);
+			
+			$params->storeList = StoreManager::filterFactoryStore($params->brand, $storeList);
 			
 			$this->_getDataFromDB($params);
 			
@@ -124,16 +123,17 @@ class DayoffService
 			"money" => 11
 		]
 		*/
-	
+		
+		#改為判別招韭辣/炸雞腿排骨
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
-			$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
-			$opCenter	= PurchaseManager::getOpCenterNo($params->brand); #全部opCenter
-			$userAreaIds= $params->userAreaIds;
-			
-			$result = $this->_repository->getDayoffList($brand, $opCenter, $userAreaIds, $stDate, $endDate);
+			$brand 			= $params->brand;
+			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
+			$endDate 		= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
+			$allowBrandIds	= $params->allowPurchaseBrandIds;
+			$allowAreaIds	= $params->allowAreaIds;
+			dd($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate);
+			$result = $this->_repository->getDayoffList($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate);
 			
 			$params->orderData = $result;
 		}
