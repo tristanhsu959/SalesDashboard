@@ -94,12 +94,41 @@ class DayoffService
 		{	
 			#店休改為不含蘿蔔,廠區店
 			$storeList = StoreManager::getStoreList($params->brand, $params->allowPurchaseBrandIds, $params->allowAreaIds, $params->stDate, $params->endDate);
-			
 			$params->storeList = StoreManager::filterFactoryStore($params->brand, $storeList);
 			
-			$this->_getDataFromDB($params);
+			$this->_getProductId($params);
 			
+			$this->_getDataFromDB($params);
+			dd($params);
 			$this->_buildBaseData($params);
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
+	/* 以short code取得product id
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getProductId($params)
+	{
+		try
+		{
+			#取資料都不分營運中心,不然可能會取不到
+			$brand				= $params->brand;
+			$brandId			= $brand->value;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$shortCodes			= config("web.purchase.product_type.dayOff.{$brandId}");
+			
+			$productIds = PurchaseManager::getProductIdByShortCode($brand, $allowOpCenterIds, $shortCodes);
+			
+			if (empty($productIds))
+				throw new Exception('查無此產品');
+			
+			$params->productIds = $productIds;
 		}
 		catch(Exception $e)
 		{
@@ -132,9 +161,10 @@ class DayoffService
 			$endDate 		= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
 			$allowBrandIds	= $params->allowPurchaseBrandIds;
 			$allowAreaIds	= $params->allowAreaIds;
-			dd($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate);
-			$result = $this->_repository->getDayoffList($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate);
+			$productIds		= $params->productIds;
 			
+			$result = $this->_repository->getDayoffList($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate, $productIds);
+			dd($result);
 			$params->orderData = $result;
 		}
 		catch(Exception $e)

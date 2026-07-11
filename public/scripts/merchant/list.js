@@ -6,9 +6,9 @@ document.addEventListener('alpine:init', () => {
 		options: {...searchData.options},
 		errors: new Set(),
 		
-		init() {console.log(this.options);
-			if (searchData.stDate == '')
-				this.searchData.stDate = searchData.today;
+		init() {
+			if (this.searchData.stDate == '')
+				this.searchData.stDate = this.searchData.today;
 		},
 		
 		search() {
@@ -33,7 +33,7 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.type = 'info';
 			this.searchData.opCenterIds = [];
 			this.searchData.areaIds = [];
-			this.searchData.stDate = searchData.today;
+			this.searchData.stDate = this.searchData.today;
 			this.errors.clear();
 		},
     }));

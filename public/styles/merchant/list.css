@@ -64,7 +64,6 @@ form, section.statistics-store {
 						background-color: var(--table-bg);
 						width: 120px;
 						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
 						
 						&:nth-of-type(4) {
 							width: 200px;

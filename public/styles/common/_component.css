@@ -64,7 +64,7 @@ table {
 	caption {
 		border-radius: unset;
 		padding-left: .5rem;
-		color: #444;
+		color: #9c27b0;
 	}
 			
 	tbody {
@@ -204,7 +204,7 @@ table {
 						min-width: 120px;
 						width: 120px;
 						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
+						/* padding-top: 1rem; */
 					}
 				}
 			}

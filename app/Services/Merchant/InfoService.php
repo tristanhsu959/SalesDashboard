@@ -3,6 +3,7 @@
 namespace App\Services\Merchant;
 
 use App\Facades\AppManager;
+use App\Facades\StoreManager;
 use App\Facades\PurchaseManager;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
@@ -123,7 +124,15 @@ class InfoService
 	
 		try
 		{
-			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->allowPurchaseBrandIds, $params->allowAreaIds);
+			$brand 					= $params->brand;
+			$allowAreaIds			= $params->allowAreaIds;
+			$allowPurchaseBrandIds 	= $params->allowPurchaseBrandIds;
+			$allowLbBrandIds 		= $params->allowLbBrandIds;
+			
+			#取所有門店
+			$allowBrandIds = array_merge($allowPurchaseBrandIds, $allowLbBrandIds);
+			
+			$storeList = $this->_repository->getStoreInfoList($brand, $allowBrandIds, $allowAreaIds);
 			
 			$params->storeList = $storeList;
 		}
@@ -144,7 +153,8 @@ class InfoService
 	{
 		try
 		{
-			#1.Build store info
+			$this->_buildBaseData($params);
+			
 			$this->_buildInfo($params);
 		}
 		catch(Exception $e)
@@ -161,7 +171,7 @@ class InfoService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildInfo($params)
+	private function _buildBaseData($params)
 	{
 		try
 		{
@@ -175,10 +185,11 @@ class InfoService
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
-				$item['storeKey'] 	= PurchaseManager::buildStoreKey($item['storeNo']);
+				$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
 				
 				return $item;
 			})->sortBy('areaId')->values()->map(function($item, $key) {
+				$temp['brandId'] 	= $item['brandId'];
 				$temp['areaName'] 	= $item['areaName'];
 				#$temp['storeNo']	= $item['storeNo'];
 				$temp['posId'] 		= $item['posId'];
@@ -195,8 +206,37 @@ class InfoService
 				return $temp;
 			})->toArray(); 
 			
+			$params->baseData = $store;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('建立門店資料失敗');
+		}
+	}
+	
+	/* Get order data
+	 * @params: enums
+	 * @params: date
+	 * @params: date
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildInfo($params)
+	{
+		try
+		{
+			$storeList = $params->baseData;
+			$storeList = StoreManager::mergeLbStoreById($storeList, $params->allowPurchaseBrandIds, $params->allowLbBrandIds);
+			
+			#因顯示是照順序,故要清除不用欄位
+			$storeList = collect($storeList)->map(function($item, $key){
+				unset($item['brandId']);
+				return $item;
+			})->sortBy('areaId')->toArray();
+			
 			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
-			$info['store']	= $store;
+			$info['store']	= $storeList;
 			
 			$params->info = $info;
 		}

@@ -23,7 +23,7 @@ class StoreManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $allowBrandIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreList($brand, $allowBrandIds, $allowLbBrandIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		/*0 => array:9 [▼
 			"areaId" => 1
@@ -135,29 +135,6 @@ class StoreManager
 		
 		return [$storeList, $lbStoreList];
 	}
-	
-	/* Get lb brandid
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getLbBrandId($brand)
-	{
-		$brandMap 	= config('web.purchase.op_center.brandMap');
-		$lbId 		= Brand::LUOBO->value;
-		
-		#御廚及南廠無
-		if ($brand == Brand::BUYGOOD OR $brand == Brand::FJVEGGIE)
-			return [];
-		
-		$brandIds = [];
-		$brandIds[] = data_get($brandMap, "TP.{$lbId}");
-		
-		return $brandIds;
-	}
-	
-	
-	
 	
 	/********************** Filter Or Format Features **********************/
 	/* 開閉店排除依日期
@@ -301,6 +278,7 @@ class StoreManager
 		return $stores;
 	}
 	
+	
 	/* Build store key(新舊系統Mapping)
 	 * @params: string
 	 * @return: array
@@ -346,5 +324,32 @@ class StoreManager
 		})->all();
 	}
 	
-	
+	/* 整合LB,外部呼叫用
+	 * @params: array
+	 * @return: array
+	 */
+	public function mergeLbStoreById($allStoreList, $mainBrandIds, $lbBrandIds)
+	{
+		#必須要有brandId, storeKey fields
+		#過濾出主要的八方或御廚或芳珍
+		$storeList = collect($allStoreList)->filter(function($item, $key) use($mainBrandIds){
+			return in_array($item['brandId'], $mainBrandIds);
+		})->values()->all();
+		
+		$lbStoreList = collect($allStoreList)->filter(function($item, $key) use($lbBrandIds){
+			return in_array($item['brandId'], $lbBrandIds);
+		})->values()->all();
+		
+		$storeKeys = collect($storeList)->pluck('storeKey')->toArray();
+		
+		#取出單蘿蔔店(如老蘿蔔沒有八方,所以沒有對應的storeKey)
+		$lbSpecials = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
+			return !in_array($item['storeKey'], $storeKeys);
+		});
+		
+		#Merge獨立的蘿蔔店
+		$stores = $lbSpecials->merge($storeList)->sortBy('areaId')->toArray();
+		
+		return $stores;
+	}
 }

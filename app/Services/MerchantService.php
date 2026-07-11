@@ -128,8 +128,11 @@ class MerchantService
 	{
 		$params = new Fluent();
 		
+		$allowOpCenterIds		= AppManager::getAllowOpCenter($searchOpCenterIds);
+		$allowAreaIds			= AppManager::getAllowPurchaseAreas($searchAreaIds);
 		$allowPurchaseBrandIds	= AppManager::getAllowPurchaseBrandId($brand, $searchOpCenterIds);
-		$allowAreaIds	= AppManager::getAllowPurchaseAreas($searchAreaIds);
+		$allowLbBrandIds 		= AppManager::getAllowLbBrandId($brand);
+		
 		$functions		= $this->parsingFunction($brand);
 		
 		$searchStDate 	= ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
@@ -137,8 +140,9 @@ class MerchantService
 		
 		$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowPurchaseBrandIds, $allowAreaIds, $searchType, $searchStDate]);
 		
-		$params->brand($brand)->allowPurchaseBrandIds($allowPurchaseBrandIds)
-				->allowAreaIds($allowAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
+				->allowPurchaseBrandIds($allowPurchaseBrandIds)
+				->allowLbBrandIds($allowLbBrandIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
 				->cacheKey($cacheKey);
 		

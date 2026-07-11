@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Models\CurrentUser;
 use App\Enums\MenuGroup;
+use App\Enums\Brand;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 
@@ -197,6 +198,7 @@ class AppManager
 	 */
 	public function getAllowPurchaseBrandId($brand, $filterOpCenters = [])
 	{
+		#將OpCenter判別, 統一轉由判別BrandId
 		$brandId = $brand->value;
 		$brandMapConfig = config('web.purchase.op_center.brandMap');
 		$allowOpCenters = $this->getAllowOpCenter($filterOpCenters);
@@ -208,6 +210,29 @@ class AppManager
 		})->values()->all();
 		
 		return $allowBrandIds;
+	}
+	
+	/* Get lb brandid
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getAllowLbBrandId($brand)
+	{
+		#訂貨取資料需,但情境太多,要獨立取
+		$brandMap 	= config('web.purchase.op_center.brandMap');
+		$lbId 		= Brand::LUOBO->value;
+		$allowLbId	= data_get($brandMap, "TP.{$lbId}"); #取TP即可
+		
+		#八方一律取,不影響
+		if ($brand ==  Brand::BAFANG)
+			return [$allowLbId];
+		
+		#御廚及南廠無
+		if ($brand == Brand::BUYGOOD OR $brand == Brand::FJVEGGIE)
+			return [];
+		
+		return [];
 	}
 	
 	/* 
