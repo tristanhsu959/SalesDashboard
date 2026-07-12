@@ -117,7 +117,9 @@ class StoreManager
 		$mainBrandCode 	= $brand->shortCode();
 		$lbBrandCode	= Brand::LUOBO->shortCode(); 
 		
-		return [$storeGroup[$mainBrandCode], $storeGroup[$lbBrandCode]];
+		$mainStores = data_get($storeGroup, $mainBrandCode, []);
+		$lbStores 	= data_get($storeGroup, $lbBrandCode, []);
+		return [$mainStores, $lbStores];
 	}
 	
 	/* 開閉店排除依日期

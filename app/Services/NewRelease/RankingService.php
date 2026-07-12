@@ -52,15 +52,15 @@ class RankingService
 		if (empty($baseData))
 			return FALSE;
 		
-		#排名是依最後一天的值
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) use($endDate) {
-			#需考量沒有訂單的狀況
-			$dayData = $items->groupBy('saleDate')->get($endDate, collect([]))->first();
+		#排名是依最後一天的值(BaseData已是不重複門店)
+		$result = collect($baseData)->map(function($item, $key) use($endDate) {
 			
-			$temp = $items->first(); #當基底資料
-			#$temp['saleDate'] 	= $endDate;
-			$temp['qty']		= intval(data_get($dayData, 'qty', 0)); 
-			unset($temp['saleDate'], $temp['areaId']);
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['shopName'] 	= $item['storeName'];
+			$temp['shopId'] 	= $item['storeKey'];
+			
+			$dayData = collect($item['data'])->get($endDate, 0);
+			$temp['qty'] = intval($dayData); 
 			
 			return $temp;
 		});

@@ -355,68 +355,35 @@ class NewReleaseService
 		#DB有濾一遍了,只是預防萬一
 		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
-		$saleData = collect($saleData)->groupBy('shopId');
+		#整理saleData
+		$saleData = collect($saleData)->map(function($item, $key) {
+			$item['saleDate'] = Carbon::parse($item['saleDate'])->format('Y-m-d');
+			return $item;
+		})->groupBy('shopId')->toArray();
 		
 		#所有有效店家統計(因門店已是有效全部門店,改寫成以門店取資料)
 		#gid在pos manager已處理成統一area id
+		#這裏還不會Parsing
 		$baseData = collect($params->storeList)->map(function($item, $key) use($params, $saleData) {
 			
 			$data = data_get($saleData, $item['posId'], NULL); 
 			
 			#無資料或無POS Id的店
 			if (empty($data))
-			{
-				$temp['shopId'] 	= $item['posId'];
-				$temp['saleDate'] 	= $params->endDate;
-				$temp['qty'] 		= 0;
-				$temp['shopName'] 	= $item['storeName'];
-				$temp['areaId'] 	= $item['areaId'];
-				$temp['areaName']	= $item['areaName'];
-				$temp['storeKey']	= $item['storeKey'];
-			}
+				$item['data'] = [];
 			else
 			{
-				$temp['shopId'] 	= $item['posId'];
-				$temp['saleDate']	= Carbon::parse($data['saleDate'])->format('Y-m-d');
-				$temp['qty'] 		= $data['qty'];
-				$temp['shopName'] 	= $item['storeName'];
-				$temp['areaId'] 	= $item['areaId'];
-				$temp['areaName']	= $item['areaName'];
-				$temp['storeKey'] 	= $item['storeKey'];
+				$item['data'] = collect($data)->mapWithKeys(function($item, $key){
+					return [$item['saleDate'] => $item['qty']];
+				})->toArray();
 			}
 			
-			/*
-			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
-			$item['shopName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['shopName']);
-			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
-			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
-			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
-			*/
-			if (!empty($data))
-			dd($item);
 			return $item; 
 		})->reject(function($item, $key){
 			return empty($item);
-		});
+		})->toArray();
 		
-		#補全未有銷售的門店資料(只需補active store)
-		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		$filloutShops = StoreManager::filterStoreByPosId($storeList, $saleShopIds);
-		
-		#重建
-		$filloutShops = collect($filloutShops)->map(function($item, $key) use($params){
-			$temp['shopId'] 	= $item['posId'];
-			$temp['saleDate'] 	= $params->endDate;
-			$temp['qty'] 		= 0;
-			$temp['shopName'] 	= $item['storeName'];
-			$temp['areaId'] 	= $item['areaId'];
-			$temp['areaName']	= $item['areaName'];
-			$temp['storeKey']	= $item['storeKey'];
-			
-			return $temp;
-		});
-		
-		$params->baseData = $baseData->merge($filloutShops)->toArray();
+		$params->baseData = $baseData;
 	}
 	
 	/* 基底資料

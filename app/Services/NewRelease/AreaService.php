@@ -62,9 +62,11 @@ class AreaService
 		$params->set('area.header', $header);
 		
 		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) use($totalDays) {
+			$data = $items->pluck('data')->filter()->flatten();
+			
 			$temp['areaName']		= $items->pluck('areaName')->first();
-			$temp['shopCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-			$temp['totalQty'] 		= intval($items->pluck('qty')->sum()); #區域銷售總量
+			$temp['shopCount']		= $items->pluck('storeId')->unique()->count(); #店家數
+			$temp['totalQty'] 		= intval($data->sum()); #區域銷售總量
 			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
 			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
 			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $totalDays / $temp['shopCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數

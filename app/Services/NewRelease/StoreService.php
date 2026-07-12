@@ -63,19 +63,15 @@ class StoreService
 		
 		$params->set('shop.header', $header);
 		
-		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($item, $key) use($totalDays) {
-			$temp['storeKey']	= $item->pluck('storeKey')->first();
-			$temp['shopId']		= $item->pluck('shopId')->first();
-			$temp['shopName'] 	= $item->pluck('shopName')->first();
-			$temp['areaId'] 	= $item->pluck('areaId')->first();
-			$temp['areaName'] 	= $item->pluck('areaName')->first();
+		#已是不重複門店及資料
+		$result = collect($baseData)->sortBy('areaId')->map(function($item, $key) use($totalDays) {
 			
-			$temp['dayQty'] = $item->mapWithKeys(function($item, $key){
-				if (! empty($item['saleDate']))
-					return [$item['saleDate'] => intval($item['qty'])];
-				else
-					return [];
-			})->toArray();
+			$temp['storeKey']	= $item['storeKey'];
+			$temp['shopId']		= $item['posId'];
+			$temp['shopName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['dayQty'] 	= $item['data'];
 			
 			#計算=>銷售總量|平均銷售數量
 			$temp['totalQty'] = array_sum($temp['dayQty']); #銷售量總和
