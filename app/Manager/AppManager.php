@@ -221,5 +221,20 @@ class AppManager
 			return array_map('intval', $filterAreas);
 	}
 	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowSalesAreas($filterAreas = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authAreas = $currentUser->getSalesAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
+	}
+	
 	/******************** User Auth Filter End ********************/
 }

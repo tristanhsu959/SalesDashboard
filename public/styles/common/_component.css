@@ -173,7 +173,8 @@ table {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 128px - 2rem);
+		/* 預設Height為有Sheet狀況 */
+		max-height: calc(100vh - 128px - 2rem - 48px - 1rem); /*top nav,toolbar,sheet,padding*/
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/

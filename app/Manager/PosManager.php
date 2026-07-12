@@ -25,7 +25,7 @@ class PosManager
 	 * @params: int
 	 * @return: array
 	 */
-	public function getOpCenterNo($brand)
+	/* public function getOpCenterNo($brand)
 	{
 		#銷售不分營運中心:台北/高雄
 		return OpCenter::toValueArray();
@@ -33,8 +33,8 @@ class PosManager
 		/* if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value OR $brandId == Brand::FJVEGGIE->value)
 			return OpCenter::toValueArray();
 		
-		return []; */
-	}
+		return []; *
+	} */
 	
 	/* 取全部店家(含閉店)
 	 * @params: enum
@@ -43,7 +43,7 @@ class PosManager
 	 * @params: string
 	 * @return: array
 	 */
-	public function getAllStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
+	/* public function getAllStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
 	{
 		try
 		{
@@ -65,7 +65,7 @@ class PosManager
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料發生錯誤');
 		}
-	}
+	} */
 	
 	/* 取有效店家
 	 * @params: enum
@@ -74,7 +74,7 @@ class PosManager
 	 * @params: string
 	 * @return: array
 	 */
-	public function getActiveStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
+	/* public function getActiveStores($brand, $userAreaIds, $type = FALSE, $name = FALSE)
 	{
 		try
 		{
@@ -97,13 +97,13 @@ class PosManager
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取門店資料發生錯誤');
 		}
-	}
+	} */
 	
 	/* 格式化及轉換
 	 * @params: array
 	 * @return: array
 	 */
-	private function _formatStores($storeList)
+	/* private function _formatStores($storeList)
 	{
 		$result = $storeList->map(function($item, $key){
 			$item['shopName'] 	= Str::replace($item['shopId'], '', $item['shopName']); #去除Name前置的shop id
@@ -113,7 +113,7 @@ class PosManager
 		})->sortBy('areaId')->values()->all();
 		
 		return $result;
-	}	
+	} */	
 		
 	/* Filter data by shop
 	 * @params: collection
@@ -151,7 +151,7 @@ class PosManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getFillOutStore($activeShopList, $saleShopIds)
+	/* public function getFillOutStore($activeShopList, $saleShopIds)
 	{
 		#改用active shop來判過濾即可
 		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
@@ -160,8 +160,9 @@ class PosManager
 		});
 		
 		return $result;
-	}
+	} */
 	
+	/******************** 屬銷售的定義放在POS Manager ********************/
 	/* 判別複合店
 	 * @params: array
 	 * @return: array

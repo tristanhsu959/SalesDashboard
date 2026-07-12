@@ -10,20 +10,21 @@ use App\Enums\Factory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 
-/* 因同步訂貨,故抽出獨立 */
+/* 因同步訂貨,故抽出獨立, 不分銷售及訂貨 */
+/* 個自的定義放在自己的Manager */
 class StoreManager
 {
 	public function __construct(protected StoreRepository $_repository)
 	{
 	}
 	
-	/******************** Store ********************/
+	/******************** Store Main Feature ********************/
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $allowBrandIds, $allowLbBrandIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		/*0 => array:9 [▼
 			"areaId" => 1
@@ -39,16 +40,13 @@ class StoreManager
 		
 		try
 		{
+			#取門店不含蘿蔔
+			list($storeList, $lbStoreList) = $this->_getStoreData($brand, $allowOpCenterIds, $allowAreaIds);
 			
-			#八方不含蘿蔔(因storeNo是相同的,且不用顯示,若要顯示時只有特殊的蘿蔔要處理)
-			list($storeList, $lbStoreList) = $this->getStoreData($brand, $allowBrandIds, $allowAreaIds);
+			#只需要storeList
+			$storeList = $this->filterActiveStoreByDate($storeList, $stDate, $endDate);
 			
-			$storeList = $this->_filterActiveStoreByDate($storeList, $stDate, $endDate);
-			
-			#為避免訂貨沒有更新POS Id, 因門店已有濾權限, 全取即可
-			$ezorderPosIds = $this->_getPosIdFromEzOrder($brand);
-			
-			return $this->_formatStoreOutput($storeList, $ezorderPosIds);
+			return $this->_formatStoreOutput($brand, $storeList);
 		}
 		catch(Exception $e)
 		{
@@ -62,31 +60,26 @@ class StoreManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreListWithLb($brand, $allowBrandIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
+	public function getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
 	{
 		try
 		{
 			#蘿蔔店獨立取,為避免取錯店名或目關資訊
 			#取回data已排除開閉店
-			list($storeList, $lbStoreList) = $this->getStoreData($brand, $allowBrandIds, $allowAreaIds);
+			list($storeList, $lbStoreList) = $this->_getStoreData($brand, $allowOpCenterIds, $allowAreaIds);
 			
-			$storeList = $this->_filterActiveStoreByDate($storeList, $stDate, $endDate);
-			
-			#為避免訂貨沒有更新POS Id, 因門店已有濾權限, 全取即可
-			$ezorderPosIds = $this->_getPosIdFromEzOrder($brand);
-			
-			$storeList = $this->_formatStoreOutput($storeList, $ezorderPosIds);
+			$storeList = $this->filterActiveStoreByDate($storeList, $stDate, $endDate);
+			$storeList = $this->_formatStoreOutput($brand, $storeList);
 			
 			#八方北廠才有蘿蔔
 			if (empty($lbStoreList))
 				return $storeList;
 			else
 			{
-				$lbStoreList = $this->_filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
+				$lbStoreList = $this->filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
+				$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
 				
-				$lbStoreList = $this->_formatStoreOutput($lbStoreList);
-				
-				return $this->_mergeStoreOutput($storeList, $lbStoreList);
+				return $this->_mergeLbStore($storeList, $lbStoreList);
 			}
 
 		}
@@ -102,7 +95,7 @@ class StoreManager
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreData($brand, $allowBrandIds, $allowAreaIds)
+	private function _getStoreData($brand, $allowOpCenterIds, $allowAreaIds)
 	{
 		/*0 => array:9 [▼
 			"areaId" => 1
@@ -116,60 +109,17 @@ class StoreManager
 		]
 		*/
 		
-		#未來若要存cache, 只要改這裏
-		#改成全取再分(加取工廠)
-		#取回的close date已+8
-		$lbBrandIds = $this->_getLbBrandId($brand);
+		$allStoreList = $this->_repository->getStoreList($brand, $allowOpCenterIds, $allowAreaIds);
 		
-		$allBrandIds = array_merge($allowBrandIds, $lbBrandIds);
-		$brandStore = $this->_repository->getStoreList($brand, $allBrandIds, $allowAreaIds);
+		#過濾出主要門店(八方或御廚或芳珍)及蘿蔔
+		$storeGroup = collect($allStoreList)->groupBy('brandNo')->toArray();
 		
-		#過濾出主要的八方或御廚或芳珍
-		$storeList = collect($brandStore)->filter(function($item, $key) use($allowBrandIds){
-			return in_array($item['brandId'], $allowBrandIds);
-		})->values()->all();
+		$mainBrandCode 	= $brand->shortCode();
+		$lbBrandCode	= Brand::LUOBO->shortCode(); 
 		
-		$lbStoreList = collect($brandStore)->filter(function($item, $key) use($lbBrandIds){
-			return in_array($item['brandId'], $lbBrandIds);
-		})->values()->all();
-		
-		return [$storeList, $lbStoreList];
+		return [$storeGroup[$mainBrandCode], $storeGroup[$lbBrandCode]];
 	}
 	
-	/* Build store key(新舊系統Mapping)
-	 * @params: string
-	 * @return: array
-	 */
-	public function buildStoreKey($storeNo)
-	{
-		#特殊的蘿蔔店,因不符規則編碼規則,故要先處理
-		$lbSpecialStoreNos = config('web.purchase.store.lbSpecialStore');
-		$convertNo = data_get($lbSpecialStoreNos, $storeNo, NULL);
-		$storeNo = empty($convertNo) ? $storeNo : $convertNo;
-		
-		#新系統有前置碼/八方有蘿蔔尾碼1&2
-		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
-		$storeKey = Str::take($storeKey, 7);
-		
-		return $storeKey;
-	}
-	
-	/* Get pos id from ezorder
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getPosIdFromEzOrder($brand)
-	{
-		$ids = $this->_repository->getPosIdFromEzOrder($brand);
-		
-		$ids = collect($ids)->mapWithKeys(function($item, $key){
-			return [$item['storeKey'] => $item['posId']];
-		})->all();
-		
-		return array_filter($ids);
-	}
-	
-	/********************** Filter Or Format Features **********************/
 	/* 開閉店排除依日期
 	 * @params: array
 	 * @return: array
@@ -202,6 +152,99 @@ class StoreManager
 		
 		return $storeList;
 	}
+	
+	/* Format store output
+	 * @params: array
+	 * @return: array
+	 */
+	private function _formatStoreOutput($brand, $storeList)
+	{
+		$ezorderPosIds = $this->getPosIdFromEzOrderByBrand($brand);
+		
+		#To key-value
+		#因訂貨功能不需要POS Id,但此階段不能先排除,因不知道是誰來呼叫
+		$store = collect($storeList)->map(function($item, $key) use($ezorderPosIds) {
+			
+			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
+			
+			$ezPosId = data_get($ezorderPosIds, $item['storeKey'], '');
+			
+			if (empty($item['posId']) OR $item['posId'] == 'null')
+				$item['posId'] =  '';
+			
+			$item['posId'] =  empty($ezPosId) ? $item['posId'] : $ezPosId;
+			
+			$area = AreaLib::toArea(intval($item['areaId']));
+			
+			$item['storeId']	= intval($item['storeId']);
+			$item['areaId']		= $area->value;
+			$item['areaName'] 	= $area->label();
+			
+			return $item;
+		})->sortBy('areaId')->values()->all();
+		
+		return $store;
+	}
+	
+	/* Get pos id from ezorder
+	 * @params: array
+	 * @return: array
+	 */
+	public function getPosIdFromEzOrderByBrand($brand)
+	{
+		$ids = $this->_repository->getPosIdFromEzOrder($brand);
+		
+		$ids = collect($ids)->mapWithKeys(function($item, $key){
+			return [$item['storeKey'] => $item['posId']];
+		})->all();
+		
+		return array_filter($ids);
+	}
+	
+	/* Build store key(新舊系統Mapping)
+	 * @params: string
+	 * @return: array
+	 */
+	public function buildStoreKey($storeNo)
+	{
+		#特殊的蘿蔔店,因不符規則編碼規則,故要先處理
+		$lbSpecialStoreNos = config('web.purchase.store.lbSpecialStore');
+		$convertNo = data_get($lbSpecialStoreNos, $storeNo, NULL);
+		$storeNo = empty($convertNo) ? $storeNo : $convertNo;
+		
+		#新系統有前置碼/八方有蘿蔔尾碼1&2
+		#因有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
+		#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
+		#有些No沒有TP/KH要注意
+		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		$storeKey = Str::take($storeKey, 7);
+		
+		return $storeKey;
+	}
+	
+	/* Format store output
+	 * @params: array
+	 * @return: array
+	 */
+	private function _mergeLbStore($storeList, $lbStoreList)
+	{
+		$storeKeys = collect($storeList)->pluck('storeKey')->toArray();
+		
+		#取出單蘿蔔店(如老蘿蔔沒有八方,所以沒有對應的storeKey)
+		$lbSpecials = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
+			return !in_array($item['storeKey'], $storeKeys);
+		});
+		
+		#Merge獨立的蘿蔔店
+		$stores = $lbSpecials->merge($storeList)->sortBy('areaId')->toArray();
+		
+		return $stores;
+	}
+	
+	/********************** Store Main Feature End **********************/
+	
+	
+	/********************** Filter Or Format Features **********************/
 	
 	/* 排除廠區學區店(因依情境不同手動呼叫,只針對沒有POS的)
 	 * 銷售才會用到
@@ -242,62 +285,6 @@ class StoreManager
 			return $item['typeName'] == $typeName;
 		})->toArray();
 	}
-	
-	
-	/* Format store output
-	 * @params: array
-	 * @return: array
-	 */
-	private function _formatStoreOutput($storeList, $ezorderPosIds = [])
-	{
-		#To key-value
-		#因訂貨功能不需要POS Id,但此階段不能先排除,因不知道是誰來呼叫
-		$store = collect($storeList)->map(function($item, $key) use($ezorderPosIds) {
-			
-			#因有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
-			#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
-			#有些No沒有TP/KH要注意
-			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
-			
-			$ezPosId = data_get($ezorderPosIds, $item['storeKey'], '');
-			
-			if (empty($item['posId']) OR $item['posId'] == 'null')
-				$item['posId'] =  '';
-			
-			$item['posId'] =  empty($ezPosId) ? $item['posId'] : $ezPosId;
-			
-			$area = AreaLib::toArea(intval($item['areaId']));
-			
-			$item['storeId']	= intval($item['storeId']);
-			$item['areaId']		= $area->value;
-			$item['areaName'] 	= $area->label();
-			
-			return $item;
-		})->sortBy('areaId')->values()->all();
-		
-		return $store;
-	}
-	
-	/* Format store output
-	 * @params: array
-	 * @return: array
-	 */
-	private function _mergeStoreOutput($storeList, $lbStoreList)
-	{
-		$storeKeys = collect($storeList)->pluck('storeKey')->toArray();
-		
-		#取出單蘿蔔店(如老蘿蔔沒有八方,所以沒有對應的storeKey)
-		$lbSpecials = collect($lbStoreList)->filter(function($item, $key) use($storeKeys) {
-			return !in_array($item['storeKey'], $storeKeys);
-		});
-		
-		#Merge獨立的蘿蔔店
-		$stores = $lbSpecials->merge($storeList)->sortBy('areaId')->toArray();
-		
-		return $stores;
-	}
-	
-	
 	
 	/* 過濾不計算的門店(如員購)
 	 * @params: string

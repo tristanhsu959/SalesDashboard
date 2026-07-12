@@ -7,22 +7,28 @@ use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
 use App\Libraries\Purchase\AreaLib;
+use App\Repositories\Traits\PurchaseReposTrait;
 use Illuminate\Support\Facades\DB;
 
 /* nOrder DB Common */
 class StoreRepository extends Repository
 {
+	use PurchaseReposTrait;
+	
 	/* 取門店清單(改成含蘿蔔,再由service處理)
 	 * @params: array
 	 * @params: enum
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreList($brand, $allowBrandIds, $allowAreaIds)
+	public function getStoreList($brand, $allowOpCenterIds, $allowAreaIds)
 	{
-		$brandId 		= $brand->value;
-		$allowAreaIds	= AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
-		$excepts		= config("web.purchase.store.except.{$brandId}");
+		#一律都取蘿蔔,再由service過濾
+		$brandId = $brand->value;
+		$allowAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$excepts = config("web.purchase.store.except.{$brandId}");
+		
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -32,15 +38,21 @@ class StoreRepository extends Repository
 			->join('BusinessType as bt', 'bt.Id', '=', 's.BusinessTypeId')
 			->join('Brand as b', 'b.Id', '=', 's.BrandId')
 			->join('Factory as f', 'f.id', '=', 'sc.FactoryId')
-			->select('b.Id as brandId', 'ar.Id as areaId', 'f.Name as factoryName')
+			->select('b.No as brandNo', 'ar.Id as areaId', 'f.Name as factoryName')
 			->addSelect('s.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId', 'bt.Name as typeName')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
-			->whereExists(function ($query) use($allowBrandIds) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
+			})
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->whereIn('bd.Id',  $allowBrandIds);
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
 			->whereIn('s.AreaId', $allowAreaIds)
 			->whereNotIn('s.No', $excepts)#->ddRawSql();

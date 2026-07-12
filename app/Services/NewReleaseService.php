@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
-use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Repositories\NewReleaseRepository;
 use App\Services\NewRelease\StoreService;
 use App\Services\NewRelease\AreaService;
@@ -93,7 +93,7 @@ class NewReleaseService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate)
+	public function getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate, $searchAreaIds)
 	{
 		try
 		{
@@ -101,7 +101,7 @@ class NewReleaseService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			#Params都用pass(保留service可複用空間)
-			$params = $this->_initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate);
+			$params = $this->_initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate, $searchAreaIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -139,19 +139,19 @@ class NewReleaseService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate)
+	private function _initParams($brand, $searchReleaseId, $searchStDate, $searchEndDate, $searchAreaIds)
 	{
 		$params = new Fluent();
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
-		$opCenter		= PosManager::getOpCenterNo($brand);
+		#Op & Area有權限設定,故要再與查詢條件判別
+		$allowOpCenterIds		= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
+		$allowAreaIds			= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchReleaseId, $searchStDate, $searchEndDate]);
 		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->releaseId($searchReleaseId)->stDate($searchStDate)->endDate($searchEndDate)
 				->cacheKey($cacheKey);
 		
@@ -249,11 +249,13 @@ class NewReleaseService
 	{
 		try
 		{
+			#取新品設定參數
 			$settings = $this->_repository->getSettingById($params->releaseId);
 			
 			if (empty($settings))
 				throw new Exception('新品設定不存在或已停用');
 			
+			#取出對應的erpNo料號
 			$result = $this->_repository->getErpNoById($params->releaseId);
 			
 			#分開primary & secondary
@@ -283,13 +285,16 @@ class NewReleaseService
 	 */
 	private function _getStoreList($params)
 	{
-		#$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
-		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
+		#改Mapping訂貨門店-已判別日期, 等同active list
+		$brand 				= $params->brand;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
 		
-		#改Mapping訂貨門店/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
-		
-		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
+		#新品先過濾廠區學區店
+		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 	}
 	
 	/* Get main data & mapping data
@@ -309,9 +314,9 @@ class NewReleaseService
 			$primaryIds 	= $params->primaryIds;
 			$secondaryIds 	= $params->secondaryIds;
 			$tastes 		= $params->tastes;
-			$userAreaIds 	= $params->userAreaIds;
+			$allowAreaIds 	= $params->allowAreaIds;
 			
-			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $userAreaIds);
+			$saleData = $this->_repository->getSaleData($brand, $stDate, $endDate, $primaryIds, $secondaryIds, $tastes, $allowAreaIds);
 				
 			$params->saleData = $saleData;
 		}
@@ -321,7 +326,6 @@ class NewReleaseService
 			throw new Exception('讀取POS系統訂單資料失敗');
 		}
 	}
-	
 	
 	/* 基底資料
 	 * @params: collection
@@ -348,12 +352,99 @@ class NewReleaseService
 			return;
 		}
 		
-		#要改成所有店家統計(含閉店)
-		#這裏只要先補全店家資料(無銷售訂單)及所需欄位
-		/* $saleStoreList = collect($params->allShopList)->mapWithKeys(function($item, $key){
-			return [$item['shopId'] => $item]; #posId
-		}); */
+		#DB有濾一遍了,只是預防萬一
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
+		$saleData = collect($saleData)->groupBy('shopId');
+		
+		#所有有效店家統計(因門店已是有效全部門店,改寫成以門店取資料)
+		#gid在pos manager已處理成統一area id
+		$baseData = collect($params->storeList)->map(function($item, $key) use($params, $saleData) {
+			
+			$data = data_get($saleData, $item['posId'], NULL); 
+			
+			#無資料或無POS Id的店
+			if (empty($data))
+			{
+				$temp['shopId'] 	= $item['posId'];
+				$temp['saleDate'] 	= $params->endDate;
+				$temp['qty'] 		= 0;
+				$temp['shopName'] 	= $item['storeName'];
+				$temp['areaId'] 	= $item['areaId'];
+				$temp['areaName']	= $item['areaName'];
+				$temp['storeKey']	= $item['storeKey'];
+			}
+			else
+			{
+				$temp['shopId'] 	= $item['posId'];
+				$temp['saleDate']	= Carbon::parse($data['saleDate'])->format('Y-m-d');
+				$temp['qty'] 		= $data['qty'];
+				$temp['shopName'] 	= $item['storeName'];
+				$temp['areaId'] 	= $item['areaId'];
+				$temp['areaName']	= $item['areaName'];
+				$temp['storeKey'] 	= $item['storeKey'];
+			}
+			
+			/*
+			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
+			$item['shopName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['shopName']);
+			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
+			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
+			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
+			*/
+			if (!empty($data))
+			dd($item);
+			return $item; 
+		})->reject(function($item, $key){
+			return empty($item);
+		});
+		
+		#補全未有銷售的門店資料(只需補active store)
+		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
+		$filloutShops = StoreManager::filterStoreByPosId($storeList, $saleShopIds);
+		
+		#重建
+		$filloutShops = collect($filloutShops)->map(function($item, $key) use($params){
+			$temp['shopId'] 	= $item['posId'];
+			$temp['saleDate'] 	= $params->endDate;
+			$temp['qty'] 		= 0;
+			$temp['shopName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName']	= $item['areaName'];
+			$temp['storeKey']	= $item['storeKey'];
+			
+			return $temp;
+		});
+		
+		$params->baseData = $baseData->merge($filloutShops)->toArray();
+	}
+	
+	/* 基底資料
+	 * @params: collection
+	 * @return: array
+	 */
+	/* private function _buildBaseData($params)
+	{
+		/*
+		[
+		330002 => [
+			"shopId" => "350001"
+			"saleDate" => "2025-09-22"
+			"qty" => "4"
+			"shopName" => "御廚竹南博愛店"
+			"areaId" => 3
+			"areaName" => "桃竹苗區"
+		]
+		*#/
+		$saleData = array_filter($params->saleData);
+		
+		if (empty($saleData))
+		{
+			$params->baseData = [];
+			return;
+		}
+		
+		#所有有效店家統計
 		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
 			return [$item['posId'] => $item]; #posId
 		});
@@ -383,7 +474,7 @@ class NewReleaseService
 			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
 			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
 			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
-			*/
+			*#/
 			
 			return $item; 
 		})->reject(function($item, $key){
@@ -392,8 +483,7 @@ class NewReleaseService
 		
 		#補全未有銷售的門店資料(只需補active store)
 		$saleShopIds = $baseData->pluck('shopId')->unique()->values()->toArray();
-		#$filloutShops = PosManager::getFillOutStore($params->activeShopList, $saleShopIds);
-		$filloutShops = PurchaseManager::filterStoreByPosId($storeList, $saleShopIds);
+		$filloutShops = StoreManager::filterStoreByPosId($storeList, $saleShopIds);
 		
 		#重建
 		$filloutShops = collect($filloutShops)->map(function($item, $key) use($params){
@@ -409,7 +499,7 @@ class NewReleaseService
 		});
 		
 		$params->baseData = $baseData->merge($filloutShops)->toArray();
-	}
+	} */
 	
 	
 	/* ========================== 統計 ========================== */
