@@ -191,50 +191,6 @@ class AppManager
 	
 	
 	/******************** User Auth Filter ********************/
-	/* 過濾查詢條件與使用者授權 */
-	/* 訂貨DB相關,都轉成BrandId取資料
-	 * @params: 
-	 * @return: boolean
-	 */
-	public function getAllowPurchaseBrandId($brand, $filterOpCenters = [])
-	{
-		#將OpCenter判別, 統一轉由判別BrandId
-		$brandId = $brand->value;
-		$brandMapConfig = config('web.purchase.op_center.brandMap');
-		$allowOpCenters = $this->getAllowOpCenter($filterOpCenters);
-		
-		$allowBrandIds = collect($brandMapConfig)->filter(function($items, $key) use($allowOpCenters) {
-			return in_array($key, $allowOpCenters);
-		})->map(function($items, $key) use($brandId){
-			return $items[$brandId];
-		})->values()->all();
-		
-		return $allowBrandIds;
-	}
-	
-	/* Get lb brandid
-	 * @params: int
-	 * @params: array
-	 * @return: array
-	 */
-	public function getAllowLbBrandId($brand)
-	{
-		#訂貨取資料需,但情境太多,要獨立取
-		$brandMap 	= config('web.purchase.op_center.brandMap');
-		$lbId 		= Brand::LUOBO->value;
-		$allowLbId	= data_get($brandMap, "TP.{$lbId}"); #取TP即可
-		
-		#八方一律取,不影響
-		if ($brand ==  Brand::BAFANG)
-			return [$allowLbId];
-		
-		#御廚及南廠無
-		if ($brand == Brand::BUYGOOD OR $brand == Brand::FJVEGGIE)
-			return [];
-		
-		return [];
-	}
-	
 	/* 
 	 * @params: 
 	 * @return: boolean

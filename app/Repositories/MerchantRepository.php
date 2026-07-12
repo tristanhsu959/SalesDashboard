@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Enums\Brand;
 use App\Enums\Area;
 use App\Libraries\Purchase\AreaLib;
+use App\Repositories\Traits\PurchaseReposTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Exception;
@@ -14,7 +14,7 @@ use Exception;
 
 class MerchantRepository extends Repository
 {
-	#use PurchaseReposTrait;
+	use PurchaseReposTrait;
 	
 	public function __construct()
 	{
@@ -26,11 +26,13 @@ class MerchantRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getStoreInfoList($brand, $allowBrandIds, $allowAreaIds)
+	public function getStoreInfoList($brand, $allowOpCenterIds, $allowAreaIds)
 	{
 		$brandId = $brand->value;
 		$allowAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
 		$excepts = config("web.purchase.store.except.{$brandId}");
+		
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -43,14 +45,20 @@ class MerchantRepository extends Repository
 			->leftJoin(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->leftJoin(DB::raw('Car as c WITH(NOLOCK)'), 'c.Id', '=', 'sc.CarId')
 			->leftJoin(DB::raw('Warehouse as w WITH(NOLOCK)'), 'w.Id', '=', 'sc.WarehouseId')
-			->select('b.Id as brandId', 'ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
+			->select('b.No as brandNo', 'ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
 			->addSelect('s.StorePhone as storePhone', 's.Address as address', 's.VATNumber as vatNumber', 'u.Name as salesName')
 			->addSelect('f.Name as factoryName', 'w.Name as warehouse', 'c.Name as carNo')
-			->whereExists(function ($query) use($allowBrandIds) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
+			})
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->whereIn('bd.Id',  $allowBrandIds);
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
 			->whereNull('s.CloseDate')
 			->when($allowAreaIds, function ($query, $allowAreaIds) {
@@ -59,7 +67,7 @@ class MerchantRepository extends Repository
 			})
 			->whereNotIn('s.No', $excepts)#->ddRawSql();
 			->get()
-			->toArray(); 
+			->toArray();
 		
 		return $result;
 	}
@@ -79,7 +87,6 @@ class MerchantRepository extends Repository
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
-		dd();
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Store as s')
@@ -94,6 +101,12 @@ class MerchantRepository extends Repository
 				#->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
+			->whereExists(function ($query) use($opCenter) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'a.OperationCenterId')
+					->whereIn('oc.No', $opCenter);
+			})
 			->whereExists(function ($query) use($allowBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')

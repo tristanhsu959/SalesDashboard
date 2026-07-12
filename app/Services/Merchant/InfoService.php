@@ -124,17 +124,13 @@ class InfoService
 	
 		try
 		{
+			#因不是basic store,故不從StoreManager取
 			$brand 					= $params->brand;
+			$allowOpCenterIds		= $params->allowOpCenterIds;
 			$allowAreaIds			= $params->allowAreaIds;
-			$allowPurchaseBrandIds 	= $params->allowPurchaseBrandIds;
-			$allowLbBrandIds 		= $params->allowLbBrandIds;
 			
-			#取所有門店
-			$allowBrandIds = array_merge($allowPurchaseBrandIds, $allowLbBrandIds);
-			
-			$storeList = $this->_repository->getStoreInfoList($brand, $allowBrandIds, $allowAreaIds);
-			
-			$params->storeList = $storeList;
+			#取所有門店(含廠區學區及蘿蔔)
+			$params->storeList = $this->_repository->getStoreInfoList($brand, $allowOpCenterIds, $allowAreaIds);
 		}
 		catch(Exception $e)
 		{
@@ -177,19 +173,26 @@ class InfoService
 		{
 			$storeList = $params->storeList;
 			
-			#先處理area為了可以排序
-			$store = collect($storeList)->map(function($item, $key){
+			#先處理storeKey, 才能進行合併
+			$storeList = collect($storeList)->map(function($item, $key){
+				$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
+				return $item;
+			})->toArray(); 
+			
+			$mergeStoreList = StoreManager::mergeLbStoreByBrandNo($params->brand, $storeList);
+			
+			#處理Data
+			$store = collect($mergeStoreList)->map(function($item, $key){
 				$item['posId'] 		= (empty($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
 				$item['salesName']	= (empty($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
-				$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
 				
 				return $item;
-			})->sortBy('areaId')->values()->map(function($item, $key) {
-				$temp['brandId'] 	= $item['brandId'];
+			})->map(function($item, $key) {
+				#依顯示順序
 				$temp['areaName'] 	= $item['areaName'];
 				#$temp['storeNo']	= $item['storeNo'];
 				$temp['posId'] 		= $item['posId'];
@@ -204,7 +207,7 @@ class InfoService
 				$temp['salesName']	= $item['salesName'];
 				
 				return $temp;
-			})->toArray(); 
+			})->sortBy('areaId')->values()->all(); 
 			
 			$params->baseData = $store;
 		}
@@ -226,17 +229,8 @@ class InfoService
 	{
 		try
 		{
-			$storeList = $params->baseData;
-			$storeList = StoreManager::mergeLbStoreById($storeList, $params->allowPurchaseBrandIds, $params->allowLbBrandIds);
-			
-			#因顯示是照順序,故要清除不用欄位
-			$storeList = collect($storeList)->map(function($item, $key){
-				unset($item['brandId']);
-				return $item;
-			})->sortBy('areaId')->toArray();
-			
 			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
-			$info['store']	= $storeList;
+			$info['store']	= $params->baseData;
 			
 			$params->info = $info;
 		}

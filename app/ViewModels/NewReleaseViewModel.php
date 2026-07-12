@@ -51,6 +51,10 @@ class NewReleaseViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
+		$currentUser 	= AppManager::getCurrentUser();
+		$areaPermission = $currentUser->getSalesAreaPermissionMap();
+		
+		$this->set('options.opCenterList', $opCenter);
 		$this->set('options.newReleaseProducts', $this->_service->getNewReleaseProducts($this->brand->value));
 	}
 	

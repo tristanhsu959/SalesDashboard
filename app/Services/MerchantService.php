@@ -128,21 +128,18 @@ class MerchantService
 	{
 		$params = new Fluent();
 		
+		#Op & Area有權限設定,故要再與查詢條件判別
 		$allowOpCenterIds		= AppManager::getAllowOpCenter($searchOpCenterIds);
 		$allowAreaIds			= AppManager::getAllowPurchaseAreas($searchAreaIds);
-		$allowPurchaseBrandIds	= AppManager::getAllowPurchaseBrandId($brand, $searchOpCenterIds);
-		$allowLbBrandIds 		= AppManager::getAllowLbBrandId($brand);
 		
 		$functions		= $this->parsingFunction($brand);
 		
-		$searchStDate 	= ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
+		$searchStDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
 		$searchEndDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->addDay()->format('Y-m-d');
 		
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowPurchaseBrandIds, $allowAreaIds, $searchType, $searchStDate]);
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate]);
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
-				->allowPurchaseBrandIds($allowPurchaseBrandIds)
-				->allowLbBrandIds($allowLbBrandIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
 				->cacheKey($cacheKey);
 		
