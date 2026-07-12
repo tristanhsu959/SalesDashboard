@@ -7,7 +7,7 @@
 						<th x-text="store.header.areaName"></th>
 						<th x-text="store.header.shopId"></th>
 						<th x-text="store.header.storeKey"></th>
-						<th x-text="store.header.shopName"></th>
+						<th x-text="store.header.storeName"></th>
 						<template x-for="pName in store.header.products" :key="pName">
 							<th x-text="pName"></th>
 						</template>
@@ -19,7 +19,7 @@
 						<td x-text="storeData.areaName"></td>
 						<td x-text="storeData.shopId"></td>
 						<td x-text="storeData.storeKey"></td>
-						<td><button class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey })"><i>more_vert</i></button><span x-text="storeData.shopName"></span></td>
+						<td><button class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey })"><i>more_vert</i></button><span x-text="storeData.storeName"></span></td>
 						
 						<template x-for="(pName, pId) in store.header.products" :key="pId">
 							<td>

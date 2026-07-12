@@ -294,6 +294,7 @@ class NewReleaseService
 		
 		#新品先過濾廠區學區店
 		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		$storeList = PosManager::filterSpecialStore($brand, $storeList);
 		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 	}
 	

@@ -67,7 +67,7 @@ class StoreRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getLbStoreList($brand, $opCenter, $userAreaIds)
+	/* public function getLbStoreList($brand, $opCenter, $userAreaIds)
 	{
 		$brandId = $brand->value;
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
@@ -97,7 +97,7 @@ class StoreRepository extends Repository
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			}) */
+			}) *#/
 			#->whereNull('s.CloseDate')
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
@@ -107,7 +107,7 @@ class StoreRepository extends Repository
 			->toArray(); 
 		
 		return $result;
-	}
+	} */
 	
 	/* 取有效門店清單(only id:計算用)
 	 * @params: enum

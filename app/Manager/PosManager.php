@@ -131,18 +131,19 @@ class PosManager
 		return $result;
 	}
 	
-	/* 排除特殊複合店
+	/* 排除特殊複合(屬銷售定義非通用,故不寫在StoreManager)
 	 * @params: collection
 	 * @return: array
 	 */
 	public function filterSpecialStore($brand, $storeList)
 	{
+		#御廚才有影響
 		$brandId = $brand->value;
 		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}");
 		
 		$result = collect($storeList)->filter(function($item, $key) use($excepts){
 			return ! in_array($item['storeKey'], $excepts);
-		});
+		})->toArray();
 		
 		return $result;
 	}

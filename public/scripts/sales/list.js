@@ -65,7 +65,8 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
-			this.searchData.shopName = '';
+			this.searchData.areaIds = [];
+			this.searchData.storeName = '';
 			this.searchData.category = '';
 			this.searchData.productIds = [];
 			this.errors.clear();
@@ -87,7 +88,7 @@ document.addEventListener('alpine:init', () => {
 				String(store.shopId || '').toLowerCase().includes(searchKeyword) ||
 				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
 				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
-				String(store.shopName || '').toLowerCase().includes(searchKeyword)
+				String(store.storeName || '').toLowerCase().includes(searchKeyword)
 			);
 			
 			return result;
@@ -113,7 +114,7 @@ document.addEventListener('alpine:init', () => {
 			if (data)
 			{
 				this.detail.storeKey 	= data.storeKey;
-				this.detail.storeName 	= data.shopName;
+				this.detail.storeName 	= data.storeName;
 				this.detail.products 	= data.products;
 				
 				ui('#salesDetail');

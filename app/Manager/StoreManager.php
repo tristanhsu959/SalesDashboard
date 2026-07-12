@@ -259,7 +259,7 @@ class StoreManager
 		$brandId = $brand->value;
 		$excepts = config("web.purchase.store.factoryStore.{$brandId}");
 		
-		#只濾除沒POS的
+		#濾除沒POS的或廠區學區店
 		return collect($storeList)->reject(function($item, $key) use($excepts) {
 			return empty($item['posId']) OR $item['posId'] == 'null' OR in_array($item['storeKey'], $excepts);
 		})->toArray();

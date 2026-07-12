@@ -4,7 +4,7 @@ namespace App\Services\Sales;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
-use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Repositories\SalesRepository;
 use App\Services\Sales\StoreService;
 use App\Services\Sales\AreaService;
@@ -48,7 +48,7 @@ class ProductService
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
-		
+			#dd($params);
 			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)
@@ -183,7 +183,7 @@ class ProductService
 			return [$item['productId'] => $item['productName']];
 		})->toArray();
 		
-		$params->productHeader = $header;
+		$params->productMap = $header;
 	}
 	
 	/* 門店資料
@@ -192,14 +192,17 @@ class ProductService
 	 */
 	private function _getStoreList($params)
 	{
-		#$params->allStoreList 	= PosManager::getAllStores($params->brand, $params->userAreaIds); #all shops
-		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds); #only active shops
+		$brand 				= $params->brand;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
 		
-		##20260630:改用訂貨門店來mapping/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
-		$storeList = PosManager::filterSpecialStore($params->brand, $storeList);
-		$params->storeList = PurchaseManager::filterFactoryStore($storeList); #無PosId
+		#新品先過濾廠區學區店
+		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		$storeList = PosManager::filterSpecialStore($brand, $storeList);
 		
+		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 	}
 	
 	/* 取查詢的門店資料
@@ -251,10 +254,10 @@ class ProductService
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$primaryIds 	= $params->primaryIds;
 			$secondaryIds 	= $params->secondaryIds;
-			$userAreaIds 	= $params->userAreaIds;
+			$allowAreaIds 	= $params->allowAreaIds;
 			$filterStoreIds	= $params->storeIds;
 			
-			$result = $this->_repository->getSaleData($brand, $userAreaIds, $stDate, $endDate, $primaryIds, $secondaryIds, $filterStoreIds);
+			$result = $this->_repository->getSaleData($brand, $allowAreaIds, $stDate, $endDate, $primaryIds, $secondaryIds, $filterStoreIds);
 			
 			$params->saleData = $result;
 		}
@@ -286,64 +289,53 @@ class ProductService
 			"productName" => "橙汁排骨"
 		]
 		*/
+		$saleData = array_filter($params->saleData);
 		
-		if (empty($params->saleData))
+		if (empty($saleData))
 		{
 			$params->baseData = [];
 			return;
 		}
 		
+		#改用門店對應資料,因門店已是active,不用再處理補全門店
 		$saleData = PosManager::filterDataByExceptStore($params->brand, $params->saleData);
+		
+		#用來convert erpNo to productId
 		$productList = $params->productList; 
 		
-		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
-			return [$item['posId'] => $item];
-		})->all();
+		#先處理Data再mapping
+		$saleData = collect($saleData)->groupBy('shopId')->map(function($items, $key) use($productList){
+			return collect($items)->map(function($item, $key) use($productList) {
+				
+				#轉換成系統設定Id and Name
+				$product = data_get($productList, $item['erpNo'], NULL);
+				
+				$temp['productId']	= empty($product) ? 0 : $product['productId'];
+				$temp['productName']= empty($product) ? '' : $product['productName'];
+				$temp['amount']		= $item['amount'];	
+				$temp['qty']		= $item['qty'];
+				$temp['saleDate']	= $item['saleDate'];
+				
+				return $temp;
+			})->toArray();
+			
+		})->toArray();
 		
-		$baseData = collect($saleData)->map(function($item, $key) use($productList, $storeList) {
+		$baseData = collect($params->storeList)->map(function($item, $key) use($saleData) {
 			
-			$store 	= data_get($storeList, $item['shopId'], NULL); 
-			$product= data_get($productList, $item['erpNo'], NULL);
+			$data = data_get($saleData, $item['posId'], []); 
 			
-			if (is_null($store))
-				return '';
-			
-			$item['storeKey'] 	= $store['storeKey'];
-			$item['shopName'] 	= $store['storeName'];
-			$item['areaId'] 	= $store['areaId'];
-			$item['areaName']	= $store['areaName'];
-			
-			#轉換成系統設定Id and Name
-			$item['productId']	= empty($product) ? 0 : $product['productId'];
-			$item['productName']= empty($product) ? '' : $product['productName'];
-			
-			return $item;
-		})->reject(function($item, $key){
-			return empty($item);
-		});
-		
-		#補全未有銷售的門店資料(closedown = 0)
-		$saleShopIds 	= array_filter($baseData->pluck('shopId')->unique()->values()->toArray());
-		$filloutShops 	= PosManager::getFillOutStore($params->storeList, $saleShopIds);
-		
-		#因每個統計內容不同, 故無法寫在trait class
-		$filloutShops = collect($filloutShops)->map(function($item, $key) {
 			$temp['storeKey'] 	= $item['storeKey'];
-			$temp['shopId'] 	= $item['posId'];
-			$temp['shopName'] 	= $item['storeName'];
-			$temp['erpNo'] 		= '';
-			$temp['amount'] 	= 0;
-			$temp['qty'] 		= 0;
+			$temp['shopId'] 	= $item['posId']; 
+			$temp['storeName'] 	= $item['storeName'];
 			$temp['areaId'] 	= $item['areaId'];
 			$temp['areaName']	= $item['areaName'];
-			$temp['productId'] 	= 0;
-			$temp['productName']= '';
-			$temp['saleDate'] 	= '';
+			$temp['data']		= $data;
 			
 			return $temp;
-		});
+		})->toArray();
 		
-		$params->baseData = $baseData->merge($filloutShops)->toArray();
+		$params->baseData = $baseData;
 	}
 	
 	/* ====================== Prepare data End ====================== */
@@ -413,24 +405,24 @@ class ProductService
 		$header = [
 					'areaName' 	=> '區域', 
 					'shopCount'	=> '店家數',
-					'products' 	=> $params->productHeader
+					'products' 	=> $params->productMap
 				];
 		$params->set('area.header', $header);
 		
-		$result = collect($baseData)->sortBy('areaId')->groupBy('areaId')->map(function($items, $key) {
-			#區域總計
-			$temp['areaName'] 	= $items->pluck('areaName')->get(0);
-			$temp['shopCount']	= $items->pluck('shopId')->unique()->count(); #店家數
+		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) {
 			
-			#因補全門店會有key=0
-			$temp['products']  	= $items->groupBy('productId')->map(function($items, $key){
+			#區域總計
+			$temp['areaName'] 	= $items->pluck('areaName')->first();
+			$temp['shopCount']	= $items->count(); #店家數
+			
+			$data = $items->pluck('data')->filter()->collapse();
+			
+			$temp['products'] = collect($data)->groupBy('productId')->map(function($items, $key){
 				
 				$temp['totalQty'] 	= $items->pluck('qty')->sum();
 				$temp['totalAmount']= round($items->pluck('amount')->sum(), 2);
 				
 				return $temp;
-			})->filter(function($item, $key){
-				return $key != 0;
 			})->toArray();
 			
 			return $temp;
@@ -438,15 +430,15 @@ class ProductService
 		
 		#這裏是依header
 		$result['total']['areaName']	= '全區合計';
-		$result['total']['shopCount']	= collect($baseData)->pluck('shopId')->unique()->count(); 
-		$result['total']['products'] 	= collect($baseData)->groupBy('productId')->map(function($items, $key){
+		$result['total']['shopCount']	= collect($baseData)->count(); 
+		
+		$totalData = collect($baseData)->pluck('data')->collapse();
+		$result['total']['products'] 	= collect($totalData)->groupBy('productId')->map(function($items, $key){
 				
 			$temp['totalQty'] 	= $items->pluck('qty')->sum();
 			$temp['totalAmount']=  round($items->pluck('amount')->sum(), 2);
 			
 			return $temp;
-		})->filter(function($item, $key){
-			return $key != 0;
 		})->toArray();
 		
 		$params->set('area.data', array_filter($result));
@@ -488,30 +480,28 @@ class ProductService
 			'areaName'	=> '區域', 
 			'shopId'	=> 'POS店號',
 			'storeKey'	=> '門店代號', 
-			'shopName' 	=> '門店名稱',
-			'products' 	=> $params->productHeader
+			'storeName'	=> '門店名稱',
+			'products' 	=> $params->productMap
 		];
 		
 		$params->set('store.header', $header);
 		
 		#總量不分Date
-		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($items, $key) {
-			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
-			$temp['shopId'] 	= $items->pluck('shopId')->first();
-			$temp['shopName'] 	= $items->pluck('shopName')->first();
-			$temp['areaId'] 	= $items->pluck('areaId')->first();
-			$temp['areaName'] 	= $items->pluck('areaName')->first();
-				
-			#因有補全的門店,故會有key=0的狀況	
-			$temp['products'] = $items->groupBy('productId')->map(function($items, $key){
+		$result = collect($baseData)->sortBy('areaId')->map(function($item, $key) {
+			
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['shopId'] 	= $item['shopId'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			
+			$temp['products'] = collect($item['data'])->groupBy('productId')->map(function($items, $key){
 				
 				$temp['totalQty'] 	= $items->pluck('qty')->sum();
 				$temp['totalAmount']=  round($items->pluck('amount')->sum(), 2);
 				
 				return $temp;
 				
-			})->filter(function($item, $key){
-				return $key != 0;
 			})->toArray();
 			
 			return $temp;	
@@ -530,7 +520,7 @@ class ProductService
 		$params->set('detail.header', []);
 		$params->set('detail.data', []);
 		$baseData 	= $params->baseData;
-		$products 	= $params->productHeader;
+		$products 	= $params->productMap;
 		
 		$this->_buildDayRange($params);
 		
@@ -543,7 +533,46 @@ class ProductService
 		$params->set('detail.header', $header);
 		
 		#Deatail by day
-		$result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) use($products, $dayRange) {
+		$result = collect($baseData)->mapWithKeys(function($item, $key){
+			return [$item['storeKey'] => $item];
+		})->map(function($item, $key) use($products, $dayRange) {
+			
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['storeName'] 	= $item['storeName'];
+			
+			$temp['products'] =  collect($item['data'])->groupBy('productId')->map(function($items, $key) use($dayRange) {
+				
+				$dayItems = $items->groupBy('saleDate');
+				
+				#按日期順序
+				return collect($dayRange)->map(function($date, $key) use($dayItems){
+					
+					$data = $dayItems->get($date, collect([]));
+					
+					if ($data->isEmpty())
+					{
+						$temp['totalQty'] 	= 0;
+						$temp['totalAmount']= 0;
+					}
+					else
+					{	
+						$temp['totalQty'] 	= $data->pluck('qty')->sum();
+						$temp['totalAmount']= round($data->pluck('amount')->sum(), 2);
+					}
+					
+					return $temp;
+				});
+			
+			})->mapWithKeys(function($item, $key) use($products) {
+				$productName = data_get($products, $key);
+				return [$productName => $item];
+			})->toArray();
+			
+			return $temp;	
+		})->all();
+		
+		$params->set('detail.data', $result);
+		/* $result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) use($products, $dayRange) {
 			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
 			$temp['shopName'] 	= $items->pluck('shopName')->first();
 				
@@ -575,7 +604,7 @@ class ProductService
 					$temp['totalAmount']=  round($items->pluck('amount')->sum(), 2);
 				
 					return $temp;
-				})->sortKeys()->all(); */
+				})->sortKeys()->all(); *#/
 			
 			})->mapWithKeys(function($item, $key) use($products) {
 				$productName = data_get($products, $key);
@@ -583,9 +612,8 @@ class ProductService
 			})->toArray();
 			
 			return $temp;	
-		})->all();
+		})->all(); */
 		
-		$params->set('detail.data', $result);
 	}
 	
 	/* 計算日期天數

@@ -109,7 +109,7 @@ class SalesService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName, $searchCategory, $searchProductIds)
 	{
 		try
 		{
@@ -117,7 +117,7 @@ class SalesService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			#Params都用pass(保留service可複用空間)
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName, $searchCategory, $searchProductIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -159,19 +159,19 @@ class SalesService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName, $searchCategory, $searchProductIds)
 	{
 		$params = new Fluent();
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
-		$opCenter		= PosManager::getOpCenterNo($brand); #不分取全部
+		#Op & Area有權限設定,故要再與查詢條件判別
+		$allowOpCenterIds		= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
+		$allowAreaIds			= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreName, $searchCategory, $searchProductIds]);
 		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
 				->storeName($searchStoreName)
 				->category($searchCategory)->productIds($searchProductIds)
