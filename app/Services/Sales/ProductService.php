@@ -48,7 +48,7 @@ class ProductService
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
-			#dd($params);
+			
 			return $this->_generateStatistics($params);
 		}
 		catch(Exception $e)

@@ -47,12 +47,13 @@ class EzOrderPosController extends Controller
 		$searchBy			= $request->input('searchBy');
 		$searchStDate		= $request->input('searchStDate'); #or Month
 		$searchEndDate		= $request->input('searchEndDate');
+		$searchAreaIds		= $request->array('searchAreaIds');
 		$searchStoreName	= $request->input('searchStoreName', NULL);
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName);
+		$this->_viewModel->keepSearchData($searchType, $searchBy, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

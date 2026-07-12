@@ -48,6 +48,7 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.by = 'store';
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
+			this.searchData.areaIds = [];
 			this.searchData.storeName = '';
 			this.errors.clear();
 		},

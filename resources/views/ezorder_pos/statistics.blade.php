@@ -45,17 +45,18 @@
 			<label>結束日期</label>
 		</div>
 		
-		<!--fieldset x-show="searchData.by == 'area'" class="light-blue-border light-blue-text">
-			<legend class="title-small">選擇區域</legend>
+		<fieldset class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
-				<template x-for="(areaName, areaId) in options.areas" :key="areaId">
-					<label class="checkbox check-pink">
-						<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds" :disabled="searchData.by != 'area'">
-						<span x-text="areaName"></span>
-					</label>
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
 				</template>
 			</nav>
-		</fieldset-->
+			<output class="red-text small">未選時取全區</output>
+		</fieldset>
 		
 		<div x-show="searchData.by == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
 			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.by != 'store'" @input="errors.delete('storeName')">

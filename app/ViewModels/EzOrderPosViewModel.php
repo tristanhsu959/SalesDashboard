@@ -63,11 +63,10 @@ class EzOrderPosViewModel extends Fluent
 		];
 		$this->set('options.by', $by);
 		
-		#區域選項須以使用者權限為主
-		/* $currentUser = AppManager::getCurrentUser();
-		$allowAreas = $currentUser->getAreaPermissionsMap();
+		$currentUser 	= AppManager::getCurrentUser();
+		$areaPermission = $currentUser->getSalesAreaPermissionMap();
 		
-		$this->set('options.areas', $allowAreas); */
+		$this->set('options.areaList', $areaPermission);
 	}
 	
 	/* Form submit action
@@ -91,7 +90,7 @@ class EzOrderPosViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'ez', $by = 'store', $stDate = NULL, $endDate = NULL, $storeName = '')
+	public function keepSearchData($type = 'ez', $by = 'store', $stDate = NULL, $endDate = NULL, $areaIds = [], $storeName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
@@ -101,6 +100,7 @@ class EzOrderPosViewModel extends Fluent
 		$this->set('search.by', $by);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
+		$this->set('search.areaIds', $areaIds);
 		$this->set('search.storeName', $storeName);
 		$this->set('search.today', $today);
 		$this->set('search.thisMonth', $thisMonth);

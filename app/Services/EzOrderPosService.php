@@ -80,14 +80,14 @@ class EzOrderPosService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName)
+	public function getStatistics($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName);
+			$params = $this->_initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName);
 			
 			$statistics = Cache::remember($params->cacheKey, 600, function () use($params){
 				
@@ -126,18 +126,18 @@ class EzOrderPosService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName)
+	private function _initParams($brand, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName)
 	{
 		$params = new Fluent();
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$userAreaIds 	= $currentUser->getSalesAreaPermissions();
-		$opCenter		= PosManager::getOpCenterNo($brand);
+		#Op & Area有權限設定,故要再與查詢條件判別
+		$allowOpCenterIds	= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
+		$allowAreaIds		= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);
+		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);
 		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)->by($searchBy)
 				->stDate($searchStDate)->endDate($searchEndDate)->storeName($searchStoreName)
 				->cacheKey($cacheKey);

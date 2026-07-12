@@ -3,7 +3,8 @@
 namespace App\Services\EzOrderPos;
 
 use App\Facades\AppManager;
-use App\Facades\PurchaseManager;
+use App\Facades\PosManager;
+use App\Facades\StoreManager;
 use App\Repositories\EzOrderPosRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
@@ -89,16 +90,19 @@ class StoreService
 			#1. Get all shops with area permission
 			$this->_getActiveStoreList($params);
 			
-			#2. 八方點Area或查詢對應的POS ID
-			$this->_getFilterPosId($params);
+			#2.過濾查詢店名
+			$this->_getPosIdByName($params);
 			
-			#3.八方點Data
+			#3. 八方點Area或查詢對應的POS ID
+			$this->_getAreaPosIdForEzOrder($params);
+			
+			#4.八方點Data
 			$this->_getEzorderFromDB($params);
 			
-			#4.POS Data
+			#5.POS Data
 			$this->_getPosFromDB($params);
 			
-			#5.POS Data
+			#6.POS Data
 			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
@@ -115,32 +119,43 @@ class StoreService
 	private function _getActiveStoreList($params)
 	{
 		#門店以訂貨的為基準, 因八方點是用訂貨的store
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+		#改Mapping訂貨門店-已判別日期, 等同active list
+		$brand 				= $params->brand;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
 		
-		#濾除八方點定義的廠區店(雖有些店有PosId,但仍濾除)
-		$brandId = $params->brand->value;
-		$excepts = array_merge(config("web.ezorder.store.factoryStore.{$brandId}"), config("web.ezorder.store.except.{$brandId}"));
-		
-		$storeList = collect($storeList)->reject(function($item, $key) use($excepts){
-			return in_array($item['storeKey'], $excepts) OR empty($item['posId']);
-		})->all();
-		
-		#過濾訂貨定義的廠區店
-		$storeList = PurchaseManager::filterFactoryStore($storeList);
-		
-		#若有storeName條件則要先過濾
+		#已過濾廠區學區店(含八方點定義的,無ezorder excepts, 因訂貨無此店號不用濾)
+		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		$storeList = PosManager::filterSpecialStore($brand, $storeList);
+		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+	}
+	
+	/* 取查詢的門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getPosIdByName($params)
+	{
+		#避免用like查詢
 		$storeName = $params->storeName;
 		
-		if (! empty($storeName))
+		if (empty($storeName))
 		{
-			$storeList = collect($storeList)->filter(function($item, $key) use($storeName){
-				return Str::contains($item['storeName'], $storeName);
-			})->all();
+			$params->namePosIds = [];
+			return TRUE;
 		}
 		
-		$params->storeList = $storeList;
+		$storeList = collect($params->storeList)->filter(function($item, $key) use($storeName){
+			return Str::contains($item['storeName'], $storeName);
+		});
 		
-		if (empty($storeList))
+		#有查店名,要更新store list
+		$params->storeList 	= $storeList->toArray();
+		$params->namePosIds	= $storeList->pluck('posId')->values()->all(); 
+		
+		if (empty($params->storeList))
 			throw new Exception('查無符合資料');
 	}
 	
@@ -148,40 +163,18 @@ class StoreService
 	 * @params: fluent
 	 * @return: array
 	 */
-	private function _getFilterPosId($params)
+	private function _getAreaPosIdForEzOrder($params)
 	{
 		#因八方點無area, 故需用posid來判別過濾
-		$userAreaIds 	= $params->userAreaIds; 
-		$allAreaIds		= Area::getAll();
-		$hasAllAreaAuth	= collect($allAreaIds)->diff($userAreaIds)->isEmpty(); #全區權限
-		$allPosIds		= collect($params->storeList)->pluck('posId')->all(); #門店已過濾區域權限及storeName
+		$allowAreaIds = $params->allowAreaIds;
 		
-		#有無查詢
-		$params->namePosIds = empty($params->storeName) ? [] : $allPosIds;
+		#門店已過濾區域權限及storeName
+		$areaPosIds	= collect($params->storeList)->filter(function($item, $key) use($allowAreaIds){
+			return in_array($item['areaId'], $allowAreaIds);
+		})->pluck('posId')->toArray(); 
 		
 		#區域:只有八方點需要用到
-		$params->areaPosIds = ($hasAllAreaAuth) ? [] : $allPosIds;
-	}
-	
-	
-	/* Get store posid
-	 * @params: fluent
-	 * @return: array
-	 */
-	private function _getPosIdByName($params)
-	{
-		#因POS只有posid, 八方點無區域, 統一用POSId當依據
-		#須依取得的stores為基準,因已過濾區域權限
-		$storeList = $params->storeList;
-		$storeName = $params->storeName;
-		
-		if (empty($storeName))
-		{
-			$params->namePosIds = [];
-			return;
-		}
-		
-		$params->namePosIds = collect($storeList)->pluck('posId')->all();
+		$params->areaPosIds = $areaPosIds;
 	}
 	
 	/* 取八方點DB
@@ -232,7 +225,7 @@ class StoreService
 			$brand 		= $params->brand;
 			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$areaIds 	= $params->userAreaIds;
+			$areaIds 	= $params->allowAreaIds;
 			$posIds		= $params->namePosIds;
 			
 			#因八方點無法計算營業日, 故要另外取
