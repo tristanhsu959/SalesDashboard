@@ -19,7 +19,7 @@ document.addEventListener('alpine:init', () => {
 			{
 				this.$refs.searchStDate.type = 'date'; //input type
 				this.$refs.searchEndDate.type = 'date';
-				this.$refs.searchShopName.disabled = false;
+				this.$refs.searchStoreName.disabled = false;
 				this.searchData.stDate = this.searchData.today;
 				this.searchData.endDate = this.searchData.today;
 			}
@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
 			{
 				this.$refs.searchStDate.type = 'month';
 				this.$refs.searchEndDate.type = 'month';
-				this.$refs.searchShopName.disabled = true;
+				this.$refs.searchStoreName.disabled = true;
 				this.searchData.stDate = this.searchData.thisMonth;
 				this.searchData.endDate = this.searchData.thisMonth;
 			}
@@ -62,7 +62,9 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = 'store';
-			this.searchData.shopName = '';
+			this.searchData.storeType = this.searchData.defaultStoreTypes;
+			this.searchData.areaIds = [];
+			this.searchData.storeName = '';
 			this.errors.clear();
 			this.switchConditions();
 		},

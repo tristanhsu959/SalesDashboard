@@ -4,7 +4,7 @@ namespace App\Services\DailyRevenue;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
-use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Repositories\DailyRevenueRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Sales\AreaLib;
@@ -35,7 +35,7 @@ class StoreService
 		$this->_statistics = [
 			'brandId'		=> '', #export
 			'brandCode'		=> '',
-			'modeType'		=> '',
+			'type'		=> '',
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'shop' 			=> [],
@@ -76,10 +76,10 @@ class StoreService
 	{
 		$this->_statistics['brandId']	= $params->brand->value;
 		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['modeType']	= $params->type;
+		$this->_statistics['type']		= $params->type;
 		$this->_statistics['startDate'] = $params->stDate;
 		$this->_statistics['endDate']	= $params->endDate;
-		$this->_statistics['shop']		= $params->shop;
+		$this->_statistics['store']		= $params->store;
 		$this->_statistics['area']		= $params->area;
 		$this->_statistics['hasResult']	= FALSE;
 		
@@ -109,7 +109,7 @@ class StoreService
 			$this->_getDataFromDB($params);
 			
 			#3.build to base data
-			$this->_buildBaseData($params); 
+			$this->_buildBaseData($params); dd($params);
 		}
 		catch(Exception $e)
 		{
@@ -124,13 +124,18 @@ class StoreService
 	 */
 	private function _getStoreList($params)
 	{
-		#20260701:改用訂貨門店來mapping/但因資料可能有缺失, 原POS門店還是得要保留(取代activeShopList)
-		#$params->allShopList 	= PosManager::getAllStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #all shops
-		#$params->activeShopList = PosManager::getActiveStores($params->brand, $params->userAreaIds, $params->shopType, $params->shopName); #only active shops
+		#20260701:改用訂貨門店來mapping
+		#改Mapping訂貨門店-已判別日期, 等同active list
+		$brand 				= $params->brand;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
 		
-		$storeList = PurchaseManager::getStoreList($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
-		#營收要排除無POS
-		$params->storeList = PurchaseManager::filterFactoryStore($storeList);
+		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		$storeList = PosManager::filterSpecialStore($brand, $storeList);
+		
+		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 	}
 	
 	/* Get buy good data
@@ -144,18 +149,12 @@ class StoreService
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$shopType 		= $params->shopType;
-			$shopName 		= $params->shopName;
-			$userAreaIds 	= $params->userAreaIds;
+			$storeType 		= $params->storeType;
+			$storeName 		= $params->storeName;
+			$allowAreaIds 	= $params->allowAreaIds;
 			
-			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
+			$result = $this->_repository->getSale00Data($brand, $allowAreaIds, $stDate, $endDate, $storeType, $storeName);
 			
-			#去除shop id(已不需要)
-			/* $result = collect($result)->map(function($item, $key){
-				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
-				return $item;
-			})->toArray(); */
-				
 			$params->saleData = array_filter($result);
 		}
 		catch(Exception $e)
@@ -187,7 +186,7 @@ class StoreService
 		#即時營收取有效店家即可
 		$saleData	= PosManager::filterDataByExceptStore($params->brand, $params->saleData);
 		
-		$storeList 	= PurchaseManager::filterStoreByTypeName($params->storeList, $params->shopType);
+		$storeList 	= StoreManager::filterStoreByTypeName($params->storeList, $params->storeType);
 		
 		$storeList 	= collect($storeList)->mapWithKeys(function($item, $key){
 			return [$item['posId'] => $item];

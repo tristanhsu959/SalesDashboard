@@ -23,7 +23,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName)
+	public function getSale00Data($brand, $allowAreaIds, $stDate, $endDate, $storeType, $storeName)
 	{
 		$brandId = $brand->value;
 		$excepts = config("web.sales.shop.except.{$brandId}");
@@ -37,15 +37,15 @@ class DailyRevenueRepository extends Repository
 		else
 			return [];
 		
-		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
 		
 		$isToday = Carbon::parse($stDate)->isToday() && Carbon::parse($endDate)->isToday();
 		
 		#芳珍沒有sd_sale00
 		if ($isToday && $brand != Brand::FJVEGGIE)
-			return $this->getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $shopType, $shopName, $excepts);
+			return $this->getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts);
 		else
-			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $shopType, $shopName, $excepts);
+			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts);
 	}
 	
 	/* 取營收資料By today only
@@ -54,7 +54,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $shopType, $shopName, $excepts)
+	public function getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts)
 	{
 		$result = $db
 				->table(DB::raw('z_sd_sale00 as a WITH(NOLOCK)'))
@@ -62,10 +62,10 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<', $endDate)
-				->whereIn('b.SHOP_KIND', $shopType)
+				->whereIn('b.SHOP_KIND', $storeType)
 				->whereIn('b.gid', $authAreaIds)
-				->when(! empty($shopName), function ($query) use ($shopName) {
-					$query->whereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+				->when(! empty($storeName), function ($query) use ($storeName) {
+					$query->whereAny(['b.SHOP_NAME'], 'like', "%{$storeName}%");
 				})
 				->whereNotIn('a.shopId', $excepts)
 				->select('a.shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
@@ -86,7 +86,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getFromSale00($db, $authAreaIds, $stDate, $endDate, $shopType, $shopName, $excepts)
+	public function getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts)
 	{
 		#Group會變超慢, 改為由PHP計算
 		$subQuery = $db
@@ -105,9 +105,9 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->whereIn('b.gid', $authAreaIds)
-				->whereIn('b.SHOP_KIND', $shopType)
-				->when(! empty($shopName), function ($query) use ($shopName) {
-					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$shopName}%");
+				->whereIn('b.SHOP_KIND', $storeType)
+				->when(! empty($storeName), function ($query) use ($storeName) {
+					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$storeName}%");
 				})
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId')

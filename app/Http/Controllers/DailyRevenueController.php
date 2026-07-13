@@ -43,16 +43,17 @@ class DailyRevenueController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		#query params
-		$searchType		= $request->input('searchType');
-		$searchStDate	= $request->input('searchStDate'); #or Month
-		$searchEndDate	= $request->input('searchEndDate');
-		$searchShopType	= $request->input('searchShopType', array_keys(config('web.sales.shop.type'))); #未選取查全部
-		$searchShopName	= $request->input('searchShopName');
+		$searchType			= $request->input('searchType');
+		$searchStDate		= $request->input('searchStDate'); #or Month
+		$searchEndDate		= $request->input('searchEndDate');
+		$searchStoreType	= $request->input('searchStoreType', array_keys(config('web.sales.shop.type'))); #未選取查全部
+		$searchAreaIds		= $request->input('searchAreaIds');
+		$searchStoreName	= $request->input('searchStoreName');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

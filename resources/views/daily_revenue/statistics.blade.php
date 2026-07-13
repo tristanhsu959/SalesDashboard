@@ -19,7 +19,7 @@
 		<h5>查詢</h5>
 		
 		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.type" :key="id">
+			<template x-for="(name, id) in options.type" :key="id">
 				<label class="radio field-red">
 					<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
 					<span x-text="name"></span>
@@ -37,20 +37,31 @@
 			<label>結束日期</label>
 		</div>
 		
-		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'shopName')">
-			<input type="text" name="searchShopName" maxlength="10" x-model="searchData.shopName" x-ref="searchShopName" @input="errors.delete('shopName')">
-			<label>找店名</label>
-		</div>
-		
-		<div class="field middle-align">
-			<nav>
-				<template x-for="(name, id) in options.shopType" :key="id">
-					<label class="checkbox large">
-						<input type="checkbox" name="searchShopType[]" :value="id" x-model="searchData.shopType">
-						<span x-text="name"></span>
-					</label>
+		<nav>
+			<template x-for="(name, id) in options.storeType" :key="id">
+				<label class="checkbox large">
+					<input type="checkbox" name="searchStoreType[]" :value="id" x-model="searchData.storeType">
+					<span x-text="name"></span>
+				</label>
+			</template>
+		</nav>
+			
+		<fieldset class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
 				</template>
 			</nav>
+			<output class="red-text small">未選時取全區</output>
+		</fieldset>
+		
+		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
+			<label>找店名</label>
 		</div>
 		
 		<div class="space"></div>

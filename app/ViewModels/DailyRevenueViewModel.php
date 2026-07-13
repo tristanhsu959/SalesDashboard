@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -58,10 +59,15 @@ class DailyRevenueViewModel extends Fluent
 		if ($this->brand == Brand::FJVEGGIE)
 			unset($type['aov']);
 		
-		$this->set('options.mode.type', $type);
+		$this->set('options.type', $type);
 
 		#根據poserp.shop_kind
-		$this->set('options.shopType', config('web.sales.shop.type'));
+		$this->set('options.storeType', config('web.sales.shop.type'));
+		
+		$currentUser 	= AppManager::getCurrentUser();
+		$areaPermission = $currentUser->getSalesAreaPermissionMap();
+		
+		$this->set('options.areaList', $areaPermission);
 	}
 	
 	/* Form submit action
@@ -85,23 +91,27 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL, $shopType = [], $shopName = '')
+	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL, $storeType = [], $areaIds = [], $storeName = '')
     {
 		#Init default type
 		$today = Carbon::now()->format('Y-m-d');
 		$thisMonth = Carbon::now()->format('Y-m');
 		
+		$defaultStoreTypes = ($this->brand == Brand::BAFANG) ? [1] : [1, 2];
+		
 		#依brand預計不同
-		if (empty($stDate) && empty($endDate) && empty($shopType))
-			$shopType = ($this->brand == Brand::BAFANG) ? [1] : [1, 2]; #Default直營
+		if (empty($stDate) && empty($endDate) && empty($storeType))
+			$storeType =  $defaultStoreTypes; 
 		
 		$this->set('search.type', $type);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
-		$this->set('search.shopType', $shopType);
-		$this->set('search.shopName', $shopName);
+		$this->set('search.storeType', $storeType);
+		$this->set('search.areaIds', $areaIds);
+		$this->set('search.storeName', $storeName);
 		$this->set('search.today', $today);
 		$this->set('search.thisMonth', $thisMonth);
+		$this->set('search.defaultStoreTypes', $defaultStoreTypes);
 	}
 	
 	/* Partial view
@@ -131,16 +141,10 @@ class DailyRevenueViewModel extends Fluent
 	public function responseData()
 	{
 		$response = $this->responseBaseData();
-		
-		$type = data_get($this->statistics, 'modeType', NULL);
-		
-		if ($type == 'store')
-			$data = data_get($this->statistics, 'area.data', []);
-		else
-			$data = data_get($this->statistics, 'data', []);
+		#$type = data_get($this->statistics, 'type', NULL);
 		
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
-		$response['modeType'] = $type;
+		#$response['type'] = $type;
 		
 		return $response;
 	}
