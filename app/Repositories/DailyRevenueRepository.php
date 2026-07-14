@@ -63,7 +63,7 @@ class DailyRevenueRepository extends Repository
 		$result = $db
 				->table(DB::raw('z_sd_sale00 as a WITH(NOLOCK)'))
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.shopId')
-				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
+				#->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->where('a.saleDate', '>=', $stDate)
 				->where('a.saleDate', '<', $endDate)
 				->whereIn('b.SHOP_KIND', $storeType)
@@ -72,12 +72,12 @@ class DailyRevenueRepository extends Repository
 					$query->whereIn('b.SHOP_ID', $namePosIds);
 				})
 				->whereNotIn('a.shopId', $excepts)
-				->select('a.shopId', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
+				->select('a.shopId', 'b.gid as areaId', 'a.saleDate') #'c.Sk_name as typeName', 
 				->selectRaw('sum(a.amount) as amount')
 				->selectRaw('sum(a.totalSales) as totalSales')
 				->selectRaw('sum(a.totalExtra) as totalExtra')
 				->selectRaw('sum(a.totalDischarge) as totalDischarge')
-				->groupBy('a.shopId', 'c.Sk_name', 'b.gid', 'a.saleDate')#->ddRawSql();
+				->groupBy('a.shopId', 'b.gid', 'a.saleDate')#->ddRawSql();
 				->get()
 				->toArray(); 
 		
@@ -107,20 +107,20 @@ class DailyRevenueRepository extends Repository
 						->on('orders.SHOP_ID', '=', 'a.SHOP_ID');
 				})
 				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
-				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
+				#->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->whereIn('b.gid', $authAreaIds)
 				->whereIn('b.SHOP_KIND', $storeType)
 				->when(! empty($namePosIds), function ($query) use ($namePosIds) {
 					$query->WhereIn('b.SHOP_ID', $namePosIds);
 				})
 				->whereNotIn('a.SHOP_ID', $excepts)
-				->select('a.SHOP_ID as shopId', 'c.Sk_name as typeName', 'b.gid as areaId')
+				->select('a.SHOP_ID as shopId', 'b.gid as areaId') #, 'c.Sk_name as typeName'
 				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
 				->selectRaw('sum(a.amount) as amount')
 				->selectRaw('sum(a.TOT_SALES) as totalSales')
 				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
 				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
-				->groupBy('a.SHOP_ID', 'c.Sk_name', 'b.gid', DB::raw('CAST(a.SALE_DATE AS DATE)'))#->ddRawSql();
+				->groupBy('a.SHOP_ID', 'b.gid', DB::raw('CAST(a.SALE_DATE AS DATE)'))#->ddRawSql();
 				->get()
 				->toArray();
 		
@@ -134,7 +134,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType)
+	public function getDataByAverageOrderValue($brand, $allowAreaIds, $stDate, $endDate, $storeType)
 	{
 		$brandId = $brand->value;
 		$excepts = config("web.sales.shop.except.{$brandId}");
@@ -146,13 +146,13 @@ class DailyRevenueRepository extends Repository
 		else
 			return [];
 		
-		$authAreaIds = AreaLib::toSalesAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
 		
 		$result = $db
 				->table(DB::raw('SHOP00 as a WITH(NOLOCK)'))
 				->join(DB::raw('SALE00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
 				->whereIn('a.gid', $authAreaIds)
-				->whereIn('a.SHOP_KIND', $shopType)
+				->whereIn('a.SHOP_KIND', $storeType)
 				->whereNotIn('a.SHOP_ID', $excepts)
 				->where('b.STATUS', '=', 2) #3:作廢不計入
 				->where('b.SALE_DATE', '>=', $stDate)
