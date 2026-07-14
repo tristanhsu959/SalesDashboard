@@ -145,7 +145,7 @@
 		<section class="sales-list container">
 			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
+					<i>info</i><div class="max">查無銷售資料</div>
 				</div>
 			</article>
 			

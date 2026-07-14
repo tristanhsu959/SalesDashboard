@@ -226,6 +226,10 @@ class ProductService
 		#有查店名,要更新store list
 		$params->storeList 	= $storeList->toArray();
 		$params->storeIds	= $storeList->pluck('posId')->values()->all(); 
+		
+		#沒查到門店
+		if (empty($params->storeIds))
+			throw new Exception('查無符合門店資料');
 	}
 	
 	/* Get buy good data
@@ -404,7 +408,7 @@ class ProductService
 		
 		$header = [
 					'areaName' 	=> '區域', 
-					'shopCount'	=> '店家數',
+					'storeCount'=> '店家數',
 					'products' 	=> $params->productMap
 				];
 		$params->set('area.header', $header);
@@ -413,7 +417,7 @@ class ProductService
 			
 			#區域總計
 			$temp['areaName'] 	= $items->pluck('areaName')->first();
-			$temp['shopCount']	= $items->count(); #店家數
+			$temp['storeCount']	= $items->count(); #店家數
 			
 			$data = $items->pluck('data')->filter()->collapse();
 			
@@ -430,7 +434,7 @@ class ProductService
 		
 		#這裏是依header
 		$result['total']['areaName']	= '全區合計';
-		$result['total']['shopCount']	= collect($baseData)->count(); 
+		$result['total']['storeCount']	= collect($baseData)->count(); 
 		
 		$totalData = collect($baseData)->pluck('data')->collapse();
 		$result['total']['products'] 	= collect($totalData)->groupBy('productId')->map(function($items, $key){
@@ -705,8 +709,8 @@ class ProductService
 			$rowQty[]	 = $data['areaName'];
 			$rowAmount[] = $data['areaName'];
 			
-			$rowQty[]	 = $data['shopCount'];
-			$rowAmount[] = $data['shopCount'];
+			$rowQty[]	 = $data['storeCount'];
+			$rowAmount[] = $data['storeCount'];
 			
 			#須依header的順序取資料
 			foreach($areaData['header']['products'] as $productId => $productName)
