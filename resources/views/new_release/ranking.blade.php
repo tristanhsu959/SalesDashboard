@@ -9,7 +9,7 @@
 						<div class="ranking" x-text="topRanking + 1"></div>
 						<div class="info">
 							<span x-text="items[0]['areaName']"></span>
-							<div class="name" x-text="items[0]['shopName']"></div>
+							<div class="name" x-text="items[0]['storeName']"></div>
 							<span x-text="items[0]['shopId']"></span>
 						</div>
 						<span class="badge none primary" x-text="items[0]['qty']"></span>
@@ -31,7 +31,7 @@
 						<div class="ranking" x-text="lastRanking + 1"></div>
 						<div class="info">
 							<span x-text="items[0]['areaName']"></span>
-							<div class="name" x-text="items[0]['shopName']"></div>
+							<div class="name" x-text="items[0]['storeName']"></div>
 							<span x-text="items[0]['shopId']"></span>
 						</div>
 						<span class="badge none secondary" x-text="items[0]['qty']"></span>

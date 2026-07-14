@@ -68,12 +68,12 @@ class DailyRevenueRepository extends Repository
 					$query->whereAny(['b.SHOP_NAME'], 'like', "%{$storeName}%");
 				})
 				->whereNotIn('a.shopId', $excepts)
-				->select('a.shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
+				->select('a.shopId', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
 				->selectRaw('sum(a.amount) as amount')
 				->selectRaw('sum(a.totalSales) as totalSales')
 				->selectRaw('sum(a.totalExtra) as totalExtra')
 				->selectRaw('sum(a.totalDischarge) as totalDischarge')
-				->groupBy('a.shopId', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', 'a.saleDate')
+				->groupBy('a.shopId', 'c.Sk_name', 'b.gid', 'a.saleDate')
 				->get()
 				->toArray(); 
 		

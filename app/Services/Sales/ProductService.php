@@ -243,7 +243,7 @@ class ProductService
 				"productId" => "UC06000002"
 				"price_sum" => 111 => price * qty + discount
 				"qty_sum" => 99
-				"shopName" => "御廚重慶北直營店"
+				"storeName" => "御廚重慶北直營店"
 				"gid" => "A01"
 				"productName" => "炸雞腿飯"
 			]
@@ -279,7 +279,7 @@ class ProductService
 		/* 重整資料格式/命名/區域
 		array:11 [
 			"shopId" => "100001"
-			"shopName" => "御廚中正南昌店"
+			"storeName" => "御廚中正南昌店"
 			"erpNo" => "UC00000042"
 			"price_sum" => "360.0"
 			"qty_sum" => "3"
@@ -454,7 +454,7 @@ class ProductService
 		/* 重整資料格式
 		array:6 [
 			"shopId" => "100001"
-			"shopName" => "御廚中正南昌店"
+			"storeName" => "御廚中正南昌店"
 			"areaId" => 1
 			"areaName" => null
 			"products" => array:5 [▼
@@ -574,7 +574,7 @@ class ProductService
 		$params->set('detail.data', $result);
 		/* $result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) use($products, $dayRange) {
 			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
-			$temp['shopName'] 	= $items->pluck('shopName')->first();
+			$temp['shopNastoreNameme'] 	= $items->pluck('storeName')->first();
 				
 			#因有補全的門店,故會有key=0的狀況	
 			$temp['products'] = $items->groupBy('productId')->map(function($items, $key) use($dayRange) {
@@ -746,12 +746,12 @@ class ProductService
 			$rowQty[]	= $data['areaName'];
 			$rowQty[]	= $data['shopId'];
 			$rowQty[]	= $data['storeKey'];
-			$rowQty[]	= $data['shopName'];
+			$rowQty[]	= $data['storeName'];
 			
 			$rowAmount[]= $data['areaName'];
 			$rowAmount[]= $data['shopId'];
 			$rowAmount[]= $data['storeKey'];
-			$rowAmount[]= $data['shopName'];
+			$rowAmount[]= $data['storeName'];
 			
 			foreach($shopData['header']['products'] as $productId => $productName)
 			{

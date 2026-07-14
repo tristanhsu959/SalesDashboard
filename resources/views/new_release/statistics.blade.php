@@ -38,7 +38,7 @@
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
-		
+		<!--x-show="Object.keys(options.areaList).length > 1"-->
 		<fieldset class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
@@ -49,7 +49,7 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全區</output>
+			<output class="red-text small">未選時取全部</output>
 		</fieldset>
 		
 		<div class="space"></div>
@@ -103,7 +103,7 @@
 				</div>
 			</article>
 		
-			<div x-show="response.hasResult" class="statistics">
+			<div class="statistics">
 				<div class="tabs cyan-text">
 					<a class="active" data-ui="#tab-area">區域彙總</a>
 					<a data-ui="#tab-shop">店別明細</a>

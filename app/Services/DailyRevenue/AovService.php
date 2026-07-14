@@ -125,7 +125,7 @@ class AovService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addMonth()->format('Y-m-d H:i:s');
 			$shopType 		= $params->shopType;
-			$shopName 		= FALSE;
+			$storeName 		= FALSE;
 			$userAreaIds 	= $params->userAreaIds;
 			
 			$result = $this->_repository->getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType);

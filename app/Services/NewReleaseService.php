@@ -340,7 +340,7 @@ class NewReleaseService
 			"shopId" => "350001"
 			"saleDate" => "2025-09-22"
 			"qty" => "4"
-			"shopName" => "御廚竹南博愛店"
+			"storeName" => "御廚竹南博愛店"
 			"areaId" => 3
 			"areaName" => "桃竹苗區"
 		]
@@ -399,7 +399,7 @@ class NewReleaseService
 			"shopId" => "350001"
 			"saleDate" => "2025-09-22"
 			"qty" => "4"
-			"shopName" => "御廚竹南博愛店"
+			"storeName" => "御廚竹南博愛店"
 			"areaId" => 3
 			"areaName" => "桃竹苗區"
 		]
@@ -431,14 +431,14 @@ class NewReleaseService
 				return '';
 			
 			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
-			$item['shopName'] 	= $store['storeName'];
+			$item['storeName'] 	= $store['storeName'];
 			$item['areaId'] 	= $store['areaId'];
 			$item['areaName']	= $store['areaName'];
 			$item['storeKey'] 	= $store['storeKey'];
 			
 			/*
 			$item['saleDate']	= Carbon::parse($item['saleDate'])->format('Y-m-d');
-			$item['shopName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['shopName']);
+			$item['storeName'] 	= data_get($store, 'storeName', empty($shop) ? 'UNKNOW' :  $shop['storeName']);
 			$item['areaId'] 	= data_get($store, 'areaId', empty($shop) ? 0 :  $shop['areaId']);
 			$item['areaName']	= data_get($store, 'areaName', empty($shop) ? 'UNKNOW' :  $shop['areaName']);
 			$item['storeKey']	= data_get($store, 'storeKey', empty($shop) ? '' :  $shop['storeKey']);
@@ -458,7 +458,7 @@ class NewReleaseService
 			$temp['shopId'] 	= $item['posId'];
 			$temp['saleDate'] 	= $params->endDate;
 			$temp['qty'] 		= 0;
-			$temp['shopName'] 	= $item['storeName'];
+			$temp['storeName'] 	= $item['storeName'];
 			$temp['areaId'] 	= $item['areaId'];
 			$temp['areaName']	= $item['areaName'];
 			$temp['storeKey']	= $item['storeKey'];

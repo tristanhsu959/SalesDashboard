@@ -173,7 +173,7 @@ class StoreService
 		/*
 		0 => array:8 [▼
 		  "shopId" => "0035"
-		  "shopName" => "0035中壢海華直營店"
+		  "storeName" => "0035中壢海華直營店"
 		  "areaId" => 3
 		  "areaName" => "桃竹苗區"
 		  "shopType" => "1"
@@ -200,7 +200,7 @@ class StoreService
 			
 			$temp['storeKey'] 		= $store['storeKey'];
 			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $store['storeName'];
+			$temp['storeName'] 		= $store['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= $store['areaId'];
 			$temp['areaName']		= $store['areaName'];
@@ -227,7 +227,7 @@ class StoreService
 		})->map(function($item, $key) use($params){
 			$temp['storeKey'] 		= $item['storeKey'];
 			$temp['shopId'] 		= $item['posId'];
-			$temp['shopName'] 		= $item['storeName'];
+			$temp['storeName'] 		= $item['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName']		= $item['areaName'];
@@ -366,7 +366,7 @@ class StoreService
 		/* Output: 20260510改併成一個array,也方便export
 		[
 		330002 => [
-			"shopName" => "御廚豐原向陽店"
+			"storeName" => "御廚豐原向陽店"
 			"areaName" => "中彰投區"
 			"dayAmount" =>  [
 				"2025-09-15" => 666.0
@@ -384,7 +384,7 @@ class StoreService
 		if (empty($baseData))
 			return [];
 		
-		$header = ['areaName' => '區域', 'storeKey' => '門店代號', 'shopName' => '門店名稱', 'shopTypeName' => '類型',
+		$header = ['areaName' => '區域', 'storeKey' => '門店代號', 'storeName' => '門店名稱', 'shopTypeName' => '類型',
 					'dayAmount' => $params->dayRange
 				];
 		$params->set('shop.header', $header);
@@ -393,7 +393,7 @@ class StoreService
 		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) {
 			
 			$temp['storeKey'] 		= $items->pluck('storeKey')->first();
-			$temp['shopName'] 		= $items->pluck('shopName')->first();
+			$temp['storeName'] 		= $items->pluck('storeName')->first();
 			$temp['shopTypeName'] 	= $items->pluck('shopTypeName')->first();
 			$temp['areaId'] 		= $items->pluck('areaId')->first();
 			$temp['areaName'] 		= $items->pluck('areaName')->first();
@@ -422,7 +422,7 @@ class StoreService
 		->toArray();
 		
 		$result['total']['storeKey'] 	= ''; 
-		$result['total']['shopName'] 	= '總計'; 
+		$result['total']['storeName'] 	= '總計'; 
 		$result['total']['shopTypeName']= ''; 
 		$result['total']['areaName'] 	= ''; 
 		$result['total']['dayAmount']	= collect($baseData)->groupBy('saleDate')->mapWithKeys(function($items, $date) {
@@ -526,7 +526,7 @@ class StoreService
 			$row = [];
 			$row[] = $shop['areaName'];
 			$row[] = $shop['storeKey'];
-			$row[] = $shop['shopName'];
+			$row[] = $shop['storeName'];
 			$row[] = $shop['shopTypeName'];
 			
 			foreach($srcData['header']['dayAmount'] as $colKey)

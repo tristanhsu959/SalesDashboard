@@ -34,7 +34,7 @@ class RankingService
 		[
 			"103001" => [
 				"shopId" => "103001"
-				"shopName" => "御廚民生承德直營店"
+				"storeName" => "御廚民生承德直營店"
 				"area" => "大台北區"
 				"saleDate" => '2026-01-01'
 				"qty" => 29
@@ -56,7 +56,7 @@ class RankingService
 		$result = collect($baseData)->map(function($item, $key) use($endDate) {
 			
 			$temp['areaName'] 	= $item['areaName'];
-			$temp['shopName'] 	= $item['storeName'];
+			$temp['storeName'] 	= $item['storeName'];
 			$temp['shopId'] 	= $item['storeKey'];
 			
 			$dayData = collect($item['data'])->get($endDate, 0);
@@ -88,7 +88,7 @@ class RankingService
 				$row = [];
 				$row[] = $data['areaName'];
 				$row[] = $data['shopId'];
-				$row[] = $data['shopName'];
+				$row[] = $data['storeName'];
 				$row[] = $data['qty'];
 				$row[] = $ranking + 1;
 				
