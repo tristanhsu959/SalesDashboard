@@ -72,26 +72,78 @@ class MerchantRepository extends Repository
 		return $result;
 	}
 	
-	/* 取店休資訊, 不使用共用的trait共
+	/* 取店休資訊, 不使用共用的trait
 	 * @params: enum
 	 * @params: array
 	 * @return: array
 	 */
-	public function getDayoffList($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate, $productIds)
+	public function getDayoffList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
-		$brandId = $brand->value;
-		$brandNo = $brand->shortCode();
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
-		
+		$brandId 	= $brand->value;
 		#To utc
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
+		
+		$authAreaIds	= AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		#有判別brand不會抓到蘿蔔店,故要先處理
+		$dbBrandIds 	= $this->getDbBrandIdWithLb($brand, $allowOpCenterIds); #有LB
+		
+		$excepts = config("web.purchase.store.except.{$brandId}");
 		
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Store as s')
 			->fromRaw('Store as s WITH(NOLOCK)')
-			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
+			->join(DB::raw('[Order] as o WITH(NOLOCK)'), 'o.StoreId', '=', 's.Id')
+			->join(DB::raw('OrderSub as os WITH(NOLOCK)'), 'os.OrderId', '=', 'o.Id')
+			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'os.ProductId')
+			->select('s.No as storeNo', 'p.OldNo as shortCode') #, 'p.Name as productName'
+			->selectRaw('sum(os.quantity) as qty')
+			->whereExists(function ($query) use($allowOpCenterIds) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
+			})
+			->whereExists(function ($query) use($dbBrandIds) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
+			})
+			->where('s.OpenDate', '<=', $endDate) #不含未來開店
+			->whereNull('s.CloseDate') #只取有效門店
+			->when($authAreaIds, function ($query, $authAreaIds) {
+				return $query->whereIn('s.AreaId', $authAreaIds);
+			})
+			->whereIn('os.ProductId', $productIds)
+			->where('o.ExpectedDate', '>=', $stDate)
+			->where('o.ExpectedDate', '<', $endDate)
+			->whereNotIn('s.No', $excepts)
+			->groupBy('s.No', 'p.OldNo')#->toRawSql();
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
+	/* public function getDayoffList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
+	{
+		$brandId 	= $brand->value;
+		#To utc
+		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
+		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
+		
+		$authAreaIds	= AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		#有判別brand不會抓到蘿蔔店,故要先處理
+		$dbBrandIds 	= $this->getDbBrandIdWithLb($brand, $allowOpCenterIds); #有LB
+		
+		$excepts = config("web.purchase.store.except.{$brandId}");
+		
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Store as s')
+			->fromRaw('Store as s WITH(NOLOCK)')
 			->select('s.No as storeNo')
 			->addSelect(['money' => $db->table('Order as o')
 				->select('o.Money')
@@ -101,41 +153,28 @@ class MerchantRepository extends Repository
 				#->whereIn('o.State', $orderStatus)
 				->limit(1)
 			])
-			->whereExists(function ($query) use($opCenter) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $opCenter);
+					->whereColumn('oc.Id', 's.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($allowBrandIds) {
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->whereIn('bd.Id',  allowBrandIds);
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
-			#有判別brand不會抓到蘿蔔店
-			/* ->whereExists(function ($query) use($brandNo) {
-				$query->select(DB::raw(1))
-					->from('Brand as bd')
-					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $brandNo);
-			}) */
-			/* ->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			}) */
 			->where('s.OpenDate', '<=', $endDate) #不含未來開店
 			->whereNull('s.CloseDate') #只取有效門店
 			->when($authAreaIds, function ($query, $authAreaIds) {
 				return $query->whereIn('s.AreaId', $authAreaIds);
 			})
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
-			->get()
-			->toArray();
+			->whereNotIn('s.No', $excepts)->toRawSql();
+			/* ->get()
+			->toArray(); 
 		
 		return $result;
-	}
+	} */
 
 }

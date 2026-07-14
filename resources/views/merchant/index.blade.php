@@ -86,9 +86,7 @@
 		<!-- 不可有空格 -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-			<pre><i>lightbulb</i>店休資訊不含廠區店、學區店及單蘿蔔店
-<i>lightbulb</i>八方：招牌餡、韭菜餡、韓式辣味餡
-<i>lightbulb</i>御廚：醃漬排骨、醃漬雞腿</pre>
+			<pre>店休資訊判別條件：<br/>八方：招牌餡、韭菜餡、韓式辣味餡訂貨量<br/>御廚：醃漬排骨、醃漬雞腿訂貨量</pre>
 		</section>
 	</template>
 	

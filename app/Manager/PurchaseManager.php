@@ -84,6 +84,87 @@ class PurchaseManager
 		return $factory;
 	}
 	
+	/******************** Product ********************/
+	/* Get product id */
+	public function getProductIdByName($brand, $opCenter, $name)
+	{
+		$brandId = $brand->value;
+		
+		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
+		
+		return $result;
+	}
+	
+	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
+	{
+		$brandId = $brand->value;
+		
+		$result = $this->_repository->getProductIdByShortCode($brandId, $opCenter, $shortCodes);
+		
+		#format to int
+		$ids = collect($result)->map(function($item, $key){
+			return (int)$item;
+		})->toArray();
+		
+		return $ids;
+	}
+	
+	/* 取對應的Product&Short code mapping
+	 * @params: int
+	 * @params: boolean
+	 * @return: array
+	 */
+	public function getProductShortCodeMapping($brand, $returnMapping = TRUE)
+	{
+		#取所有產品
+		$opCenter = $this->getOpCenterNo($brand, []); #所有營運中心
+		$productMapping = $this->_repository->getProductShortCode($brand, $opCenter);
+		
+		#因不分工廠, 現狀會有重複, 要再濾除
+		$productMapping = collect($productMapping)->unique('productNo');
+		
+		if ($returnMapping === TRUE)
+		{
+			$productMapping = $productMapping->mapWithKeys(function($item, $key){
+				return [$item['productNo'] => $item['productName']];
+			});
+		}
+		
+		return $productMapping->all();
+	}
+	
+	/* 取對應的Group設定值
+	 * @params: string
+	 * @return: array
+	 */
+	public function getGroupByShortCode($brandId, $code)
+	{
+		$groupConfig = config("web.purchase.product_type.groupPrefix.{$brandId}");
+		
+		foreach($groupConfig as $config)
+		{
+			if (Str::startsWith($code, $config['pattern']))
+			{
+				$group['groupId'] 	= $config['id'];
+				$group['groupName'] = $config['name'];
+				
+				return $group;
+			}
+		}
+		
+		return ['groupId' => '', 'groupName' => ''];
+	}
+	
+	/* 取對應的Group設定值
+	 * @params: string
+	 * @return: array
+	 */
+	public function getPackagingScale($code)
+	{
+		$config = config('web.purchase.product_type.packagingScale');
+		
+		return data_get($config, $code, 1);
+	}
 	
 	/******************** Store ********************/
 	/* Get store data by brand
@@ -346,87 +427,6 @@ class PurchaseManager
 		})->all();
 	} */
 	
-	/******************** Product ********************/
-	/* Get product id */
-	public function getProductIdByName($brand, $opCenter, $name)
-	{
-		$brandId = $brand->value;
-		
-		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
-		
-		return $result;
-	}
-	
-	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
-	{
-		$brandId = $brand->value;
-		
-		$result = $this->_repository->getProductIdByShortCode($brandId, $opCenter, $shortCodes);
-		
-		#format to int
-		$ids = collect($result)->map(function($item, $key){
-			return (int)$item;
-		})->toArray();
-		
-		return $ids;
-	}
-	
-	/* 取對應的Product&Short code mapping
-	 * @params: int
-	 * @params: boolean
-	 * @return: array
-	 */
-	public function getProductShortCodeMapping($brand, $returnMapping = TRUE)
-	{
-		#取所有產品
-		$opCenter = $this->getOpCenterNo($brand, []); #所有營運中心
-		$productMapping = $this->_repository->getProductShortCode($brand, $opCenter);
-		
-		#因不分工廠, 現狀會有重複, 要再濾除
-		$productMapping = collect($productMapping)->unique('productNo');
-		
-		if ($returnMapping === TRUE)
-		{
-			$productMapping = $productMapping->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			});
-		}
-		
-		return $productMapping->all();
-	}
-	
-	/* 取對應的Group設定值
-	 * @params: string
-	 * @return: array
-	 */
-	public function getGroupByShortCode($brandId, $code)
-	{
-		$groupConfig = config("web.purchase.product_type.groupPrefix.{$brandId}");
-		
-		foreach($groupConfig as $config)
-		{
-			if (Str::startsWith($code, $config['pattern']))
-			{
-				$group['groupId'] 	= $config['id'];
-				$group['groupName'] = $config['name'];
-				
-				return $group;
-			}
-		}
-		
-		return ['groupId' => '', 'groupName' => ''];
-	}
-	
-	/* 取對應的Group設定值
-	 * @params: string
-	 * @return: array
-	 */
-	public function getPackagingScale($code)
-	{
-		$config = config('web.purchase.product_type.packagingScale');
-		
-		return data_get($config, $code, 1);
-	}
 	
 	
 	

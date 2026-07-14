@@ -92,14 +92,12 @@ class DayoffService
 	{
 		try
 		{	
-			#店休改為不含蘿蔔,廠區店
-			$storeList = StoreManager::getStoreList($params->brand, $params->allowPurchaseBrandIds, $params->allowAreaIds, $params->stDate, $params->endDate);
-			$params->storeList = StoreManager::filterFactoryStore($params->brand, $storeList);
+			$this->_getStoreList($params);
 			
 			$this->_getProductId($params);
 			
 			$this->_getDataFromDB($params);
-			dd($params);
+			
 			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
@@ -107,6 +105,25 @@ class DayoffService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+			
+		#店休改為不顯示蘿蔔(但資料有抓蘿蔔)
+		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#$storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
 	}
 	
 	/* 以short code取得product id
@@ -119,14 +136,15 @@ class DayoffService
 		{
 			#取資料都不分營運中心,不然可能會取不到
 			$brand				= $params->brand;
-			$brandId			= $brand->value;
 			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			
+			$brandId			= $brand->value;
 			$shortCodes			= config("web.purchase.product_type.dayOff.{$brandId}");
 			
 			$productIds = PurchaseManager::getProductIdByShortCode($brand, $allowOpCenterIds, $shortCodes);
 			
 			if (empty($productIds))
-				throw new Exception('查無此產品');
+				throw new Exception('查無產品代碼');
 			
 			$params->productIds = $productIds;
 		}
@@ -153,18 +171,18 @@ class DayoffService
 		]
 		*/
 		
-		#改為判別招韭辣/炸雞腿排骨
+		#改為判別八方：招韭辣餡/御廚：炸雞腿/炸排骨
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
-			$endDate 		= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
-			$allowBrandIds	= $params->allowPurchaseBrandIds;
-			$allowAreaIds	= $params->allowAreaIds;
-			$productIds		= $params->productIds;
+			$brand 				= $params->brand;
+			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d 00:00:00');
+			$endDate 			= Carbon::parse($stDate)->addDay()->format('Y-m-d H:i:s');
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds		= $params->allowAreaIds;
+			$productIds			= $params->productIds;
 			
-			$result = $this->_repository->getDayoffList($brand, $allowBrandIds, $allowAreaIds, $stDate, $endDate, $productIds);
-			dd($result);
+			$result = $this->_repository->getDayoffList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
+			
 			$params->orderData = $result;
 		}
 		catch(Exception $e)
@@ -180,24 +198,29 @@ class DayoffService
 	 */
 	private function _buildBaseData($params)
 	{
-		#先整合八方及蘿蔔資料
+		#有佔比只是暫時不顯示, 故要取全門店
 		$orderData = collect($params->orderData)->map(function($item, $key){
-			
-			$temp['storeKey'] 	= PurchaseManager::buildStoreKey($item['storeNo']);
-			$temp['amount']		= intval($item['money']);
-			
-			return $temp;
+			$item['storeKey'] = StoreManager::buildStoreKey($item['storeNo']);
+			return $item;
 		})->groupBy('storeKey')->map(function($items, $key){
-			return $items->pluck('amount')->sum();
-		});
-		
-		#Merge to store
+			#因不顯示產品,故可不用ProductName
+			return collect($items)->groupBy('shortCode')->map(function($items, $key){
+				return $items->pluck('qty')->sum();
+			})->all();
+		})->all();
 		
 		$baseData = collect($params->storeList)->map(function($item, $key) use($orderData){
+			$data = data_get($orderData, $item['storeKey'], []);
 			
-			$item['noOrder'] = empty(data_get($orderData, $item['storeKey'], 0));
-			return $item;
-		})->all();
+			$temp['storeKey']	= $item['storeKey'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['posId'] 		= $item['posId'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['hasDayOff']	= (collect($data)->sum() <= 0) ? 1 : 0; #方便計算
+			
+			return $temp;
+		})->toArray();
 		
 		$params->baseData = $baseData;
 	}
@@ -234,24 +257,23 @@ class DayoffService
 	{
 		try
 		{
-			$storeData = $params->baseData;
+			$baseData = $params->baseData;
 			
 			#Statistics dayoff
-			$dayoffData = collect($storeData)->groupBy('areaId')->map(function($items, $key) {
+			#先過濾無訂貨再分區域
+			$dayoffData = collect($baseData)->groupBy('areaId')->map(function($items, $key) {
 				
 				$temp['areaId']		= $items->pluck('areaId')->first();
 				$temp['areaName']	= $items->pluck('areaName')->first();
 				$temp['total']		= $items->count(); #門店數
-				$temp['dayoffCount']= $items->pluck('noOrder')->sum();
+				$temp['dayoffCount']= $items->pluck('hasDayOff')->sum();
 				
 				#佔不提供佔比(上頭指示)
 				#$temp['percent']	= round(intval($temp['dayoffCount']) / intval($temp['total']) * 100, 2);
-				
 				return $temp;
 			});
 			
-			#總計
-			$summary['areaId']		= 0;
+			$summary['areaId']		= '';
 			$summary['areaName'] 	= '總計';
 			$summary['total'] 		= $dayoffData->pluck('total')->sum();
 			$summary['dayoffCount'] = $dayoffData->pluck('dayoffCount')->sum();
@@ -277,11 +299,12 @@ class DayoffService
 	{
 		try
 		{
-			$storeData = $params->baseData;
+			$baseData = $params->baseData;
 			
-			$dayoffData = collect($storeData)->filter(function($item, $key){
-				return $item['noOrder'];
+			$dayoffDetail = collect($baseData)->filter(function($item, $key){
+				return $item['hasDayOff'];
 			})->map(function($item, $key) {
+				
 				#只取需要欄位
 				$temp['areaId']		= $item['areaId'];
 				$temp['areaName'] 	= $item['areaName'];
@@ -293,7 +316,7 @@ class DayoffService
 			})->values()->all(); 
 			
 			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱'];
-			$info['store']	= $dayoffData;
+			$info['store']	= $dayoffDetail;
 			
 			$params->dayoff = $info;
 		}
