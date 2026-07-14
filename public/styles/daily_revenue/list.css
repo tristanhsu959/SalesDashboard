@@ -68,6 +68,10 @@ form {
 						background-color: var(--table-fixed-bg);
 						color: var(--table-fixed-color);
 					}
+					&:nth-of-type(5) {
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
+					}
 				}
 				/*須放在最後,以免被nth-of-type覆蓋*/
 				&:last-child td {

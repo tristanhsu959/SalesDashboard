@@ -475,7 +475,7 @@ class StoreService
 		if (empty($baseData))
 			return [];
 		
-		$header = ['areaName' => '區域', 'storeKey' => '門店代號', 'storeName' => '門店名稱', 'storeTypeName' => '類型',
+		$header = ['areaName' => '區域', 'shopId' => 'Pos店號', 'storeKey' => '門店代號', 'storeName' => '門店名稱', 'storeTypeName' => '類型',
 					'dayAmount' => $params->dayRange
 				];
 		$params->set('store.header', $header);
@@ -484,6 +484,7 @@ class StoreService
 		$result = collect($baseData)->map(function($item, $key) {
 			
 			$temp['storeKey'] 		= $item['storeKey'];
+			$temp['shopId'] 		= $item['shopId'];
 			$temp['storeName'] 		= $item['storeName'];
 			$temp['storeTypeName'] 	= $item['typeName'];
 			$temp['areaId'] 		= $item['areaId'];
@@ -501,6 +502,7 @@ class StoreService
 		
 		#By日總計
 		$result['total']['storeKey'] 		= ''; 
+		$result['total']['shopId'] 			= ''; 
 		$result['total']['storeName'] 		= '總計'; 
 		$result['total']['storeTypeName']	= ''; 
 		$result['total']['areaName'] 		= ''; 
@@ -604,6 +606,7 @@ class StoreService
 		{
 			$row = [];
 			$row[] = $shop['areaName'];
+			$row[] = $shop['shopId'];
 			$row[] = $shop['storeKey'];
 			$row[] = $shop['storeName'];
 			$row[] = $shop['storeTypeName'];

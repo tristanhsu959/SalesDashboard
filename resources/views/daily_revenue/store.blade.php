@@ -46,6 +46,7 @@
 					<thead>
 						<tr>
 							<th x-text="store.header.areaName"></th>
+							<th x-text="store.header.shopId"></th>
 							<th x-text="store.header.storeKey"></th>
 							<th x-text="store.header.storeName"></th>
 							<th x-text="store.header.storeTypeName"></th>
@@ -58,6 +59,7 @@
 						<template x-for="(storeData, storeId) in store.data" :key="storeId">
 						<tr>
 							<td x-text="storeData.areaName"></td>
+							<td x-text="storeData.shopId"></td>
 							<td x-text="storeData.storeKey"></td>
 							<td x-text="storeData.storeName"></td>
 							<td x-text="storeData.storeTypeName"></td>
