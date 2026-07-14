@@ -18,7 +18,7 @@
 					<thead>
 						<tr>
 							<th x-text="area.header.areaName"></th>
-							<th x-text="area.header.shopCount"></th>
+							<th x-text="area.header.storeCount"></th>
 							<template x-for="(date, dateKey) in area.header.dayAmount" :key="dateKey">
 								<th x-text="date"></th>
 							</template>
@@ -28,7 +28,7 @@
 						<template x-for="(areaData, areaId) in area.data" :key="areaId">
 						<tr>
 							<td x-text="areaData.areaName"></td>
-							<td x-text="areaData.shopCount"></td>
+							<td x-text="areaData.storeCount"></td>
 							<template x-for="(date, dateKey) in area.header.dayAmount" :key="dateKey">
 								<td x-text="Helper.formatDollar(areaData.dayAmount[date] || 0)"></td>
 							</template>
@@ -40,29 +40,29 @@
 		</div>
 	
 		<!-- 門店 -->
-		<div x-data="{shop:@js($viewModel->statisticsData('shop'))}" class="page padding" id="tab-shop">
+		<div x-data="{store:@js($viewModel->statisticsData('store'))}" class="page padding" id="tab-shop">
 			<section class="statistics-store scrollbar" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>
-							<th x-text="shop.header.areaName"></th>
-							<th x-text="shop.header.storeKey"></th>
-							<th x-text="shop.header.shopName"></th>
-							<th x-text="shop.header.shopTypeName"></th>
-							<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
+							<th x-text="store.header.areaName"></th>
+							<th x-text="store.header.storeKey"></th>
+							<th x-text="store.header.storeName"></th>
+							<th x-text="store.header.storeTypeName"></th>
+							<template x-for="(date, dateKey) in store.header.dayAmount" :key="dateKey">
 								<th x-text="date"></th>
 							</template>
 						</tr>
 					</thead>
 					<tbody>
-						<template x-for="(shopData, shopId) in shop.data" :key="shopId">
+						<template x-for="(storeData, storeId) in store.data" :key="storeId">
 						<tr>
-							<td x-text="shopData.areaName"></td>
-							<td x-text="shopData.storeKey"></td>
-							<td x-text="shopData.shopName"></td>
-							<td x-text="shopData.shopTypeName"></td>
-							<template x-for="(date, dateKey) in shop.header.dayAmount" :key="dateKey">
-								<td x-text="Helper.formatDollar(shopData.dayAmount[date] || 0)"></td>
+							<td x-text="storeData.areaName"></td>
+							<td x-text="storeData.storeKey"></td>
+							<td x-text="storeData.storeName"></td>
+							<td x-text="storeData.storeTypeName"></td>
+							<template x-for="(date, dateKey) in store.header.dayAmount" :key="dateKey">
+								<td x-text="Helper.formatDollar(storeData.dayAmount[date] || 0)"></td>
 							</template>
 						</tr>
 						</template>

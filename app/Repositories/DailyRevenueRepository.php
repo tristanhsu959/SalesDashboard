@@ -19,11 +19,14 @@ class DailyRevenueRepository extends Repository
 	
 	/* 取營收資料 SALE00/有sum處理過
 	 * @params: enums
+	 * @params: array
 	 * @params: datetime
 	 * @params: datetime
+	 * @params: array
+	 * @params: array
 	 * @return: array
 	 */
-	public function getSale00Data($brand, $allowAreaIds, $stDate, $endDate, $storeType, $storeName)
+	public function getSale00Data($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds)
 	{
 		$brandId = $brand->value;
 		$excepts = config("web.sales.shop.except.{$brandId}");
@@ -39,13 +42,14 @@ class DailyRevenueRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
 		
-		$isToday = Carbon::parse($stDate)->isToday() && Carbon::parse($endDate)->isToday();
+		#endDate有先加一天
+		$isToday = Carbon::parse($stDate)->isToday() && Carbon::parse($endDate)->subDay()->isToday();
 		
 		#芳珍沒有sd_sale00
 		if ($isToday && $brand != Brand::FJVEGGIE)
-			return $this->getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts);
+			return $this->getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts);
 		else
-			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts);
+			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts);
 	}
 	
 	/* 取營收資料By today only
@@ -54,7 +58,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts)
+	public function getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts)
 	{
 		$result = $db
 				->table(DB::raw('z_sd_sale00 as a WITH(NOLOCK)'))
@@ -64,8 +68,8 @@ class DailyRevenueRepository extends Repository
 				->where('a.saleDate', '<', $endDate)
 				->whereIn('b.SHOP_KIND', $storeType)
 				->whereIn('b.gid', $authAreaIds)
-				->when(! empty($storeName), function ($query) use ($storeName) {
-					$query->whereAny(['b.SHOP_NAME'], 'like', "%{$storeName}%");
+				->when(! empty($namePosIds), function ($query) use ($namePosIds) {
+					$query->whereIn('b.SHOP_ID', $namePosIds);
 				})
 				->whereNotIn('a.shopId', $excepts)
 				->select('a.shopId', 'c.Sk_name as typeName', 'b.gid as areaId', 'a.saleDate')
@@ -73,7 +77,7 @@ class DailyRevenueRepository extends Repository
 				->selectRaw('sum(a.totalSales) as totalSales')
 				->selectRaw('sum(a.totalExtra) as totalExtra')
 				->selectRaw('sum(a.totalDischarge) as totalDischarge')
-				->groupBy('a.shopId', 'c.Sk_name', 'b.gid', 'a.saleDate')
+				->groupBy('a.shopId', 'c.Sk_name', 'b.gid', 'a.saleDate')#->ddRawSql();
 				->get()
 				->toArray(); 
 		
@@ -86,7 +90,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $storeName, $excepts)
+	public function getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts)
 	{
 		#Group會變超慢, 改為由PHP計算
 		$subQuery = $db
@@ -106,17 +110,17 @@ class DailyRevenueRepository extends Repository
 				->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
 				->whereIn('b.gid', $authAreaIds)
 				->whereIn('b.SHOP_KIND', $storeType)
-				->when(! empty($storeName), function ($query) use ($storeName) {
-					$query->WhereAny(['b.SHOP_NAME'], 'like', "%{$storeName}%");
+				->when(! empty($namePosIds), function ($query) use ($namePosIds) {
+					$query->WhereIn('b.SHOP_ID', $namePosIds);
 				})
 				->whereNotIn('a.SHOP_ID', $excepts)
-				->select('a.SHOP_ID as shopId', 'b.SHOP_NAME as shopName', 'c.Sk_name as typeName', 'b.gid as areaId')
+				->select('a.SHOP_ID as shopId', 'c.Sk_name as typeName', 'b.gid as areaId')
 				->selectRaw('CAST(a.SALE_DATE AS DATE) as saleDate')
 				->selectRaw('sum(a.amount) as amount')
 				->selectRaw('sum(a.TOT_SALES) as totalSales')
 				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
 				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
-				->groupBy('a.SHOP_ID', 'b.SHOP_NAME', 'c.Sk_name', 'b.gid', DB::raw('CAST(a.SALE_DATE AS DATE)'))
+				->groupBy('a.SHOP_ID', 'c.Sk_name', 'b.gid', DB::raw('CAST(a.SALE_DATE AS DATE)'))#->ddRawSql();
 				->get()
 				->toArray();
 		

@@ -169,11 +169,11 @@ class DailyRevenueService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'store')
+		if ($type == 'store')
 			$service = app(StoreService::class);
-		else if ($modeType == 'aov')
+		else if ($type == 'aov')
 			$service = app(aovService::class);
 		else
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();

@@ -79,7 +79,7 @@ class AreaService
 		$result['total']['storeCount'] 		= collect($result)->pluck('storeCount')->sum(); 
 		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
 		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
-		$result['total']['avgStoreQty'] 		= round($result['total']['totalQty'] / $result['total']['storeCount'], 1); #totalQty / shopCount
+		$result['total']['avgStoreQty'] 	= round($result['total']['totalQty'] / $result['total']['storeCount'], 1); #totalQty / shopCount
 		$result['total']['avgDayStoreQty']	= round($result['total']['avgDayQty'] / $result['total']['storeCount'], 1); #avgDayQty / shopCount
 		
 		$params->set('area.data', $result);
