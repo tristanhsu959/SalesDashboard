@@ -96,7 +96,12 @@ class PurchaseManager
 		
 		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
 		
-		return $result;
+		#format to int
+		$ids = collect($result)->map(function($item, $key){
+			return (int)$item;
+		})->toArray();
+		
+		return $ids;
 	}
 	
 	/* 取ShortCode對應的ProductId(查詢時)

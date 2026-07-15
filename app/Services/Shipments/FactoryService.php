@@ -4,9 +4,11 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager;
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -31,9 +33,9 @@ class FactoryService
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
-			'modeCalc'		=> '',
-			'modeBy'		=> '',
+			'type'		=> '',
+			'calc'		=> '',
+			'by'		=> '',
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -114,7 +116,7 @@ class FactoryService
 	{
 		try
 		{
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
+			$this->_getStoreList($params);
 			
 			$orderData = $this->_getDataFromDB($params);
 			
@@ -128,6 +130,25 @@ class FactoryService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		
+		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#這裏不排除工廠學區店
+		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
 	}
 	
 	/* Get order data
@@ -151,15 +172,15 @@ class FactoryService
 	
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productIds	= $params->productIds;
-			$opCenter	= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); #all op center
-			$userAreaIds= $params->userAreaIds;
+			$brand 				= $params->brand;
+			$stDate				= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 			= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productIds			= $params->productIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
 			#已包含蘿蔔訂單
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -182,10 +203,10 @@ class FactoryService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$productCodes	= $params->shortCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
-			$userAreaIds 	= $params->userAreaIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -221,7 +242,7 @@ class FactoryService
 		#因工廠沒門店, 要先濾除
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$item['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
+			$item['storeKey'] = StoreManager::buildStoreKey($item['storeNo']);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
@@ -317,7 +338,7 @@ class FactoryService
 			$temp['memo']		= trim($item['memo']);
 			
 			return $temp;
-		})->toArray();
+		})->sortKeys()->toArray();
 		
 		$params->productList = $productList;
 	}
@@ -331,8 +352,8 @@ class FactoryService
 		try
 		{
 			#輸出用,故取全部工廠
-			$opCenter = PurchaseManager::getOpCenterNo($params->brand);
-			$factory = PurchaseManager::getFactoryList($params->brand, $opCenter);
+			$opCenter	= OpCenter::toValueArray();
+			$factory 	= PurchaseManager::getFactoryList($params->brand, $opCenter);
 			
 			$params->factoryList = $factory;
 		}
@@ -459,7 +480,8 @@ class FactoryService
 		foreach($sourceData['productList'] as $shortCode => $item)
 		{
 			$factoryData = data_get($sourceData['data'], $shortCode, []);
-			$productName = $item['productName'];
+			#不能用productName,會重複蓋掉
+			$productName = "{$shortCode}_{$item['productName']}";
 			
 			if (empty($factoryData))
 				continue;

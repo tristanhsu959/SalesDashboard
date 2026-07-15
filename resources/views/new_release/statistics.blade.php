@@ -38,8 +38,8 @@
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
-		<!--x-show="Object.keys(options.areaList).length > 1"-->
-		<fieldset class="field light-blue-border light-blue-text">
+		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">

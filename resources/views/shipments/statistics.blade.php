@@ -47,15 +47,43 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.by" :key="id">
-				<label class="radio field-purple">
-					<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
-					<span x-text="name"></span>
+		<fieldset x-show="Object.keys(options.opCenterList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇營運中心</legend>
+			<nav class="wrap">
+				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="opId" name="searchOpCenterIds[]" x-model="searchData.opCenterIds">
+					<span x-text="opName"></span>
 				</label>
-			</template>
-		</nav>
-
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
+		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
+		
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.by" :key="id">
+					<label class="radio field-purple">
+						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
+		
 		<div x-show="searchData.by == 'keyword'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'keyword')">
 			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" x-ref="searchKeyword" @input="errors.delete('keyword')">
 			<label>產品名稱</label>

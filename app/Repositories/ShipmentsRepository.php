@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-#use App\Repositories\Traits\PurchaseReposTrait;
+use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
@@ -15,7 +15,7 @@ use Exception;
 
 class ShipmentsRepository extends Repository
 {
-	#use PurchaseReposTrait;
+	use PurchaseReposTrait;
 	
 	public function __construct()
 	{
@@ -49,13 +49,15 @@ class ShipmentsRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByProductId($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds)
+	public function getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		$brandId 	= $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -73,24 +75,18 @@ class ShipmentsRepository extends Repository
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.ErpNo as erpNo', 'p.OldNo as shortCode', 'p.Memo as memo')
-			->whereExists(function ($query) use($opCenter) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $opCenter);
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brand) {
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->whereIn('bd.No',  PurchaseManager::getBrandShortCode($brand));
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
-			/* ->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			}) */
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized')

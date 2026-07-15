@@ -63,6 +63,7 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.releaseId = '';
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
+			this.searchData.areaIds = [];
 			this.errors.clear();
 		},
     }));

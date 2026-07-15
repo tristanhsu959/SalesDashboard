@@ -113,7 +113,8 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL, 
+	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
+						$searchOpCenterIds = [], $searchAreaIds = [],
 						$searchBy = 'keyword', $searchKeyword = '', $searchCategory = '', $searchShortCodes = [])
     {
 		$today = Carbon::tomorrow()->format('Y-m-d');
@@ -124,6 +125,8 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.opCenterIds', $searchOpCenterIds);
+		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.by', $searchBy);
 		$this->set('search.keyword', $searchKeyword);
 		$this->set('search.category', $searchCategory);
@@ -160,7 +163,7 @@ class ShipmentsViewModel extends Fluent
 		$response = $this->responseBaseData();
 		
 		#filter tool
-		$type = data_get($this->statistics, 'modeType', NULL);
+		$type = data_get($this->statistics, 'type', NULL);
 		$response['hasFilter'] = ($type == 'store');
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		

@@ -63,10 +63,8 @@ class EzOrderPosViewModel extends Fluent
 		];
 		$this->set('options.by', $by);
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$areaPermission = $currentUser->getSalesAreaPermissionMap();
-		
-		$this->set('options.areaList', $areaPermission);
+		$areaList = $this->getSalesAreaOptions($this->brand);
+		$this->set('options.areaList', $areaList);
 	}
 	
 	/* Form submit action
