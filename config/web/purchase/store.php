@@ -12,6 +12,7 @@ return [
 		Brand::BUYGOOD->value => [
 			'TS10006000', 'TS999111', 'RLbg999', 'RL1002'
 		],
+		Brand::FJVEGGIE->value => [],
 	],
 	#根據八方點另整理
 	'factoryStore' => [
@@ -33,7 +34,8 @@ return [
 			'4280007', #Dashboard新增
 		],
 		
-		Brand::BUYGOOD->value => []
+		Brand::BUYGOOD->value => [],
+		Brand::FJVEGGIE->value => [],
 	],
 	
 	#蘿蔔店:特別要處理的店(蘿蔔 => 八方)

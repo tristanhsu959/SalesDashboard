@@ -22,11 +22,11 @@ class ShipmentsRepository extends Repository
 		
 	}
 	
-	/* 取Product setting
+	/* 取Product enabled setting
 	 * @params: string
 	 * @return: array
 	 */
-	public function getEnableProducts($brand)
+	public function getEnableProductSettings($brand)
 	{
 		$brandId = $brand->value;
 		

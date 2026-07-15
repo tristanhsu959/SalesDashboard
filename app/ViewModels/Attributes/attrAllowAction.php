@@ -7,6 +7,7 @@ use App\Models\CurrentUser;
 use App\Traits\AuthTrait;
 use App\Enums\Operation;
 use App\Enums\Area;
+use App\Enums\Brand;
 
 #Status & Message
 trait attrAllowAction
@@ -34,18 +35,54 @@ trait attrAllowAction
 	 * @params: string
 	 * @return: void
 	 */
-	public function getAuthAreaList()
+	public function getPurchaseOpCenterOptions($brand)
 	{
-		$currentUser = AppManager::getCurrentUser();
-		$authAreaList = $currentUser['roleArea'];
+		$currentUser 	= AppManager::getCurrentUser();
+		$opCenters 		= $currentUser->getOpCenterPermissionMap();
 		
-		$allAreaList = Area::options();
+		if ($this->brand != Brand::BAFANG) #八方才有
+			return [];
 		
-		$list = collect($allAreaList)->filter(function($item, $key) use($authAreaList){
-			return in_array($key, $authAreaList);
-		})->toArray();
+		#只有單個, 就無需顯示
+		if (count($opCenters) <= 1)
+			return [];
 		
-		return $list;
+		return $opCenters;
+	}
+	
+	/* Area permission
+	 * @params: string
+	 * @return: void
+	 */
+	public function getPurchaseAreaOptions($brand)
+	{
+		$currentUser	= AppManager::getCurrentUser();
+		$areas 			= $currentUser->getPurchaseAreaPermissionMap();
+		
+		#單區授權不顯示
+		if (count($areas) <= 1)
+			return [];
+		
+		return $areas;
+	}
+	
+	/* Area permission
+	 * @params: string
+	 * @return: void
+	 */
+	public function getSalesAreaOptions()
+	{
+		$currentUser 	= AppManager::getCurrentUser();
+		$areas 			= $currentUser->getSalesAreaPermissionMap();
+		
+		if ($this->brand == Brand::FJVEGGIE) #芳珍不顯示
+			return [];
+		
+		#單區授權不顯示
+		if (count($areas) <= 1)
+			return [];
+		
+		return $areas;
 	}
 	
 	/* Action permission

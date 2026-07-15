@@ -45,7 +45,7 @@ class PurchaseProductViewModel extends Fluent
 		$this->set('options.brands', Brand::toArray()); 
 		
 		if ($this->action == FormAction::UPDATE)
-			$this->set('options.products', $this->_service->getProductList()); 
+			$this->set('options.products', $this->_service->getProductOptions()); 
 	}
 	
 	/* Form submit action

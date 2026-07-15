@@ -169,6 +169,7 @@ class StoreManager
 			
 			$item['storeKey'] = $this->buildStoreKey($item['storeNo']);
 			
+			#ez無值取原來的,芳珍就不會有posid在ezorder
 			$ezPosId = data_get($ezorderPosIds, $item['storeKey'], '');
 			
 			if (empty($item['posId']) OR $item['posId'] == 'null')
@@ -183,7 +184,7 @@ class StoreManager
 			$item['areaName'] 	= $area->label();
 			
 			return $item;
-		})->sortBy('areaId')->values()->all();
+		})->unique('storeKey')->sortBy('areaId')->values()->all(); #芳珍會有重複的店
 		
 		return $store;
 	}
@@ -257,7 +258,7 @@ class StoreManager
 	{
 		#ezorder定義的名單,有另調整過
 		$brandId = $brand->value;
-		$excepts = config("web.purchase.store.factoryStore.{$brandId}");
+		$excepts = config("web.purchase.store.factoryStore.{$brandId}", []);
 		
 		#濾除沒POS的或廠區學區店
 		return collect($storeList)->reject(function($item, $key) use($excepts) {

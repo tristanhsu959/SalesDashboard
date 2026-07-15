@@ -139,7 +139,7 @@ class PosManager
 	{
 		#御廚才有影響
 		$brandId = $brand->value;
-		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}");
+		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}", []);
 		
 		$result = collect($storeList)->filter(function($item, $key) use($excepts){
 			return ! in_array($item['storeKey'], $excepts);

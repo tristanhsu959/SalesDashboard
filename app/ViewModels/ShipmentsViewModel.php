@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\Services\ShipmentsService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
@@ -53,9 +54,16 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
-		list($category, $products) = $this->_service->getEnableProducts($this->brand);
+		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
+		$areaList 		= $this->getPurchaseAreaOptions($this->brand);
+		
+		$this->set('options.opCenterList', $opCenterList);
+		$this->set('options.areaList', $areaList);
+		
+		list($category, $products) = $this->_service->getProductOptions($this->brand);
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
+		
 	}
 	
 	/* 查詢選項
@@ -68,19 +76,19 @@ class ShipmentsViewModel extends Fluent
 			'store'		=> '依門店', 
 			'factory'	=> '依工廠',
 		];
-		$this->set('options.mode.type', $type);
+		$this->set('options.type', $type);
 		
 		$calc = [
 			'day'	=> '以日計算', 
 			'month'	=> '以月計算',
 		];
-		$this->set('options.mode.calc', $calc);
+		$this->set('options.calc', $calc);
 
 		$by = [
 			'keyword'	=> '關鍵字查詢',
 			'category'	=> '分類查詢', 
 		];
-		$this->set('options.mode.by', $by);
+		$this->set('options.by', $by);
 	}
 	
 	/* Form submit action

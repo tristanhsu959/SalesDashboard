@@ -26,7 +26,7 @@ class StoreRepository extends Repository
 		#一律都取蘿蔔,再由service過濾
 		$brandId = $brand->value;
 		$allowAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
-		$excepts = config("web.purchase.store.except.{$brandId}");
+		$excepts = config("web.purchase.store.except.{$brandId}", []);
 		
 		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		

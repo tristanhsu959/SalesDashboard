@@ -6,6 +6,7 @@ use App\Facades\PurchaseManager;
 use App\Repositories\PurchaseProductRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Brand;
+use App\Enums\OpCenter;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -26,12 +27,22 @@ class PurchaseProductService
 	{
 		try
 		{
+			$opCenterIds = OpCenter::getAll();
 			$bfBrandId = Brand::BAFANG->value;
 			$bgBrandId = Brand::BUYGOOD->value;
 			
-			$productMapping[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG);
-			$productMapping[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD);
+			#先取訂貨的產品資料,因本地設定只有ShortCode, 沒有Name
+			$productMapping[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG, $opCenterIds);
+			$productMapping[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD, $opCenterIds);
 			
+			#轉成key-value
+			$productMapping = collect($productMapping)->map(function($items, $key){
+				return collect($items)->mapWithKeys(function($item, $key){
+					return [$item['productNo'] => $item['productName']];
+				})->toArray();
+			})->toArray();
+			
+			#取enabled的可查詢產品
 			$list = $this->_repository->getSetting();
 			
 			$list = collect($list)->groupBy('brandId')->map(function($items, $key) use($productMapping) {
@@ -51,28 +62,32 @@ class PurchaseProductService
 		}
 	}
 	
-	/* Get product for options from new order system(called by vm for options)
+	/* Get product for options from new order system(called by viewmodel for options)
 	 * called by update
 	 * @params: 
 	 * @return: array
 	 */
-	public function getProductList()
+	public function getProductOptions()
 	{
+		#設定選項清單
 		try
 		{
+			$opCenterIds = OpCenter::getAll();
 			$bfBrandId = Brand::BAFANG->value;
 			$bgBrandId = Brand::BUYGOOD->value;
 			
-			
 			#要分開取, 因short code是不分brand
-			$list[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG, FALSE);
-			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD, FALSE);
+			$list[$bfBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BAFANG, $opCenterIds);
+			$list[$bgBrandId] = PurchaseManager::getProductShortCodeMapping(Brand::BUYGOOD, $opCenterIds);
 			
 			#下架沒有被設定成stop, 但erpNo似乎會是空值, 目前是全取
 			$list = collect($list)->map(function($items, $brandId) {
-				return collect($items)->unique('productNo')->map(function($item, $key) use($brandId){
+				
+				return collect($items)->map(function($item, $key) use($brandId){
 					
+					#取得config自訂的分類,只是為了UI上方便查找
 					$group = PurchaseManager::getGroupByShortCode($brandId, $item['productNo']);
+					
 					return array_merge($item, $group);
 				})->groupBy('groupId')->map(function($items, $key){
 					$temp['groupName'] 	= $items->pluck('groupName')->first();

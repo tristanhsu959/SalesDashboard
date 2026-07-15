@@ -85,7 +85,11 @@ class PurchaseManager
 	}
 	
 	/******************** Product ********************/
-	/* Get product id */
+	/* 取Name對應的ProductId(查詢時)
+	 * @params: int
+	 * @params: boolean
+	 * @return: array
+	 */
 	public function getProductIdByName($brand, $opCenter, $name)
 	{
 		$brandId = $brand->value;
@@ -95,6 +99,11 @@ class PurchaseManager
 		return $result;
 	}
 	
+	/* 取ShortCode對應的ProductId(查詢時)
+	 * @params: int
+	 * @params: boolean
+	 * @return: array
+	 */
 	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
 	{
 		$brandId = $brand->value;
@@ -114,26 +123,22 @@ class PurchaseManager
 	 * @params: boolean
 	 * @return: array
 	 */
-	public function getProductShortCodeMapping($brand, $returnMapping = TRUE)
+	public function getProductShortCodeMapping($brand, $allOpCenter = [])
 	{
-		#取所有產品
-		$opCenter = $this->getOpCenterNo($brand, []); #所有營運中心
-		$productMapping = $this->_repository->getProductShortCode($brand, $opCenter);
+		$productData = $this->_repository->getProductAndShortCode($brand, $allOpCenter);
 		
 		#因不分工廠, 現狀會有重複, 要再濾除
-		$productMapping = collect($productMapping)->unique('productNo');
+		$productMapping = collect($productData)->unique('productNo')->all();
 		
-		if ($returnMapping === TRUE)
-		{
-			$productMapping = $productMapping->mapWithKeys(function($item, $key){
-				return [$item['productNo'] => $item['productName']];
-			});
-		}
+		/* $productMapping = $productData->mapWithKeys(function($item, $key){
+			return [$item['productNo'] => $item['productName']];
+		})->all(); */
 		
-		return $productMapping->all();
+		#改為直接回傳, 不轉換成key-value
+		return $productMapping;
 	}
 	
-	/* 取對應的Group設定值
+	/* 取對應的Group設定值(Dashboard自訂)
 	 * @params: string
 	 * @return: array
 	 */

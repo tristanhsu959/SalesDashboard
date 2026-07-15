@@ -79,14 +79,18 @@ class ShipmentsService
 	 * @params: int
 	 * @return: string
 	 */
-	public function getEnableProducts($brand)
+	public function getProductOptions($brand)
 	{
-		$brandId = $brand->value;
+		$currentUser 	= AppManager::getCurrentUser();
+		$allowOpCenter 	= $currentUser->getOpCenterPermissions();
 		
-		$enableProducts = $this->_repository->getEnableProducts($brand);
+		#Get setting from maridb((這裏沒分營運中心,只分品牌: Brand & ShortCoe)
+		$enableProducts 	= $this->_repository->getEnableProductSettings($brand);
+		$enableShortCodes 	= collect($enableProducts)->pluck('shortCode')->values()->all();
 		
-		#Get product mapping
-		$productMapping = PurchaseManager::getProductShortCodeMapping($brand);
+		#再至訂貨取到對應的產品名(這裏會分營運中心)
+		#shortCode => productName
+		$productMapping = PurchaseManager::getProductShortCodeMapping($brand, $allowOpCenter);
 		
 		#Build options
 		/*array:4 [
@@ -97,7 +101,25 @@ class ShipmentsService
 		]
 		*/
 		
-		$list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
+		$brandId = $brand->value;
+		
+		#因設定沒分營運中心, 故要改以訂貨的為依據過濾
+		$list = collect($productMapping)->filter(function($item, $key) use($enableShortCodes){
+			return in_array($key, $enableShortCodes);
+		})->map(function($item, $key) use($brandId) {
+			
+			$temp['shortCode'] 	= $key;
+			$temp['productName']= $item;
+			
+			$category = PurchaseManager::getGroupByShortCode($brandId, $temp['shortCode']);
+			
+			$temp['groupId']	= $category['groupId'];
+			$temp['groupName'] 	= $category['groupName'];
+			
+			return $temp;
+		})->values()->all();
+		
+		/* $list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
 			
 			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
 			
@@ -106,12 +128,12 @@ class ShipmentsService
 			$item['groupName'] 	= $category['groupName'];
 			unset($item['brandId']);
 			return $item;
-		})->toArray();
+		})->toArray(); */
 		
 		#要分成category & product對應
 		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
-			$temp['catId'] = $items->pluck('groupId')->unique()->first();
-			$temp['catName'] = $items->pluck('groupName')->unique()->first();
+			$temp['catId'] 	= $items->pluck('groupId')->unique()->first();
+			$temp['catName']= $items->pluck('groupName')->unique()->first();
 			
 			return $temp;
 		})->mapWithKeys(function($item, $key){

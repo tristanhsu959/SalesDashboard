@@ -19,29 +19,42 @@ trait PurchaseReposTrait
 	 */
 	/* public function getOpCenterNo($brandId)
 	{
-		#台北/高雄
+		#台北/高雄(取全部)
 		if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value)
 			return OpCenter::toValueArray();
 		
 		return [];
-	}
-	
+	} */
+	/* 
 	public function getBrandNo($brandId)
 	{
 		$brand = Brand::tryFrom($brandId);
 		return $brand->shortCode();
 	}
-	
+	*/
 	public function getFactoryNo($brandId)
 	{
-		$brand = Brand::tryFrom($brandId);
 		if ($brandId == Brand::BAFANG->value)
 			return [Factory::TP->value, Factory::KH->value];
 		else
 			return [Factory::TS->value, Factory::RL->value];
-	} */
+	} 
 	
-	/* 條件轉 */
+	/* To Db brandId */
+	/* Convert to brandId
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllDbBrandId($allowOpCenterIds)
+	{
+		$brandIds = [];
+		$brandIds[] = $brand->value; #主要brand
+		
+		$dbBrandIds = $this->_convertToDbBrandId($brandIds, $allowOpCenterIds);
+		
+		return $dbBrandIds;
+	}
+	
 	/* Convert to brandId
 	 * @params: 
 	 * @return: boolean
@@ -77,7 +90,7 @@ trait PurchaseReposTrait
 		#代入的是enum的定Ids
 		$brandMapConfig = config('web.purchase.op_center.brandMap');
 		
-		#這是要
+		#取得DB mapping id
 		$dbBrandIds = collect($brandMapConfig)->filter(function($items, $key) use($allowOpCenterIds) {
 			return in_array($key, $allowOpCenterIds);
 		})->map(function($items, $key) use($brandIds){

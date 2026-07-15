@@ -8,6 +8,7 @@ use App\Facades\StoreManager;
 use App\Repositories\DailyRevenueRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Sales\AreaLib;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -161,6 +162,13 @@ class StoreService
 		$allowAreaIds 		= $params->allowAreaIds;
 		$stDate				= $params->stDate;
 		$endDate			= $params->endDate;
+		
+		#如果是芳珍, 暫不分權限
+		if ($brand == Brand::FJVEGGIE)
+		{
+			$allowOpCenterIds 	= OpCenter::getAll();
+			$allowAreaIds 		= Area::getAll();
+		}
 		
 		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
 		$storeList = PosManager::filterSpecialStore($brand, $storeList);
