@@ -17,7 +17,7 @@
 		<h5>查詢</h5>
 		<div class="field label suffix round border field-light-blue">
 			<select x-model="searchData.type" name="searchType">
-				<template x-for="(name, typeId) in options.mode.type" :key="typeId">
+				<template x-for="(name, typeId) in options.type" :key="typeId">
 					<option x-text="name" :value="typeId" :selected="searchData.type == typeId"></option>
 				</template>
 			</select>
@@ -36,16 +36,30 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<fieldset class="light-blue-border light-blue-text">
+		<fieldset x-show="Object.keys(options.opCenterList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇營運中心</legend>
+			<nav class="wrap">
+				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="opId" name="searchOpCenterIds[]" x-model="searchData.opCenterIds">
+					<span x-text="opName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
+		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
-				<template x-for="(areaName, areaId) in options.mode.areaList" :key="areaId">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
 				<label class="checkbox check-pink">
 					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
 					<span x-text="areaName"></span>
 				</label>
 				</template>
 			</nav>
+			<output class="red-text small">未選時取全部</output>
 		</fieldset>
 		
 		<div class="space"></div>

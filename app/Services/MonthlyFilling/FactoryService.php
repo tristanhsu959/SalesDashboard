@@ -4,6 +4,7 @@ namespace App\Services\MonthlyFilling;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager;
 use App\Repositories\MonthlyFillingRepository;
 use App\Libraries\ResponseLib;
@@ -31,8 +32,8 @@ class FactoryService
 	public function __construct(protected MonthlyFillingRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
-			'modeRange'		=> '',
+			'type'			=> '',
+			'range'			=> '',
 			'brandId'		=> '', #export
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
@@ -79,8 +80,8 @@ class FactoryService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
-		$this->_statistics['modeRange']		= $params->range;
+		$this->_statistics['type']			= $params->type;
+		$this->_statistics['range']			= $params->range;
 		$this->_statistics['brandId']		= $params->brand->value;
 		$this->_statistics['brandCode']		= $params->brand->code();
 		$this->_statistics['startDate'] 	= $params->stDate;
@@ -112,19 +113,20 @@ class FactoryService
 			$this->_getProductIdByCode($params);
 			
 			#2.Build params
-			$params->productList = config('web.purchase.monthly_filling.monthly');
 			$this->_getFactoryList($params);
 			
-			#因追加的關係才抓storeList
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->userAreaIds, $params->stDate, $params->endDate);
 			
-			#3.Get Purchase data
+			#3.Get store
+			#因追加的關係才抓storeList
+			$this->_getStoreList($params);
+			
+			#4.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
 			
-			#4.Get extra data
+			#5.Get extra data
 			$extraData = $this->_getExtraDataFromDB($params);
 			
-			#5. Build base data
+			#6. Build base data
 			#會有false的無效array, 用array_filter去除
 			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
 		}
@@ -143,19 +145,20 @@ class FactoryService
 	{
 		try
 		{
-			$brand		= $params->brand;
-			$codes		= config('web.purchase.monthly_filling.monthly');
-			$opCenter 	= PurchaseManager::getOpCenterNo($brand, $params->opCenter);
+			$brand				= $params->brand;
+			$productList		= config('web.purchase.monthly_filling.monthly');
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
 			
 			#非0開頭會變成int(sql會convert error)
-			$codes 	= collect($codes)->pluck('code')->all();
+			$codes 	= collect($productList)->pluck('code')->all();
 			
 			#取norder DB對應的product id
-			$ids = PurchaseManager::getProductIdByShortCode($brand, $opCenter, $codes);
+			$ids = PurchaseManager::getProductIdByShortCode($brand, $allowOpCenterIds, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
 			
+			$params->productList	= $productList;
 			$params->productCodes 	= $codes; #舊系統DB需用到
 			$params->productIds 	= $ids;
 		}
@@ -178,8 +181,7 @@ class FactoryService
 		try
 		{
 			#代授權OpCenter,若要取全部工廠則代入全部
-			$opCenter 	= PurchaseManager::getOpCenterNo($params->brand);
-			$factory 	= PurchaseManager::getFactoryList($params->brand, $opCenter);
+			$factory 	= PurchaseManager::getFactoryList($params->brand, $params->allowOpCenterIds);
 			
 			$params->factoryList = $factory;
 		}
@@ -188,6 +190,25 @@ class FactoryService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception('讀取出貨工廠資料失敗');
 		}
+	}
+	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		
+		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#這裏不排除工廠學區店
+		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
 	}
 	
 	/* Get order data
@@ -206,14 +227,14 @@ class FactoryService
 	
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$opCenter	= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); 
-			$userAreaIds= $params->userAreaIds;
-			$productIds = $params->productIds;
+			$brand 				= $params->brand;
+			$stDate				= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 			= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productIds 		= $params->productIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$orderData = $this->_repository->getOrderDataByFactory($brand, $opCenter, $userAreaIds, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByFactory($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -232,14 +253,14 @@ class FactoryService
 	{
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productCodes 	= $params->productCodes;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
-			$userAreaIds 	= $params->userAreaIds;
+			$brand 				= $params->brand;
+			$stDate				= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 			= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes 		= $params->productCodes;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();

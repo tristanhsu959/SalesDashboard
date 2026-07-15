@@ -16,14 +16,14 @@
 	@csrf
 		<h5>查詢</h5>
 		<div class="field middle-align">
-		<nav class="wrap">
-			<template x-for="(name, id) in options.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'date')">

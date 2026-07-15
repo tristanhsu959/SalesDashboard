@@ -116,10 +116,9 @@ class MonthlyFillingService
 	{
 		$params = new Fluent();
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$userAreaIds 	= $currentUser->getPurchaseAreaPermissions();
-		$userOpCenter	= $currentUser->getOpCenterPermissions();
-		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter);
+		#此功能暫不提供營運中心, 區域選項
+		$allowOpCenterIds	= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
+		$allowAreaIds		= AppManager::getAllowPurchaseAreas(); #整併查詢參數
 		
 		#轉換日期
 		if ($searchRange == 'year')
@@ -135,9 +134,9 @@ class MonthlyFillingService
 		}
 			
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $userOpCenter, $userAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchStDate, $searchEndDate, $searchType, $searchRange]);
 		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->type($searchType)->range($searchRange)
 				->cacheKey($cacheKey);
@@ -162,9 +161,9 @@ class MonthlyFillingService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export monthly filling data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'store')
+		if ($type == 'store')
 			$service = app(StoreService::class);
 		else
 			$service = app(FactoryService::class);

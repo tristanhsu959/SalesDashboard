@@ -65,14 +65,14 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -111,31 +111,19 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		$params = new Fluent();
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$userAreaIds 	= $currentUser->getPurchaseAreaPermissions();
-		$userOpCenter	= $currentUser->getOpCenterPermissions();
-		$opCenter		= PurchaseManager::getOpCenterNo($brand, $userOpCenter);
+		$allowOpCenterIds	= AppManager::getAllowOpCenter($searchOpCenterIds); #只有取門店需要,無需代參數
+		$allowAreaIds		= AppManager::getAllowPurchaseAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $opCenter, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchProductCodes]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);
 		
-		#處理查詢areaIds
-		if (empty($searchAreaIds))
-			$searchAreaIds = $userAreaIds; #未選取則取全部
-		else
-		{
-			$searchAreaIds = collect($searchAreaIds)->filter(function($value, $key) use($userAreaIds){
-				return in_array($value, $userAreaIds);
-			})->toArray();
-		}
-		
-		$params->brand($brand)->opCenter($opCenter)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
-				->searchAreaIds($searchAreaIds)->productCodes($searchProductCodes)
+				->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		
 		return $params;
@@ -158,9 +146,9 @@ class PurchaseReportService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export 營業概況 data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'performance')
+		if ($type == 'performance')
 			$service = app(PerformanceService::class);
 		else
 			return ResponseLib::initialize('檔案下載發生錯誤，請重新查詢')->fail();

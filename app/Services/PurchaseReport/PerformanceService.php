@@ -4,6 +4,7 @@ namespace App\Services\PurchaseReport;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager;
 use App\Repositories\PurchaseReportRepository;
 use App\Libraries\ResponseLib;
@@ -33,7 +34,7 @@ class PerformanceService
 	public function __construct(protected PurchaseReportRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
+			'type'		=> '',
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -77,7 +78,7 @@ class PerformanceService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
+		$this->_statistics['type']			= $params->type;
 		$this->_statistics['brandId']		= $params->brand->value;
 		$this->_statistics['brandCode']		= $params->brand->code();
 		$this->_statistics['startDate'] 	= $params->stDate;
@@ -109,8 +110,8 @@ class PerformanceService
 			#1.Get product id
 			$this->_getProductIdByCode($params);
 			
-			#2.Build params
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->opCenter, $params->searchAreaIds, $params->stDate, $params->endDate);
+			#2.Get store
+			$this->_getStoreList($params);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -141,9 +142,9 @@ class PerformanceService
 			$codeGroup	= config('web.purchase.report.performance');
 			
 			#取出所有的short code
-			$codes 		= collect($codeGroup)->collapse()->pluck('code')->toArray();
+			$codes = collect($codeGroup)->collapse()->pluck('code')->toArray();
 			
-			$ids = PurchaseManager::getProductIdByShortCode($params->brand, $params->opCenter, $codes);
+			$ids = PurchaseManager::getProductIdByShortCode($params->brand, $params->allowOpCenterIds, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
@@ -159,6 +160,24 @@ class PerformanceService
 		}
 	}
 	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		
+		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#這裏不排除工廠學區店
+		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
+	}
 	/* ====================== 主流程 End ====================== */
 	
 	/* Get order data
@@ -178,14 +197,14 @@ class PerformanceService
 	
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
-			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
-			$searchAreaIds	= $params->searchAreaIds;
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter); #all op center
-			$productIds 	= $params->productIds;
+			$brand 				= $params->brand;
+			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
+			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
+			$productIds 		= $params->productIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$orderData = $this->_repository->getOrderDataByPerformance($brand, $opCenter, $searchAreaIds, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -215,13 +234,14 @@ class PerformanceService
 		
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
-			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
-			$productCodes 	= $params->productCodes; #舊系統用product code
-			$opCenter		= PurchaseManager::getOpCenterNo($params->brand, $params->opCenter);
+			$brand 				= $params->brand;
+			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
+			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
+			$productCodes 		= $params->productCodes; #舊系統用product code
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $opCenter, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -258,8 +278,8 @@ class PerformanceService
 		$orderData = collect($orderData)->merge($extraData);
 		
 		$baseData = collect($orderData)->map(function($item, $key) {
-			$item['storeKey'] 		= PurchaseManager::buildStoreKey($item['storeNo']);
-			$item['qty'] 			= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
+			$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
+			$item['qty'] 		= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
 		})->groupBy('storeKey')->toArray();
@@ -320,7 +340,7 @@ class PerformanceService
 	 */
 	private function _buildHeader($params)
 	{
-		$productGroup 	= $params->productGroup;
+		$productGroup = $params->productGroup;
 		
 		$groupList = collect($productGroup)->map(function($group, $key){
 			return collect($group)->mapWithKeys(function($item, $key){

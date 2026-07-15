@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-#use App\Repositories\Traits\PurchaseReposTrait;
+use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
@@ -15,7 +15,7 @@ use Exception;
 
 class PurchaseReportRepository extends Repository
 {
-	#use PurchaseReposTrait;
+	use PurchaseReposTrait;
 	
 	public function __construct()
 	{
@@ -29,13 +29,14 @@ class PurchaseReportRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByPerformance($brand, $opCenter, $searchAreaIds, $stDate, $endDate, $productIds)
+	public function getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $searchAreaIds);
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -49,17 +50,17 @@ class PurchaseReportRepository extends Repository
 			->selectRaw('sum(b.Quantity) as qty')
 			->selectRaw('sum(b.Money) as amount')
 			->addSelect('s.No as storeNo', 'p.OldNo as shortCode')
-			->whereExists(function ($query) use($opCenter) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $opCenter);
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brand) {
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 's.BrandId')
-					->whereIn('bd.No',  PurchaseManager::getBrandShortCode($brand));
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
 			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
