@@ -2,6 +2,7 @@
 
 namespace App\Manager;
 
+use App\Facades\AppManager;
 use App\Manager\Repositories\PosRepository;
 use App\Libraries\Sales\AreaLib;
 use App\Libraries\HelperLib;
@@ -21,20 +22,113 @@ class PosManager
 	{
 	}
 	
-	/* 取對應nOrder的設定值
-	 * @params: int
+	/******************** 屬銷售的定義放在POS Manager ********************/
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowOpCenters()
+	{
+		#銷售不分營運中心
+		return OpCenter::toValueArray();
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowAreas($filterAreas = [])
+	{
+		$currentUser 	= AppManager::getCurrentUser();
+		$authAreas 		= $currentUser->getSalesAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
+	}
+		
+	/* Filter data by shop
+	 * @params: collection
 	 * @return: array
 	 */
-	/* public function getOpCenterNo($brand)
+	public function filterDataByExceptStore($brand, $data)
 	{
-		#銷售不分營運中心:台北/高雄
-		return OpCenter::toValueArray();
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
-		/* if ($brandId == Brand::BAFANG->value OR $brandId == Brand::BUYGOOD->value OR $brandId == Brand::FJVEGGIE->value)
-			return OpCenter::toValueArray();
+		$result = collect($data)->filter(function($item, $key) use($excepts){
+			return ! in_array($item['shopId'], $excepts);
+		});
 		
-		return []; *
+		return $result;
+	}
+	
+	/* 排除特殊複合(屬銷售定義非通用,故不寫在StoreManager)
+	 * @params: collection
+	 * @return: array
+	 */
+	public function filterSpecialStore($brand, $storeList)
+	{
+		#御廚才有影響
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}", []);
+		
+		$result = collect($storeList)->filter(function($item, $key) use($excepts){
+			return ! in_array($item['storeKey'], $excepts);
+		})->toArray();
+		
+		return $result;
+	}
+	
+	/* 補全門店判別(門店已改同步訂貨)
+	 * @params: array
+	 * @return: array
+	 */
+	/* public function getFillOutStore($activeShopList, $saleShopIds)
+	{
+		#改用active shop來判過濾即可
+		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
+			#過濾出無銷售且為active門店
+			return ! in_array($item['posId'], $saleShopIds);
+		});
+		
+		return $result;
 	} */
+	
+	/* 判別複合店
+	 * @params: array
+	 * @return: array
+	 */
+	public function isDualBranded($posId)
+	{
+		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
+		#八方及御廚都判斷, 不用特別判別Brand
+		
+		$bafang	= array_keys($dualBrandedShopIds);
+		$buygood= array_values($dualBrandedShopIds);
+		
+		return in_array($posId, $bafang) OR in_array($posId, $buygood);
+	}
+	
+	/* 取複合店
+	 * @params: array
+	 * @return: array
+	 */
+	public function getDualBrandedMappingId($posId)
+	{
+		#八方及御廚都判斷, 不用特別判別Brand
+		$bafangMapping = config('web.sales.shop.dualBrandedId');
+		$buygoodMapping = array_flip($bafangMapping);
+		
+		#基本上都是御廚posid要抓八方,所以先判別buygood
+		$mapId = data_get($buygoodMapping, $posId, 0);
+		
+		if (! empty($mapId))
+			return $mapId;
+		
+		return data_get($bafangMapping, $posId, 0);
+	}
 	
 	/* 取全部店家(含閉店)
 	 * @params: enum
@@ -115,86 +209,5 @@ class PosManager
 		return $result;
 	} */	
 		
-	/* Filter data by shop
-	 * @params: collection
-	 * @return: array
-	 */
-	public function filterDataByExceptStore($brand, $data)
-	{
-		$brandId = $brand->value;
-		$excepts = config("web.sales.shop.except.{$brandId}");
-		
-		$result = collect($data)->filter(function($item, $key) use($excepts){
-			return ! in_array($item['shopId'], $excepts);
-		});
-		
-		return $result;
-	}
 	
-	/* 排除特殊複合(屬銷售定義非通用,故不寫在StoreManager)
-	 * @params: collection
-	 * @return: array
-	 */
-	public function filterSpecialStore($brand, $storeList)
-	{
-		#御廚才有影響
-		$brandId = $brand->value;
-		$excepts = config("web.sales.shop.dualBrandedExceptStoreKey.{$brandId}", []);
-		
-		$result = collect($storeList)->filter(function($item, $key) use($excepts){
-			return ! in_array($item['storeKey'], $excepts);
-		})->toArray();
-		
-		return $result;
-	}
-	
-	/* 補全門店判別(門店已改同步訂貨)
-	 * @params: array
-	 * @return: array
-	 */
-	/* public function getFillOutStore($activeShopList, $saleShopIds)
-	{
-		#改用active shop來判過濾即可
-		$result = collect($activeShopList)->filter(function($item, $key) use($saleShopIds) {
-			#過濾出無銷售且為active門店
-			return ! in_array($item['posId'], $saleShopIds);
-		});
-		
-		return $result;
-	} */
-	
-	/******************** 屬銷售的定義放在POS Manager ********************/
-	/* 判別複合店
-	 * @params: array
-	 * @return: array
-	 */
-	public function isDualBranded($posId)
-	{
-		$dualBrandedShopIds = config('web.sales.shop.dualBrandedId');
-		#八方及御廚都判斷, 不用特別判別Brand
-		
-		$bafang	= array_keys($dualBrandedShopIds);
-		$buygood= array_values($dualBrandedShopIds);
-		
-		return in_array($posId, $bafang) OR in_array($posId, $buygood);
-	}
-	
-	/* 取複合店
-	 * @params: array
-	 * @return: array
-	 */
-	public function getDualBrandedMappingId($posId)
-	{
-		#八方及御廚都判斷, 不用特別判別Brand
-		$bafangMapping = config('web.sales.shop.dualBrandedId');
-		$buygoodMapping = array_flip($bafangMapping);
-		
-		#基本上都是御廚posid要抓八方,所以先判別buygood
-		$mapId = data_get($buygoodMapping, $posId, 0);
-		
-		if (! empty($mapId))
-			return $mapId;
-		
-		return data_get($bafangMapping, $posId, 0);
-	}
 }

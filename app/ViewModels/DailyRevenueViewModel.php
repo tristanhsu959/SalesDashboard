@@ -64,10 +64,8 @@ class DailyRevenueViewModel extends Fluent
 		#根據poserp.shop_kind
 		$this->set('options.storeType', config('web.sales.shop.type'));
 		
-		$currentUser 	= AppManager::getCurrentUser();
-		$areaPermission = $currentUser->getSalesAreaPermissionMap();
-		
-		$this->set('options.areaList', $areaPermission);
+		$areaList = $this->getSalesAreaOptions();
+		$this->set('options.areaList', $areaList);
 	}
 	
 	/* Form submit action

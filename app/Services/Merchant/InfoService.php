@@ -177,7 +177,7 @@ class InfoService
 			$storeList = collect($storeList)->map(function($item, $key){
 				$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
 				return $item;
-			})->toArray(); 
+			})->all(); 
 			
 			$mergeStoreList = StoreManager::mergeLbStoreByBrandNo($params->brand, $storeList);
 			
@@ -191,7 +191,7 @@ class InfoService
 				$item['areaName']	= $area->label();
 				
 				return $item;
-			})->map(function($item, $key) {
+			})->sortBy('areaId')->map(function($item, $key) {
 				#依顯示順序
 				$temp['areaName'] 	= $item['areaName'];
 				#$temp['storeNo']	= $item['storeNo'];
@@ -207,7 +207,7 @@ class InfoService
 				$temp['salesName']	= $item['salesName'];
 				
 				return $temp;
-			})->sortBy('areaId')->values()->all(); 
+			})->values()->all(); 
 			
 			$params->baseData = $store;
 		}

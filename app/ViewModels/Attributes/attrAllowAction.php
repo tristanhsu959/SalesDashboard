@@ -35,7 +35,7 @@ trait attrAllowAction
 	 * @params: string
 	 * @return: void
 	 */
-	public function getPurchaseOpCenterOptions($brand)
+	public function getPurchaseOpCenterOptions()
 	{
 		$currentUser 	= AppManager::getCurrentUser();
 		$opCenters 		= $currentUser->getOpCenterPermissionMap();
@@ -54,12 +54,21 @@ trait attrAllowAction
 	 * @params: string
 	 * @return: void
 	 */
-	public function getPurchaseAreaOptions($brand)
+	public function getAllAreaOptions()
+	{
+		return Area::options();
+	}
+	
+	/* Area permission
+	 * @params: string
+	 * @return: void
+	 */
+	public function getPurchaseAreaOptions()
 	{
 		$currentUser	= AppManager::getCurrentUser();
 		$areas 			= $currentUser->getPurchaseAreaPermissionMap();
 		
-		#單區授權不顯示
+		#單區授權不顯示(芳珍無訂貨功能)
 		if (count($areas) <= 1)
 			return [];
 		
@@ -78,7 +87,7 @@ trait attrAllowAction
 		if ($this->brand == Brand::FJVEGGIE) #芳珍不顯示
 			return [];
 		
-		#單區授權不顯示
+		#單區授權不顯示, return [], 後續會去取user aurh areas
 		if (count($areas) <= 1)
 			return [];
 		

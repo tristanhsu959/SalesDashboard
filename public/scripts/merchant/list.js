@@ -31,7 +31,6 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = 'info';
-			this.searchData.opCenterIds = [];
 			this.searchData.areaIds = [];
 			this.searchData.stDate = this.searchData.today;
 			this.errors.clear();

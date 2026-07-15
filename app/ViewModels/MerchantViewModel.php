@@ -51,20 +51,15 @@ class MerchantViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$currentUser 	= AppManager::getCurrentUser();
-		$opCenter 		= $currentUser->getOpCenterPermissionMap();
-		$areaPermission = $currentUser->getSalesAreaPermissionMap();
-		$hasOpCenter 	= ($this->brand == Brand::BAFANG); #八方才有
-		
 		$type = [
 			'info'		=> '門店資訊', 
 			'dayOff'	=> '店休資訊',
 		];
 		
 		$this->set('options.type', $type);
-		$this->set('options.opCenterList', $opCenter);
-		$this->set('options.areaList', $areaPermission);
-		$this->set('options.hasOpCenter', $hasOpCenter);
+		
+		$areaList = $this->getAllAreaOptions(); #不分區, 全開
+		$this->set('options.areaList', $areaList);
 	}
 	
 	/* Form submit action
@@ -89,10 +84,9 @@ class MerchantViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'info', $stDate = '', $opCenterIds = [], $areaIds = [])
+	public function keepSearchData($type = 'info', $stDate = '', $areaIds = [])
     {
 		$this->set('search.type', $type);
-		$this->set('search.opCenterIds', $opCenterIds);
 		$this->set('search.areaIds', $areaIds);
 		$this->set('search.stDate', $stDate);
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));

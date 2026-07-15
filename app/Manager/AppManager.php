@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Models\CurrentUser;
 use App\Enums\MenuGroup;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
@@ -191,11 +192,12 @@ class AppManager
 	
 	
 	/******************** User Auth Filter ********************/
+	#移至各自的manager,因營運中心太複雜
 	/* 
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAllowOpCenter($filterOpCenters = [])
+	/* public function getAllowOpCenter($filterOpCenters = [])
 	{
 		$currentUser = $this->getCurrentUser();
 		$authOpCenters = $currentUser->getOpCenterPermissions();
@@ -204,13 +206,13 @@ class AppManager
 			return $authOpCenters;
 		else
 			return $filterOpCenters;
-	}
+	} */
 	
 	/* 
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAllowPurchaseAreas($filterAreas = [])
+	/* public function getAllowPurchaseAreas($filterAreas = [])
 	{
 		$currentUser = $this->getCurrentUser();
 		$authAreas = $currentUser->getPurchaseAreaPermissions();
@@ -219,13 +221,13 @@ class AppManager
 			return $authAreas;
 		else
 			return array_map('intval', $filterAreas);
-	}
+	} */
 	
 	/* 
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAllowSalesAreas($filterAreas = [])
+	/* public function getAllowSalesAreas($filterAreas = [])
 	{
 		$currentUser = $this->getCurrentUser();
 		$authAreas = $currentUser->getSalesAreaPermissions();
@@ -234,7 +236,7 @@ class AppManager
 			return $authAreas;
 		else
 			return array_map('intval', $filterAreas);
-	}
+	} */
 	
 	/******************** User Auth Filter End ********************/
 }

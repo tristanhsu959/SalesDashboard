@@ -219,7 +219,7 @@ class ShipmentsService
 		$params = new Fluent();
 		
 		#這裏是call appmanager不是current user
-		$allowOpCenterIds	= AppManager::getAllowOpCenter($searchOpCenterIds); #只有取門店需要,無需代參數
+		$allowOpCenterIds	= AppManager::getAllowOpCenters($searchOpCenterIds); #只有取門店需要,無需代參數
 		$allowAreaIds		= AppManager::getAllowPurchaseAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;

@@ -63,7 +63,7 @@ class SalesViewModel extends Fluent
 		];
 		$this->set('options.type', $type);
 		
-		$areaList = $this->getSalesAreaOptions($this->brand);
+		$areaList = $this->getSalesAreaOptions();
 		$this->set('options.areaList', $areaList);
 	}
 	

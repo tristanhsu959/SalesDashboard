@@ -164,8 +164,9 @@ class SalesService
 		$params = new Fluent();
 		
 		#Op & Area有權限設定,故要再與查詢條件判別
-		$allowOpCenterIds	= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
+		#只有取門店需要
+		$allowOpCenterIds	= PosManager::getAllowOpCenters();
+		$allowAreaIds		= PosManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);

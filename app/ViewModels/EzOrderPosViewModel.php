@@ -63,7 +63,7 @@ class EzOrderPosViewModel extends Fluent
 		];
 		$this->set('options.by', $by);
 		
-		$areaList = $this->getSalesAreaOptions($this->brand);
+		$areaList = $this->getSalesAreaOptions();
 		$this->set('options.areaList', $areaList);
 	}
 	

@@ -103,7 +103,7 @@
 				</div>
 			</article>
 		
-			<div class="statistics">
+			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
 					<a class="active" data-ui="#tab-area">區域彙總</a>
 					<a data-ui="#tab-shop">店別明細</a>

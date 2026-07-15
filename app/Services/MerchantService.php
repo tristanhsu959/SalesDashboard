@@ -77,14 +77,14 @@ class MerchantService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchAreaIds)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchAreaIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -124,16 +124,15 @@ class MerchantService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds)
+	private function _initParams($brand, $searchType, $searchStDate, $searchAreaIds)
 	{
 		$params = new Fluent();
 		
-		#Op & Area有權限設定,故要再與查詢條件判別
-		$allowOpCenterIds		= AppManager::getAllowOpCenter($searchOpCenterIds);
-		$allowAreaIds			= AppManager::getAllowPurchaseAreas($searchAreaIds);
+		#此功能無法被歸類銷售或訂貨,故取全區
+		$allowOpCenterIds	= PurchaseManager::getAllOpCenters();
+		$allowAreaIds		= PurchaseManager::getAllAreas($searchAreaIds);
 		
 		$functions		= $this->parsingFunction($brand);
-		
 		$searchStDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
 		$searchEndDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->addDay()->format('Y-m-d');
 		
@@ -169,9 +168,9 @@ class MerchantService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['type'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'info')
+		if ($type == 'info')
 			$service = app(InfoService::class);
 		else
 			$service = app(DayoffService::class);

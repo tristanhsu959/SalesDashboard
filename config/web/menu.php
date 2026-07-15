@@ -57,12 +57,12 @@ return [
 			'style' 	=> ['icon' => 'storefront', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.merchant'),
 		],
-		[
+		/* [
 			'name' 		=> Functions::BF_PURCHASE_SALES->label(), #門店進貨及銷售
 			'code'		=> Functions::BF_PURCHASE_SALES->value,
 			'style' 	=> ['icon' => 'finance_mode', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_sales'),
-		],
+		], */
 	],
 	
 	MenuGroup::BUYGOOD->value => [
@@ -108,12 +108,12 @@ return [
 			'style' 	=> ['icon' => 'storefront', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.merchant'),
 		],
-		[
+		/* [
 			'name' 		=> Functions::BG_PURCHASE_SALES->label(), #門店進貨及銷售
 			'code'		=> Functions::BG_PURCHASE_SALES->value,
 			'style' 	=> ['icon' => 'finance_mode', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase_sales'),
-		],
+		], */
 	],
 	
 	MenuGroup::FJVEGGIE->value => [

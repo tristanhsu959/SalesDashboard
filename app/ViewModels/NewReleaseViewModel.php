@@ -52,7 +52,7 @@ class NewReleaseViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$areaList = $this->getSalesAreaOptions($this->brand);
+		$areaList = $this->getSalesAreaOptions();
 		
 		$this->set('options.areaList', $areaList);
 		$this->set('options.newReleaseProducts', $this->_service->getNewReleaseProducts($this->brand->value));

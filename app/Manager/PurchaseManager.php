@@ -2,10 +2,12 @@
 
 namespace App\Manager;
 
+use App\Facades\AppManager;
 use App\Manager\Repositories\PurchaseRepository;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
+use App\Enums\Area;
 use App\Enums\Factory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -15,6 +17,71 @@ class PurchaseManager
 {
 	public function __construct(protected PurchaseRepository $_repository)
 	{
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllOpCenters()
+	{
+		return OpCenter::getAll();
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowOpCenters($brand)
+	{
+		$currentUser = AppManager::getCurrentUser();
+		$authOpCenters = $currentUser->getOpCenterPermissions();
+		
+		if (empty($filterOpCenters))
+			return $authOpCenters;
+		else
+			return $filterOpCenters;
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllAreas($filterAreas = [])
+	{
+		if (empty($filterAreas))
+			return Area::getAll();
+		else
+			return $filterAreas;
+	}
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowAreas($filterAreas = [])
+	{
+		$currentUser = AppManager::getCurrentUser();
+		$authAreas = $currentUser->getPurchaseAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
+	}
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAllowSalesAreas($filterAreas = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authAreas = $currentUser->getSalesAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
 	}
 	
 	/* 取對應nOrder的設定值

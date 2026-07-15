@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Facades\AppManager;
 use App\Facades\PosManager;
-use App\Facades\PurchaseManager;
 use App\Services\EzOrderPos\StoreService;
 use App\Services\EzOrderPos\AreaService;
 use App\Repositories\EzOrderPosRepository;
@@ -131,8 +130,9 @@ class EzOrderPosService
 		$params = new Fluent();
 		
 		#Op & Area有權限設定,故要再與查詢條件判別
-		$allowOpCenterIds	= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
+		#只有取門店需要
+		$allowOpCenterIds	= PosManager::getAllowOpCenters(); 
+		$allowAreaIds		= PosManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 		= $this->parsingFunction($brand);
 		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBy, $searchStDate, $searchEndDate, $searchStoreName]);

@@ -7,6 +7,7 @@ use App\Services\DailyRevenue\AovService;
 use App\Facades\AppManager;
 use App\Facades\PosManager;
 use App\Repositories\DailyRevenueRepository;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -134,8 +135,15 @@ class DailyRevenueService
 		$params = new Fluent();
 		
 		#Op & Area有權限設定,故要再與查詢條件判別
-		$allowOpCenterIds	= AppManager::getAllowOpCenter(); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowSalesAreas($searchAreaIds); #整併查詢參數
+		$allowOpCenterIds	= PosManager::getAllowOpCenters(); #只有取門店需要,無需代參數
+		$allowAreaIds		= PosManager::getAllowAreas($searchAreaIds); #整併查詢參數
+		
+		#如果是芳珍, 暫不分權限
+		if ($brand == Brand::FJVEGGIE)
+		{
+			$allowOpCenterIds 	= OpCenter::getAll();
+			$allowAreaIds 		= Area::getAll();
+		}
 		
 		if ($searchType == 'store') #有區間條件才要預設
 			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;

@@ -30,20 +30,7 @@
 			<label>查詢日期</label>
 		</div>
 		
-		<fieldset class="field light-blue-border light-blue-text">
-			<legend class="small">選擇營運中心</legend>
-			<nav class="wrap">
-				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
-				<label class="checkbox check-pink">
-					<input type="checkbox" :value="opId" name="searchOpCenterIds[]" x-model="searchData.opCenterIds" :disabled="!options.hasOpCenter">
-					<span x-text="opName"></span>
-				</label>
-				</template>
-			</nav>
-			<output class="red-text small">未選時取全營運中心(南北廠)</output>
-		</fieldset>
-		
-		<fieldset class="field light-blue-border light-blue-text">
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">

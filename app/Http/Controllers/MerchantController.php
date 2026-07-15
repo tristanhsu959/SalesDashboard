@@ -45,13 +45,12 @@ class MerchantController extends Controller
 		#query params
 		$searchType			= $request->input('searchType');
 		$searchStDate		= $request->input('searchStDate', '');
-		$searchOpCenterIds	= $request->array('searchOpCenterIds');
 		$searchAreaIds		= $request->array('searchAreaIds');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds);
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchAreaIds);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchOpCenterIds, $searchAreaIds);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchAreaIds);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

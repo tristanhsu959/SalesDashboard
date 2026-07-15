@@ -115,7 +115,7 @@ class PurchaseReportService
 	{
 		$params = new Fluent();
 		
-		$allowOpCenterIds	= AppManager::getAllowOpCenter($searchOpCenterIds); #只有取門店需要,無需代參數
+		$allowOpCenterIds	= AppManager::getAllowOpCenters($searchOpCenterIds); #只有取門店需要,無需代參數
 		$allowAreaIds		= AppManager::getAllowPurchaseAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 	= $this->parsingFunction($brand);
