@@ -37,10 +37,13 @@ class PurchaseManager
 		$currentUser = AppManager::getCurrentUser();
 		$authOpCenters = $currentUser->getOpCenterPermissions();
 		
-		if (empty($filterOpCenters))
+		#芳珍無訂貨功能
+		if ($brand == Brand::BAFANG)
 			return $authOpCenters;
-		else
-			return $filterOpCenters;
+		else if ($brand == Brand::BUYGOOD)
+			return $this->getAllOpCenters();
+		else 
+			return [];
 	}
 	
 	/* 

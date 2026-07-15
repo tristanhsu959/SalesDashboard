@@ -81,8 +81,7 @@ class ShipmentsService
 	 */
 	public function getProductOptions($brand)
 	{
-		$currentUser 	= AppManager::getCurrentUser();
-		$allowOpCenter 	= $currentUser->getOpCenterPermissions();
+		$allowOpCenter 	= PurchaseManager::getAllowOpCenters($brand);
 		
 		#Get setting from maridb((這裏沒分營運中心,只分品牌: Brand & ShortCoe)
 		$enableProducts 	= $this->_repository->getEnableProductSettings($brand);
@@ -163,14 +162,14 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
+			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -214,13 +213,13 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
 		$params = new Fluent();
 		
 		#這裏是call appmanager不是current user
-		$allowOpCenterIds	= AppManager::getAllowOpCenters($searchOpCenterIds); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowPurchaseAreas($searchAreaIds); #整併查詢參數
+		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand); #只有取門店需要,無需代參數
+		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);

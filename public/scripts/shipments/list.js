@@ -65,7 +65,6 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.by = Object.keys(this.options.by)[0];
 			this.searchData.stDate = this.searchData.tomorrow;
 			this.searchData.endDate = this.searchData.tomorrow;
-			this.searchData.opCenterIds = [];
 			this.searchData.areaIds = [];
 			this.searchData.keyword = '';
 			this.searchData.category = '';

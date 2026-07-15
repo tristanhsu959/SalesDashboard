@@ -54,10 +54,7 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
-		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
-		$areaList 		= $this->getPurchaseAreaOptions($this->brand);
-		
-		$this->set('options.opCenterList', $opCenterList);
+		$areaList = $this->getPurchaseAreaOptions($this->brand);
 		$this->set('options.areaList', $areaList);
 		
 		list($category, $products) = $this->_service->getProductOptions($this->brand);
@@ -114,8 +111,8 @@ class ShipmentsViewModel extends Fluent
 	 * @return: array
 	 */
 	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
-						$searchOpCenterIds = [], $searchAreaIds = [],
-						$searchBy = 'keyword', $searchKeyword = '', $searchCategory = '', $searchShortCodes = [])
+						$searchAreaIds = [], $searchBy = 'keyword', $searchKeyword = '', 
+						$searchCategory = '', $searchShortCodes = [])
     {
 		$today = Carbon::tomorrow()->format('Y-m-d');
 		$searchStDate	= $searchStDate ?? $today;
@@ -125,7 +122,6 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
-		$this->set('search.opCenterIds', $searchOpCenterIds);
 		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.by', $searchBy);
 		$this->set('search.keyword', $searchKeyword);
