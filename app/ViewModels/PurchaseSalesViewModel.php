@@ -63,8 +63,8 @@ class PurchaseSalesViewModel extends Fluent
 		];
 		$this->set('options.type', $type);
 		
-		$areaList = $this->getAuthAreaList();
-		$this->set('options.areaList', $areaList);
+		/* $areaList = $this->getAuthAreaList();
+		$this->set('options.areaList', $areaList); */
 	}
 	
 	/* Form submit action

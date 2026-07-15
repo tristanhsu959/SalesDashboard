@@ -15,7 +15,7 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		
+		<div class="field middle-align">
 		<nav class="wrap">
 			<template x-for="(name, id) in options.type" :key="id">
 				<label class="radio field-red">
@@ -24,6 +24,7 @@
 				</label>
 			</template>
 		</nav>
+		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'date')">
 			<input type="date" name="searchDate" maxlength="10" x-model="searchData.date" x-ref="searchDate" @input="errors.delete('date')" :max="searchData.today">
