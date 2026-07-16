@@ -115,8 +115,9 @@ class PurchaseReportService
 	{
 		$params = new Fluent();
 		
-		$allowOpCenterIds	= AppManager::getAllowOpCenters($searchOpCenterIds); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowPurchaseAreas($searchAreaIds); #整併查詢參數
+		#報表目前只有八方有, 暫不考慮御廚的情境
+		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand, $searchOpCenterIds); #只有取門店需要,無需代參數
+		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 	= $this->parsingFunction($brand);
 		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);

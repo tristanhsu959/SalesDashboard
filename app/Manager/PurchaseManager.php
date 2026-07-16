@@ -32,14 +32,19 @@ class PurchaseManager
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAllowOpCenters($brand)
+	public function getAllowOpCenters($brand, $filterOpCenters = [])
 	{
 		$currentUser = AppManager::getCurrentUser();
 		$authOpCenters = $currentUser->getOpCenterPermissions();
 		
 		#芳珍無訂貨功能
 		if ($brand == Brand::BAFANG)
-			return $authOpCenters;
+		{
+			if (empty($filterOpCenters))
+				return $authOpCenters;
+			else
+				return $filterOpCenters;
+		}
 		else if ($brand == Brand::BUYGOOD)
 			return $this->getAllOpCenters();
 		else 
