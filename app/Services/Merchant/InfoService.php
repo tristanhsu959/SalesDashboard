@@ -3,6 +3,7 @@
 namespace App\Services\Merchant;
 
 use App\Facades\AppManager;
+use App\Facades\StoreManager;
 use App\Facades\PurchaseManager;
 use App\Repositories\MerchantRepository;
 use App\Libraries\ResponseLib;
@@ -41,8 +42,7 @@ class InfoService
 	{
 		try
 		{
-			#Get data
-			$this->_getDataFromDB($params);
+			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
 			
@@ -82,6 +82,25 @@ class InfoService
 	
 	/* ====================== 主流程 End ====================== */
 	
+	/* Get search data
+	 * @params: array
+	 * @return: array
+	 */
+	private function _prepareData($params)
+	{
+		try
+		{
+			#1. Get data from DB
+			$this->_getDataFromDB($params);
+
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
+	}
+	
 	/* Get order data
 	 * @params: 
 	 * @return: array
@@ -105,9 +124,13 @@ class InfoService
 	
 		try
 		{
-			$storeList = $this->_repository->getStoreInfoList($params->brand, $params->userAreaIds);
+			#因不是basic store,故不從StoreManager取
+			$brand 					= $params->brand;
+			$allowOpCenterIds		= $params->allowOpCenterIds;
+			$allowAreaIds			= $params->allowAreaIds;
 			
-			$params->storeList = $storeList;
+			#取所有門店(含廠區學區及蘿蔔)
+			$params->storeList = $this->_repository->getStoreInfoList($brand, $allowOpCenterIds, $allowAreaIds);
 		}
 		catch(Exception $e)
 		{
@@ -126,7 +149,8 @@ class InfoService
 	{
 		try
 		{
-			#1.Build store info
+			$this->_buildBaseData($params);
+			
 			$this->_buildInfo($params);
 		}
 		catch(Exception $e)
@@ -143,24 +167,32 @@ class InfoService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildInfo($params)
+	private function _buildBaseData($params)
 	{
 		try
 		{
 			$storeList = $params->storeList;
 			
-			#先處理area為了可以排序
-			$store = collect($storeList)->map(function($item, $key){
+			#先處理storeKey, 才能進行合併
+			$storeList = collect($storeList)->map(function($item, $key){
+				$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
+				return $item;
+			})->all(); 
+			
+			$mergeStoreList = StoreManager::mergeLbStoreByBrandNo($params->brand, $storeList);
+			
+			#處理Data
+			$store = collect($mergeStoreList)->map(function($item, $key){
 				$item['posId'] 		= (empty($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
 				$item['salesName']	= (empty($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
-				$item['storeKey'] 	= PurchaseManager::buildStoreKey($item['storeNo']);
 				
 				return $item;
-			})->sortBy('areaId')->values()->map(function($item, $key) {
+			})->sortBy('areaId')->map(function($item, $key) {
+				#依顯示順序
 				$temp['areaName'] 	= $item['areaName'];
 				#$temp['storeNo']	= $item['storeNo'];
 				$temp['posId'] 		= $item['posId'];
@@ -175,10 +207,30 @@ class InfoService
 				$temp['salesName']	= $item['salesName'];
 				
 				return $temp;
-			})->toArray(); 
+			})->values()->all(); 
 			
+			$params->baseData = $store;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('建立門店資料失敗');
+		}
+	}
+	
+	/* Get order data
+	 * @params: enums
+	 * @params: date
+	 * @params: date
+	 * @params: array
+	 * @return: array
+	 */
+	private function _buildInfo($params)
+	{
+		try
+		{
 			$info['header'] = ['區域', 'Pos店號', '門店代號', '門店名稱', '地址', '電話', '統一編號', '出貨工廠', '出貨倉別', '車次', '督導'];
-			$info['store']	= $store;
+			$info['store']	= $params->baseData;
 			
 			$params->info = $info;
 		}

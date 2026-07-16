@@ -29,14 +29,14 @@ class PurchaseReportRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByPerformance($brand, $userAreaIds, $stDate, $endDate, $productIds)
+	public function getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -50,18 +50,24 @@ class PurchaseReportRepository extends Repository
 			->selectRaw('sum(b.Quantity) as qty')
 			->selectRaw('sum(b.Money) as amount')
 			->addSelect('s.No as storeNo', 'p.OldNo as shortCode')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($dbBrandIds) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
+			})
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized')

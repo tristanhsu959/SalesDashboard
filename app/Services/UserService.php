@@ -51,7 +51,8 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function createUser($account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
+	public function createUser($account, $password, $displayName, $department, $email, $description, $isActive, 
+								$permission, $areaPermission)
 	{
 		try
 		{
@@ -62,8 +63,13 @@ class UserService
 			#2.Hash password
 			$password = Hash::make($password);
 			
-			#3. Create user
-			$this->_repository->insert($account, $password, $displayName, $department, $email, $isActive, RoleGroup::USER->value, $permission, $area, $description);
+			#3. Convert area permission
+			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
+			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
+			
+			#4. Create user
+			$this->_repository->insert($account, $password, $displayName, $department, $email, $description, $isActive, 
+										RoleGroup::USER->value, $permission, $areaPermission);
 		
 			return ResponseLib::initialize()->success();
 		}
@@ -103,6 +109,7 @@ class UserService
 		try
 		{
 			$result = $this->_repository->getById($id);
+			
 			return ResponseLib::initialize($result)->success();
 		}
 		catch(Exception $e)
@@ -119,7 +126,8 @@ class UserService
 	 * @params: int
 	 * @return: array
 	 */
-	public function updateUser($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description)
+	public function updateUser($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
+								$permission, $areaPermission)
 	{
 		try
 		{
@@ -131,8 +139,13 @@ class UserService
 			if (! empty($password))
 				$password = Hash::make($password);
 			
-			#3. Update user
-			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $isActive, $permission, $area, $description);
+			#3. Convert area permission
+			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
+			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
+			
+			#4. Update user
+			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $description, $isActive, 
+										$permission, $areaPermission);
 			
 			return ResponseLib::initialize()->success();
 		}

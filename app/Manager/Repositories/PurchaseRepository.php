@@ -19,168 +19,23 @@ class PurchaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getFactoryList($brandId)
+	public function getFactoryList($opCenter, $factoryNos)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Factory as f')
 			->select('f.No as factoryNo', 'f.Name as factoryName')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'f.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereIn('f.No', $this->getFactoryNo($brandId))
+			->whereIn('f.No', $factoryNos)
 			->where('f.IsEnable', '=', 1)
 			->orderBy('f.Id')
 			->get()
 			->toArray();
-		
-		return $result;
-	}
-	
-	/* 取門店清單(含蘿蔔)
-	 * @params: enum
-	 * @params: array
-	 * @return: array
-	 */
-	public function getStoreList($brand, $userAreaIds)
-	{
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
-		
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Store as s')
-			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->join('BusinessType as bt', 'bt.Id', '=', 's.BusinessTypeId')
-			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId', 'bt.Name as typeName')
-			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
-			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Brand as bd')
-					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
-					/* 取八方+蘿蔔condition
-					->where(function ($query) use ($brandId) {
-						$query->where('bd.No', $this->getBrandNo($brandId))
-						  ->when($brandId == Brand::BAFANG->value, function ($query) {
-							  $query->orWhere('bd.No', 'LB');
-						  });
-					}); */
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			->whereIn('s.AreaId', $authAreaIds)
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->ddRawSql();
-			->get()
-			->toArray(); 
-		
-		return $result;
-	}
-	
-	/* 取蘿蔔門店清單
-	 * @params: enum : 必須還是帶入八方brand
-	 * @params: array
-	 * @return: array
-	 */
-	public function getLbStoreList($brand, $userAreaIds)
-	{
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
-		
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Store as s')
-			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->select('ar.Id as areaId', 's.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId')
-			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
-			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Brand as bd')
-					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  Brand::LUOBO->shortCode());
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			#->whereNull('s.CloseDate')
-			->whereIn('s.AreaId', $authAreaIds)
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))#->toRawSql();
-			#->orderBy('s.OperationCenterId')
-			#->orderBy('ar.Id')
-			->get()
-			->toArray(); 
-		
-		return $result;
-	}
-	
-	
-	/* 取有效門店清單(only id:計算用)
-	 * @params: enum
-	 * @params: array
-	 * @return: array
-	 */
-	public function getActiveStoreId($brand, $userAreaIds)
-	{
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
-		
-		$db = $this->connectNewOrder();
-		$result = $db
-			->table('Store as s')
-			->join('Area as ar', 'ar.Id', '=', 's.AreaId')
-			->join('StoreCar as sc', 'sc.StoreId', '=', 's.Id')
-			->select('ar.Id as areaId', 's.Id as storeId')
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('OperationCenter as oc')
-					->whereColumn('oc.Id', 's.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Brand as bd')
-					->whereColumn('bd.Id', 's.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
-			})
-			->whereExists(function ($query) use($brandId) {
-				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
-			->whereNull('s.CloseDate')
-			->when($authAreaIds, function ($query, $authAreaIds) {
-				return $query->whereIn('s.AreaId', $authAreaIds);
-			})
-			->whereNotIn('s.No', config("web.purchase.store.except.{$brandId}"))
-			->get()
-			->toArray(); 
 		
 		return $result;
 	}
@@ -191,7 +46,7 @@ class PurchaseRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getProductIdByName($brandId, $name)
+	public function getProductIdByName($brandId, $opCenter, $name)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -199,18 +54,18 @@ class PurchaseRepository extends Repository
 			->fromRaw('Product as a WITH(NOLOCK)')
 			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
 			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'st.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.IsStop', '=', 0)
 			->where('a.Name', 'like', "%{$name}%")
 			->groupBy('a.Id')
@@ -226,7 +81,7 @@ class PurchaseRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getProductIdByShortCode($brandId, $shortCodes)
+	public function getProductIdByShortCode($brandId, $opCenter, $shortCodes)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -234,21 +89,21 @@ class PurchaseRepository extends Repository
 			->fromRaw('Product as a WITH(NOLOCK)')
 			->join(DB::raw('Stocks as st WITH(NOLOCK)'), 'st.ProductId', '=', 'a.Id')
 			->select('a.Id')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($opCenter) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $opCenter);
 			})
-			->whereExists(function ($query) use($brandId) {
+			/* ->whereExists(function ($query) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'st.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+					->whereIn('ft.No',  ['TW_TP', 'TW_KH']);
+			}) */
 			->where('a.IsStop', '=', 0)
 			->whereIn('a.OldNo', $shortCodes)
-			->groupBy('a.Id')
+			->groupBy('a.Id')#->ddRawSql();
 			->get()
 			->pluck('Id')
 			->toArray();
@@ -322,9 +177,11 @@ class PurchaseRepository extends Repository
 	 * @params: int
 	 * @return: array
 	 */
-	public function getProductShortCode($brandId)
+	public function getProductAndShortCode($brand, $allowOpCenterIds)
 	{
-		$enableCodes = config('web.purchase.product_type.shortCode.enabled');
+		$brandId 		= $brand->value;
+		$dbBrandIds 	= $this->getDbBrandId($brand, $allowOpCenterIds);
+		$enableCodes 	= config('web.purchase.product_type.shortCode.enabled');
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -332,37 +189,33 @@ class PurchaseRepository extends Repository
 			->join('Product as p', 'p.Id', '=', 'a.ProductId')
 			->select('p.OldNo as productNo', 'p.Name as productName')
 			->where('a.ShelfStatus', '=', 1)
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
-					->from('OperationCenter as op')
-					->whereColumn('op.Id', 'p.OperationCenterId')
-					->whereIn('op.No', $this->getOpCenterNo($brandId));
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'p.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
 					->from('Brand as bd')
 					->whereColumn('bd.Id', 'a.BrandId')
-					->where('bd.No',  $this->getBrandNo($brandId));
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
+			#會有品牌是八方, 但出貨工廠是二崙屯山?(過濾工廠以免萬一, 不知跟調撥是否有關)
 			->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'a.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
 			})
-			#先全抓
-			/* ->where(function ($query) use ($enableCodes) {
-				foreach ($enableCodes as $pattern) 
-				{
-					$query->orWhere('p.OldNo', 'like', $pattern);
-				}
-			}) */
 			->where('p.OldNo', '!=', '')
 			->groupBy('p.OldNo', 'p.Name')
-			->orderBy('p.OldNo')
+			->orderBy('p.OldNo')#->ddRawSql();
 			->get()
 			->toArray(); 
 		
 		return $result;
 	}
+	
+	
 }

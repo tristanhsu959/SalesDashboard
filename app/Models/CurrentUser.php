@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoleGroup;
+use App\Enums\OpCenter;
 use App\Enums\Area;
 use Illuminate\Support\Fluent;
 
@@ -55,6 +56,18 @@ class CurrentUser extends Fluent
 		$this->fill($info);
 	}
 	
+	/* Show available name
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getAvailableName()
+	{
+		$account 	= $this->get('account');
+		$name 		= $this->get('displayName', NULL);
+		
+		return empty($name) ? $account : $name;
+	}
+	
 	/* 內建Supervisor (RoleGroup)
 	 * @params:  
 	 * @return: boolean
@@ -64,6 +77,21 @@ class CurrentUser extends Fluent
 		$roleGroup = $this->get('roleGroup', 0);
 		
 		return ($roleGroup == RoleGroup::SUPERVISOR->value);
+	}
+	
+	/* Auth permission of function by current user
+	 * @params: string
+	 * @return: boolean
+	 */
+	public function hasFunctionPermission($functionKey)
+	{
+		if ($this->isSupervisor())
+			return TRUE;
+		
+		$permissions	= $this->get('rolePermission', []);
+		$allowFunctions	= array_values($permissions); #Key same as code
+		
+		return in_array($functionKey, $allowFunctions);
 	}
 	
 	#改為只有判別功能,無CRUD
@@ -81,6 +109,7 @@ class CurrentUser extends Fluent
 		return in_array($functionKey, $permissions);
 	}
 	
+	
 	/* Get permission
 	 * @params: 
 	 * @return: boolean
@@ -93,48 +122,100 @@ class CurrentUser extends Fluent
 		return $this->get('rolePermission', []);
 	}
 	
+	/* Get opcenter permission key
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getOpCenterPermissions()
+	{
+		$opList = $this->getOpCenterPermissionMap();
+		
+		return array_keys($opList);
+	}
+	
+	/* Get opcenter permission key-value
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getOpCenterPermissionMap()
+	{
+		$opList = OpCenter::options();
+		
+		if ($this->isSupervisor())
+			return $opList;
+		
+		$authOps = $this->get('roleArea.opCenter', []);
+		
+		$opList = collect($opList)->filter(function($item, $key) use($authOps) {
+			return in_array($key, $authOps);
+		})->toArray();
+		
+		return $opList;
+	}
+	
+	/* Get area permission key
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function getSalesAreaPermissions()
+	{
+		$areaList = $this->getSalesAreaPermissionMap();
+		
+		return array_keys($areaList);
+	}
+	
 	/* Get area permission key-value
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAreaPermissionsMap()
+	public function getSalesAreaPermissionMap()
 	{
 		$areaList = Area::options();
 		
 		if ($this->isSupervisor())
 			return $areaList;
 		
-		$areaList = collect($areaList)->filter(function($item, $key) {
-			return in_array($key, $this->roleArea);
+		$authAreas = $this->get('roleArea.sales', []);
+		
+		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
+			return in_array($key, $authAreas);
 		})->toArray();
 		
 		return $areaList;
 	}
 	
-	/* Show available name
+	/* Get area permission key-value
 	 * @params: 
 	 * @return: boolean
 	 */
-	public function getAvailableName()
+	public function getPurchaseAreaPermissions()
 	{
-		$account 	= $this->get('account');
-		$name 		= $this->get('displayName', NULL);
+		$areaList = $this->getPurchaseAreaPermissionMap();
 		
-		return empty($name) ? $account : $name;
+		return array_keys($areaList);
 	}
 	
-	/* Auth permission of function by current user
-	 * @params: string
+	/* Get area permission key-value
+	 * @params: 
 	 * @return: boolean
 	 */
-	public function hasFunctionPermission($functionKey)
+	public function getPurchaseAreaPermissionMap()
 	{
+		$areaList = Area::options();
+		
 		if ($this->isSupervisor())
-			return TRUE;
+			return $areaList;
 		
-		$permissions	= $this->get('rolePermission', []);
-		$allowFunctions	= array_values($permissions); #Key same as code
+		$authAreas = $this->get('roleArea.purchase', []);
 		
-		return in_array($functionKey, $allowFunctions);
+		$areaList = collect($areaList)->filter(function($item, $key) use($authAreas) {
+			return in_array($key, $authAreas);
+		})->toArray();
+		
+		return $areaList;
 	}
+	
+	
+	
+	
 }

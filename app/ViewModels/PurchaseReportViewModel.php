@@ -53,14 +53,13 @@ class PurchaseReportViewModel extends Fluent
 		$type = [
 			'performance'	=> '營運概況', 
 		];
-
-		$this->set('options.mode.type', $type);
+		$this->set('options.type', $type);
 		
-		#區域選項須以使用者權限為主
-		$currentUser = AppManager::getCurrentUser();
-		$allowAreas = $currentUser->getAreaPermissionsMap();
+		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
+		$areaList 		= $this->getPurchaseAreaOptions($this->brand);
 		
-		$this->set('options.mode.areaList', $allowAreas);
+		$this->set('options.opCenterList', $opCenterList);
+		$this->set('options.areaList', $areaList);
 	}
 	
 	/* Form submit action
@@ -84,13 +83,14 @@ class PurchaseReportViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'performance', $searchStDate = NULL, $searchEndDate = NULL, $searchAreaIds = [], $searchProductCodes = [])
+	public function keepSearchData($searchType = 'performance', $searchStDate = NULL, $searchEndDate = NULL, $searchOpCenterIds = [], $searchAreaIds = [], $searchProductCodes = [])
     {
 		$today = Carbon::now()->format('Y-m-d');
 		
 		$this->set('search.type', $searchType);
 		$this->set('search.stDate', $searchStDate ?? $today);
 		$this->set('search.endDate', $searchEndDate ?? $today);
+		$this->set('search.opCenterIds', $searchOpCenterIds);
 		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.productCodes', $searchProductCodes);
 		$this->set('search.today', $today); 

@@ -16,6 +16,15 @@ class LegacyManager
 	{
 	}
 	
+	public function getFactoryNo($brandId)
+	{
+		$brand = Brand::tryFrom($brandId);
+		if ($brandId == Brand::BAFANG->value)
+			return [Factory::TP->value, Factory::KH->value];
+		else
+			return [Factory::TS->value, Factory::RL->value];
+	}
+	
 	/* 取全部追加(Save to local scheduling會用到)
 	 * @params: datetime
 	 * @params: datetime
@@ -125,16 +134,6 @@ class LegacyManager
 		
 		return $result;
 	}
-	
-	public function getFactoryNo($brandId)
-	{
-		$brand = Brand::tryFrom($brandId);
-		if ($brandId == Brand::BAFANG->value)
-			return [Factory::TP->value, Factory::KH->value];
-		else
-			return [Factory::TS->value, Factory::RL->value];
-	}
-	
 	
 	/* 取追加ByPosId
 	 * @params: datetime

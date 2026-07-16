@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/sales/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/sales/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/sales/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -15,14 +16,16 @@
 	@csrf
 		<h5>查詢</h5>
 		
-		<!--nav class="wrap">
-			<template x-for="(name, id) in options.mode.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav-->
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
@@ -34,8 +37,26 @@
 			<label>結束日期</label>
 		</div>
 		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
+		
+		<div class="field label border round field-light-blue">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
+			<label>找店名</label>
+		</div>
+		
 		<div class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
-			<select x-model="searchData.category" name="searchCategory"><!-- @change="searchData.productIds = []"-->
+			<select x-model="searchData.category" name="searchCategory" @change="errors.delete('category')">
 				<option value="">請選擇</option>
 				<template x-for="(name, catId) in options.category" :key="catId">
 					<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
@@ -84,6 +105,16 @@
 					<span>下載</span>
 				</a>
 			</template>
+			<template x-if="response.hasResult && response.hasFilter">
+				<nav  x-show="$store.sales.showFilter" class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.sales.filter">
+						<label>篩選</label>
+					</div>
+					<button class="right-round" @click="$store.sales.filter = ''"><i>backspace</i></button>
+				</nav>
+			</template>
 			<template x-if="response.hasResult">
 				<label class="switch icon">
 					<input type="checkbox" x-model="$store.sales.showAmount">
@@ -116,14 +147,14 @@
 		<section class="sales-list container">
 			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
+					<i>info</i><div class="max">查無銷售資料</div>
 				</div>
 			</article>
 			
 			<div x-show="response.hasResult" class="statistics">
 				<div class="tabs cyan-text">
-					<a class="active" data-ui="#tab-area">區域彙總</a>
-					<a data-ui="#tab-shop">店別明細</a>
+					<a class="active" data-ui="#tab-area" @click="$store.sales.showFilter = 0">區域彙總</a>
+					<a data-ui="#tab-shop" @click="$store.sales.showFilter = 1">店別明細</a>
 				</div>
 			
 				@include('sales.area')

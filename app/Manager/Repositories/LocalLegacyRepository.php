@@ -3,7 +3,7 @@
 namespace App\Manager\Repositories;
 
 use App\Repositories\Repository;
-use App\Repositories\Traits\PurchaseReposTrait;
+#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Factory;
@@ -11,7 +11,7 @@ use App\Enums\Factory;
 #舊訂貨系統in Local
 class LocalLegacyRepository  extends Repository
 {
-	use PurchaseReposTrait;
+	#use PurchaseReposTrait;
 	
 	public function __construct()
 	{
@@ -23,10 +23,10 @@ class LocalLegacyRepository  extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getExtraData($brandId, $stDate, $endDate, $productCodes)
+	public function getExtraData($brand, $factoryNos, $stDate, $endDate, $productCodes)
 	{
 		#只能用factory no來分brand
-		$factoryNos = $this->getFactoryNo($brandId);
+		$brandId = $brand->value;
 		
 		$db = $this->connectSalesDashboard();
 		#union all有點慢

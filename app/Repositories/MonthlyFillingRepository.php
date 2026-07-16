@@ -26,7 +26,7 @@ class MonthlyFillingRepository extends Repository
 	 * @params: string
 	 * @return: array
 	 */
-	public function getProductIdByCode($brandId, $codes)
+	/* public function getProductIdByCode($brandId, $codes)
 	{
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -54,7 +54,7 @@ class MonthlyFillingRepository extends Repository
 			->toArray();
 		
 		return $result;
-	}
+	} */
 	
 	/* 取主資料 By store 
 	 * @params: enums
@@ -63,14 +63,15 @@ class MonthlyFillingRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByStore($brand, $stDate, $endDate, $productIds, $userAreaIds)
+	public function getOrderDataByStore($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		#轉成DB brandid, 其實可不判別OpCenter,結果應相同
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -83,18 +84,24 @@ class MonthlyFillingRepository extends Repository
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
 			->addSelect('s.Id as storeId', 's.No as storeNo', 'p.OldNo as shortCode')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($dbBrandIds) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
+			})
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized') #audited
@@ -115,14 +122,14 @@ class MonthlyFillingRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByFactory($brand, $stDate, $endDate, $productIds, $userAreaIds)
+	public function getOrderDataByFactory($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc();
 		$endDate= (new Carbon($endDate))->utc();
 		
-		$brandId = $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$authAreaIds 	= AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		$dbBrandIds 	= $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -136,18 +143,24 @@ class MonthlyFillingRepository extends Repository
 			->selectRaw('LEFT(CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE), 7) as expectedDate')
 			->selectRaw('sum(b.Quantity) as qty')
 			->addSelect('f.No as factoryNo', 'p.OldNo as shortCode')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($dbBrandIds) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
+			})
+			/* ->whereExists(function ($query) use($brandId) {
 				$query->select(DB::raw(1))
 					->from('Factory as ft')
 					->whereColumn('ft.Id', 'sc.FactoryId')
 					->whereIn('ft.No',  $this->getFactoryNo($brandId));
-			})
+			}) */
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized')

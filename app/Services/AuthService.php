@@ -7,6 +7,7 @@ use App\Repositories\AuthRepository;
 use App\Libraries\ResponseLib;
 use App\Enums\Functions;
 use App\Enums\RoleGroup;
+use App\Enums\OpCenter;
 use App\Enums\Area;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -45,16 +46,19 @@ class AuthService
 			if ($userInfo === FALSE)
 				throw new Exception('此帳號尚未在系統註冊');
 			
-			#4.Auth password or AD(併行)
+			#4.rebuild data
+			$userInfo = $this->_rebuildInfo($userInfo);
+			
+			#5.Auth password or AD(併行)
 			$isPass = $this->_authPassword($account, $userInfo['userPassword'], $password);
 			if ($isPass === FALSE)
 				throw new Exception('登入失敗，帳號密碼錯誤');
 			
-			#5.Validate user status
+			#6.Validate user status
 			if (boolval($userInfo['isActive']) === FALSE)
 				throw new Exception('登入失敗，此帳號已停用');
 			
-			#6. Save to session
+			#7. Save to session
 			AppManager::saveCurrentUser($userInfo);
 			
 			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
@@ -83,21 +87,6 @@ class AuthService
 				return FALSE;
 			}
 			
-			if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value)
-			{
-				$userInfo['rolePermission'] = Functions::getAll();
-				$userInfo['roleArea'] 		= Area::getAll();
-			}
-			
-			#宜蘭已整併至大台北,但POS還是有宜蘭(但帳號管理已不會再有)
-			#自動綁定
-			$roleArea = collect($userInfo['roleArea']);
-			
-			if ($roleArea->contains(Area::TAIPEI->value))
-				$roleArea->push(Area::YILAN->value);
-			
-			$userInfo['roleArea'] = $roleArea->unique()->toArray();
-			
 			Log::channel('webSysLog')->info("驗證帳號[{$account}]註冊狀態成功", [ __class__, __function__, __line__]);
 			
 			return $userInfo;
@@ -109,6 +98,38 @@ class AuthService
 			
 			throw new Exception('驗證帳號註冊狀態，發生錯誤');
 		}
+	}
+	
+	private function _rebuildInfo($userInfo)
+	{
+		#20260703:因改了rolearea結構,故先處理以防萬一
+		data_fill($userInfo, 'roleArea.opCenter', []);
+		data_fill($userInfo, 'roleArea.sales', []);
+		data_fill($userInfo, 'roleArea.purchase', []);
+		
+		if ($userInfo['roleGroup'] == RoleGroup::SUPERVISOR->value)
+		{
+			$userInfo['rolePermission'] 		= Functions::getAll();
+			$userInfo['roleArea']['opCenter'] 	= OpCenter::getAll();
+			$userInfo['roleArea']['sales'] 		= Area::getAll();
+			$userInfo['roleArea']['purchase'] 	= Area::getAll();
+		}
+				
+		#宜蘭已整併至大台北,但POS還是有宜蘭(但帳號管理已不會再有), 自動綁定
+		#銷售
+		$userInfo['roleArea']['sales'] = collect($userInfo['roleArea']['sales'])
+			->when(fn($area) => $area->contains(Area::TAIPEI->value), fn($area) => $area->push(Area::YILAN->value))
+			->unique()
+			->values()
+			->toArray();
+		
+		$userInfo['roleArea']['purchase'] = collect($userInfo['roleArea']['purchase'])
+			->when(fn($area) => $area->contains(Area::TAIPEI->value), fn($area) => $area->push(Area::YILAN->value))
+			->unique()
+			->values()
+			->toArray();
+			
+		return $userInfo;
 	}
 	
 	/* 驗證系統密碼或AD

@@ -7,6 +7,7 @@ use App\Services\DailyRevenue\AovService;
 use App\Facades\AppManager;
 use App\Facades\PosManager;
 use App\Repositories\DailyRevenueRepository;
+use App\Enums\OpCenter;
 use App\Enums\Brand;
 use App\Enums\Functions;
 use App\Enums\Area;
@@ -78,14 +79,14 @@ class DailyRevenueService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 			
 			#主要是for即時，故每次都query
 			if (Cache::has($params->cacheKey))
@@ -129,23 +130,31 @@ class DailyRevenueService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		#Op & Area有權限設定,故要再與查詢條件判別
+		$allowOpCenterIds	= PosManager::getAllowOpCenters(); #只有取門店需要,無需代參數
+		$allowAreaIds		= PosManager::getAllowAreas($searchAreaIds); #整併查詢參數
+		
+		#如果是芳珍, 暫不分權限
+		if ($brand == Brand::FJVEGGIE)
+		{
+			$allowOpCenterIds 	= OpCenter::getAll();
+			$allowAreaIds 		= Area::getAll();
+		}
 		
 		if ($searchType == 'store') #有區間條件才要預設
 			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		
-		$functions 		= $this->parsingFunction($brand);
-		$cacheKey 		= HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate, $searchEndDate, $searchShopType, $searchShopName]);
+		$functions 	= $this->parsingFunction($brand);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchStoreName]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)
 				->stDate($searchStDate)->endDate($searchEndDate)
-				->shopType($searchShopType)->shopName($searchShopName)
+				->storeType($searchStoreType)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
 		
 		return $params;
@@ -165,14 +174,14 @@ class DailyRevenueService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export daily revenue data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'store')
+		if ($type == 'store')
 			$service = app(StoreService::class);
-		else if ($modeType == 'aov')
+		else if ($type == 'aov')
 			$service = app(aovService::class);
 		else
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();

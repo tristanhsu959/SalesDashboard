@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Traits\PurchaseReposTrait;
+#use App\Repositories\Traits\PurchaseReposTrait;
 use App\Facades\PurchaseManager;
 use App\Facades\PosManager;
 use App\Libraries\Purchase\AreaLib;
@@ -17,7 +17,7 @@ use Exception;
 
 class PurchaseSalesRepository extends Repository
 {
-	use PurchaseReposTrait;
+	#use PurchaseReposTrait;
 	
 	public function __construct()
 	{

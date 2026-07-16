@@ -21,9 +21,20 @@ class HelperLib
 	 */
 	public static function buildCacheKey(array $params)
 	{
-		$keys[] = $params;
+		$keys[] = array_filter($params);
 		$keys = Arr::whereNotNull(Arr::flatten($keys));
 		
 		return implode(':', $keys);
 	}
+	
+	public static function versionAsset($path) 
+	{
+        $fullPath = public_path($path);
+        
+        #檢查檔案是否存在，避免報錯
+        if (file_exists($fullPath)) 
+		    return asset($path) . '?v=' . filemtime($fullPath);
+        
+        return asset($path);
+    }
 }

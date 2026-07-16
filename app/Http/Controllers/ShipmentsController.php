@@ -47,13 +47,15 @@ class ShipmentsController extends Controller
 		$searchCalc 		= $request->input('searchCalc');
 		$searchStDate 		= $request->input('searchStDate');
 		$searchEndDate 		= $request->input('searchEndDate');
+		$searchAreaIds 		= $request->array('searchAreaIds');
 		$searchBy 			= $request->input('searchBy');
 		$searchKeyword		= $request->input('searchKeyword');
 		$searchCategory 	= $request->input('searchCategory');
 		$searchShortCodes 	= $request->array('searchShortCodes');
  		
-  		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes); 
+		$this->_viewModel->initialize($brand, $function);
+		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, $searchEndDate, 
+					$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -74,7 +76,8 @@ class ShipmentsController extends Controller
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, 
+						$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

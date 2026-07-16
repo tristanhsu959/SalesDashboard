@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/new_release/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/new_release/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/new_release/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -37,6 +38,19 @@
 			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
+		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
 		
 		<div class="space"></div>
 		<nav class="right-align group split">
@@ -85,7 +99,7 @@
 		<section class="new-release-list container">
 			<article x-show="!response.hasResult" class="secondary-container border">
 				<div class="row">
-					<i>info</i><div class="max">查無符合資料</div>
+					<i>info</i><div class="max">查無銷售資料</div>
 				</div>
 			</article>
 		

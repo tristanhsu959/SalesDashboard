@@ -1,13 +1,19 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
+	Alpine.store('ezorderPos', {
+		showFilter: Alpine.$persist(false),
+		filter: '',
+	});
+	
 	Alpine.data('search', (searchData) => ({
 		searchData: {...searchData.search},
 		options: {...searchData.options},
 		errors: new Set(),
 		
 		init() {
-			
+			if (this.searchData.by == 'store')
+				Alpine.store('ezorderPos').showFilter = true;
 		},
 		
 		search() {
@@ -42,18 +48,33 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.by = 'store';
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
+			this.searchData.areaIds = [];
 			this.searchData.storeName = '';
 			this.errors.clear();
 		},
     }));
 	
-	Alpine.data('statistics', (statistics) => ({
+	Alpine.data('statisticsData', (statistics) => ({
 		header: {...statistics.header},
 		data: {...statistics.data},
 		
 		init() {
+			
 		},
 		
+		get filterStore() {
+			const searchKeyword = Alpine.store('ezorderPos').filter.toLowerCase();
+			
+			const list = Object.values(this.data);
+			
+			const result = list.filter(store => 
+				String(store[0] || '').toLowerCase().includes(searchKeyword) ||
+				String(store[1] || '').toLowerCase().includes(searchKeyword) ||
+				String(store[2] || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
 	}));
 });
 

@@ -131,14 +131,14 @@ class StoreService
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
 			$shopType 		= $params->shopType;
-			$shopName 		= $params->shopName;
+			$storeName 		= $params->storeName;
 			$userAreaIds 	= $params->userAreaIds;
 			
-			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $shopName);
+			$result = $this->_repository->getSale00Data($brand, $userAreaIds, $stDate, $endDate, $shopType, $storeName);
 			
 			#去除shop id
 			$result = collect($result)->map(function($item, $key){
-				$item['shopName'] = Str::replace($item['shopId'], '', $item['shopName']);
+				$item['storeName'] = Str::replace($item['shopId'], '', $item['storeName']);
 				return $item;
 			})->toArray();
 				
@@ -160,7 +160,7 @@ class StoreService
 		/*
 		0 => array:8 [▼
 		  "shopId" => "0035"
-		  "shopName" => "0035中壢海華直營店"
+		  "storeName" => "0035中壢海華直營店"
 		  "areaId" => 3
 		  "areaName" => "桃竹苗區"
 		  "shopType" => "1"
@@ -171,11 +171,11 @@ class StoreService
 		*/
 		
 		#即時營收取有效店家即可
-		$saleData = PosManager::filterExceptStore($params->brand, $saleData);
+		$saleData = PosManager::filterDataByExceptStore($params->brand, $saleData);
 		
 		$baseData = collect($saleData)->map(function($item, $key) {
 			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $item['shopName'];
+			$temp['storeName'] 		= $item['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= AreaLib::toId($item['areaId']);
 			$temp['areaName']		= (Area::tryFrom($temp['areaId']))->label();
@@ -195,7 +195,7 @@ class StoreService
 		#重建
 		$filloutShops = $filloutShops->map(function($item, $key) use($params){
 			$temp['shopId'] 		= $item['shopId'];
-			$temp['shopName'] 		= $item['shopName'];
+			$temp['storeName'] 		= $item['storeName'];
 			$temp['shopTypeName']	= $item['typeName'];
 			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName']		= $item['areaName'];

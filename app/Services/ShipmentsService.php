@@ -34,9 +34,9 @@ class ShipmentsService
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '', #store,factory
-			'modeCalc'		=> '', #日,月
-			'modeBy'		=> '', #keyword,category
+			'type'		=> '', #store,factory
+			'calc'		=> '', #日,月
+			'by'		=> '', #keyword,category
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -79,12 +79,17 @@ class ShipmentsService
 	 * @params: int
 	 * @return: string
 	 */
-	public function getEnableProducts($brandId)
+	public function getProductOptions($brand)
 	{
-		$enableProducts = $this->_repository->getEnableProducts($brandId);
+		$allowOpCenter 	= PurchaseManager::getAllowOpCenters($brand);
 		
-		#Build product mapping
-		$productMapping = PurchaseManager::getProductShortCodeMapping($brandId);
+		#Get setting from maridb((這裏沒分營運中心,只分品牌: Brand & ShortCoe)
+		$enableProducts 	= $this->_repository->getEnableProductSettings($brand);
+		$enableShortCodes 	= collect($enableProducts)->pluck('shortCode')->values()->all();
+		
+		#再至訂貨取到對應的產品名(這裏會分營運中心)
+		#shortCode => productName
+		$productMapping = PurchaseManager::getProductShortCodeMapping($brand, $allowOpCenter);
 		
 		#Build options
 		/*array:4 [
@@ -94,7 +99,26 @@ class ShipmentsService
 			"groupName" => "餡類"
 		]
 		*/
-		$list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
+		
+		$brandId = $brand->value;
+		
+		#因設定沒分營運中心, 故要改以訂貨的為依據過濾
+		$list = collect($productMapping)->filter(function($item, $key) use($enableShortCodes){
+			return in_array($item['productNo'], $enableShortCodes);
+		})->map(function($item, $key) use($brandId) {
+			
+			$temp['shortCode'] 	= $item['productNo'];
+			$temp['productName']= $item['productName'];
+			
+			$category = PurchaseManager::getGroupByShortCode($brandId, $temp['shortCode']);
+			
+			$temp['groupId']	= $category['groupId'];
+			$temp['groupName'] 	= $category['groupName'];
+			
+			return $temp;
+		})->values()->all();
+		
+		/* $list = collect($enableProducts)->map(function($item, $key) use($brandId, $productMapping) {
 			
 			$item['productName']= data_get($productMapping, "{$item['shortCode']}", '');
 			
@@ -103,12 +127,12 @@ class ShipmentsService
 			$item['groupName'] 	= $category['groupName'];
 			unset($item['brandId']);
 			return $item;
-		})->toArray();
-			
+		})->toArray(); */
+		
 		#要分成category & product對應
 		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
-			$temp['catId'] = $items->pluck('groupId')->unique()->first();
-			$temp['catName'] = $items->pluck('groupName')->unique()->first();
+			$temp['catId'] 	= $items->pluck('groupId')->unique()->first();
+			$temp['catName']= $items->pluck('groupName')->unique()->first();
 			
 			return $temp;
 		})->mapWithKeys(function($item, $key){
@@ -138,14 +162,14 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
+			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -158,6 +182,7 @@ class ShipmentsService
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
+				#先取Product Id
 				$this->_getProductId($params);
 				
 				if ($params->type == 'store')
@@ -188,22 +213,23 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
 	{
 		$params = new Fluent();
 		
-		$currentUser = AppManager::getCurrentUser();
-		$userAreaIds = $currentUser->roleArea;
+		#這裏是call appmanager不是current user
+		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand); #只有取門店需要,無需代參數
+		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		
 		if ($searchBy == 'keyword')
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
 		else
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
+			$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->type($searchType)->calc($searchCalc)->by($searchBy)
 				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)
@@ -212,15 +238,24 @@ class ShipmentsService
 		return $params;
 	}
 	
+	/* 以short code取得product id
+	 * @params: array
+	 * @return: array
+	 */
 	private function _getProductId($params)
 	{
 		try
 		{
+			#取資料都不分營運中心,不然可能會取不到
+			$brand 		= $params->brand;
+			$opCenterIds= $params->allowOpCenterIds;
+			$areaIds 	= $params->allowAreaIds;
+			
 			if ($params->by == 'keyword')
-				$params->productIds = PurchaseManager::getProductIdByName($params->brand->value,  $params->keyword);
+				$params->productIds = PurchaseManager::getProductIdByName($brand, $opCenterIds, $params->keyword);
 			else
-				$params->productIds = PurchaseManager::getProductIdByShortCode($params->brand->value, $params->shortCodes);
-		
+				$params->productIds = PurchaseManager::getProductIdByShortCode($brand, $opCenterIds, $params->shortCodes);
+			
 			if (empty($params->productIds))
 				throw new Exception('查無此產品');
 		}
@@ -248,9 +283,9 @@ class ShipmentsService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['modeType'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'store')
+		if ($type == 'store')
 			$service = app(StoreService::class);
 		else
 			$service = app(FactoryService::class);

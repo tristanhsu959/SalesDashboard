@@ -4,6 +4,7 @@ namespace App\Services\PurchaseReport;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager;
 use App\Repositories\PurchaseReportRepository;
 use App\Libraries\ResponseLib;
@@ -33,7 +34,7 @@ class PerformanceService
 	public function __construct(protected PurchaseReportRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
+			'type'		=> '',
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -77,7 +78,7 @@ class PerformanceService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
+		$this->_statistics['type']			= $params->type;
 		$this->_statistics['brandId']		= $params->brand->value;
 		$this->_statistics['brandCode']		= $params->brand->code();
 		$this->_statistics['startDate'] 	= $params->stDate;
@@ -109,8 +110,8 @@ class PerformanceService
 			#1.Get product id
 			$this->_getProductIdByCode($params);
 			
-			#2.Build params
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->areaIds, $params->stDate, $params->endDate);
+			#2.Get store
+			$this->_getStoreList($params);
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
@@ -138,13 +139,12 @@ class PerformanceService
 		try
 		{
 			#營運概況取固定的product
-			$brandId 	= $params->brand->value;
 			$codeGroup	= config('web.purchase.report.performance');
 			
 			#取出所有的short code
 			$codes = collect($codeGroup)->collapse()->pluck('code')->toArray();
 			
-			$ids = PurchaseManager::getProductIdByShortCode($brandId, $codes);
+			$ids = PurchaseManager::getProductIdByShortCode($params->brand, $params->allowOpCenterIds, $codes);
 			
 			if (empty($ids))
 				throw new Exception('查無參照的產品');
@@ -160,6 +160,24 @@ class PerformanceService
 		}
 	}
 	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		
+		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#這裏不排除工廠學區店
+		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
+	}
 	/* ====================== 主流程 End ====================== */
 	
 	/* Get order data
@@ -179,13 +197,14 @@ class PerformanceService
 	
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
-			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
-			$userAreaIds	= $params->areaIds;
-			$productIds 	= $params->productIds;
+			$brand 				= $params->brand;
+			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
+			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
+			$productIds 		= $params->productIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$orderData = $this->_repository->getOrderDataByPerformance($brand, $userAreaIds, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -215,13 +234,22 @@ class PerformanceService
 		
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
-			$endDate 		= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
-			$productCodes 	= $params->productCodes;
-			$userAreaIds 	= $params->areaIds;
+			$brand 				= $params->brand;
+			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
+			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
+			$productCodes 		= $params->productCodes; #舊系統用product code
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
+			
+			#因無areaId, 故只能從門店過濾
+			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
+			
+			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
+				$storeKey = Str::take($item['storeNo'], 7);
+				return in_array($storeKey, $validStoreKeys);
+			})->toArray();
 			
 			return $extraData;
 		}
@@ -238,58 +266,44 @@ class PerformanceService
 	 */
 	private function _buildBaseData($params, $orderData, $extraData)
 	{
-		#整合追加資料
-		$baseData = collect($orderData)->merge($extraData);
+		/*[ 
+			"expectedDate" => "2026-07-09"
+			"qty" => "25"
+			"amount" => "1750.000000"
+			"storeNo" => "TP10000011"
+			"shortCode" => "0001"
+		]
+		*/
+		#整合追加資料,Group Data但先不計算
+		$orderData = collect($orderData)->merge($extraData);
 		
-		$storeList = collect($params->storeList)->mapWithKeys(function($item, $key){
-			return [$item['storeKey'] => $item];
-		})->toArray();
-		
-		#過濾不計算門店(確保取得到store info)
-		$baseData = PurchaseManager::filterOrderByStoreNo($params->brand->value, $baseData);
-		
-		#處理包裝轉換
-		#因追加在舊系統,故要改成storeKey做為主要關聯
-		$baseData = collect($baseData)->map(function($item, $key) use($storeList){
-			$storeKey = PurchaseManager::buildStoreKey($item['storeNo']);
-			$store = data_get($storeList, $storeKey);
-			if (empty($store))
-				dd($item, $storeKey, $store);
-			$temp['expectedDate']	= $item['expectedDate'];
-			$temp['storeNo'] 		= $item['storeNo'];
-			$temp['storeKey'] 		= $storeKey;
-			$temp['storeName'] 		= $store['storeName'];
-			$temp['areaId'] 		= $store['areaId'];
-			$temp['areaName'] 		= $store['areaName'];
-			$temp['openDate'] 		= $store['openDate'];
-			$temp['shortCode'] 		= $item['shortCode'];
-			$temp['qty'] 			= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
-			$temp['amount']			= $item['amount'];
+		$baseData = collect($orderData)->map(function($item, $key) {
+			$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
+			$item['qty'] 		= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
-			return $temp;
-		});
+			return $item;
+		})->groupBy('storeKey')->toArray();
 		
-		$orderStoreKeys = $baseData->pluck('storeKey')->toArray();
-		
-		#以store為基準補全資料
-		$fillinData = collect($storeList)->reject(function($item, $key) use($orderStoreKeys){
-			return in_array($item['storeKey'], $orderStoreKeys);
-		})->map(function($item, $key) use($params){
-			$temp['expectedDate']	= NULL; #會用來計算營業天數, 故要放空值
+		#用門店取資料,因門店已是active list
+		/* $baseData = collect($params->storeList)->map(function($item, $key) use($orderData){
+			
+			$order = data_get($orderData, $item['storeKey'], NULL);
+			
+			$temp['expectedDate']	= data_get($order, 'expectedDate', NULL);
 			$temp['storeNo'] 		= $item['storeNo'];
-			$temp['storeKey'] 		= PurchaseManager::buildStoreKey($item['storeNo']);
+			$temp['storeKey'] 		= $item['storeKey'];
 			$temp['storeName'] 		= $item['storeName'];
 			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName'] 		= $item['areaName'];
 			$temp['openDate'] 		= $item['openDate'];
-			$temp['shortCode'] 		= '';
-			$temp['qty'] 			= 0;
-			$temp['amount']			= 0;
+			$temp['shortCode'] 		= data_get($order, 'shortCode', NULL);
+			$temp['qty'] 			= data_get($order, 'qty', 0);
+			$temp['amount']			= data_get($order, 'amount', 0);
 			
 			return $temp;
-		})->toArray();
+		})->filter()->all(); */
 		
-		$params->baseData = $baseData->merge($fillinData);
+		$params->baseData = $baseData;
 	}
 	
 	/* ========================== 統計 ========================== */
@@ -326,7 +340,7 @@ class PerformanceService
 	 */
 	private function _buildHeader($params)
 	{
-		$productGroup 	= $params->productGroup;
+		$productGroup = $params->productGroup;
 		
 		$groupList = collect($productGroup)->map(function($group, $key){
 			return collect($group)->mapWithKeys(function($item, $key){
@@ -355,29 +369,41 @@ class PerformanceService
 	private function _parsingByStore($params)
 	{
 		#依區->門店->產品
-		$result = collect($params->baseData)->groupBy('areaId')->map(function($items, $key){
+		$baseData = $params->baseData;
+		
+		#改用門店來取, 排多比較不會亂
+		$result = collect($params->storeList)->map(function($item, $key) use($baseData){
 			
-			return $items->groupBy('storeKey')->map(function($items, $key){
-				$temp['storeKey'] 	= $items->pluck('storeKey')->first();
-				$temp['storeName'] 	= $items->pluck('storeName')->first();
-				$temp['areaId'] 	= $items->pluck('areaId')->first();
-				$temp['areaName'] 	= $items->pluck('areaName')->first();
-				$temp['openDate'] 	= $items->pluck('openDate')->first();
+			$data = data_get($baseData, $item['storeKey'], []);
+			
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['openDate'] 	= $item['openDate'];
+			
+			if (empty($data))
+			{
+				$temp['products'] = [];
+				$temp['openDays'] = 0;
+			}
+			else
+			{	
+				$temp['products'] = collect($data)->groupBy('shortCode')->map(function($items, $key){
 				
-				$temp['products']	= $items->groupBy('shortCode')->map(function($items, $key){
-					#DB其實是unique的, 但還是當成array來處理
+					#DB其實是unique的(每個品項只有一筆), 但還是當成array來處理
 					$product['qty'] 	= round(floatval($items->pluck('qty')->sum()), 2); #因有乘係數, 故要用float
 					$product['amount'] 	= round(floatval($items->pluck('amount')->sum()), 2); #因有乘係數, 故要用float
 					
 					return $product;
 				})->toArray();
 				
-				$temp['openDays'] 	= $items->whereNotNull('expectedDate')->pluck('expectedDate')->unique()->count();
-				
-				return $temp;
-			})->toArray();
+				$temp['openDays'] = collect($data)->whereNotNull('expectedDate')->pluck('expectedDate')->unique()->count();
+			}	
 			
-		})->sortKeys()->toArray();
+			return $temp;
+			
+		})->toArray();
 		
 		$params->orders = $result;
 	}
@@ -388,23 +414,25 @@ class PerformanceService
 	 */
 	private function _generateOutput($params)
 	{
-		$orders = $params->orders;
-		
-		if (empty($orders))
+		#Sheets by area
+		if (empty($params->orders))
 			return [];
+		
+		$orders = collect($params->orders)->groupBy('areaId');
 		
 		#須依據header順序
 		foreach($orders as $areaId => $areaGroup)
 		{
-			$areaName = collect($areaGroup)->pluck('areaName')->first();
+			$areaName = $areaGroup->pluck('areaName')->first();
 			$areaData[$areaName] = [];
 			$sn = 1;
 			
 			foreach($areaGroup as $storeData)
 			{
-				$configMap	= $this->_getConfigProductMap();
+				$configMap	= $this->_getConfigProductMap(); #product mapping settings
 				$opendays 	= data_get($storeData, 'openDays'); #營業天數
 				
+				#Build product => qty,amount mapping : 確保每個product都要對應值
 				$total = $this->_getProductOutput($storeData);
 				
 				$row = [];
@@ -450,7 +478,7 @@ class PerformanceService
 				
 				$row['drinkQty'] 	= $drinkQty; #飲料總和
 				$row['totalAmount'] = $fillingAmount + $wrapperAmount + $drinkAmount; #銷售總額
-				$row['openDays'] = $opendays; #營業天數
+				$row['openDays'] 	= $opendays; #營業天數
 				$sn++;
 				
 				$areaData[$areaName][] = $row;

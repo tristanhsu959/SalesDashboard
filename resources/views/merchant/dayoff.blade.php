@@ -37,7 +37,7 @@
 			</section>
 			
 			<!-- 門店 -->
-			<section class="statistics-store" :class="response.brandCode">
+			<section x-show="response.dayoffCount > 0" class="statistics-store" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>

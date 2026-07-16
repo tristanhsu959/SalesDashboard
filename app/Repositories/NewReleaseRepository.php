@@ -136,8 +136,8 @@ class NewReleaseRepository extends Repository
 			->map(fn($no) => "N'{$no}'")
 			->implode(','); */
 			
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();

@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/ezorder_pos/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/ezorder_pos/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/ezorder_pos/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -16,23 +17,25 @@
 	@csrf
 		<h5>查詢</h5>
 		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
-		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.by" :key="id">
-				<label class="radio field-light-blue">
-					<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<nav class="wrap">
+				<template x-for="(name, id) in options.by" :key="id">
+					<label class="radio field-light-blue">
+						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
+		<div class="space"></div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
@@ -44,17 +47,18 @@
 			<label>結束日期</label>
 		</div>
 		
-		<!--fieldset x-show="searchData.by == 'area'" class="light-blue-border light-blue-text">
-			<legend class="title-small">選擇區域</legend>
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
-				<template x-for="(areaName, areaId) in options.areas" :key="areaId">
-					<label class="checkbox check-pink">
-						<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds" :disabled="searchData.by != 'area'">
-						<span x-text="areaName"></span>
-					</label>
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
 				</template>
 			</nav>
-		</fieldset-->
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
 		
 		<div x-show="searchData.by == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
 			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.by != 'store'" @input="errors.delete('storeName')">
@@ -83,6 +87,17 @@
 					<i>download_2</i>
 					<span>下載</span>
 				</a>
+			</template>
+			
+			<template x-if="response.hasResult && response.hasFilter">
+				<nav  x-show="$store.ezorderPos.showFilter" class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.ezorderPos.filter">
+						<label>篩選</label>
+					</div>
+					<button class="right-round" @click="$store.ezorderPos.filter = ''"><i>backspace</i></button>
+				</nav>
 			</template>
 		</nav>
 	</header>

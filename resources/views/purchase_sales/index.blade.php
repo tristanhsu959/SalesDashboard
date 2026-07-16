@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/purchase_sales/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/purchase_sales/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/purchase_sales/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -14,15 +15,16 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'date')">
 			<input type="date" name="searchDate" maxlength="10" x-model="searchData.date" x-ref="searchDate" @input="errors.delete('date')" :max="searchData.today">

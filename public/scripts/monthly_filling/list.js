@@ -62,8 +62,8 @@ document.addEventListener('alpine:init', () => {
 		
 		
 		resetSearch() {
-			this.searchData.type = Object.keys(this.options.mode.type)[0];
-			this.searchData.range = Object.keys(this.options.mode.range)[0];
+			this.searchData.type = Object.keys(this.options.type)[0];
+			this.searchData.range = Object.keys(this.options.range)[0];
 			this.changeDateInput();
 			this.errors.clear();
 		},

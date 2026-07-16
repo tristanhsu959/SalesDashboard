@@ -4,6 +4,7 @@ namespace App\Services\Shipments;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager; #from local
 use App\Repositories\ShipmentsRepository;
 use App\Libraries\ResponseLib;
@@ -32,9 +33,9 @@ class StoreService
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'modeType'		=> '',
-			'modeCalc'		=> '',
-			'modeBy'		=> '',
+			'type'		=> '',
+			'calc'		=> '',
+			'by'		=> '',
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -78,9 +79,9 @@ class StoreService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
-		$this->_statistics['modeCalc']		= $params->calc; 
-		$this->_statistics['modeBy']		= $params->by; 
+		$this->_statistics['type']			= $params->type;
+		$this->_statistics['calc']			= $params->calc; 
+		$this->_statistics['by']			= $params->by; 
 		$this->_statistics['brandId']		= $params->brand->value; 
 		$this->_statistics['brandCode']		= $params->brand->code(); 
 		$this->_statistics['startDate'] 	= $params->stDate; 
@@ -117,7 +118,7 @@ class StoreService
 	{
 		try
 		{
-			$params->storeList = PurchaseManager::getStoreListWithLb($params->brand, $params->userAreaIds, $params->stDate, $params->endDate);
+			$this->_getStoreList($params);
 			
 			$orderData = $this->_getDataFromDB($params);
 			
@@ -130,6 +131,25 @@ class StoreService
 			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
 			throw new Exception($e->getMessage());
 		}
+	}
+	
+	/* 門店資料
+	 * @params: collection
+	 * @return: array
+	 */
+	private function _getStoreList($params)
+	{
+		$brand 				= $params->brand;
+		$stDate				= $params->stDate;
+		$endDate			= $params->endDate;
+		$allowOpCenterIds 	= $params->allowOpCenterIds;
+		$allowAreaIds 		= $params->allowAreaIds;
+		
+		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		#這裏不排除工廠學區店
+		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$params->storeList = $storeList;
 	}
 	
 	/* Get order data
@@ -156,13 +176,15 @@ class StoreService
 	
 		try
 		{
-			$brand 		= $params->brand;
-			$stDate		= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 	= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productIds	= $params->productIds;
+			$brand 				= $params->brand;
+			$stDate				= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 			= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productIds			= $params->productIds;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
 			#已包含蘿蔔訂單
-			$orderData = $this->_repository->getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $params->userAreaIds);
+			$orderData = $this->_repository->getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
 		}
@@ -181,13 +203,15 @@ class StoreService
 	{
 		try
 		{
-			$brand 			= $params->brand;
-			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
-			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
-			$productCodes 	= $params->shortCodes;
-			$userAreaIds 	= $params->userAreaIds;
+			$brand 				= $params->brand;
+			$stDate				= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
+			$endDate 			= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
+			$productCodes 		= $params->shortCodes;
+			$allowOpCenterIds 	= $params->allowOpCenterIds;
+			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $stDate, $endDate, $productCodes);
+			#維持原狀,不判別opCenter, 最後由門店一起過濾
+			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
@@ -215,13 +239,18 @@ class StoreService
 		#整合追加資料
 		$baseData = collect($orderData)->merge($extraData);
 		
+		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
+		
 		#處理包裝轉換
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$item['storeKey'] = PurchaseManager::buildStoreKey($item['storeNo']);
+			$item['storeKey'] = StoreManager::buildStoreKey($item['storeNo']);
 			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
 			return $item;
+		})->filter(function($item, $key) use($authStoreKeys){
+			
+			return in_array($item['storeKey'], $authStoreKeys);
 		})->toArray();
 	
 		$params->baseData = $baseData;
@@ -310,7 +339,7 @@ class StoreService
 			$temp['memo']		= trim($item['memo']);
 			
 			return $temp;
-		})->toArray();
+		})->sortKeys()->toArray();
 		
 		$params->productList = $productList;
 		
@@ -357,6 +386,7 @@ class StoreService
 			return;
 		}
 		
+		#這裏再處理無權限門店
 		$modeCalc = $params->calc;
 		
 		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) use($modeCalc) {
@@ -448,7 +478,7 @@ class StoreService
 		foreach($sourceData['productList'] as $shortCode => $item)
 		{
 			$storeData = data_get($sourceData['data'], $shortCode, []);
-			$productName = $item['productName'];
+			$productName = "{$shortCode}_{$item['productName']}";
 			
 			if (empty($storeData))
 				continue;

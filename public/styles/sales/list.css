@@ -69,3 +69,32 @@ form {
 		}
 	}
 }
+
+#salesDetail {
+	width: 100vw;
+	overflow-x: auto;
+		
+	table {
+		thead tr th {
+			min-width: 100px;
+			max-width: 100px;
+			
+			&:nth-of-type(1) {
+				width: 200px;
+				min-width: 200px;
+				max-width: 200px;
+			}
+		}
+		
+		tbody tr td {
+			min-width: 100px;
+			max-width: 100px;
+			
+			&:nth-of-type(1) {
+				width: 200px;
+				min-width: 200px;
+				max-width: 200px;
+			}
+		}
+	}
+}

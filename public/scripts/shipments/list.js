@@ -60,11 +60,12 @@ document.addEventListener('alpine:init', () => {
 		
 		
 		resetSearch() {
-			this.searchData.type = Object.keys(this.options.mode.type)[0];
-			this.searchData.calc = Object.keys(this.options.mode.calc)[0];
-			this.searchData.by = Object.keys(this.options.mode.by)[0];
-			this.searchData.stDate = '';
-			this.searchData.endDate = '';
+			this.searchData.type = Object.keys(this.options.type)[0];
+			this.searchData.calc = Object.keys(this.options.calc)[0];
+			this.searchData.by = Object.keys(this.options.by)[0];
+			this.searchData.stDate = this.searchData.tomorrow;
+			this.searchData.endDate = this.searchData.tomorrow;
+			this.searchData.areaIds = [];
 			this.searchData.keyword = '';
 			this.searchData.category = '';
 			this.searchData.shortCodes = [];

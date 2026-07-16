@@ -61,6 +61,12 @@ button, a {
 
 /* Table, Grid Define */
 table {
+	caption {
+		border-radius: unset;
+		padding-left: .5rem;
+		color: #9c27b0;
+	}
+			
 	tbody {
 		tr td.action {
 			width: 100px;
@@ -167,7 +173,8 @@ table {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 230px);
+		/* 預設Height為有Sheet狀況 */
+		max-height: calc(100vh - 128px - 2rem - 48px - 1rem); /*top nav,toolbar,sheet,padding*/
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
@@ -182,6 +189,10 @@ table {
 			padding: 0;
 			margin: 0;
 			border-radius: 4px;
+			
+			caption {
+				background-color: var(--table-bg);
+			}
 			
 			&.stripes tbody tr:nth-child(odd) {
 				background-color: var(--table-stripes);
@@ -198,7 +209,7 @@ table {
 						min-width: 120px;
 						width: 120px;
 						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
+						/* padding-top: 1rem; */
 					}
 				}
 			}

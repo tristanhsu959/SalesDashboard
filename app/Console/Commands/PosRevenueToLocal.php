@@ -114,8 +114,8 @@ class PosRevenueToLocal extends Command
 	 */
 	public function getDataByAverageOrderValue($brand, $userAreaIds, $stDate, $endDate, $shopType)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();

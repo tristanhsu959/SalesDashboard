@@ -29,8 +29,8 @@ class EzOrderPosRepository extends Repository
 	 */
 	public function getDataFromPos($brand, $stDate, $endDate, $areaIds, $posIds)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();
@@ -78,8 +78,8 @@ class EzOrderPosRepository extends Repository
 	 */
 	public function getBusinessDays($brand, $stDate, $endDate, $areaIds, $posIds)
 	{
-		$configCode = $brand->code();
-		$excepts = config("web.sales.shop.except.{$configCode}");
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
 		
 		if ($brand == Brand::BAFANG)
 			$db = $this->connectBFPosErp();
@@ -121,8 +121,8 @@ class EzOrderPosRepository extends Repository
 	public function getDataFromEzOrder($brand, $stDate, $endDate, $posIds)
 	{
 		$brandId 	= $brand->value;
-		$brandCode 	= config("web.ezorder_pos.store.code.{$brandId}"); #八方點的code
-		$excepts 	= array_merge(config("web.ezorder_pos.store.factoryStore.{$brandId}"), config("web.ezorder_pos.store.except.{$brandId}"));
+		$brandCode 	= config("web.ezorder.store.code.{$brandId}"); #八方點的code
+		$excepts 	= array_merge(config("web.ezorder.store.factoryStore.{$brandId}"), config("web.ezorder.store.except.{$brandId}"));
 		
 		$db = $this->connectQuickOrder();
 		

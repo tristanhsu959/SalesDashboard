@@ -3,13 +3,14 @@ body main.app {
 	overflow-y: hidden !important;
 }
 
-form {
-	margin-block-start: 0;
+form, section.statistics-store {
+	margin-block-start: 0 !important;
 }
 
 /* Data */
 .store-content {
 	padding: 1rem;
+	
 	/* 門市 */
 	.statistics-store {
 		&.bafang {
@@ -29,11 +30,12 @@ form {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 200px);
+		max-height: calc(100vh - 128px - 2rem);
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
 		margin: 0;
+		padding: 0;
 		border: 1px solid var(--table-bg-dark);
 		
 		table {
@@ -45,6 +47,9 @@ form {
 			margin: 0;
 			border-radius: 4px;
 			
+			caption {
+				background-color: var(--table-bg);
+			}
 			&.stripes tbody tr:nth-child(odd) {
 				background-color: var(--table-stripes);
 			}
@@ -59,7 +64,6 @@ form {
 						background-color: var(--table-bg);
 						width: 120px;
 						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
 						
 						&:nth-of-type(4) {
 							width: 200px;

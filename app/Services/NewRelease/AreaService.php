@@ -56,29 +56,31 @@ class AreaService
 		if (empty($baseData))
 			return FALSE;
 		
-		$header = ['areaName' => '區域', 'shopCount'	=> '店家數', 'totalQty' => '銷售總量', 
-					'avgDayQty' => '平均日銷售量', 'avgShopQty' => '每店平均銷量', 'avgDayShopQty' => '每店平均日銷量'];
+		$header = ['areaName' => '區域', 'storeCount'	=> '店家數', 'totalQty' => '銷售總量', 
+					'avgDayQty' => '平均日銷售量', 'avgStoreQty' => '每店平均銷量', 'avgDayStoreQty' => '每店平均日銷量'];
 		
 		$params->set('area.header', $header);
 		
 		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) use($totalDays) {
+			$data = $items->pluck('data')->filter()->flatten();
+			
 			$temp['areaName']		= $items->pluck('areaName')->first();
-			$temp['shopCount']		= $items->pluck('shopId')->unique()->count(); #店家數
-			$temp['totalQty'] 		= intval($items->pluck('qty')->sum()); #區域銷售總量
+			$temp['storeCount']		= $items->pluck('storeId')->unique()->count(); #店家數
+			$temp['totalQty'] 		= intval($data->sum()); #區域銷售總量
 			$temp['avgDayQty'] 		= round($temp['totalQty'] / $totalDays, 1); 		#區域平均日銷售量: 區域銷售總量/天數
-			$temp['avgShopQty'] 	= round($temp['totalQty'] / $temp['shopCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
-			$temp['avgDayShopQty'] 	= round($temp['totalQty'] / $totalDays / $temp['shopCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數
+			$temp['avgStoreQty'] 	= round($temp['totalQty'] / $temp['storeCount'], 1); #區域每店平均銷量: 區域銷售總量/店家數
+			$temp['avgDayStoreQty'] = round($temp['totalQty'] / $totalDays / $temp['storeCount'], 1); 	#區域每店平均日銷量: 區域銷售總量/店家數/天數
 			
 			return $temp;
 		})->sortKeys()->toArray();
 		
 		#這裏是依header
 		$result['total']['areaName'] 		= '全區合計'; 
-		$result['total']['shopCount'] 		= collect($result)->pluck('shopCount')->sum(); 
+		$result['total']['storeCount'] 		= collect($result)->pluck('storeCount')->sum(); 
 		$result['total']['totalQty'] 		= collect($result)->pluck('totalQty')->sum();
 		$result['total']['avgDayQty'] 		= round($result['total']['totalQty'] / $totalDays, 1);
-		$result['total']['avgShopQty'] 		= round($result['total']['totalQty'] / $result['total']['shopCount'], 1); #totalQty / shopCount
-		$result['total']['avgDayShopQty']	= round($result['total']['avgDayQty'] / $result['total']['shopCount'], 1); #avgDayQty / shopCount
+		$result['total']['avgStoreQty'] 	= round($result['total']['totalQty'] / $result['total']['storeCount'], 1); #totalQty / shopCount
+		$result['total']['avgDayStoreQty']	= round($result['total']['avgDayQty'] / $result['total']['storeCount'], 1); #avgDayQty / shopCount
 		
 		$params->set('area.data', $result);
 	}

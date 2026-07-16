@@ -7,7 +7,13 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
+			let minDate = '';
 			
+			if (this.searchData.releaseId > 0)
+				minDate = this.options.newReleaseProducts[this.searchData.releaseId].saleDate;
+		
+			this.$refs.searchStDate.min = minDate;
+			this.$refs.searchEndDate.min = minDate;
 		},
 		
 		search() {
@@ -57,6 +63,7 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.releaseId = '';
 			this.searchData.stDate = '';
 			this.searchData.endDate = '';
+			this.searchData.areaIds = [];
 			this.errors.clear();
 		},
     }));

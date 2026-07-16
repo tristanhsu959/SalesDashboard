@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\Services\ShipmentsService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
@@ -53,9 +54,13 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
-		list($category, $products) = $this->_service->getEnableProducts($this->brand->value);
+		$areaList = $this->getPurchaseAreaOptions($this->brand);
+		$this->set('options.areaList', $areaList);
+		
+		list($category, $products) = $this->_service->getProductOptions($this->brand);
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
+		
 	}
 	
 	/* 查詢選項
@@ -68,19 +73,19 @@ class ShipmentsViewModel extends Fluent
 			'store'		=> '依門店', 
 			'factory'	=> '依工廠',
 		];
-		$this->set('options.mode.type', $type);
+		$this->set('options.type', $type);
 		
 		$calc = [
 			'day'	=> '以日計算', 
 			'month'	=> '以月計算',
 		];
-		$this->set('options.mode.calc', $calc);
+		$this->set('options.calc', $calc);
 
 		$by = [
 			'keyword'	=> '關鍵字查詢',
 			'category'	=> '分類查詢', 
 		];
-		$this->set('options.mode.by', $by);
+		$this->set('options.by', $by);
 	}
 	
 	/* Form submit action
@@ -105,8 +110,9 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL, 
-						$searchBy = 'keyword', $searchKeyword = '', $searchCategory = '', $searchShortCodes = [])
+	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
+						$searchAreaIds = [], $searchBy = 'keyword', $searchKeyword = '', 
+						$searchCategory = '', $searchShortCodes = [])
     {
 		$today = Carbon::tomorrow()->format('Y-m-d');
 		$searchStDate	= $searchStDate ?? $today;
@@ -116,6 +122,7 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.by', $searchBy);
 		$this->set('search.keyword', $searchKeyword);
 		$this->set('search.category', $searchCategory);
@@ -152,10 +159,8 @@ class ShipmentsViewModel extends Fluent
 		$response = $this->responseBaseData();
 		
 		#filter tool
-		$type = data_get($this->statistics, 'modeType', NULL);
-		$data = data_get($this->statistics, 'data', []);
-		
-		$response['hasFilter'] = ($type == 'store' && !empty($data));
+		$type = data_get($this->statistics, 'type', NULL);
+		$response['hasFilter'] = ($type == 'store');
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;

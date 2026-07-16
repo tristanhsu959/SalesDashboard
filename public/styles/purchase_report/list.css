@@ -8,8 +8,6 @@ form {
 }
 
 #searchPanel {
-	max-width: 360px;
-	
 	.mode-group {
 		.field {
 			margin-block-start: 0;

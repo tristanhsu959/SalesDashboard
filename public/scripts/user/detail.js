@@ -1,9 +1,12 @@
 /* Role Create JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('userForm', (formData, options) => ({
-		formData: {...formData},
-		options: options,
+	Alpine.data('userForm', (response, data) => ({
+		response: response,
+		formData: {...data.formData},
+		options: data.options,
+		formAction: data.formAction,
+		actionLabel: data.actionLabel,
 		errors: new Set(),
 		activeTab: '',
 		showPassword: false,
@@ -45,7 +48,9 @@ document.addEventListener('alpine:init', () => {
 			this.formData.department = '';
 			this.formData.email = '';
 			this.formData.permission = [];
-			this.formData.area = [];
+			this.formData.opCenter = [];
+			this.formData.salesArea = [];
+			this.formData.purchaseArea = [];
 			this.formData.description = '';
 		}
     }));

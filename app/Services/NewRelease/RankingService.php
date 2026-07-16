@@ -34,7 +34,7 @@ class RankingService
 		[
 			"103001" => [
 				"shopId" => "103001"
-				"shopName" => "御廚民生承德直營店"
+				"storeName" => "御廚民生承德直營店"
 				"area" => "大台北區"
 				"saleDate" => '2026-01-01'
 				"qty" => 29
@@ -52,15 +52,15 @@ class RankingService
 		if (empty($baseData))
 			return FALSE;
 		
-		#排名是依最後一天的值
-		$result = collect($baseData)->groupBy('shopId')->map(function($items, $key) use($endDate) {
-			#需考量沒有訂單的狀況
-			$dayData = $items->groupBy('saleDate')->get($endDate, collect([]))->first();
+		#排名是依最後一天的值(BaseData已是不重複門店)
+		$result = collect($baseData)->map(function($item, $key) use($endDate) {
 			
-			$temp = $items->first(); #當基底資料
-			#$temp['saleDate'] 	= $endDate;
-			$temp['qty']		= intval(data_get($dayData, 'qty', 0)); 
-			unset($temp['saleDate'], $temp['areaId']);
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['shopId'] 	= $item['storeKey'];
+			
+			$dayData = collect($item['data'])->get($endDate, 0);
+			$temp['qty'] = intval($dayData); 
 			
 			return $temp;
 		});
@@ -88,7 +88,7 @@ class RankingService
 				$row = [];
 				$row[] = $data['areaName'];
 				$row[] = $data['shopId'];
-				$row[] = $data['shopName'];
+				$row[] = $data['storeName'];
 				$row[] = $data['qty'];
 				$row[] = $ranking + 1;
 				

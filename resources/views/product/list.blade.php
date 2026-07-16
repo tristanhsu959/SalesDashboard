@@ -1,12 +1,13 @@
 @extends('layouts.app')
 @use('App\Enums\Brand')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/product/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/product/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/product/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -18,7 +19,7 @@
 			
 			<template x-for="(brand, brandId) in response.options.brands">
 				<nav x-show="brandId == $store.productSetting.tabIndex" class="no-space filter">
-					<div class="field label suffix border field-filter-dark">
+					<div class="field label suffix border field-filter-dark small">
 						<select x-model="$store.productSetting.filterCat[brandId]" id="filterCat">
 							<option value="">全部</option>
 							<template x-for="(catName, catId) in response.options.categories[brandId]" :key="catId">
@@ -53,7 +54,7 @@
 			
 			<form x-data="productList(@js($viewModel->responseList()))" action="" method="post" x-ref="productListForm">
 			@csrf
-			<div class="list-wrapper">
+			<div x-show="response.hasResult" class="list-wrapper">
 				<div class="tabs">
 					<template x-for="(brand, brandId) in brands" :key="brandId">
 						<a :data-ui="`#page-${brandId}`" :class="activeTab == brandId ? 'active':''" @click="$store.productSetting.tabIndex = brandId" class="tab-pink">
@@ -87,8 +88,8 @@
 					</div>
 					</template>
 				</div>
-			</section>
-		</form>
+			</form>
+		</section>
 	</template>
 </div>
 <!-- Content -->

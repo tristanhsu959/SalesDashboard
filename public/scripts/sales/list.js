@@ -4,7 +4,11 @@ document.addEventListener('alpine:init', () => {
 	//統計單位顯示
 	Alpine.store('sales', {
 		showAmount: Alpine.$persist(false),
-        
+        showFilter: Alpine.$persist(false),
+		filter: '',
+		
+		storeDetail: [],
+		
 		toggle() {
            this.showAmount = ! this.showAmount;
         }
@@ -16,7 +20,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			
+			Alpine.store('sales').showFilter = false;
 		},
 		
 		search() {
@@ -33,6 +37,12 @@ document.addEventListener('alpine:init', () => {
 					Alpine.store('toast').notify('結束日期不可小於開始日期');
 				}
 			}
+			
+			if (this.searchData.type == 'store' && this.searchData.storeName == '')
+				this.errors.add('storeName');
+			
+			if (this.searchData.category == '')
+				this.errors.add('category');
 			
 			if (this.searchData.productIds.length == 0)
 			{
@@ -55,11 +65,59 @@ document.addEventListener('alpine:init', () => {
 		resetSearch() {
 			this.searchData.stDate = this.searchData.today;
 			this.searchData.endDate = this.searchData.today;
-			this.searchData.shopName = '';
+			this.searchData.areaIds = [];
+			this.searchData.storeName = '';
 			this.searchData.category = '';
 			this.searchData.productIds = [];
 			this.errors.clear();
 		},
+    }));
+	
+	Alpine.data('statisticsStore', (store, detail) => ({
+		store: {...store},
+		
+		init() { 
+		},
+		
+		get filterStore() {
+			const searchKeyword = Alpine.store('sales').filter.toLowerCase();
+			
+			const list = Object.values(this.store.data);
+			
+			const result = list.filter(store => 
+				String(store.shopId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		},
+	
+    }));
+	
+	Alpine.data('storeDetail', () => ({
+		detail: {
+			storeKey: '',
+			storeName: '',
+			header: {},
+			products: {},
+		},
+		
+		init() { 
+		},
+		
+		openDetail(eventData) {
+			this.detail.storeKey 	= eventData.id;
+			this.detail.storeName 	= eventData.name;
+			this.detail.header 		= eventData.details.header;
+			this.detail.products 	= eventData.details.data;
+				
+			console.log(this.detail.products);
+			
+			ui('#salesDetail');
+		},
+	
     }));
 });
 

@@ -46,11 +46,12 @@ class NewReleaseController extends Controller
 		$searchReleaseId= $request->integer('searchReleaseId');
 		$searchStDate	= $request->input('searchStDate');
 		$searchEndDate	= $request->input('searchEndDate');
+		$searchAreaIds	= $request->array('searchAreaIds');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchReleaseId, $searchStDate, $searchEndDate);
-	
-		$response = $this->_service->getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate);
+		$this->_viewModel->keepSearchData($searchReleaseId, $searchStDate, $searchEndDate, $searchAreaIds);
+		
+		$response = $this->_service->getStatistics($brand, $searchReleaseId, $searchStDate, $searchEndDate, $searchAreaIds);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

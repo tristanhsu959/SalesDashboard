@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/shipments/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/shipments/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/shipments/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -15,21 +16,25 @@
 	@csrf
 		<h5>查詢</h5>
 		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-			
-			<template x-for="(name, id) in options.mode.calc" :key="id">
-				<label class="radio field-light-blue">
-					<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
+		<div class="field middle-align">
+			<nav>
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<nav>
+				<template x-for="(name, id) in options.calc" :key="id">
+					<label class="radio field-light-blue">
+						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
+		<div class="space"></div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
@@ -42,15 +47,30 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.by" :key="id">
-				<label class="radio field-purple">
-					<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
-					<span x-text="name"></span>
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
 				</label>
-			</template>
-		</nav>
-
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全部</output>
+		</fieldset>
+		
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.by" :key="id">
+					<label class="radio field-purple">
+						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
+		
 		<div x-show="searchData.by == 'keyword'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'keyword')">
 			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" x-ref="searchKeyword" @input="errors.delete('keyword')">
 			<label>產品名稱</label>
@@ -69,13 +89,13 @@
 		</div>
 		
 		<template x-for="(products, catId) in options.products" :key="catId">
-			<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="light-blue-border fieldset">
+			<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="light-blue-border fieldset product-list">
 				<legend><i class="small red-text">asterisk</i><span class="light-blue-text">請勾選產品</span></legend>
 				<template x-for="(item, idx) in products" :key="idx">
 					<div class="row">
 						<label class="checkbox large s3 check-amber">
 							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode">
-							<span x-text="item.productName"></span>
+							<span x-text="`${item.shortCode} ${item.productName}`"></span>
 						</label>
 					</div>
 				</template>

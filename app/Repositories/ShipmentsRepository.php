@@ -22,12 +22,14 @@ class ShipmentsRepository extends Repository
 		
 	}
 	
-	/* 取Product setting
+	/* 取Product enabled setting
 	 * @params: string
 	 * @return: array
 	 */
-	public function getEnableProducts($brandId)
+	public function getEnableProductSettings($brand)
 	{
+		$brandId = $brand->value;
+		
 		#取後台的enabled product
 		$db = $this->connectSalesDashboard();
 		$result = $db
@@ -47,19 +49,23 @@ class ShipmentsRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByProductId($brand, $stDate, $endDate, $productIds, $userAreaIds)
+	public function getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
 	{
 		#to UTC Time
 		$stDate		= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate	= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		$brandId 	= $brand->value;
-		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $userAreaIds);
+		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		
+		#轉成DB brandid, 其實可不判別OpCenter,結果應相同
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
 			->table('Order as a')
 			->fromRaw('[Order] as a WITH(NOLOCK)')
 			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
+			#->join(DB::raw('OperationCenter as op WITH(NOLOCK)'), 'op.Id', '=', 'a.OperationCenterId')
 			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
 			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'a.StoreId')
 			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
@@ -70,17 +76,17 @@ class ShipmentsRepository extends Repository
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')
 			->addSelect('b.Quantity as qty', 'b.Money as amount')
 			->addSelect('p.Name as productName', 'p.ErpNo as erpNo', 'p.OldNo as shortCode', 'p.Memo as memo')
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
 					->from('OperationCenter as oc')
 					->whereColumn('oc.Id', 'a.OperationCenterId')
-					->whereIn('oc.No', $this->getOpCenterNo($brandId));
+					->whereIn('oc.No', $allowOpCenterIds);
 			})
-			->whereExists(function ($query) use($brandId) {
+			->whereExists(function ($query) use($dbBrandIds) {
 				$query->select(DB::raw(1))
-					->from('Factory as ft')
-					->whereColumn('ft.Id', 'sc.FactoryId')
-					->whereIn('ft.No',  $this->getFactoryNo($brandId));
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
 			})
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)

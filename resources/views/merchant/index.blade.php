@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
     <link href="{{ asset('styles/merchant/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/merchant/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/merchant/list.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -14,20 +15,33 @@
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
-		
-		<nav class="wrap">
-			<template x-for="(name, id) in options.mode.type" :key="id">
-				<label class="radio field-red">
-					<input type="radio" name="searchType" x-model="searchData.type" :value="id">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
-		
+		<div class="field middle-align">
+			<nav class="wrap">
+				<template x-for="(name, id) in options.type" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow" :disabled="searchData.type == 'info'">
+			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow" :disabled="searchData.type != 'dayOff'">
 			<label>查詢日期</label>
 		</div>
+		
+		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+			<legend class="small">選擇區域</legend>
+			<nav class="wrap">
+				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
+				<label class="checkbox check-pink">
+					<input type="checkbox" :value="areaId" name="searchAreaIds[]" x-model="searchData.areaIds">
+					<span x-text="areaName"></span>
+				</label>
+				</template>
+			</nav>
+			<output class="red-text small">未選時取全區</output>
+		</fieldset>
 		
 		<div class="space"></div>
 		<nav class="right-align group split">
@@ -56,9 +70,11 @@
 	</header>
 	
 	<template x-if="response.status && response.isInit">
-		<!-- Loading -->
+		<!-- 不可有空格 -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
+			<pre x-show="response.brandCode == 'bafang'" class="red-border">店休資訊判別條件：<br/>招牌餡、韭菜餡、韓式辣味餡訂貨量</pre>
+			<pre x-show="response.brandCode == 'buygood'" class="red-border">店休資訊判別條件：<br/>醃漬排骨、醃漬雞腿訂貨量</pre>
 		</section>
 	</template>
 	

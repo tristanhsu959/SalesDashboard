@@ -1,16 +1,18 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
 	<link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/user/detail.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/user/detail.js') }}" defer></script>
 @endpush
 
 @section('content')
 
-<form x-data='userForm(@json($viewModel->formData), @json($viewModel->options))' action="{{ $viewModel->getFormAction() }}" method="post" novalidate @submit.prevent="validate()">
+<div x-data="userForm(@js($viewModel->detailResponseData()), @js($viewModel->detailData()))" class="content-wrapper">
+<form :action="formAction" method="post" novalidate @submit.prevent="validate()">
 	<input type="hidden" name="id" :value="formData.id" x-model="formData.id">
 	@csrf
 	
@@ -75,12 +77,13 @@
 					<a :data-ui="`#page-${groupName}`" x-text="groupName" :class="activeTab == groupName ? 'active':''" ></a>
 				</template>
 				
-				<a data-ui="#page-area" :class="activeTab == 'area' ? 'active':''">區域權限</a>
+				<a data-ui="#page-sales-area" :class="activeTab == 'sales-area' ? 'active':''">銷售區域權限</a>
+				<a data-ui="#page-purchase-area" :class="activeTab == 'purchase-area' ? 'active':''">訂貨區域權限</a>
 			</div>
 			
 			<template x-for="(groups, groupName) in options.functions" :key="`list-${groupName}`">
 			<div class="page padding" :id="`page-${groupName}`" :class="activeTab == groupName ? 'active':''">
-				<fieldset class="role-permission field-blue fieldset required">
+				<fieldset class="role-permission field-blue fieldset required surface-container-high">
 					<ul class="list border">
 						<template x-for="(item, idx) in groups" :key="idx">
 						<li class="">
@@ -99,21 +102,75 @@
 			</div>
 			</template>
 			
-			<div class="page padding" id="page-area" :class="activeTab == 'area' ? 'active':''">
-				<fieldset class="area-permission field-blue fieldset required">
+			<!--區域權限-->
+			<div class="page padding" id="page-sales-area" :class="activeTab == 'sales-area' ? 'active':''">
+				<fieldset class="area-permission field-blue fieldset required surface-container-high">
+					<ul class="list border">
+						<template x-for="(areaName, areaId) in options.salesAreas" :key="areaId">
+						<li>
+							<div class="max">
+								<h6 class="small"></h6>
+								<div x-text="areaName"></div>
+							</div>
+							<label class="switch field-dark-blue">
+								<input x-model="formData.area.sales" type="checkbox" name="area[sales][]" :value="areaId">
+								<span></span>
+							</label>
+						</li>
+						</template>
+					</ul>
+				</fieldset>
+				
+				<!--fieldset class="area-permission field-blue fieldset required">
 					<template x-for="(areaName, areaId) in options.areas" :key="areaId">
 						<label class="form-check-label" :for="`area-${areaId}`">
 							<input x-model="formData.area" class="form-check-input" type="checkbox" name="area[]" :id="`area-${areaId}`" :value="areaId">
 							<span x-text="areaName"></span>
 						</label>
 					</template>
+				</fieldset-->
+			</div>
+
+			<div class="page padding" id="page-purchase-area" :class="activeTab == 'purchase-area' ? 'active':''">
+				<fieldset class="area-permission field-red fieldset required surface-container-high">
+					<legend>指定營運中心(主要影響中彰投區門店|未指定則依品牌判別)</legend>
+					<ul class="list border">
+						<template x-for="(opName, opId) in options.opCenters" :key="opId">
+						<li class="red-text">
+							<div class="max">
+								<h6 class="small"></h6>
+								<div x-text="opName"></div>
+							</div>
+							<label class="switch field-red">
+								<input x-model="formData.area.opCenter" type="checkbox" name="area[opCenter][]" :value="opId">
+								<span></span>
+							</label>
+						</li>
+						</template>
+					</ul>
 				</fieldset>
-			</div>	
+				<fieldset class="area-permission field-blue fieldset required surface-container-high">
+					<ul class="list border">
+						<template x-for="(areaName, areaId) in options.purchaseAreas" :key="areaId">
+						<li>
+							<div class="max">
+								<h6 class="small"></h6>
+								<div x-text="areaName"></div>
+							</div>
+							<label class="switch field-dark-blue">
+								<input x-model="formData.area.purchase" type="checkbox" name="area[purchase][]" :value="areaId">
+								<span></span>
+							</label>
+						</li>
+						</template>
+					</ul>
+				</fieldset>
+			</div>				
 		</article>
 		
 		<div class="space"></div>
 		<nav class="toolbar">
-			<button type="submit" class="button btn-save btn-primary slow-ripple">{{ $viewModel->action->label()}}</button>
+			<button type="submit" class="button btn-save btn-primary slow-ripple" x-text="actionLabel"></button>
 			<button @click="reset() "type="button" class="button btn-cancel border slow-ripple">重置</button>
 			<!--label class="checkbox check-red">
 				<input type="checkbox" name="passwordOnly" value="1">
@@ -122,5 +179,6 @@
 		</nav>
 	</section>
 </form>
+</div>
 
 @endsection

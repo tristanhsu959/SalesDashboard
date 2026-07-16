@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@use('App\Libraries\HelperLib')
 
 @push('styles')
 	<!--link href="{{ asset('styles/product/detail.css') }}" rel="stylesheet"-->
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('scripts/product/detail.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/product/detail.js') }}" defer></script>
 @endpush
 
 @section('content')

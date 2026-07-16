@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\AppManager;
+use App\Facades\PurchaseManager;
 use App\Services\Merchant\InfoService;
 use App\Services\Merchant\DayoffService;
 use App\Repositories\MerchantRepository;
@@ -36,6 +37,8 @@ class MerchantService
 			'type'			=> '',
 			'startDate'		=> '', #Y-m-d
 			'endDate'		=> '', #Y-m-d
+			'opCenterIds'	=> [],
+			'areaIds'		=> [],
             'info' 			=> [],
 			'dayoff' 		=> [],
 			'areaDayoff'	=> [],
@@ -74,14 +77,14 @@ class MerchantService
 	 * @params: date
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchAreaIds)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchAreaIds);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -104,14 +107,6 @@ class MerchantService
 				#執行統計
 				$this->_statistics = $service->analysis($params);
 				
-				#無值不cache
-				/* if (! empty(Arr::flatten($this->_statistics['info'])) OR ! empty(Arr::flatten($this->_statistics['dayoff'])))
-				{
-					$this->_statistics['exportToken'] 	= bin2hex($cacheKey); #hex2bin
-					$this->_statistics['exportName']	= ($searchType == 'info') ? '門店資訊' : '店休資訊';
-					Cache::put($cacheKey, $this->_statistics, now()->addMinutes(10));
-				} */
-				
 				return ResponseLib::initialize($this->_statistics)->success();
 			}
 		}
@@ -129,18 +124,21 @@ class MerchantService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate)
+	private function _initParams($brand, $searchType, $searchStDate, $searchAreaIds)
 	{
 		$params = new Fluent();
 		
-		$currentUser	= AppManager::getCurrentUser();
-		$userAreaIds	= $currentUser->roleArea;
+		#此功能無法被歸類銷售或訂貨,故取全區
+		$allowOpCenterIds	= PurchaseManager::getAllOpCenters();
+		$allowAreaIds		= PurchaseManager::getAllAreas($searchAreaIds);
+		
 		$functions		= $this->parsingFunction($brand);
+		$searchStDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
+		$searchEndDate 	= empty($searchStDate) ? '' : Carbon::parse($searchStDate)->addDay()->format('Y-m-d');
 		
-		$searchStDate = ($searchType == 'info') ? '' : Carbon::parse($searchStDate)->format('Y-m-d'); 
-		$cacheKey = HelperLib::buildCacheKey([$functions->value, $userAreaIds, $searchType, $searchStDate]);
+		$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate]);
 		
-		$params->brand($brand)->userAreaIds($userAreaIds)
+		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)->stDate($searchStDate)->endDate($searchStDate)
 				->cacheKey($cacheKey);
 		
@@ -170,9 +168,9 @@ class MerchantService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export merchant data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$modeType = $sourceData['type'];
+		$type = $sourceData['type'];
 		
-		if ($modeType == 'info')
+		if ($type == 'info')
 			$service = app(InfoService::class);
 		else
 			$service = app(DayoffService::class);

@@ -4,6 +4,8 @@ namespace App\Manager;
 
 use App\Models\CurrentUser;
 use App\Enums\MenuGroup;
+use App\Enums\OpCenter;
+use App\Enums\Brand;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 
@@ -17,6 +19,7 @@ class AppManager
 		
 	}
 	
+	/******************** User Basic ********************/
 	/* hasAuth
 	 * @params: 
 	 * @return: boolean
@@ -51,7 +54,11 @@ class AppManager
 		if ($currentUser->isSupervisor())
 			return TRUE;
 		
-		return empty($currentUser['roleArea']) ? FALSE : TRUE;
+		if (empty($currentUser['roleArea']['sales']) && empty($currentUser['roleArea']['purchase']))
+			return FALSE;
+		else
+			return TRUE;
+		#return empty($currentUser['roleArea']) ? FALSE : TRUE;
 	}
 	
 	/* 清除登入資訊|Menu
@@ -181,4 +188,55 @@ class AppManager
 		
 		return $menu;
 	}
+	/******************** User Basic End ********************/
+	
+	
+	/******************** User Auth Filter ********************/
+	#移至各自的manager,因營運中心太複雜
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	/* public function getAllowOpCenter($filterOpCenters = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authOpCenters = $currentUser->getOpCenterPermissions();
+		
+		if (empty($filterOpCenters))
+			return $authOpCenters;
+		else
+			return $filterOpCenters;
+	} */
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	/* public function getAllowPurchaseAreas($filterAreas = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authAreas = $currentUser->getPurchaseAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
+	} */
+	
+	/* 
+	 * @params: 
+	 * @return: boolean
+	 */
+	/* public function getAllowSalesAreas($filterAreas = [])
+	{
+		$currentUser = $this->getCurrentUser();
+		$authAreas = $currentUser->getSalesAreaPermissions();
+		
+		if (empty($filterAreas))
+			return $authAreas;
+		else
+			return array_map('intval', $filterAreas);
+	} */
+	
+	/******************** User Auth Filter End ********************/
 }

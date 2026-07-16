@@ -34,7 +34,7 @@ class StoreService
 		[
 		330002 => [
 			"shopId" => "420001"
-			"shopName" => "御廚豐原向陽店"
+			"storeName" => "御廚豐原向陽店"
 			"areaId" => 4
 			"areaName" => "中彰投區"
 			"dayQty" =>  [
@@ -56,26 +56,22 @@ class StoreService
 		if (empty($baseData))
 			return FALSE;
 		
-		$header = ['areaName' => '區域', 'shopId' => 'POS店號', 'storeKey' => '門店代號', 'shopName' => '門店名稱', 
+		$header = ['areaName' => '區域', 'shopId' => 'POS店號', 'storeKey' => '門店代號', 'storeName' => '門店名稱', 
 					'dayQty' => $params->dayRange, 
 					'totalQty' => '銷售總量', 'totalAvg' => '平均銷售數量'
 				];
 		
 		$params->set('shop.header', $header);
 		
-		$result = collect($baseData)->sortBy('areaId')->groupBy('shopId')->map(function($item, $key) use($totalDays) {
-			$temp['storeKey']	= $item->pluck('storeKey')->first();
-			$temp['shopId']		= $item->pluck('shopId')->first();
-			$temp['shopName'] 	= $item->pluck('shopName')->first();
-			$temp['areaId'] 	= $item->pluck('areaId')->first();
-			$temp['areaName'] 	= $item->pluck('areaName')->first();
+		#已是不重複門店及資料
+		$result = collect($baseData)->sortBy('areaId')->map(function($item, $key) use($totalDays) {
 			
-			$temp['dayQty'] = $item->mapWithKeys(function($item, $key){
-				if (! empty($item['saleDate']))
-					return [$item['saleDate'] => intval($item['qty'])];
-				else
-					return [];
-			})->toArray();
+			$temp['storeKey']	= $item['storeKey'];
+			$temp['shopId']		= $item['posId'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['dayQty'] 	= $item['data'];
 			
 			#計算=>銷售總量|平均銷售數量
 			$temp['totalQty'] = array_sum($temp['dayQty']); #銷售量總和
@@ -102,7 +98,7 @@ class StoreService
 			$row[] = data_get($data, 'areaName');
 			$row[] = data_get($data, 'shopId');
 			$row[] = data_get($data, 'storeKey');
-			$row[] = data_get($data, 'shopName');
+			$row[] = data_get($data, 'storeName');
 			
 			foreach($shopData['header']['dayQty'] as $date)
 			{

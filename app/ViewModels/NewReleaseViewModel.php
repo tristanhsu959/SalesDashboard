@@ -2,6 +2,7 @@
 
 namespace App\ViewModels;
 
+use App\Facades\AppManager;
 use App\Services\NewReleaseService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
@@ -51,6 +52,9 @@ class NewReleaseViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
+		$areaList = $this->getSalesAreaOptions();
+		
+		$this->set('options.areaList', $areaList);
 		$this->set('options.newReleaseProducts', $this->_service->getNewReleaseProducts($this->brand->value));
 	}
 	
@@ -75,11 +79,12 @@ class NewReleaseViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($searchReleaseId = 0, $searchStDate = '', $searchEndDate = '')
+	public function keepSearchData($searchReleaseId = 0, $searchStDate = '', $searchEndDate = '', $searchAreaIds = [])
     {
 		$this->set('search.releaseId', $searchReleaseId);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.today', Carbon::now()->format('Y-m-d'));
 	}
 	

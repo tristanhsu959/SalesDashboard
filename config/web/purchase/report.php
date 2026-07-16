@@ -1,5 +1,6 @@
 <?php
 
+#Purchase report config
 #避免前端排序問題, 改為獨立array, 不使用key-value
 return [
 	#營運概況

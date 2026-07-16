@@ -5,7 +5,7 @@
 				<thead>
 					<tr>
 						<th x-text="area.header.areaName"></th>
-						<th x-text="area.header.shopCount"></th>
+						<th x-text="area.header.storeCount"></th>
 						<template x-for="pName in area.header.products" :key="pName">
 							<th x-text="pName"></th>
 						</template>
@@ -15,7 +15,7 @@
 					<template x-for="(areaData, areaId) in area.data" :key="areaId">
 					<tr>
 						<td x-text="areaData.areaName"></td>
-						<td x-text="areaData.shopCount"></td>
+						<td x-text="areaData.storeCount"></td>
 						<template x-for="(pName, pId) in area.header.products" :key="pId">
 						<td>
 							<span x-show="!$store.sales.showAmount" x-text="areaData.products[pId]?.totalQty || 0"></span>
