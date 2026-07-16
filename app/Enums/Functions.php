@@ -28,6 +28,7 @@ enum Functions : string
 	case BF_MONTHLY_FILLING		= 'bafang:monthly_filling';
 	case BF_MERCHANT			= 'bafang:merchant';
 	case BF_PURCHASE_SALES		= 'bafang:purchase_sales';
+	case BF_PURCHASE_NOT_ORDER	= 'bafang:purchases_not_order';
 		
 	#Buygood	
 	case BG_NEW_RELEASE			= 'buygood:new_releases';
@@ -38,6 +39,7 @@ enum Functions : string
 	case BG_SHIPMENTS			= 'buygood:shipments';
 	case BG_MERCHANT			= 'buygood:merchant';
 	case BG_PURCHASE_SALES		= 'buygood:purchase_sales';
+	case BG_PURCHASE_NOT_ORDER	= 'buygood:purchases_not_order';
 	
 	#FjVeggie	
 	case FJ_DAILY_REVENUE		= 'fjVeggie:daily_revenue';
@@ -70,6 +72,7 @@ enum Functions : string
 			self::BF_DAILY_REVENUE		=> '門店營收',
 			self::BF_MERCHANT			=> '門店資訊',
 			self::BF_PURCHASE_SALES		=> '門店進貨及銷售(Beta)',
+			self::BF_PURCHASE_NOT_ORDER	=> '未訂貨查詢',
 			
 			#御廚
 			self::BG_NEW_RELEASE 		=> '新品銷售',
@@ -80,6 +83,7 @@ enum Functions : string
 			self::BG_DAILY_REVENUE		=> '門店營收',
 			self::BG_MERCHANT			=> '門店資訊',
 			self::BG_PURCHASE_SALES		=> '門店進貨及銷售(Beta)',
+			self::BG_PURCHASE_NOT_ORDER	=> '未訂貨查詢',
 			
 			#芳珍
 			self::FJ_DAILY_REVENUE		=> '門店營收',

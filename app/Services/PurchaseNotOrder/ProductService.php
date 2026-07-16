@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Shipments;
+namespace App\Services\PurchaseNotOrder;
 
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Facades\StoreManager;
 use App\Facades\LocalLegacyManager; #from local
-use App\Repositories\ShipmentsRepository;
+use App\Repositories\PurchaseNotOrderRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\Purchase\AreaLib;
 use App\Enums\Brand;
@@ -26,11 +26,11 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class StoreService
+class ProductService
 {
 	private $_statistics	= [];
    
-	public function __construct(protected ShipmentsRepository $_repository)
+	public function __construct(protected PurchaseNotOrderRepository $_repository)
 	{
 		$this->_statistics = [
 			'type'		=> '',
@@ -41,7 +41,6 @@ class StoreService
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'productIds'	=> [],
-			'dateList'		=> [],
 			'productList'	=> [],
 			'storeList'		=> [],
 			'data'			=> [],
@@ -64,7 +63,7 @@ class StoreService
 			$this->_outputReport($params);
 		
 			$this->_generateStatistics($params);
-			
+			dd($params);
 			return $this->_statistics;
 		}
 		catch(Exception $e)
@@ -86,7 +85,6 @@ class StoreService
 		$this->_statistics['brandCode']		= $params->brand->code(); 
 		$this->_statistics['startDate'] 	= $params->stDate; 
 		$this->_statistics['endDate'] 		= $params->endDate;
-		$this->_statistics['dateList'] 		= $params->dateList;
 		$this->_statistics['productList'] 	= $params->productList;
 		$this->_statistics['storeList'] 	= $params->storeList;
 		$this->_statistics['data'] 			= $params->data;
@@ -161,16 +159,10 @@ class StoreService
 		/*0 => array:12 [
 			"expectedDate" => "2026-05-29"
 			"area" => "中彰投-八方"
-			"storeId" => "158"
 			"storeNo" => "KH4010002"
-			"factoryNo" => "TW_KH"
-			"factoryName" => "高雄工廠"
 			"qty" => "90"
-			"amount" => "6300.000000"
 			"productName" => "招牌餡"
-			"erpNo" => "PR00208001"
 			"shortCode" => "0001"
-			"memo" => ""
 		]
 		*/
 	
@@ -184,6 +176,7 @@ class StoreService
 			$allowAreaIds 		= $params->allowAreaIds;
 			
 			#已包含蘿蔔訂單
+			#要有ErpNo,用來判別是否為有效產品
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
 			return $orderData;
@@ -241,12 +234,10 @@ class StoreService
 		
 		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
 		
-		#處理包裝轉換
+		#不處理包裝轉換,只算數量
 		$baseData = collect($baseData)->map(function($item, $key){
 			
-			$item['storeKey'] = StoreManager::buildStoreKey($item['storeNo']);
-			$item['qty'] = round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
-			
+			$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
 			return $item;
 		})->filter(function($item, $key) use($authStoreKeys){
 			
@@ -266,13 +257,10 @@ class StoreService
 	{
 		try
 		{
-			#1.計算查詢範圍總天數 (use Date not DateTime)
-			$this->_buildDateHeader($params);
-			
-			#2.Build productList
+			#1.Build productList
 			$this->_buildProductList($params);
 		
-			#3. analysis by 門店
+			#2. analysis by 門店
 			$this->_parsingByStore($params);
 			
 			return $params;
@@ -284,43 +272,6 @@ class StoreService
 		}
 	}
 	
-	/* 計算日期天數
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildDateHeader($params)
-	{
-		$modeCalc 	= $params->calc;
-		$header 	= [];
-		
-		if ($modeCalc == 'day')
-		{
-			#By day
-			$st		= Carbon::create($params->stDate);
-			$end 	= Carbon::create($params->endDate);
-			$period = CarbonPeriod::create($st, $end);
-			
-			foreach ($period as $date) 
-			{
-				$header[] = $date->format('Y-m-d');
-			}
-		}
-		else
-		{
-			#By month
-			$st		= Carbon::parse($params->stDate)->startOfMonth();
-			$end	= Carbon::parse($params->endDate)->startOfMonth();
-			$period = CarbonPeriod::create($st, '1 month', $end);
-			
-			foreach ($period as $date) 
-			{
-				$header[] = $date->format('Y-m');
-			}
-		}
-		
-		$params->dateList = $header;
-	}
-	
 	/* Get order data
 	 * @params: array
 	 * @return: array
@@ -329,36 +280,14 @@ class StoreService
 	{
 		$baseData = $params->baseData;
 		
-		#有的工廠沒有設memo,故要手動處理
-		#改用shortcode group(因舊系統追加沒erpNo)
+		#用shortcode group(因舊系統追加沒erpNo)
 		$productList = collect($baseData)->groupBy('shortCode')->map(function($items, $key){
-			#取新的為主, 新系統才有erpNo
-			#erpNo有值才會有memo
-			$item = $items->where('erpNo', '!=', '')->first();
 			
-			$temp['productName']= $item['productName'];
-			$temp['memo']		= trim($item['memo']);
-			
-			return $temp;
+			return $items->pluck('productName')->first();
 		})->sortKeys()->toArray();
 		
 		$params->productList = $productList;
 		
-		/* old process code
-		$productList = collect($baseData)->groupBy('erpNo')->mapWithKeys(function($items, $key){
-			$temp['productName']= $items->pluck('productName')->first();
-			
-			#會有空格的狀況
-			$temp['memo'] = $items->pluck('memo')->filter(function($value, $key){
-				return trim($value) != '';
-			})->first();
-			
-			$temp['memo'] = empty($temp['memo']) ? '' : $temp['memo'];
-			$erpNo = $items->pluck('erpNo')->first();
-			
-			return [$erpNo => $temp];
-		})->toArray();
-		*/
 	}
 	
 	/* 依Store
@@ -387,10 +316,10 @@ class StoreService
 			return;
 		}
 		
-		#這裏再處理無權限門店
+		#以門店最值,以便過濾無效門店
 		$modeCalc = $params->calc;
 		
-		$result = collect($orderData)->groupBy('shortCode')->map(function($items, $key) use($modeCalc) {
+		$result = collect($params->storeList)->map(function($item, $key) use($modeCalc) {
 			
 			$temp = $items->groupBy('storeKey')->map(function($items, $key) use($modeCalc) {
 				
@@ -419,7 +348,7 @@ class StoreService
 			
 			return $temp;
 		})->sortKeys()->toArray();
-		
+		dd($result);
 		$params->data = $result;
 	}
 	
