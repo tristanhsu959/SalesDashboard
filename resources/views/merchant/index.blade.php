@@ -73,7 +73,8 @@
 		<!-- 不可有空格 -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-			<pre>店休資訊判別條件：<br/>八方：招牌餡、韭菜餡、韓式辣味餡訂貨量<br/>御廚：醃漬排骨、醃漬雞腿訂貨量</pre>
+			<pre x-show="response.brandCode == 'bafang'" class="red-border">店休資訊判別條件：<br/>招牌餡、韭菜餡、韓式辣味餡訂貨量</pre>
+			<pre x-show="response.brandCode == 'buygood'" class="red-border">店休資訊判別條件：<br/>醃漬排骨、醃漬雞腿訂貨量</pre>
 		</section>
 	</template>
 	
