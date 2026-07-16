@@ -62,7 +62,7 @@ class MonthlyFillingViewModel extends Fluent
 			'store'		=> '依門店(餡量)', 
 			'factory'	=> '依工廠(月總量．月均量)',
 		];
-		$this->set('options.mode.type', $type);
+		$this->set('options.type', $type);
 		
 		#查詢區間
 		$range = [
@@ -70,7 +70,7 @@ class MonthlyFillingViewModel extends Fluent
 			'month'		=> '月區間', 
 			'date'		=> '日區間',
 		];
-		$this->set('options.mode.range', $range);
+		$this->set('options.range', $range);
 	}
 	
 	/* Form submit action

@@ -17,7 +17,7 @@
 		<h5>查詢</h5>
 		<div class="field middle-align">
 			<nav class="wrap">
-				<template x-for="(name, id) in options.mode.type" :key="id">
+				<template x-for="(name, id) in options.type" :key="id">
 					<label class="radio field-red">
 						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
 						<span x-text="name"></span>
@@ -26,7 +26,7 @@
 			</nav>
 			
 			<nav class="wrap">
-				<template x-for="(name, id) in options.mode.range" :key="id">
+				<template x-for="(name, id) in options.range" :key="id">
 					<label class="radio field-light-blue">
 						<input type="radio" name="searchRange" x-model="searchData.range" :value="id" @change="changeDateInput()">
 						<span x-text="name"></span>

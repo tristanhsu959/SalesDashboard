@@ -117,8 +117,8 @@ class MonthlyFillingService
 		$params = new Fluent();
 		
 		#此功能暫不提供營運中心, 區域選項
-		$allowOpCenterIds	= AppManager::getAllowOpCenters(); #只有取門店需要,無需代參數
-		$allowAreaIds		= AppManager::getAllowPurchaseAreas(); #整併查詢參數
+		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand); #只有取門店需要,無需代參數
+		$allowAreaIds		= PurchaseManager::getAllowAreas(); #整併查詢參數
 		
 		#轉換日期
 		if ($searchRange == 'year')

@@ -57,6 +57,7 @@ class ShipmentsRepository extends Repository
 		$brandId 	= $brand->value;
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
 		
+		#轉成DB brandid, 其實可不判別OpCenter,結果應相同
 		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();

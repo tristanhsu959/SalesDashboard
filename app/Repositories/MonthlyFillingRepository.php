@@ -69,6 +69,7 @@ class MonthlyFillingRepository extends Repository
 		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
+		#轉成DB brandid, 其實可不判別OpCenter,結果應相同
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
 		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
 		
