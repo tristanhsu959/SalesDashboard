@@ -96,29 +96,26 @@ document.addEventListener('alpine:init', () => {
 	
     }));
 	
-	Alpine.data('storeDetail', (detailData) => ({
-		header: {...detailData.header},
-		data: {...detailData.data},
+	Alpine.data('storeDetail', () => ({
 		detail: {
-			storeName: '',
 			storeKey: '',
+			storeName: '',
+			header: {},
 			products: {},
 		},
 		
 		init() { 
 		},
 		
-		openDetail(storeKey) {
-			const data = this.data[storeKey];
-			
-			if (data)
-			{
-				this.detail.storeKey 	= data.storeKey;
-				this.detail.storeName 	= data.storeName;
-				this.detail.products 	= data.products;
+		openDetail(eventData) {
+			this.detail.storeKey 	= eventData.id;
+			this.detail.storeName 	= eventData.name;
+			this.detail.header 		= eventData.details.header;
+			this.detail.products 	= eventData.details.data;
 				
-				ui('#salesDetail');
-			}
+			console.log(this.detail.products);
+			
+			ui('#salesDetail');
 		},
 	
     }));

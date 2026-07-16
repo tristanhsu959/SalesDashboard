@@ -19,7 +19,7 @@
 						<td x-text="storeData.areaName"></td>
 						<td x-text="storeData.shopId"></td>
 						<td x-text="storeData.storeKey"></td>
-						<td><button class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey })"><i>more_vert</i></button><span x-text="storeData.storeName"></span></td>
+						<td><button class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey, name: storeData.storeName, details: storeData.details })"><i>more_vert</i></button><span x-text="storeData.storeName"></span></td>
 						
 						<template x-for="(pName, pId) in store.header.products" :key="pId">
 							<td>
@@ -34,10 +34,10 @@
 		</section>
 	</div>
 	
-	<dialog x-data="storeDetail(@js($viewModel->statisticsData('detail')))" @active-store.window="openDetail($event.detail.id)" id="salesDetail" class="store-detail bottom scroll">
+	<dialog x-data="storeDetail()" @active-store.window="openDetail($event.detail)" id="salesDetail" class="store-detail bottom scroll">
 		<div class="row">
 			<div class="left-align max">
-				<h5 x-text="detail?.storeName || ''" class="purple-text"></h5>
+				<h6 x-text="detail?.storeName || ''" class="purple-text"></h6>
 				<div x-text="detail?.storeKey || ''"></div>
 			</div>
 			<nav class="right-align">
@@ -45,23 +45,22 @@
 			</nav>
 		</div>
 		
-		<table class="stripes">
+		<table class="stripes responsive">
 			<thead>
 				<tr>
-					<template x-for="(headName, idx) in header" :key="idx">
+					<template x-for="(headName, hidx) in detail.header" :key="hidx">
 						<th x-text="headName"></th>
 					</template>
 				</tr>
 			</thead>
 			<tbody>
-				<template x-for="(dayData, name) in detail.products" :key="name">
+				<template x-for="(rowData, rowIdx) in detail.products" :key="rowIdx">
 				<tr>
-					<td x-text="name"></td>
-					<template x-for="(saleData, date) in dayData" :key="date">
-						<td>
-							<span x-show="!$store.sales.showAmount" x-text="saleData.totalQty"></span>
-							<span x-show="$store.sales.showAmount" x-text="Helper.formatDollar(Math.round(saleData.totalAmount))"></span>
-						</td>
+					<template x-for="(colData, colIdx) in ($store.sales.showAmount ? rowData['amount'] : rowData['qty'])" :key="colIdx">
+					<td>
+						<span x-show="!$store.sales.showAmount || colIdx == 0" x-text="colData"></span>
+						<span x-show="$store.sales.showAmount && colIdx > 0" x-text="Helper.formatDollar(Math.round(colData))"></span>
+					</td>
 					</template>
 				</tr>
 				</template>

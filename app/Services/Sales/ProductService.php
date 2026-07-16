@@ -149,7 +149,7 @@ class ProductService
 				return $temp;
 			})->toArray();
 			
-			$params->productList	= $productList;
+			$params->productList	= $productList; #erpNo=>productId list
 			$params->primaryIds		= $primaryIds;
 			$params->secondaryIds 	= $secondaryIds;
 		}
@@ -355,15 +355,15 @@ class ProductService
 	{
 		try
 		{
-			#1.區域
-			$this->parsingArea($params);
+			#1.Date list
+			$this->_buildDayRange($params);
 			
-			#2.店別
-			$this->parsingStore($params);
+			#2.區域
+			$this->_parsingArea($params);
 			
-			#3.明細(By day)
-			$this->parsingDetail($params);
-							
+			#3.店別
+			$this->_parsingStore($params);
+			
 			return TRUE;
 		}
 		catch(Exception $e)
@@ -373,12 +373,33 @@ class ProductService
 		}
 	}
 	
+	/* 計算日期天數
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildDayRange($params)
+	{
+		$st 		= Carbon::create($params->stDate);
+		$end 		= Carbon::create($params->endDate);
+		$period 	= CarbonPeriod::create($st, $end);
+		
+		$dateList = [];
+
+		foreach ($period as $date) 
+		{
+			$dateString = $date->format('Y-m-d');
+			$dateList[$dateString] = $dateString;
+		}
+		
+		$params->dayRange = $dateList;
+	}
+	
 	/* 區域彙總
 	 * @params: array
 	 * @params: int
 	 * @return: array
 	 */
-	public function parsingArea($params)
+	private function _parsingArea($params)
 	{
 		/* Output
 		"area" => [
@@ -453,27 +474,29 @@ class ProductService
 	 * @params: int
 	 * @return: array
 	 */
-	public function parsingStore($params)
+	private function _parsingStore($params)
 	{
 		/* 重整資料格式
 		array:6 [
+			"storeKey" => "2700005"
 			"shopId" => "100001"
 			"storeName" => "御廚中正南昌店"
 			"areaId" => 1
 			"areaName" => null
-			"products" => array:5 [▼
-				2 => array:1 [▼
-					"productId" => 2
-					"productName" => "橙汁排骨"
-					"totalQty" => 15
-					"totalAmount" => 2260.0
-				]...
+			"products" => [
+				92 => array:2 [
+				  "totalQty" => 2
+				  "totalAmount" => 90.0
+				]
 			]
 		]
 		*/
 		$params->set('store.header', []);
 		$params->set('store.data', []);
-		$baseData = $params->baseData;
+		
+		$baseData 	= $params->baseData;
+		$dayRange 	= $params->dayRange;
+		$productMap = $params->productMap; #key-value
 		
 		#會有無設定區域權限的狀況, 須判別
 		if (empty($baseData))
@@ -485,13 +508,13 @@ class ProductService
 			'shopId'	=> 'POS店號',
 			'storeKey'	=> '門店代號', 
 			'storeName'	=> '門店名稱',
-			'products' 	=> $params->productMap
+			'products' 	=> $productMap
 		];
 		
 		$params->set('store.header', $header);
 		
 		#總量不分Date
-		$result = collect($baseData)->sortBy('areaId')->map(function($item, $key) {
+		$result = collect($baseData)->sortBy('areaId')->map(function($item, $key) use($dayRange, $productMap) {
 			
 			$temp['storeKey'] 	= $item['storeKey'];
 			$temp['shopId'] 	= $item['shopId'];
@@ -508,6 +531,8 @@ class ProductService
 				
 			})->toArray();
 			
+			$temp['details'] = $this->_parsingDetail($item['data'], $dayRange, $productMap);
+			
 			return $temp;	
 		})->values()->all();
 		
@@ -519,12 +544,54 @@ class ProductService
 	 * @params: int
 	 * @return: array
 	 */
-	public function parsingDetail($params)
+	private function _parsingDetail($productData, $dayRange, $productMap)
+	{
+		#須存成無key狀態,順序才不會受影響
+		$details = [];
+		$details['header'] = collect(['品名'])->merge($dayRange)->values()->all();
+		
+		$productGroup = collect($productData)->groupBy('productId')->map(function($items, $key) {
+			return collect($items)->groupBy('saleDate')->map(function($items, $key){
+				$temp['qty'] 	= $items->pluck('qty')->sum();
+				$temp['amount']	= round($items->pluck('amount')->sum(), 2);
+				
+				return $temp;
+			})->all();
+		})->all();
+		
+		#處理無值也有顯示
+		foreach($productMap as $id => $name)
+		{
+			$data = data_get($productGroup, $id, NULL);
+			
+			#按header順序
+			$row = [];
+			$row['qty'][] 	= $name;
+			$row['amount'][]= $name;
+			
+			foreach($dayRange as $date)
+			{
+				$row['qty'][] 	= data_get($data, "{$date}.qty", 0);
+				$row['amount'][]= data_get($data, "{$date}.amount", 0);
+			}
+			
+			$details['data'][] = $row;
+		}
+		
+		return $details;
+	}
+	
+	/* 逐日銷售by store
+	 * @params: array
+	 * @params: int
+	 * @return: array
+	 */
+	/* public function parsingDetail($params)
 	{
 		$params->set('detail.header', []);
 		$params->set('detail.data', []);
 		$baseData 	= $params->baseData;
-		$products 	= $params->productMap;
+		$productMap	= $params->productMap;
 		
 		$this->_buildDayRange($params);
 		
@@ -536,10 +603,11 @@ class ProductService
 		$header		= collect(['品名'])->merge($dayRange)->values()->all();
 		$params->set('detail.header', $header);
 		
-		#Deatail by day
+		#Deatail by day(base data是全門店資料)
 		$result = collect($baseData)->mapWithKeys(function($item, $key){
+			#顯示時以storeKey當關聯key
 			return [$item['storeKey'] => $item];
-		})->map(function($item, $key) use($products, $dayRange) {
+		})->map(function($item, $key) use($productMap, $dayRange) {
 			
 			$temp['storeKey'] 	= $item['storeKey'];
 			$temp['storeName'] 	= $item['storeName'];
@@ -567,8 +635,8 @@ class ProductService
 					return $temp;
 				});
 			
-			})->mapWithKeys(function($item, $key) use($products) {
-				$productName = data_get($products, $key);
+			})->mapWithKeys(function($item, $key) use($productMap) {
+				$productName = data_get($productMap, $key);
 				return [$productName => $item];
 			})->toArray();
 			
@@ -576,70 +644,7 @@ class ProductService
 		})->all();
 		
 		$params->set('detail.data', $result);
-		/* $result = collect($baseData)->groupBy('storeKey')->map(function($items, $key) use($products, $dayRange) {
-			$temp['storeKey'] 	= $items->pluck('storeKey')->first();
-			$temp['shopNastoreNameme'] 	= $items->pluck('storeName')->first();
-				
-			#因有補全的門店,故會有key=0的狀況	
-			$temp['products'] = $items->groupBy('productId')->map(function($items, $key) use($dayRange) {
-				
-				$dayItems = $items->groupBy('saleDate');
-				
-				#按日期順序
-				return collect($dayRange)->map(function($date, $key) use($dayItems){
-					
-					$data = $dayItems->get($date, collect([]));
-					
-					if ($data->isEmpty())
-					{
-						$temp['totalQty'] 	= 0;
-						$temp['totalAmount']= 0;
-					}
-					else
-					{	
-						$temp['totalQty'] 	= $data->pluck('qty')->sum();
-						$temp['totalAmount']= round($data->pluck('amount')->sum(), 2);
-					}
-					
-					return $temp;
-				});
-				/* return $items->groupBy('saleDate')->map(function($items, $key){
-					$temp['totalQty'] 	= $items->pluck('qty')->sum();
-					$temp['totalAmount']=  round($items->pluck('amount')->sum(), 2);
-				
-					return $temp;
-				})->sortKeys()->all(); *#/
-			
-			})->mapWithKeys(function($item, $key) use($products) {
-				$productName = data_get($products, $key);
-				return [$productName => $item];
-			})->toArray();
-			
-			return $temp;	
-		})->all(); */
-		
-	}
-	
-	/* 計算日期天數
-	 * @params: 
-	 * @return: array
-	 */
-	private function _buildDayRange($params)
-	{
-		$st 		= Carbon::create($params->stDate);
-		$end 		= Carbon::create($params->endDate);
-		$period 	= CarbonPeriod::create($st, $end);
-		
-		$dateList = [];
-
-		foreach ($period as $date) 
-		{
-			$dateString = $date->format('Y-m-d');
-			$dateList[$dateString] = $dateString;
-		}
-		
-		$params->dayRange = $dateList;
-	}
+	} */
 	
 	/* Export data
 	 * @params: enum
