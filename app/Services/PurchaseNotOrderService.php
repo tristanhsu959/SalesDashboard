@@ -222,11 +222,9 @@ class PurchaseNotOrderService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export purchase not order data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$type = $sourceData['type'];
-		
 		$service = app(ProductService::class);
 		
 		return $service->export($sourceData);

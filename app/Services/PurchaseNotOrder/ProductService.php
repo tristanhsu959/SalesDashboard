@@ -377,24 +377,19 @@ class ProductService
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_出貨總量_?_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate']], '?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
-			$index = 0;
-			foreach($export as $sheetName => $sheetData)
-			{
-				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
-				$sheet->setName($sheetName);
+			$sheet = $writer->getCurrentSheet();
+			$sheet->setName('未訂貨門市');
 				
-				foreach($sheetData as $data)
-				{
-					$row =  Row::fromValues($data);
-					$writer->addRow($row);
-				}
-				$index++;
+			foreach($export as $data)
+			{
+				$row =  Row::fromValues($data);
+				$writer->addRow($row);
 			}
 			
 			$writer->close();
@@ -414,39 +409,26 @@ class ProductService
 	private function _buildExportData($sourceData)
 	{
 		$export = [];
-		$outputHeader = array_merge(['區域', 'POS店號', '門店代號', '門店名稱'], $sourceData['dateList']);
+		$export[] = data_get($sourceData, 'data.header', '');
 		
-		#每個product要一個sheet
-		foreach($sourceData['productList'] as $shortCode => $item)
+		$productList	= data_get($sourceData, 'productList', []);
+		$storeData 		= data_get($sourceData, 'data.store', []);
+		
+		foreach($storeData as $item)
 		{
-			$storeData = data_get($sourceData['data'], $shortCode, []);
-			$productName = "{$shortCode}_{$item['productName']}";
+			$row = [];
 			
-			if (empty($storeData))
-				continue;
+			$row[] = $item['areaName'];
+			$row[] = $item['posId'];
+			$row[] = $item['storeKey'];
+			$row[] = $item['storeName'];
 			
-			$export[$productName] = [];
-			$export[$productName][] = $outputHeader;
-			
-			#使用header來控制顯示順序,先TP後KH
-			foreach($sourceData['storeList'] as $index => $store)
+			foreach($productList as $shortCode => $name)
 			{
-				$row = [];
-				$row[] = $store['areaName'];
-				$row[] = $store['posId'];
-				$row[] = $store['storeNo'];
-				$row[] = $store['storeName'];
-				
-				$storeKey = $store['storeKey'];
-				
-				#要按Header的順序
-				foreach($sourceData['dateList'] as $date)
-				{
-					$row[] = data_get($storeData, "{$storeKey}.{$date}.qty", 0);
-				}
-				
-				$export[$productName][] = $row;
+				$row[] = data_get($item, "productQty.{$shortCode}", 0);
 			}
+			
+			$export[] = $row;
 		}
 		
 		return $export;
