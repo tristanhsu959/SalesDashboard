@@ -132,8 +132,8 @@ class PurchaseNotOrderViewModel extends Fluent
 		
 		return match($type)
 		{
-			'filling' => 'purchase_not_order.filling',
-			'product' => 'purchase_not_order.product',
+			'filling' => 'purchase_not_order.store',
+			'product' => 'purchase_not_order.store',
 		};
 	}
 	

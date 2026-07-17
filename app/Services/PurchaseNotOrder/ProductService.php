@@ -40,9 +40,7 @@ class ProductService
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'productIds'	=> [],
 			'productList'	=> [],
-			'storeList'		=> [],
 			'data'			=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
@@ -63,7 +61,7 @@ class ProductService
 			$this->_outputReport($params);
 		
 			$this->_generateStatistics($params);
-			dd($params);
+			
 			return $this->_statistics;
 		}
 		catch(Exception $e)
@@ -86,7 +84,6 @@ class ProductService
 		$this->_statistics['startDate'] 	= $params->stDate; 
 		$this->_statistics['endDate'] 		= $params->endDate;
 		$this->_statistics['productList'] 	= $params->productList;
-		$this->_statistics['storeList'] 	= $params->storeList;
 		$this->_statistics['data'] 			= $params->data;
 		$this->_statistics['hasResult'] 	= FALSE;
 		
@@ -95,12 +92,8 @@ class ProductService
 		{
 			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
-			
-			$name = [];
-			$name[] = ($params->type == 'store') ? '門店' : '工廠';
-			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
-			
-			$this->_statistics['exportName'] = Arr::join($name, '_');
+			$this->_statistics['exportName'] 	= '未訂貨查詢';
+
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(10));
 		}
 	}
@@ -260,7 +253,10 @@ class ProductService
 			#1.Build productList
 			$this->_buildProductList($params);
 		
-			#2. analysis by 門店
+			#2.Data header
+			$this->_buildHeader($params);
+			
+			#3. analysis by 門店
 			$this->_parsingByStore($params);
 			
 			return $params;
@@ -278,17 +274,31 @@ class ProductService
 	 */
 	private function _buildProductList($params)
 	{
-		$baseData = $params->baseData;
+		#必須從查詢的productId來取list, 不能從Order,因項目會少
+		#因查Name時, 只有Id沒有shortCode
+		$result = PurchaseManager::getProductShortCodeById($params->brand, $params->allowOpCenterIds, $params->productIds);
 		
-		#用shortcode group(因舊系統追加沒erpNo)
-		$productList = collect($baseData)->groupBy('shortCode')->map(function($items, $key){
-			
-			return $items->pluck('productName')->first();
-		})->sortKeys()->toArray();
-		
-		$params->productList = $productList;
-		
+		$params->productList = $result;
 	}
+	
+	/* 計算日期天數
+	 * @params: 
+	 * @return: array
+	 */
+	private function _buildHeader($params)
+	{
+		$productList = $params->productList;
+		$header = [
+			'areaName'	=> '區域',
+			'posId'		=> 'POS店號',
+			'storeKey' 	=> '門店代碼',
+			'storeName'	=> '門店名稱'
+		];
+		
+		$header = collect($header)->concat($productList)->values()->all();
+		$params->set('data.header', $header);
+	}
+	
 	
 	/* 依Store
 	 * @params: array
@@ -296,18 +306,6 @@ class ProductService
 	 */
 	private function _parsingByStore($params)
 	{
-		/*
-		"PR00313063" => array:2 [
-			"TW_KH" => array:2 [
-				"2026-03-25" => array:1 [
-					"qty" => 116
-				]
-				"2026-03-26" => array:1 []
-			]
-			"TW_TP" => array:2 []
-		]
-		*/
-		
 		$orderData = $params->baseData;
 		
 		if (empty($orderData))
@@ -316,40 +314,54 @@ class ProductService
 			return;
 		}
 		
-		#以門店最值,以便過濾無效門店
-		$modeCalc = $params->calc;
-		
-		$result = collect($params->storeList)->map(function($item, $key) use($modeCalc) {
+		#先整理資料以便Mapping,只有留qty對應即可
+		$productQty = collect($orderData)->groupBy('storeKey')->map(function($items, $key){
 			
-			$temp = $items->groupBy('storeKey')->map(function($items, $key) use($modeCalc) {
+			#理論上每個產只有會一筆product資料,但現實上仍有可能有兩筆以上可能性
+			return $items->groupBy('shortCode')->mapWithKeys(function($items, $key){
+				$qty = $items->pluck('qty')->sum();
+				$shortCode = $items->pluck('shortCode')->first();
 				
-				if ($modeCalc == 'day')
-				{
-					$day = $items->groupBy('expectedDate')->map(function($items, $key) {
-						$temp['qty'] = round($items->pluck('qty')->sum(), 2);
-						return $temp;
-					});
-					
-					return $day->toArray();	
-				}
-				
-				if ($modeCalc == 'month')
-				{
-					$month = $items->groupBy(function ($item) {
-						return substr($item['expectedDate'], 0, 7); 
-					})->map(function ($group) {
-						$temp['qty'] = round($group->pluck('qty')->sum(), 2);
-						return $temp;
-					});
-					
-					return $month->toArray();	
-				}
-			}); 
+				return [$shortCode => $qty];
+			})->all();
+		})->all();
+		
+		#以門店取值,以便過濾無效門店
+		$calc = $params->calc;
+		$queryProductCount = count($params->productList); #必須用全有product比對
+		
+		$result = collect($params->storeList)->map(function($item, $key) use($calc, $productQty, $queryProductCount) {
+			
+			$storeProductQty = data_get($productQty, $item['storeKey'], []);
+			
+			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['storeName'] 	= $item['storeName'];
+			$temp['areaId'] 	= $item['areaId'];
+			$temp['areaName'] 	= $item['areaName'];
+			$temp['posId'] 		= $item['posId'];
+			$temp['productQty'] = $storeProductQty;
+			
+			$notOrderItems = collect($storeProductQty)->filter(function($qty, $key) {
+				return $qty <= 0;
+			})->count();
+			
+			if (empty($storeProductQty))
+				$temp['isNotOrder'] = TRUE;
+			else
+			{
+				if ($calc == 'whereall')
+					$temp['isNotOrder'] = ($notOrderItems == $queryProductCount);
+				else #whereany or 無法判別時都套用此規則
+					$temp['isNotOrder'] = ($notOrderItems <= $queryProductCount && $notOrderItems > 0);
+			}
 			
 			return $temp;
-		})->sortKeys()->toArray();
-		dd($result);
-		$params->data = $result;
+		})->filter(function($item, $key){
+			#過濾出無訂單門店
+			return $item['isNotOrder'];
+		})->all();
+		
+		$params->set('data.store', $result);
 	}
 	
 	/* Export data

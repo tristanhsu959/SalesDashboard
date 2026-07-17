@@ -22,26 +22,6 @@ class PurchaseNotOrderRepository extends Repository
 		
 	}
 	
-	/* 取Product enabled setting
-	 * @params: string
-	 * @return: array
-	 */
-	public function getEnableProductSettings($brand)
-	{
-		$brandId = $brand->value;
-		
-		#取後台的enabled product
-		$db = $this->connectSalesDashboard();
-		$result = $db
-			->table('purchase_product_setting as p')
-			->select('p.purchaseBrandId as brandId', 'p.purchaseProductCode as shortCode')
-			->where('p.purchaseBrandId', '=', $brandId)
-			->get()
-			->toArray();
-		
-		return $result;
-	}
-	
 	/* 取主資料 By records 
 	 * @params: enums
 	 * @params: datetime
@@ -68,12 +48,11 @@ class PurchaseNotOrderRepository extends Repository
 			#->join(DB::raw('OperationCenter as op WITH(NOLOCK)'), 'op.Id', '=', 'a.OperationCenterId')
 			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
 			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'a.StoreId')
-			->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
-			->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
-			->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
+			#->join(DB::raw('Area as ar WITH(NOLOCK)'), 'ar.Id', '=', 's.AreaId')
+			#->join(DB::raw('StoreCar as sc WITH(NOLOCK)'), 'sc.StoreId', '=', 'a.StoreId')
+			#->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sc.FactoryId')
 			->selectRaw('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE) as expectedDate')
-			->addSelect('ar.id as areaId', 's.No as storeNo')
-			->addSelect('b.Quantity as qty')
+			->addSelect('s.No as storeNo', 'b.Quantity as qty')
 			->addSelect('p.Name as productName', 'p.OldNo as shortCode')
 			->whereExists(function ($query) use($allowOpCenterIds) {
 				$query->select(DB::raw(1))
@@ -90,7 +69,7 @@ class PurchaseNotOrderRepository extends Repository
 			->where('a.ExpectedDate', '>=', $stDate)
 			->where('a.ExpectedDate', '<', $endDate)
 			#->where('a.State', '=', 'functionalized')
-			->where('b.Money', '>', 0)
+			#->where('b.Money', '>', 0) #要全取不用判別金額0
 			->where('p.ErpNo', '!=', '')
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)#->ddRawSql();

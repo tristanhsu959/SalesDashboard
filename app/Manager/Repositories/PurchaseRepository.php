@@ -41,6 +41,26 @@ class PurchaseRepository extends Repository
 	}
 	
 	/******************** Product ********************/
+	/* 取Product enabled setting
+	 * @params: string
+	 * @return: array
+	 */
+	public function getEnableProductSettings($brand)
+	{
+		$brandId = $brand->value;
+		
+		#取後台的enabled product
+		$db = $this->connectSalesDashboard();
+		$result = $db
+			->table('purchase_product_setting as p')
+			->select('p.purchaseBrandId as brandId', 'p.purchaseProductCode as shortCode')
+			->where('p.purchaseBrandId', '=', $brandId)
+			->get()
+			->toArray();
+		
+		return $result;
+	}
+	
 	/* 取Product id
 	 * @params: int
 	 * @params: string
@@ -111,6 +131,32 @@ class PurchaseRepository extends Repository
 		return $result;
 	}
 	
+	/* 取Product id - short code
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getProductShortCodeById($brandId, $opCenter, $productIds)
+	{
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('Product as a')
+			->fromRaw('Product as a WITH(NOLOCK)')
+			->select('a.Name as productName', 'a.OldNo as shortCode')
+			->whereExists(function ($query) use($opCenter) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'a.OperationCenterId')
+					->whereIn('oc.No', $opCenter);
+			})
+			->where('a.IsStop', '=', 0)
+			->whereIn('a.Id', $productIds)
+			->groupBy('a.Name', 'a.OldNo')#->ddRawSql();
+			->get()
+			->toArray();
+		
+		return $result;
+	}
 	/* 取產品分類
 	 * @params: int
 	 * @return: array

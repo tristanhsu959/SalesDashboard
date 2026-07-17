@@ -133,10 +133,10 @@
 				<nav class="no-space filter">
 					<div class="field label border prefix field-filter-dark small">
 						<i>filter_alt</i>
-						<input type="text" x-model="$store.shipmentStore.filter">
+						<input type="text" x-model="$store.purchaseNotOrder.filter">
 						<label>篩選</label>
 					</div>
-					<button class="right-round" @click="$store.shipmentStore.filter = ''"><i>backspace</i></button>
+					<button class="right-round" @click="$store.purchaseNotOrder.filter = ''"><i>backspace</i></button>
 				</nav>
 			</template>
 		</nav>

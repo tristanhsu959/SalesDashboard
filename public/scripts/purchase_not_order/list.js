@@ -84,17 +84,17 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('statisticsNotOrder', (data) => ({
 		statistics: {...data},
 		
-		init() { 
+		init() {console.log(this.statistics);
 		},
 		
 		get filterStore() {
-			const searchKeyword = Alpine.store('purchasesStore').filter.toLowerCase();
+			const searchKeyword = Alpine.store('purchaseNotOrder').filter.toLowerCase();
 			
-			const list = Object.values(this.statistics.storeList);
+			const list = Object.values(this.statistics.data.store);
 			
 			const result = list.filter(store => 
-				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
 				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
 				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
 				String(store.storeName || '').toLowerCase().includes(searchKeyword)
 			);

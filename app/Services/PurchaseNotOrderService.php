@@ -81,65 +81,10 @@ class PurchaseNotOrderService
 	public function getProductOptions($brand)
 	{
 		$allowOpCenter 	= PurchaseManager::getAllowOpCenters($brand);
+		$productOptions = PurchaseManager::getEnableProductSettingsAndCategory($brand, $allowOpCenter);
 		
-		#同總量邏輯
-		$enableProducts 	= $this->_repository->getEnableProductSettings($brand);
-		$enableShortCodes 	= collect($enableProducts)->pluck('shortCode')->values()->all();
-		
-		#再至訂貨取到對應的產品名(這裏會分營運中心)
-		#shortCode => productName
-		$productMapping = PurchaseManager::getProductShortCodeMapping($brand, $allowOpCenter);
-		
-		#Build options
-		/*array:4 [
-			"shortCode" => "0001"
-			"productName" => "招牌餡"
-			"groupId" => 1
-			"groupName" => "餡類"
-		]
-		*/
-		
-		$brandId = $brand->value;
-		
-		#因設定沒分營運中心, 故要改以訂貨的為依據過濾
-		$list = collect($productMapping)->filter(function($item, $key) use($enableShortCodes){
-			return in_array($item['productNo'], $enableShortCodes);
-		})->map(function($item, $key) use($brandId) {
-			
-			$temp['shortCode'] 	= $item['productNo'];
-			$temp['productName']= $item['productName'];
-			
-			$category = PurchaseManager::getGroupByShortCode($brandId, $temp['shortCode']);
-			
-			$temp['groupId']	= $category['groupId'];
-			$temp['groupName'] 	= $category['groupName'];
-			
-			return $temp;
-		})->values()->all();
-		
-		#要分成category & product對應
-		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
-			$temp['catId'] 	= $items->pluck('groupId')->unique()->first();
-			$temp['catName']= $items->pluck('groupName')->unique()->first();
-			
-			return $temp;
-		})->mapWithKeys(function($item, $key){
-			return [$item['catId'] => $item['catName']];
-		})->toArray();
-		
-		#Build product
-		$products = collect($list)->groupBy('groupId')->map(function($items, $key){
-			return $items->map(function($item, $key){
-				unset($item['groupId']);
-				unset($item['groupName']);
-				
-				return $item;
-			});
-			
-			return $items;
-		})->toArray();
-		
-		return [$category, $products];
+		#若有個別處理寫在這
+		return $productOptions;
 	}
 	
 	/* ====================== 主流程 By Name ====================== */
@@ -238,8 +183,8 @@ class PurchaseNotOrderService
 			if ($params->type == 'filling')
 			{
 				$brandId = $brand->value;
-				$shortCodes = config("web.purchase.product_type.notOrderFillingProducts.{$brandId}");
-				$productIds = PurchaseManager::getProductIdByShortCode($brand, $opCenterIds, $shortCodes);
+				$params->shortCodes = config("web.purchase.product_type.notOrderFillingProducts.{$brandId}");
+				$productIds = PurchaseManager::getProductIdByShortCode($brand, $opCenterIds, $params->shortCodes);
 			}
 			else if ($params->type == 'product')
 			{
