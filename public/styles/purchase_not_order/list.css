@@ -31,81 +31,8 @@ form {
 
 	
 /* Data */
-.page {
+.statistics-list {
 	padding: 1rem;
-	
-	/* 工廠 */
-	.statistics-factory {
-		--table-bg: #fffbff;
-		
-		position: relatvie;
-		width: auto;
-		max-height: calc(100vh - 220px);
-		overflow: auto;
-		/* scrollbar-width: thin; */
-		scrollbar-color: #666 var(--table-bg); /*thumb - track*/
-		margin: 0;
-		background-color: var(--surface);
-		
-		table {
-			table-layout: fixed;
-			min-width: 100%;
-			width: auto;
-			overflow: unset;
-			padding: 0;
-			margin: 0;
-			border-radius: 4px;
-			
-			thead {
-				tr {
-					th {
-						position: sticky;
-						top: 0;
-						z-index: 5;
-						word-break: keep-all;
-						min-width: 100px;
-						max-width: 100px;
-						color: rgba(0, 0, 0, .87);
-						padding-top: 1rem;
-						background-color: var(--surface);
-						
-						&:nth-child(1) {
-							width: 100px;
-							position: sticky;
-							left: 0;
-							z-index: 6;
-						}
-					}
-				}
-			}
-			
-			tbody {
-				tr {
-					th {
-						position: sticky;
-						font-weight: bold;
-						word-break: keep-all;
-						z-index: 5;
-						background-color: var(--surface);
-						
-						&:nth-child(1) {
-							left: 0;
-						}
-					}
-					
-					td {
-						color: #424242;
-						/* 總計 
-						&:nth-last-child(-n + 2) {
-							color: #f44336;
-						}*/
-					}
-				}
-			}
-		}
-	}
-	
-	
 	
 	/* 門市 */
 	.statistics-store {

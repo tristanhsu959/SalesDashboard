@@ -42,14 +42,16 @@ class DailyRevenueRepository extends Repository
 		
 		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
 		
+		return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts);
+		
 		#endDate有先加一天
-		$isToday = Carbon::parse($stDate)->isToday() && Carbon::parse($endDate)->subDay()->isToday();
+		/* $isToday = Carbon::parse($stDate)->isToday() && Carbon::parse($endDate)->subDay()->isToday();
 		
 		#芳珍沒有sd_sale00
 		if ($isToday && $brand != Brand::FJVEGGIE)
 			return $this->getFromSdSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts);
 		else
-			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts);
+			return $this->getFromSale00($db, $authAreaIds, $stDate, $endDate, $storeType, $namePosIds, $excepts); */
 	}
 	
 	/* 取營收資料By today only
