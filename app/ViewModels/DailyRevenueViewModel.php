@@ -52,15 +52,22 @@ class DailyRevenueViewModel extends Fluent
 	private function _setOptions()
 	{
 		$type = [
-			'store'	=> '日營收', #原計算方式
-			'aov'	=> '客單統計(月)', #Average Order Value
+			'day'	=> '單日', #原計算方式(By Day)
+			'range'	=> '區間',
+			'aov'	=> '客單統計', #Average Order Value
 		];
 		
 		if ($this->brand == Brand::FJVEGGIE)
 			unset($type['aov']);
 		
 		$this->set('options.type', $type);
-
+		
+		$calc = [
+			'revenue'		=> '包含時段',
+			'dailyClosing'	=> '包含日結',
+		];
+		$this->set('options.calc', $calc);
+		
 		#根據poserp.shop_kind
 		$this->set('options.storeType', config('web.sales.shop.type'));
 		
@@ -89,24 +96,27 @@ class DailyRevenueViewModel extends Fluent
 	 * @params: int
 	 * @return: string
 	 */
-	public function keepSearchData($type = 'store', $stDate = NULL, $endDate = NULL, $storeType = [], $areaIds = [], $storeName = '')
+	public function keepSearchData($type = 'day', $calc = [], $stDate = NULL, $endDate = NULL, $storeType = [], $areaIds = [], $storeName = '')
     {
 		#Init default type
+		$yesterday = Carbon::yesterday()->format('Y-m-d');
 		$today = Carbon::now()->format('Y-m-d');
 		$thisMonth = Carbon::now()->format('Y-m');
 		
+		#依brand預設不同
 		$defaultStoreTypes = ($this->brand == Brand::BAFANG) ? [1] : [1, 2];
 		
-		#依brand預計不同
 		if (empty($stDate) && empty($endDate) && empty($storeType))
 			$storeType =  $defaultStoreTypes; 
 		
 		$this->set('search.type', $type);
+		$this->set('search.calc', $calc);
 		$this->set('search.stDate', $stDate ?? $today);
 		$this->set('search.endDate', $endDate ?? $today);
 		$this->set('search.storeType', $storeType);
 		$this->set('search.areaIds', $areaIds);
 		$this->set('search.storeName', $storeName);
+		$this->set('search.yesterday', $yesterday);
 		$this->set('search.today', $today);
 		$this->set('search.thisMonth', $thisMonth);
 		$this->set('search.defaultStoreTypes', $defaultStoreTypes);
@@ -122,7 +132,8 @@ class DailyRevenueViewModel extends Fluent
 		
 		return match($type)
 		{
-			'store'	=> 'daily_revenue.store',
+			'day'	=> 'daily_revenue.store',
+			'range'	=> 'daily_revenue.store',
 			'aov'	=> 'daily_revenue.aov',	 
 		};
 	}

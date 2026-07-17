@@ -5,15 +5,17 @@ document.addEventListener('alpine:init', () => {
 		searchData: {...searchData.search},
 		options: {...searchData.options},
 		errors: new Set(),
+		minDate: '',
 		
 		init() {
 			let minDate = '';
 			
 			if (this.searchData.releaseId > 0)
 				minDate = this.options.newReleaseProducts[this.searchData.releaseId].saleDate;
-		
-			this.$refs.searchStDate.min = minDate;
-			this.$refs.searchEndDate.min = minDate;
+			
+			this.minDate = minDate;
+			/* this.$refs.searchStDate.min = minDate;
+			this.$refs.searchEndDate.min = minDate; */
 		},
 		
 		search() {
@@ -50,13 +52,18 @@ document.addEventListener('alpine:init', () => {
 			if (releaseId > 0)
 				minDate = this.options.newReleaseProducts[releaseId].saleDate;
 		
-			this.$refs.searchStDate.min = minDate;
-			this.$refs.searchEndDate.min = minDate;
+			/* this.$refs.searchStDate.min = minDate;
+			this.$refs.searchEndDate.min = minDate; */
+			this.minDate = minDate;
 			this.searchData.stDate = minDate; //用$refs...value無法連動
 			this.searchData.endDate = ''; //reset
 			
 			this.errors.delete('releaseId')
 			this.errors.delete('stDate');
+		},
+		
+		get setMinDate() {
+			return this.minDate;
 		},
 		
 		resetSearch() {

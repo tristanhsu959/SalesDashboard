@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\DailyRevenue\StoreService;
+use App\Services\DailyRevenue\HourService;
 use App\Services\DailyRevenue\AovService;
 use App\Facades\AppManager;
 use App\Facades\PosManager;
@@ -102,9 +103,11 @@ class DailyRevenueService
 				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
 				if ($params->type == 'store') #By門店
-					$service = app(storeService::class);
+					$service = app(StoreService::class);
+				else if ($params->type == 'hour') #By小時
+					$service = app(HourService::class);
 				else if ($params->type == 'aov') #By月合併,不顯示店
-					$service = app(aovService::class);
+					$service = app(AovService::class);
 				else
 					throw new Exception('查詢門店營收時發生錯誤');
 				
@@ -147,6 +150,8 @@ class DailyRevenueService
 		
 		if ($searchType == 'store') #有區間條件才要預設
 			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
+		else if ($searchType == 'hour')
+			$searchEndDate 	= $searchStDate;
 		
 		$functions 	= $this->parsingFunction($brand);
 		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchStoreName]);

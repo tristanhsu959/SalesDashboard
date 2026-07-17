@@ -21,32 +21,43 @@
 			<nav class="wrap">
 				<template x-for="(name, id) in options.type" :key="id">
 					<label class="radio field-red">
-						<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="changeType">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<nav x-show="showCalc" class="wrap">
+				<template x-for="(name, id) in options.calc" :key="id">
+					<label class="checkbox field-light-blue">
+						<input type="checkbox" name="searchCalc[]" :value="id" x-model="searchData.calc" :disabled="!showCalc">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<div class="space"></div>
+		</div>
+		
+		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
+			<input :type="dateType" name="searchStDate" maxlength="10" x-model="searchData.stDate" @input="errors.delete('stDate')" :max="searchData.today">
+			<label>開始日期</label>
+		</div>
+		
+		<div x-show="showEndDate" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
+			<input :type="dateType" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :max="searchData.today">
+			<label>結束日期</label>
+		</div>
+		
+		<div class="field middle-align">
+			<nav>
+				<template x-for="(name, id) in options.storeType" :key="id">
+					<label class="checkbox large">
+						<input type="checkbox" name="searchStoreType[]" :value="id" x-model="searchData.storeType">
 						<span x-text="name"></span>
 					</label>
 				</template>
 			</nav>
 		</div>
 		
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
-			<label>開始日期</label>
-		</div>
-		
-		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
-			<label>結束日期</label>
-		</div>
-		
-		<nav>
-			<template x-for="(name, id) in options.storeType" :key="id">
-				<label class="checkbox large">
-					<input type="checkbox" name="searchStoreType[]" :value="id" x-model="searchData.storeType">
-					<span x-text="name"></span>
-				</label>
-			</template>
-		</nav>
-			
 		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
@@ -60,8 +71,8 @@
 			<output class="red-text small">未選時取全區</output>
 		</fieldset>
 		
-		<div x-show="searchData.type == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
-			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" @input="errors.delete('storeName')">
+		<div x-show="showStoreName" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" @input="errors.delete('storeName')" :disabled="!showStoreName">
 			<label>找店名</label>
 		</div>
 		

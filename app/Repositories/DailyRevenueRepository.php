@@ -175,4 +175,99 @@ class DailyRevenueRepository extends Repository
 		return $result; 
 	}
 	
+	/* 取營收資料 By all time range
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getFromSale00ByHour($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds)
+	{
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
+		
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else if ($brand == Brand::BUYGOOD)
+			$db = $this->connectBGPosErp();
+		else if ($brand == Brand::FJVEGGIE)
+			$db = $this->connectFJPosErp();
+		else
+			return [];
+		
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
+		
+		$subQuery = $db
+				->table(DB::raw('SALE00 as a WITH(NOLOCK)'))
+				->where('a.SALE_DATE', '>=', $stDate)
+				->where('a.SALE_DATE', '<', $endDate)
+				->where('a.STATUS', '=', 2) #3:作廢不計入
+				->select('a.SALE_ID', 'a.SHOP_ID');
+					
+		$result = $db
+				->table(DB::raw('SALE00 as a WITH(NOLOCK)'))
+				->joinSub($subQuery, 'orders', function($join){
+					$join->on('orders.SALE_ID', '=', 'a.SALE_ID')
+						->on('orders.SHOP_ID', '=', 'a.SHOP_ID');
+				})
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.SHOP_ID')
+				#->join(DB::raw('shop_kind as c WITH(NOLOCK)'), 'c.sk_id', '=', 'b.SHOP_KIND')
+				->whereIn('b.gid', $authAreaIds)
+				->whereIn('b.SHOP_KIND', $storeType)
+				->when(! empty($namePosIds), function ($query) use ($namePosIds) {
+					$query->WhereIn('b.SHOP_ID', $namePosIds);
+				})
+				->whereNotIn('a.SHOP_ID', $excepts)
+				->select('a.SHOP_ID as shopId')
+				->selectRaw('CONVERT(varchar(13), a.SALE_DATE, 120) as saleDateHour')
+				->selectRaw('sum(a.amount) as amount')
+				->selectRaw('sum(a.TOT_SALES) as totalSales')
+				->selectRaw('sum(a.TOT_EXTRA) as totalExtra')
+				->selectRaw('sum(a.TOT_DISCHARGE) as totalDischarge')
+				->groupBy('a.SHOP_ID', DB::raw('CONVERT(varchar(13), a.SALE_DATE, 120)'))#->ddRawSql();
+				->get()
+				->toArray();
+		
+		return $result; 
+	}
+	
+	/* 取營收資料 By all time range
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getFromStatistics($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds)
+	{
+		$brandId = $brand->value;
+		$excepts = config("web.sales.shop.except.{$brandId}");
+		
+		if ($brand == Brand::BAFANG)
+			$db = $this->connectBFPosErp();
+		else if ($brand == Brand::BUYGOOD)
+			$db = $this->connectBGPosErp();
+		else if ($brand == Brand::FJVEGGIE)
+			$db = $this->connectFJPosErp();
+		else
+			return [];
+		
+		$authAreaIds = AreaLib::toSalesAreaId($brand, $allowAreaIds);
+		
+		$result = $db
+				->table(DB::raw('statistics_8way00 as a WITH(NOLOCK)'))
+				->join(DB::raw('SHOP00 as b WITH(NOLOCK)'), 'b.SHOP_ID', '=', 'a.shop_id')
+				->where('a.input_date', '>=', $stDate)
+				->where('a.input_date', '<', $endDate)
+				->whereIn('b.gid', $authAreaIds)
+				->whereIn('b.SHOP_KIND', $storeType)
+				->when(! empty($namePosIds), function ($query) use ($namePosIds) {
+					$query->WhereIn('b.SHOP_ID', $namePosIds);
+				})
+				->whereNotIn('a.SHOP_ID', $excepts)
+				->select('a.shop_id as shopId', 'a.tot_amt as amount', 'a.sale_date as saleDate')#->ddRawSql();
+				->get()
+				->toArray();
+		
+		return $result; 
+	}
 }

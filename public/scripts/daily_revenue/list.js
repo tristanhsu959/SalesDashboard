@@ -7,30 +7,34 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			if (this.searchData.stDate == '')
-				this.searchData.stDate = this.searchData.today;
-			if (this.searchData.endDate == '')
-				this.searchData.endDate = this.searchData.today;
-			this.switchConditions();
+			this.changeType();
 		},
 		
-		switchConditions(){
-			if (this.searchData.type == 'store')
-			{
-				this.$refs.searchStDate.type = 'date'; //input type
-				this.$refs.searchEndDate.type = 'date';
-				this.$refs.searchStoreName.disabled = false;
-				this.searchData.stDate = this.searchData.today;
-				this.searchData.endDate = this.searchData.today;
-			}
-			else //aov
-			{
-				this.$refs.searchStDate.type = 'month';
-				this.$refs.searchEndDate.type = 'month';
-				this.$refs.searchStoreName.disabled = true;
-				this.searchData.stDate = this.searchData.thisMonth;
-				this.searchData.endDate = this.searchData.thisMonth;
-			}
+		changeType() {
+			this.searchData.stDate = this.setDefaultDate;
+			this.searchData.endDate = this.setDefaultDate;
+		},
+		
+		get showCalc() {
+			return (this.searchData.type == 'day');
+		},
+		get dateType() {
+			if (this.searchData.type == 'aov')
+				return 'month';
+			else
+				return 'date';
+		},
+		get setDefaultDate() {
+			if (this.searchData.type == 'aov')
+				return this.searchData.thisMonth;
+			else
+				return this.searchData.today;
+		},
+		get showEndDate() {
+			return (this.searchData.type != 'day');
+		},
+		get showStoreName() {
+			return (this.searchData.type != 'aov');
 		},
 		
 		search() {
@@ -61,12 +65,14 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		resetSearch() {
-			this.searchData.type = 'store';
+			this.searchData.type = 'day';
+			this.searchData.calc = [];
+			this.searchData.stDate = this.setDefaultDate;
+			this.searchData.endDate = this.setDefaultDate;
 			this.searchData.storeType = this.searchData.defaultStoreTypes;
 			this.searchData.areaIds = [];
 			this.searchData.storeName = '';
 			this.errors.clear();
-			this.switchConditions();
 		},
     }));
 	

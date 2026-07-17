@@ -46,7 +46,7 @@ class DailyRevenueController extends Controller
 		$searchType			= $request->input('searchType');
 		$searchStDate		= $request->input('searchStDate'); #or Month
 		$searchEndDate		= $request->input('searchEndDate');
-		$searchStoreType	= $request->input('searchStoreType', array_keys(config('web.sales.shop.type'))); #未選取查全部
+		$searchStoreType	= $request->array('searchStoreType', array_keys(config('web.sales.shop.type'))); #未選取查全部
 		$searchAreaIds		= $request->input('searchAreaIds');
 		$searchStoreName	= $request->input('searchStoreName');
 		
