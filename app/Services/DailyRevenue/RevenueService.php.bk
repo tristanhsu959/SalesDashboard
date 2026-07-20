@@ -27,7 +27,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class HourService
+class RevenueService
 {
 	private $_statistics	= [];
    
@@ -110,7 +110,7 @@ class HourService
 			
 			#3. Get data from DB(銷售)
 			$this->_getSaleDataFromDB($params);
-			
+			dd($params);
 			#4. Get data from DB(日結)
 			$this->_getStatisticsDataFromDB($params);
 			
@@ -189,9 +189,13 @@ class HourService
 			$storeType 		= $params->storeType;
 			$namePosIds 	= $params->namePosIds;
 			$allowAreaIds 	= $params->allowAreaIds;
+			$hasHourlyData 	= $params->hasHourlyData;
 			
-			$result = $this->_repository->getFromSale00ByHour($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
-			
+			if ($hasHourlyData)
+				$result = $this->_repository->getFromSale00WithHourly($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
+			else
+				$result = $this->_repository->getSale00Data($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
+			dd($result);
 			$params->saleData = array_filter($result);
 		}
 		catch(Exception $e)

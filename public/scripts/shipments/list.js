@@ -10,6 +10,10 @@ document.addEventListener('alpine:init', () => {
 			
 		},
 		
+		get showAreaOptions() {
+			return (Object.keys(this.options.areaList).length > 0);
+		},
+		
 		search() {
 			this.errors.clear();
 			

@@ -44,16 +44,17 @@ class DailyRevenueController extends Controller
 		
 		#query params
 		$searchType			= $request->input('searchType');
+		$searchCalc			= $request->array('searchCalc');
 		$searchStDate		= $request->input('searchStDate'); #or Month
 		$searchEndDate		= $request->input('searchEndDate');
 		$searchStoreType	= $request->array('searchStoreType', array_keys(config('web.sales.shop.type'))); #未選取查全部
-		$searchAreaIds		= $request->input('searchAreaIds');
+		$searchAreaIds		= $request->array('searchAreaIds');
 		$searchStoreName	= $request->input('searchStoreName');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
+		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

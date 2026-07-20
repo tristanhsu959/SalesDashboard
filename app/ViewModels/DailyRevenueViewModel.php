@@ -63,8 +63,8 @@ class DailyRevenueViewModel extends Fluent
 		$this->set('options.type', $type);
 		
 		$calc = [
-			'revenue'		=> '包含時段',
-			'dailyClosing'	=> '包含日結',
+			'hourly'		=> '時段營收',
+			'dailyClosing'	=> '門店日結(不含本日)',
 		];
 		$this->set('options.calc', $calc);
 		
@@ -132,8 +132,8 @@ class DailyRevenueViewModel extends Fluent
 		
 		return match($type)
 		{
-			'day'	=> 'daily_revenue.store',
-			'range'	=> 'daily_revenue.store',
+			'day'	=> 'daily_revenue.day',
+			'range'	=> 'daily_revenue.range',
 			'aov'	=> 'daily_revenue.aov',	 
 		};
 	}

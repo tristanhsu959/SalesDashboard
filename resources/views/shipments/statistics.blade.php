@@ -47,7 +47,7 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showAreaOptions" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">

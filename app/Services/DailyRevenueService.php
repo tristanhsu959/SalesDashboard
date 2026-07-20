@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Services\DailyRevenue\StoreService;
-use App\Services\DailyRevenue\HourService;
+use App\Services\DailyRevenue\DayService;
+use App\Services\DailyRevenue\RangeService;
 use App\Services\DailyRevenue\AovService;
 use App\Facades\AppManager;
 use App\Facades\PosManager;
@@ -37,10 +37,11 @@ class DailyRevenueService
 	{
 		$this->_statistics = [
 			'brandId'		=> '', #export
-			'type'			=> '',
+			'type'			=> [],
+			'calc'			=> [],
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
-			'shop' 			=> [],
+			'store' 		=> [],
 			'area' 			=> [],
 			'data'			=> [],
 			'exportToken'	=> '', #export
@@ -80,14 +81,14 @@ class DailyRevenueService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
+	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
+			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName);
 			
 			#主要是for即時，故每次都query
 			if (Cache::has($params->cacheKey))
@@ -102,10 +103,10 @@ class DailyRevenueService
 			{
 				Log::channel('appServiceLog')->info('Get daily revenue from db');
 				
-				if ($params->type == 'store') #By門店
-					$service = app(StoreService::class);
-				else if ($params->type == 'hour') #By小時
-					$service = app(HourService::class);
+				if ($params->type == 'day') #門店/時段
+					$service = app(DayService::class);
+				if ($params->type == 'range') #區域/門店
+					$service = app(RangeService::class);
 				else if ($params->type == 'aov') #By月合併,不顯示店
 					$service = app(AovService::class);
 				else
@@ -133,7 +134,7 @@ class DailyRevenueService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
+	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchAreaIds, $searchStoreName)
 	{
 		$params = new Fluent();
 		
@@ -148,16 +149,21 @@ class DailyRevenueService
 			$allowAreaIds 		= Area::getAll();
 		}
 		
-		if ($searchType == 'store') #有區間條件才要預設
-			$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
-		else if ($searchType == 'hour')
+		if ($searchType == 'day') #有區間條件才要預設
 			$searchEndDate 	= $searchStDate;
 		
+		$searchStDate	= Carbon::parse($searchStDate)->format('Y-m-d');
+		$searchEndDate 	= Carbon::parse($searchEndDate)->format('Y-m-d');
+		
+		$hasHourlyData		= in_array('hourly', $searchCalc);
+		$hasDailyClosingData= in_array('dailyClosing', $searchCalc);
+		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchStoreType, $searchStoreName]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchStoreName]);
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
-				->type($searchType)
+				->type($searchType)->calc($searchCalc)
+				->hasHourlyData($hasHourlyData)->hasDailyClosingData($hasDailyClosingData)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->storeType($searchStoreType)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
@@ -184,10 +190,12 @@ class DailyRevenueService
 		$sourceData = Cache::get($cacheKey);
 		$type = $sourceData['type'];
 		
-		if ($type == 'store')
-			$service = app(StoreService::class);
+		if ($type == 'day')
+			$service = app(DayService::class);
+		else if ($type == 'range')
+			$service = app(RangeService::class);
 		else if ($type == 'aov')
-			$service = app(aovService::class);
+			$service = app(AovService::class);
 		else
 			return ResponseLib::initialize('檔案下載失敗，請重新查詢')->fail();
 		

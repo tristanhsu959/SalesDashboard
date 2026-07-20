@@ -27,7 +27,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #partial Service
-class StoreService
+class rangeService
 {
 	private $_statistics	= [];
    
@@ -37,6 +37,7 @@ class StoreService
 			'brandId'		=> '', #export
 			'brandCode'		=> '',
 			'type'			=> '',
+			'calc'			=> [],
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'store' 		=> [],
@@ -55,6 +56,7 @@ class StoreService
 	{
 		try
 		{
+			#原來的store service
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
