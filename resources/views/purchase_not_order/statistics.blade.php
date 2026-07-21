@@ -57,7 +57,7 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權區域</output>
 		</fieldset>
 		
 		<div x-show="searchData.type == 'product'">

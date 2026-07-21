@@ -46,7 +46,7 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權營運中心</output>
 		</fieldset>
 		
 		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
@@ -59,7 +59,7 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權區域</output>
 		</fieldset>
 		
 		<div class="space"></div>
