@@ -6,7 +6,7 @@
 			</div>
 		</article>
 			
-		<div x-show="response.hasResult" class="store-content no-padding">
+		<div x-show="response.hasResult" class="store-content">
 			<!-- 門店 -->
 			<section class="statistics-store scrollbar" :class="response.brandCode">
 				<table class="stripes">

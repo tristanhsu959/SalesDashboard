@@ -32,8 +32,6 @@ form {
 	
 /* Data */
 .page {
-	padding: 1rem;
-	
 	/* 工廠 */
 	.statistics-factory {
 		--table-bg: #fffbff;

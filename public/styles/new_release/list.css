@@ -9,7 +9,6 @@ form {
 
 /* Data */
 .page {
-	padding: 1rem;
 	/* 區域彙總 */
 	.statistics-area {
 		table tbody tr {
@@ -20,7 +19,7 @@ form {
 		}
 	}
 	
-	/* 門市 */
+	/* 門市 只控制fixed欄位, 其它是共用 */
 	.statistics-store {
 		table {
 			thead tr th {

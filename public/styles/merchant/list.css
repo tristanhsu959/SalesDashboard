@@ -7,7 +7,7 @@ form, section.statistics-store {
 	margin-block-start: 0 !important;
 }
 
-/* Data */
+/* Data 格式欄位不同, 不套用_component*/
 .store-content {
 	padding: 1rem;
 	
@@ -30,7 +30,7 @@ form, section.statistics-store {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 128px - 2rem);
+		max-height: calc(100vh - 128px - 2rem - 2rem); 
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
