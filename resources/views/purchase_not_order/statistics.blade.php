@@ -39,6 +39,7 @@
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
 			<label>查詢日期</label>
+			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
 		<!--div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
