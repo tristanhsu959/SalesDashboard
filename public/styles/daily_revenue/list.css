@@ -83,6 +83,16 @@ form {
 }
 
 /* avg statistics */
+.day-revenue-list.container {
+	height: calc(100vh - 128px);
+	overflow-y: auto;
+	
+	.statistics-list {
+		padding: 0;
+	}
+}
+
+/* avg statistics */
 .aov-list.container {
 	height: calc(100vh - 128px);
 	overflow-y: auto;

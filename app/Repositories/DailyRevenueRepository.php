@@ -237,7 +237,7 @@ class DailyRevenueRepository extends Repository
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getFromStatistics($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds)
+	public function getFromDailyClosing($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds)
 	{
 		$brandId = $brand->value;
 		$excepts = config("web.sales.shop.except.{$brandId}");

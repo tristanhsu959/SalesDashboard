@@ -105,7 +105,7 @@ class DailyRevenueService
 				
 				if ($params->type == 'day') #門店/時段
 					$service = app(DayService::class);
-				if ($params->type == 'range') #區域/門店
+				else if ($params->type == 'range') #區域/門店
 					$service = app(RangeService::class);
 				else if ($params->type == 'aov') #By月合併,不顯示店
 					$service = app(AovService::class);
@@ -155,15 +155,15 @@ class DailyRevenueService
 		$searchStDate	= Carbon::parse($searchStDate)->format('Y-m-d');
 		$searchEndDate 	= Carbon::parse($searchEndDate)->format('Y-m-d');
 		
-		$hasHourlyData		= in_array('hourly', $searchCalc);
-		$hasDailyClosingData= in_array('dailyClosing', $searchCalc);
+		$hasHourlyData	= in_array('hourly', $searchCalc);
+		$hasClosingData	= in_array('dailyClosing', $searchCalc);
 		
 		$functions 	= $this->parsingFunction($brand);
 		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchStoreType, $searchStoreName]);
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->type($searchType)->calc($searchCalc)
-				->hasHourlyData($hasHourlyData)->hasDailyClosingData($hasDailyClosingData)
+				->hasHourlyData($hasHourlyData)->hasClosingData($hasClosingData)
 				->stDate($searchStDate)->endDate($searchEndDate)
 				->storeType($searchStoreType)->storeName($searchStoreName)
 				->cacheKey($cacheKey);

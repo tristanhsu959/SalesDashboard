@@ -64,7 +64,7 @@ class DailyRevenueViewModel extends Fluent
 		
 		$calc = [
 			'hourly'		=> '時段營收',
-			'dailyClosing'	=> '門店日結(不含本日)',
+			'dailyClosing'	=> '門店日結(不含今日)',
 		];
 		$this->set('options.calc', $calc);
 		

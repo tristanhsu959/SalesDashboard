@@ -40,8 +40,10 @@ class DayService
 			'calc'			=> [],
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
+			'hasHourlyData' => FALSE,
+			'hasClosingData'=> FALSE,
 			'store' 		=> [],
-			'exportName'	=> '',
+			'exportName'	=> '門店營收_單日',
 			'exportToken'	=> '', #export
 		];
 	}
@@ -58,7 +60,7 @@ class DayService
 			$this->_prepareData($params);
 			
 			$this->_outputReport($params);
-		
+			
 			$this->_generateStatistics($params);
 			
 			return $this->_statistics;
@@ -75,17 +77,19 @@ class DayService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['brandId']	= $params->brand->value;
-		$this->_statistics['brandCode']	= $params->brand->code();
-		$this->_statistics['type']		= $params->type;
-		$this->_statistics['startDate'] = $params->stDate;
-		$this->_statistics['endDate']	= $params->endDate;
-		$this->_statistics['store']		= $params->store;
-		$this->_statistics['area']		= $params->area;
-		$this->_statistics['hasResult']	= FALSE;
+		$this->_statistics['brandId']		= $params->brand->value;
+		$this->_statistics['brandCode']		= $params->brand->code();
+		$this->_statistics['type']			= $params->type;
+		$this->_statistics['calc']			= $params->calc;
+		$this->_statistics['startDate'] 	= $params->stDate;
+		$this->_statistics['endDate']		= $params->endDate;
+		$this->_statistics['store']			= $params->store;
+		$this->_statistics['hasResult']		= FALSE;
+		$this->_statistics['hasHourlyData']	= $params->hasHourlyData;
+		$this->_statistics['hasClosingData']= $params->hasClosingData;
 		
 		#無值不cache,因有補全門店,故hasResult應該都是TRUE
-		if (! empty(Arr::flatten($this->_statistics['store'])))
+		if (! empty(Arr::flatten($this->_statistics['store']['data'])))
 		{
 			$this->_statistics['hasResult']		= TRUE;
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
@@ -110,10 +114,10 @@ class DayService
 			$this->_getPosIdByName($params);
 			
 			#3. Get data from DB(銷售)
-			$this->_getSaleDataFromDB($params);
+			$this->_getSaleDataFromDBWithHourly($params);
 			
 			#4. Get data from DB(日結)
-			$this->_getStatisticsDataFromDB($params);
+			$this->_getDailyClosingDataFromDB($params);
 			
 			#5.build to base data
 			$this->_buildBaseData($params);
@@ -180,8 +184,17 @@ class DayService
 	 * @params: fluent
 	 * @return: array
 	 */
-	private function _getSaleDataFromDB($params)
+	private function _getSaleDataFromDBWithHourly($params)
 	{
+		/*[
+			"shopId" => "0103"
+			"saleDateHour" => "2026-07-20 00"
+			"amount" => "5688.0000"
+			"totalSales" => "5688.0000"
+			"totalExtra" => ".0000"
+			"totalDischarge" => ".0000"
+		]*/
+  
 		try
 		{
 			$brand 			= $params->brand;
@@ -191,7 +204,7 @@ class DayService
 			$namePosIds 	= $params->namePosIds;
 			$allowAreaIds 	= $params->allowAreaIds;
 			
-			$result = $this->_repository->getFromSale00ByHour($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
+			$result = $this->_repository->getFromSale00WithHourly($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
 			
 			$params->saleData = array_filter($result);
 		}
@@ -206,10 +219,22 @@ class DayService
 	 * @params: fluent
 	 * @return: array
 	 */
-	private function _getStatisticsDataFromDB($params)
+	private function _getDailyClosingDataFromDB($params)
 	{
+		/*[
+			"shopId" => "0103"
+			"amount" => "106385.0000"
+			"saleDate" => "2026-07-20 00:03:12.697"
+		]*/
+		
 		try
 		{
+			if ($params->hasClosingData === FALSE)
+			{
+				$params->closingData = [];
+				return TRUE;
+			}
+			
 			$brand 			= $params->brand;
 			$stDate			= (new Carbon($params->stDate))->format('Y-m-d 00:00:00');
 			$endDate 		= (new Carbon($params->endDate))->addDay()->format('Y-m-d H:i:s');
@@ -219,9 +244,9 @@ class DayService
 			
 			#因無相關欄位, 先全抓再由門店過濾
 			#日結當天不會有資料(要取input_date)
-			$result = $this->_repository->getFromStatistics($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
+			$result = $this->_repository->getFromDailyClosing($brand, $allowAreaIds, $stDate, $endDate, $storeType, $namePosIds);
 			
-			$params->statisticsData = array_filter($result);
+			$params->closingData = array_filter($result);
 		}
 		catch(Exception $e)
 		{
@@ -236,16 +261,15 @@ class DayService
 	 */
 	private function _buildBaseData($params)
 	{
-		#先處理資料但不總, 因要取by hour data
-		$saleData = PosManager::filterDataByExceptStore($params->brand, $params->saleData);
-		
-		#先處理後續要parsing的欄位值,其餘先不動
-		$saleData = collect($saleData)->map(function($item, $key){
+		#先整理Data但不總計, 後續再處理mapping
+		$saleData = collect($params->saleData)->map(function($item, $key){
 			
-			$temp['shopId']		= $item['shopId'];
+			$temp['shopId']	= $item['shopId'];
 			
-			$saleDateHour = Str::replace(' ', ':', $item['saleDateHour']);
-			$temp['hour'] 		= Str::after($saleDateHour, ':');
+			#DB: 00表00:00~00:59 => 歸到01,故要先加1hr
+			
+			$temp['hour'] = Carbon::createFromFormat('Y-m-d H', $item['saleDateHour'])->format('H');
+			#先不加1hr=>Carbon::createFromFormat('Y-m-d H', $item['saleDateHour'])->addHour()->format('H');
 			
 			#發票金額 = amount = totalSales + totalExtra + totalDischarge
 			#實銷金額 = totalSales, 應該只有totalSales
@@ -256,19 +280,20 @@ class DayService
 			
 			$temp['totalAmount'] 	= $totalSales; #實銷
 			$temp['invoiceAmount'] 	= empty($totalSales) ? $amount : $totalSales + $totalExtra + $totalDischarge; #發票金額
-
+			
 			return $temp;
 		})->groupBy('shopId')->toArray();
 		
-		$params->saleBaseData = $saleData;
+		#saleBaseData
+		$params->set('baseData.sales', $saleData);
 		
-		#日結可以先總計
-		$statisticsData = collect($params->statisticsData)->groupBy('shopId')->map(function($items, $key) {
-			
-			return collect($items)->pluck('amount')->sum(); 
+		
+		#日結-理論上只有一筆, key-value
+		$closingData = collect($params->closingData)->groupBy('shopId')->map(function($items, $key){
+			return floatval($items->pluck('amount')->sum());
 		})->toArray();
 		
-		$params->statisticsBaseData = $statisticsData;
+		$params->set('baseData.closing', $closingData);
 	}
 	
 	/* ========================== 統計 ========================== */
@@ -284,10 +309,7 @@ class DayService
 			#1.Header(共用)
 			$this->_buildHourRange($params);
 			
-			#2.By區域
-			$this->_parsingByArea($params);
-			
-			#3.By店別
+			#2.By店別日營收
 			$this->_parsingByStore($params);
 			
 			return $params;
@@ -306,7 +328,7 @@ class DayService
 	private function _buildHourRange($params)
 	{
 		#hour都一樣, 不用用stDate去算
-		$period = CarbonPeriod::create(Carbon::today()->setHour(1), '1 hour', Carbon::tomorrow());
+		$period = CarbonPeriod::create(Carbon::today(), '1 hour', Carbon::today()->setHour(23)); #Carbon::tomorrow()
 		
 		$hourList = [];
 
@@ -316,78 +338,7 @@ class DayService
 			$hourList[] = $date->isTomorrow() ? '24:00' : $date->format('H:i');
 		}
 		
-		dd($hourList);
-		$params->dayRange = $hourList;
-	}
-	
-	
-	/* 區域營收By Day
-	 * @params: array
-	 * @return: array
-	 */
-	private function _parsingByArea($params)
-	{
-		/*
-		"areaId" => [
-			"areaName" =>"大台北區"
-			"shopCount" => 11
-			"dayAmount" => [
-				"2026-03-18" => 101
-				"2026-03-19" => 22208
-			]
-			"大高雄區" => array:5 []
-			"宜蘭區" => array:5 []
-			"中彰投區" => array:5 []
-			"雲嘉南區" => array:5 []
-			"桃竹苗區" => array:5 []
-		]
-		*/
-		
-		$params->set('area.header', []);
-		$params->set('area.data', []);
-		
-		$baseData = $params->baseData;
-		
-		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [];
-		
-		$header = ['areaName' => '區域', 'storeCount' => '門店數', 'dayAmount' => $params->dayRange];
-		$params->set('area.header', $header);
-		
-		#這裏也是By day
-		$result = collect($baseData)->groupBy('areaId')->map(function($items, $key) {
-			
-			$temp['areaName']		= $items->pluck('areaName')->first();
-			$temp['storeCount']		= $items->pluck('storeKey')->unique()->count(); #店家數
-			
-			#整理Amount成Daily形式
-			$data = $items->pluck('data')->collapse();
-			
-			$temp['dayAmount'] = $data->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-				
-				#因amount會有0的狀況
-				$amount	= $items->pluck('amount')->sum();
-				return [$date => round($amount, 2)];
-			})->filter(function($item, $key){
-				return $key > 0;
-			})->toArray();
-			
-			return $temp;
-		})->sortKeys()->toArray();
-		
-		#全區總計
-		$result['total']['areaName'] 	= '總計'; 
-		$result['total']['storeCount'] 	= collect($baseData)->pluck('shopId')->unique()->count(); 
-		$result['total']['dayAmount'] 	= collect($baseData)->pluck('data')->collapse()->groupBy('saleDate')->mapWithKeys(function($items, $date) {
-			
-			$amount	= $items->pluck('amount')->sum();
-			return [$date => round($amount)];
-		})->filter(function($item, $key){
-			return $key > 0;
-		})->toArray();
-		
-		$params->set('area.data', $result);
+		$params->hourRange = $hourList;
 	}
 	
 	/* 店別每日營收
@@ -396,68 +347,65 @@ class DayService
 	 */
 	private function _parsingByStore($params)
 	{
-		/* Output: 20260510改併成一個array,也方便export
-		[
-		330002 => [
-			"storeName" => "御廚豐原向陽店"
-			"areaName" => "中彰投區"
-			"dayAmount" =>  [
-				"2025-09-15" => 666.0
-				"2025-09-14" => 777.0
-			]
-		]
-		*/
 		
 		$params->set('store.header', []);
 		$params->set('store.data', []);
 		
-		$baseData = $params->baseData;
+		$saleData 		= $params->baseData['sales'];
+		$closingData 	= ($params->hasClosingData) ? $params->baseData['closing'] : [];
+		$hourRange		= $params->hourRange;
+		$hasHourlyData	= $params->hasHourlyData;
 		
 		#會有無設定區域權限的狀況, 須判別
-		if (empty($baseData))
-			return [];
+		if (empty($saleData))
+			return TRUE;
 		
-		$header = ['areaName' => '區域', 'shopId' => 'Pos店號', 'storeKey' => '門店代號', 'storeName' => '門店名稱', 'storeTypeName' => '類型',
-					'dayAmount' => $params->dayRange
-				];
+		$header = ['區域', 'Pos店號', '門店代號', '門店名稱', '實銷金額', '發票金額'];
+		
+		if ($params->hasClosingData)
+			$header[] = '日結金額';
+		
 		$params->set('store.header', $header);
 		
-		#Sum已在DB計算, 這裏只要format output
-		$result = collect($baseData)->map(function($item, $key) {
+		$result = collect($params->storeList)->map(function($item, $key) use($saleData, $closingData, $hourRange, $hasHourlyData){
+			$sale 			= data_get($saleData, $item['posId'], []);
+			$closingAmount	= data_get($closingData, $item['posId'], 0); #已計算處理過
 			
-			$temp['storeKey'] 		= $item['storeKey'];
-			$temp['shopId'] 		= $item['shopId'];
-			$temp['storeName'] 		= $item['storeName'];
-			$temp['storeTypeName'] 	= $item['typeName'];
-			$temp['areaId'] 		= $item['areaId'];
 			$temp['areaName'] 		= $item['areaName'];
+			$temp['posId']			= $item['posId'];
+			$temp['storeKey'] 		= $item['storeKey'];
+			$temp['storeName']		= $item['storeName'];
+			$temp['totalAmount']	= round(collect($sale)->pluck('totalAmount')->sum(), 2);
+			$temp['invoiceAmount']	= round(collect($sale)->pluck('invoiceAmount')->sum(), 2);
+			$temp['closingAmount']	= round($closingAmount, 2);
 			
-			$temp['dayAmount'] = collect($item['data'])->groupBy('saleDate')->map(function($items, $date) {
-				$amount	= floatval($items->pluck('amount')->sum());
-				return round($amount, 2);
-			})->filter(function($item, $key){
-				return $key > 0;
-			})->toArray();
+			if ($hasHourlyData)
+			{
+				#DB:00~23, hourRange: 00~23, 顯示01~24:表示累積...
+				$hourlyData = collect($sale)->mapWithKeys(function($item, $key){
+					return [$item['hour'] => $item['totalAmount']];
+				})->all();
+				
+				$temp['hourly']	= collect($hourRange)->mapWithKeys(function($timeStr, $key) use($hourlyData){
+					
+					$hourKey = Str::before($timeStr, ':');
+					$amount = data_get($hourlyData, $hourKey, 0);
+					#00:00 => 顯示成01:00
+					
+					$mapKey = Carbon::createFromFormat('H:i', $timeStr)->addHour()->format('H:i');
+					
+					return [$mapKey => round($amount, 2)];
+				})->all();
+			}
+			else
+				$temp['hourly']	= [];	
 			
-			return $temp; 
-		})->values()->toArray();
-		
-		#By日總計
-		$result['total']['storeKey'] 		= ''; 
-		$result['total']['shopId'] 			= ''; 
-		$result['total']['storeName'] 		= '總計'; 
-		$result['total']['storeTypeName']	= ''; 
-		$result['total']['areaName'] 		= ''; 
-		
-		$totalData = collect($baseData)->pluck('data')->collapse();
-		
-		$result['total']['dayAmount'] = collect($totalData)->groupBy('saleDate')->map(function($items, $date) {
-			$amount	= floatval($items->pluck('amount')->sum());
-			return round($amount, 2);
-		})->toArray();
+			return $temp;
+		})->values()->all();
 		
 		$params->set('store.data',  $result);
 	}
+	
 	
 	/*************** 匯出 ***************/
 	/* Export data
