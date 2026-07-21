@@ -390,9 +390,9 @@ class DayService
 					
 					$hourKey = Str::before($timeStr, ':');
 					$amount = data_get($hourlyData, $hourKey, 0);
-					#00:00 => 顯示成01:00
 					
-					$mapKey = Carbon::createFromFormat('H:i', $timeStr)->addHour()->format('H:i');
+					#00:00 => 顯示成01:00要加1hr
+					$mapKey = Carbon::createFromFormat('H:i', $timeStr)->format('H:i'); #->addHour()
 					
 					return [$mapKey => round($amount, 2)];
 				})->all();
@@ -417,29 +417,24 @@ class DayService
 		try
 		{
 			#Build export data for sheets
-			$export['區域彙總'] = $this->_buildExportArea($sourceData['area']);
-            $export['店別明細'] = $this->_buildExportShop($sourceData['store']);
+			$export = $this->_buildExportStore($sourceData);
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
-			$fileName = Str::replaceArray('?', [$brandName, $sourceData['startDate'], $sourceData['endDate']], '?_門店營收_?_?.xlsx');
+			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
 			$index = 0;
-			foreach($export as $sheetName => $sheetData)
-			{
-				$sheet = ($index == 0) ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
-				$sheet->setName($sheetName);
+			$sheet = $writer->getCurrentSheet();
+			$sheet->setName($sourceData['exportName']);
 				
-				foreach($sheetData as $data)
-				{
-					$row =  Row::fromValues($data);
-					$writer->addRow($row);
-				}
-				$index++;
+			foreach($export as $data)
+			{
+				$row =  Row::fromValues($data);
+				$writer->addRow($row);
 			}
 			
 			$writer->close();
@@ -452,60 +447,29 @@ class DayService
 		}
 	}
 	
-	/* Build data for export
-	 * @params: array
-	 * @return: array
-	 */
-	private function _buildExportArea($srcData)
-	{
-		$export = [];
-		$export[] = Arr::flatten($srcData['header']);
-		
-		#Area data
-		foreach($srcData['data'] as $key => $area)
-		{
-			if (empty($area))
-				continue;
-			
-			$row = [];
-			$row[] = $area['areaName'];
-			$row[] = $area['storeCount'];
-				
-			#要按Header的順序
-			foreach($srcData['header']['dayAmount'] as $colKey)
-			{
-				$amount = data_get($area, "dayAmount.{$colKey}", 0);
-				$row[] = Number::currency($amount, precision: 0);
-			}
-			
-			$export[] = $row;
-		}
-		
-		return $export;
-	}
 	
 	/* Build data for export
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildExportShop($srcData)
+	private function _buildExportStore($srcData)
 	{
-		$export[] = Arr::flatten($srcData['header']);
+		$export = [];
+		$export[] = $srcData['store']['header'];
+		$hasClosingData = $srcData['hasClosingData'];
 		
-		foreach($srcData['data'] as $shopId => $shop)
+		foreach($srcData['store']['data'] as $store)
 		{
 			$row = [];
-			$row[] = $shop['areaName'];
-			$row[] = $shop['shopId'];
-			$row[] = $shop['storeKey'];
-			$row[] = $shop['storeName'];
-			$row[] = $shop['storeTypeName'];
+			$row[] = $store['areaName'];
+			$row[] = $store['posId'];
+			$row[] = $store['storeKey'];
+			$row[] = $store['storeName'];
+			$row[] = Number::currency($store['totalAmount'], precision: 0);
+			$row[] = Number::currency($store['invoiceAmount'], precision: 0);
 			
-			foreach($srcData['header']['dayAmount'] as $colKey)
-			{
-				$amount = data_get($shop, "dayAmount.{$colKey}", 0);
-				$row[] = Number::currency($amount, precision: 0);
-			}
+			if ($hasClosingData)
+				$row[] = Number::currency($store['closingAmount'], precision: 0);
 			
 			$export[]= $row;
 		}

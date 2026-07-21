@@ -8,8 +8,8 @@
 	<div x-show="response.hasResult" class="statistics-list">
 		
 		<!-- 門店 -->
-		<div x-data="{store:@js($viewModel->statisticsData('store'))}" class="padding">
-			<section class="statistics-store scrollbar" :class="response.brandCode">
+		<div x-data="{store:@js($viewModel->statisticsData('store')), hasClosingData: @js($viewModel->statisticsData('hasClosingData')), hasHourlyData: @js($viewModel->statisticsData('hasHourlyData'))}" class="padding">
+			<section class="statistics-store scrollbar no-tab" :class="response.brandCode">
 				<table class="stripes">
 					<thead>
 						<tr>
@@ -24,10 +24,13 @@
 							<td x-text="storeData.areaName"></td>
 							<td x-text="storeData.posId"></td>
 							<td x-text="storeData.storeKey"></td>
-							<td x-text="storeData.storeName"></td>
+							<td>
+								<button x-show="hasHourlyData" class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey, name: storeData.storeName, details: storeData.hourly })"><i>more_vert</i></button>
+								<span x-text="storeData.storeName"></span>
+							</td>
 							<td x-text="Helper.formatDollar(storeData.totalAmount || 0)"></td>
 							<td x-text="Helper.formatDollar(storeData.invoiceAmount || 0)"></td>
-							<td x-text="Helper.formatDollar(storeData.closingAmount || 0)"></td>
+							<td x-show="hasClosingData" x-text="Helper.formatDollar(storeData.closingAmount || 0)"></td>
 						</tr>
 						</template>
 					</tbody>
@@ -36,7 +39,7 @@
 		</div>
 	</div>
 	
-	<dialog x-data="storeDetail()" @active-store.window="openDetail($event.detail)" id="salesDetail" class="store-detail bottom scroll">
+	<dialog x-data="storeDetail()" @active-store.window="openDetail($event.detail)" id="hourlyData" class="store-detail right scroll">
 		<div class="row">
 			<div class="left-align max">
 				<h6 x-text="detail?.storeName || ''" class="purple-text"></h6>
@@ -50,21 +53,16 @@
 		<table class="stripes responsive">
 			<thead>
 				<tr>
-					<template x-for="(headName, hidx) in detail.header" :key="hidx">
-						<th x-text="headName"></th>
-					</template>
+					<th>時段</th>
+					<th>金額</th>
 				</tr>
 			</thead>
 			<tbody>
-				<template x-for="(rowData, rowIdx) in detail.products" :key="rowIdx">
-				<tr>
-					<template x-for="(colData, colIdx) in ($store.sales.showAmount ? rowData['amount'] : rowData['qty'])" :key="colIdx">
-					<td>
-						<span x-show="!$store.sales.showAmount || colIdx == 0" x-text="colData"></span>
-						<span x-show="$store.sales.showAmount && colIdx > 0" x-text="Helper.formatDollar(Math.round(colData))"></span>
-					</td>
-					</template>
-				</tr>
+				<template x-for="(amount, hour) in detail.hourlyData" :key="hour">
+					<tr>
+						<td x-text="hour"></td>
+						<td x-text="Helper.formatDollar(amount || 0)"></td>
+					</tr>
 				</template>
 			</tbody>
 		</table>

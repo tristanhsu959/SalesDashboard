@@ -113,8 +113,6 @@ document.addEventListener('alpine:init', () => {
 			this.detail.header 		= eventData.details.header;
 			this.detail.products 	= eventData.details.data;
 				
-			console.log(this.detail.products);
-			
 			ui('#salesDetail');
 		},
 	

@@ -26,15 +26,6 @@
 					</label>
 				</template>
 			</nav>
-			<nav x-show="showCalc" class="wrap">
-				<template x-for="(name, id) in options.calc" :key="id">
-					<label class="checkbox field-light-blue">
-						<input type="checkbox" name="searchCalc[]" :value="id" x-model="searchData.calc" :disabled="!showCalc">
-						<span x-text="name"></span>
-					</label>
-				</template>
-			</nav>
-			<div class="space"></div>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
@@ -52,6 +43,14 @@
 				<template x-for="(name, id) in options.storeType" :key="id">
 					<label class="checkbox large">
 						<input type="checkbox" name="searchStoreType[]" :value="id" x-model="searchData.storeType">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<nav x-show="showCalc" class="wrap">
+				<template x-for="(name, id) in options.calc" :key="id">
+					<label class="checkbox field-light-blue large">
+						<input type="checkbox" name="searchCalc[]" :value="id" x-model="searchData.calc" :disabled="!showCalc">
 						<span x-text="name"></span>
 					</label>
 				</template>

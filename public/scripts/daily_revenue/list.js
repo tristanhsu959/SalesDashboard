@@ -100,5 +100,26 @@ document.addEventListener('alpine:init', () => {
 		},
 		
     }));
+	
+	/* Hourly revenue */
+	Alpine.data('storeDetail', () => ({
+		detail: {
+			storeKey: '',
+			storeName: '',
+			hourlyData: {},
+		},
+		
+		init() { 
+		},
+		
+		openDetail(eventData) {
+			this.detail.storeKey 	= eventData.id;
+			this.detail.storeName 	= eventData.name;
+			this.detail.hourlyData 	= eventData.details;
+				
+			ui('#hourlyData');
+		},
+	
+    }));
 });
 

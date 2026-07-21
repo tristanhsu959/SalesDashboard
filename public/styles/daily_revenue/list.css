@@ -98,7 +98,9 @@ form {
 	overflow-y: auto;
 	
 	.statistics-aov {
-		margin-bottom: 1rem;
+		padding: 1rem;
+		margin-block-start: 0 !important;
+		/* margin-bottom: 1rem; */
 		
 		table tbody tr.area-detail {
 			background-color: #37474f;
