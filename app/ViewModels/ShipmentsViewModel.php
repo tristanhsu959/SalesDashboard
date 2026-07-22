@@ -70,10 +70,16 @@ class ShipmentsViewModel extends Fluent
 	private function _setSearchMode()
 	{
 		$type = [
-			'store'		=> '依門店', 
-			'factory'	=> '依工廠',
+			'total'		=> '總量', 
+			'status'	=> '門店訂貨狀況',
 		];
 		$this->set('options.type', $type);
+		
+		$by = [
+			'store'		=> '依門店', #option of total
+			'factory'	=> '依工廠', #option of total
+		];
+		$this->set('options.by', $by);
 		
 		$calc = [
 			'day'	=> '以日計算', 
@@ -81,11 +87,11 @@ class ShipmentsViewModel extends Fluent
 		];
 		$this->set('options.calc', $calc);
 
-		$by = [
+		$where = [
 			'keyword'	=> '關鍵字查詢',
 			'category'	=> '分類查詢', 
 		];
-		$this->set('options.by', $by);
+		$this->set('options.where', $where);
 	}
 	
 	/* Form submit action
@@ -110,23 +116,25 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
-						$searchAreaIds = [], $searchBy = 'keyword', $searchKeyword = '', 
-						$searchCategory = '', $searchShortCodes = [])
+	public function keepSearchData($searchType = 'total', $searchBy = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
+						$searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
+						$searchCategory = '', $searchShortCodes = [], $searchStoreName = '')
     {
 		$today = Carbon::tomorrow()->format('Y-m-d');
 		$searchStDate	= $searchStDate ?? $today;
 		$searchEndDate 	= $searchEndDate ?? $today;
 		
 		$this->set('search.type', $searchType);
+		$this->set('search.by', $searchBy);
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
 		$this->set('search.areaIds', $searchAreaIds);
-		$this->set('search.by', $searchBy);
+		$this->set('search.where', $searchWhere);
 		$this->set('search.keyword', $searchKeyword);
 		$this->set('search.category', $searchCategory);
 		$this->set('search.shortCodes', $searchShortCodes);
+		$this->set('search.storeName', $searchStoreName);
 		$this->set('search.tomorrow', Carbon::tomorrow()->format('Y-m-d'));
 	}
 	
@@ -137,11 +145,15 @@ class ShipmentsViewModel extends Fluent
 	public function getPartialView()
 	{
 		$type = $this->get('search.type', NULL);
+		$by = $this->get('search.by', NULL);
 		
-		return match($type)
+		$typeBy = "{$type}:{$by}";
+		
+		return match($typeBy)
 		{
-			'store'		=> 'shipments.store',
-			'factory'	=> 'shipments.factory',	 
+			'total:store'	=> 'shipments.store',
+			'total:factory'	=> 'shipments.factory',	 
+			'detail:all'	=> 'shipments.detail',
 		};
 	}
 	

@@ -44,18 +44,20 @@ class ShipmentsController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType 		= $request->input('searchType');
+		$searchBy 			= $request->input('searchBy'); #門店/工廠
 		$searchCalc 		= $request->input('searchCalc');
 		$searchStDate 		= $request->input('searchStDate');
 		$searchEndDate 		= $request->input('searchEndDate');
 		$searchAreaIds 		= $request->array('searchAreaIds');
-		$searchBy 			= $request->input('searchBy');
+		$searchWhere 		= $request->input('searchWhere');
 		$searchKeyword		= $request->input('searchKeyword');
 		$searchCategory 	= $request->input('searchCategory');
 		$searchShortCodes 	= $request->array('searchShortCodes');
+		$searchStoreName 	= $request->input('searchStoreName');
  		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, $searchEndDate, 
-					$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes); 
+		$this->_viewModel->keepSearchData($searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
+					$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -66,13 +68,6 @@ class ShipmentsController extends Controller
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');
-			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
-		}
-		
-		if (($searchBy == 'keyword' && empty($searchKeyword))
-				OR ($searchBy == 'category' && empty($searchShortCodes)))
-		{
-			$this->_viewModel->fail('查詢產品參數錯誤');
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
