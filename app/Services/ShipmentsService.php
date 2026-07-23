@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\Shipments\FactoryService;
 use App\Services\Shipments\StoreService;
+use App\Services\Shipments\StatusService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Repositories\ShipmentsRepository;
@@ -34,9 +35,10 @@ class ShipmentsService
 	public function __construct(protected ShipmentsRepository $_repository)
 	{
 		$this->_statistics = [
-			'type'		=> '', #store,factory
-			'calc'		=> '', #日,月
-			'by'		=> '', #keyword,category
+			'type'			=> '', 
+			'by'			=> '', #store,factory
+			'calc'			=> '', #日,月
+			'where'			=> '', #keyword,category
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -96,15 +98,16 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	public function getStatistics($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
+							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
-			
+			$params = $this->_initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
+								$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName);
 			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from cache');
@@ -116,15 +119,14 @@ class ShipmentsService
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from db');
 				
-				#先取Product Id
-				$this->_getProductId($params);
-				
-				if ($params->type == 'store')
+				if ($params->type == 'total' && $params->by == 'store')
 					$service = app(StoreService::class);
-				else if ($params->type == 'factory')
+				else if ($params->type == 'total' && $params->by == 'factory')
 					$service = app(FactoryService::class);
+				else if ($params->type == 'status')
+					$service = app(StatusService::class);
 				else
-					throw new Exception('查詢訂貨總量時發生錯誤');
+					throw new Exception('查詢訂貨總量時發生錯誤，無法識別查詢類型');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -147,7 +149,8 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes)
+	private function _initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
+							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
 	{
 		$params = new Fluent();
 		
@@ -158,46 +161,24 @@ class ShipmentsService
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		
-		if ($searchBy == 'keyword')
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchKeyword]);
-		else
-			$cacheKey = HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchCalc, $searchStDate, $searchEndDate, $searchBy, $searchCategory, $searchShortCodes]);
+		$cacheKeyItems = [$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate];
+		
+		if ($searchType == 'total' && $searchWhere == 'keyword')
+			$cacheKeyItems[] = [$searchWhere, $searchKeyword];
+		else if ($searchType == 'total' && $searchWhere == 'category')
+			$cacheKeyItems[] = [$searchWhere, $searchCategory, $searchShortCodes];
+		else if ($searchType == 'status')
+			$cacheKeyItems[] = $searchStoreName;
+		
+		$cacheKey = HelperLib::buildCacheKey($cacheKeyItems);
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
-				->type($searchType)->calc($searchCalc)->by($searchBy)
-				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)
+				->type($searchType)->by($searchBy)->calc($searchCalc)->where($searchWhere)
+				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
-		
-		return $params;
-	}
 	
-	/* 以short code取得product id
-	 * @params: array
-	 * @return: array
-	 */
-	private function _getProductId($params)
-	{
-		try
-		{
-			#取資料都不分營運中心,不然可能會取不到
-			$brand 		= $params->brand;
-			$opCenterIds= $params->allowOpCenterIds;
-			$areaIds 	= $params->allowAreaIds;
-			
-			if ($params->by == 'keyword')
-				$params->productIds = PurchaseManager::getProductIdByName($brand, $opCenterIds, $params->keyword);
-			else
-				$params->productIds = PurchaseManager::getProductIdByShortCode($brand, $opCenterIds, $params->shortCodes);
-			
-			if (empty($params->productIds))
-				throw new Exception('查無此產品');
-		}
-		catch(Exception $e)
-		{
-			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
-			throw new Exception($e->getMessage());
-		}
+		return $params;
 	}
 	
 	/* Export data
@@ -217,12 +198,17 @@ class ShipmentsService
 		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
-		$type = $sourceData['type'];
+		$type 	= $sourceData['type'];
+		$by 	= $sourceData['by'];
 		
-		if ($type == 'store')
+		if ($type == 'total' && $by == 'store')
 			$service = app(StoreService::class);
-		else
+		else if ($type == 'total' && $by == 'factory')
 			$service = app(FactoryService::class);
+		else if ($type == 'status')
+			$service = app(StatusService::class);
+		else
+			return ResponseLib::initialize()->fail('下載檔案發生錯誤，請重新查詢後下載');
 		
 		return $service->export($sourceData);
 	}

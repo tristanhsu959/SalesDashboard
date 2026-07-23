@@ -71,8 +71,8 @@ class ShipmentsController extends Controller
 			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, $searchEndDate, 
-						$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
+						$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

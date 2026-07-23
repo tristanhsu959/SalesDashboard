@@ -116,6 +116,7 @@ document.addEventListener('alpine:init', () => {
 		activeProduct: '',
 		
 		init() { 
+			/* Set active tab */
 			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
@@ -134,6 +135,53 @@ document.addEventListener('alpine:init', () => {
 			);
 			
 			return result;
+		},
+	
+    }));
+	
+	/*呼叫function要多處理變數*/
+	Alpine.data('StatisticsStatus', (data) => ({
+		statistics: {...data},
+		
+		init() { 
+		},
+		
+		/* get filterStore() {
+			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
+			
+			const list = Object.values(this.statistics.storeList);
+			
+			const result = list.filter(store => 
+				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		}, */
+	
+    }));
+	
+	/* Hourly revenue */
+	Alpine.data('storeDetail', () => ({
+		detail: {
+			dateList: [],
+			storeKey: '',
+			storeName: '',
+			data: {},
+		},
+		
+		init() {
+		},
+		
+		openDetail(eventData) {
+			this.detail.dateList 	= eventData.dateList;
+			this.detail.storeKey 	= eventData.id;
+			this.detail.storeName 	= eventData.name;
+			this.detail.data 		= eventData.details;
+			
+			ui('#detailData');
 		},
 	
     }));

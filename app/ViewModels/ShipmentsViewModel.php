@@ -144,8 +144,8 @@ class ShipmentsViewModel extends Fluent
 	 */
 	public function getPartialView()
 	{
-		$type = $this->get('search.type', NULL);
-		$by = $this->get('search.by', NULL);
+		$type 	= $this->get('search.type', NULL);
+		$by		= ($type == 'status') ? 'detail' : $this->get('search.by', NULL);
 		
 		$typeBy = "{$type}:{$by}";
 		
@@ -153,7 +153,7 @@ class ShipmentsViewModel extends Fluent
 		{
 			'total:store'	=> 'shipments.store',
 			'total:factory'	=> 'shipments.factory',	 
-			'detail:all'	=> 'shipments.detail',
+			'status:detail'	=> 'shipments.status',
 		};
 	}
 	

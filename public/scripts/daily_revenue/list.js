@@ -7,7 +7,8 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		
 		init() {
-			this.changeType();
+			this.searchData.stDate = (this.searchData.stDate == '') ? this.setDefaultDate : this.searchData.stDate;
+			this.searchData.endDate = (this.searchData.endDate == '') ? this.setDefaultDate : this.searchData.endDate;
 		},
 		
 		changeType() {

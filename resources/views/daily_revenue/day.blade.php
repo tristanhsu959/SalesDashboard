@@ -46,7 +46,7 @@
 				<div x-text="detail?.storeKey || ''"></div>
 			</div>
 			<nav class="right-align">
-				<button class="transparent circle" @click="ui('#salesDetail');"><i>close</i></button >
+				<button class="transparent circle" @click="ui('#hourlyData');"><i>close</i></button >
 			</nav>
 		</div>
 		

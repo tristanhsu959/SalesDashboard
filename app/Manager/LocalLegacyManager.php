@@ -2,7 +2,7 @@
 
 namespace App\Manager;
 
-use App\Facades\PurchaseManager;
+use App\Facades\StoreManager;
 use App\Manager\Repositories\LocalLegacyRepository;
 use App\Enums\OpCenter;
 use App\Enums\Brand;
@@ -49,6 +49,7 @@ class LocalLegacyManager
 		#架構不同,用factoryNo判別
 		$factoryNos = $this->getFactoryNoByOpCenter($brand, $opCenter);
 		
+		#這裏的storeNo已是storeKey格式
 		$data = $this->_repository->getExtraData($brand, $factoryNos, $stDate, $endDate, $productCodes);
 		
 		return $data;
@@ -59,7 +60,7 @@ class LocalLegacyManager
 	 * @params: datetime
 	 * @return: array
 	 */
-	public function getExtraDataByStore($brand, $stDate, $endDate, $storeKey)
+	public function getExtraDataByStore($brand, $opCenter, $stDate, $endDate, $storeKeys)
 	{
 		/*[
 			"shortCode" => "3615"
@@ -73,19 +74,17 @@ class LocalLegacyManager
 			"isExtra" => true
 		]
 		*/
-		$data = $this->_repository->getExtraData($brand->value, $stDate, $endDate, FALSE);
+		$factoryNos = $this->getFactoryNoByOpCenter($brand, $opCenter);
 		
+		$data = $this->_repository->getExtraData($brand, $factoryNos, $stDate, $endDate, FALSE);
+		
+		#這裏的storeNo已是storeKey格式
 		$data = collect($data)->map(function($item, $key){
-			$temp['expectedDate'] 	= $item['expectedDate'];
-			$temp['shortCode'] 		= $item['shortCode'];
-			$temp['productName'] 	= $item['productName'];
-			$temp['qty'] 			= $item['qty'];
-			$temp['amount'] 		= $item['amount'];
-			$temp['storeKey'] 		= PurchaseManager::buildStoreKey($item['storeNo']);
+			$item['storeKey'] 		= StoreManager::buildStoreKey($item['storeNo']);
 			
-			return $temp;
-		})->filter(function($item, $key) use($storeKey){
-			return $item['storeKey'] == $storeKey;
+			return $item;
+		})->filter(function($item, $key) use($storeKeys){
+			return in_array($item['storeKey'], $storeKeys);
 		})->toArray();
 			
 		return $data;
