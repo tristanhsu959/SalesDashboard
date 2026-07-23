@@ -28,8 +28,11 @@
 								<button x-show="hasHourlyData" class="transparent circle small purple-text" @click="$dispatch('active-store', { id: storeData.storeKey, name: storeData.storeName, details: storeData.hourly })"><i>more_vert</i></button>
 								<span x-text="storeData.storeName"></span>
 							</td>
+							<td x-text="Helper.formatDollar(storeData.totalSales || 0)"></td>
+							<td x-text="Helper.formatDollar(storeData.totalExtra || 0)"></td>
+							<td x-text="Helper.formatDollar(storeData.totalDischarge || 0)"></td>
 							<td x-text="Helper.formatDollar(storeData.totalAmount || 0)"></td>
-							<td x-text="Helper.formatDollar(storeData.invoiceAmount || 0)"></td>
+							<td x-text="Helper.formatDollar(storeData.invoiceAmount || 0)" class="red-text"></td>
 							<td x-show="hasClosingData" x-text="Helper.formatDollar(storeData.closingAmount || 0)"></td>
 						</tr>
 						</template>

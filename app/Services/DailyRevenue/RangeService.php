@@ -227,10 +227,12 @@ class rangeService
 			$temp['shopId'] 		= $item['shopId'];
 			$temp['saleDate'] 		= $item['saleDate'];
 			
-			#發票金額 = amount OR totalSales + totalExtra + totalDischarge
-			#實銷金額 = totalSales, 應該只有totalSales?
+			#實銷金額 = totalSales
+			#實收金額 = totalSales + totalExtra
+			#發票金額 = totalSales + totalDischarge
+			#amount	= totalSales+ totalDischarge
 			$amount 		= floatval($item['amount']);
-			$totalSales 	= floatval($item['totalSales']) + floatval($item['totalExtra']) + floatval($item['totalDischarge']);
+			$totalSales 	= floatval($item['totalSales']) + floatval($item['totalDischarge']);
 			$temp['amount'] = empty($totalSales) ? $amount : $totalSales;
 			
 			return $temp;

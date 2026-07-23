@@ -271,15 +271,19 @@ class DayService
 			$temp['hour'] = Carbon::createFromFormat('Y-m-d H', $item['saleDateHour'])->format('H');
 			#先不加1hr=>Carbon::createFromFormat('Y-m-d H', $item['saleDateHour'])->addHour()->format('H');
 			
-			#發票金額 = amount = totalSales + totalExtra + totalDischarge
-			#實銷金額 = totalSales, 應該只有totalSales
-			$amount 		= floatval($item['amount']);
-			$totalSales 	= floatval($item['totalSales']);
-			$totalExtra		= floatval($item['totalExtra']);
-			$totalDischarge = floatval($item['totalDischarge']);
+			#發票金額 ＝ amount = totalSales + totalDischarge(因totalSales有可能0)
+			$amount = floatval($item['amount']);
 			
-			$temp['totalAmount'] 	= $totalSales; #實銷
-			$temp['invoiceAmount'] 	= empty($totalSales) ? $amount : $totalSales + $totalExtra + $totalDischarge; #發票金額
+			#實銷金額
+			$temp['totalSales']		= floatval($item['totalSales']);
+			#溢收
+			$temp['totalExtra']		= floatval($item['totalExtra']);
+			#折讓
+			$temp['totalDischarge']	= floatval($item['totalDischarge']);
+			#實收金額
+			$temp['totalAmount'] 	= $temp['totalSales'] + $temp['totalExtra']	+ $temp['totalDischarge'];
+			#發票金額
+			$temp['invoiceAmount'] 	= empty($temp['totalSales']) ? $amount : $temp['totalSales'] + $temp['totalDischarge'];
 			
 			return $temp;
 		})->groupBy('shopId')->toArray();
@@ -360,7 +364,7 @@ class DayService
 		if (empty($saleData))
 			return TRUE;
 		
-		$header = ['區域', 'Pos店號', '門店代號', '門店名稱', '實銷金額', '發票金額'];
+		$header = ['區域', 'Pos店號', '門店代號', '門店名稱', '實銷金額', '溢收金額', '折讓金額', '實收金額', '發票金額'];
 		
 		if ($params->hasClosingData)
 			$header[] = '日結金額';
@@ -375,6 +379,9 @@ class DayService
 			$temp['posId']			= $item['posId'];
 			$temp['storeKey'] 		= $item['storeKey'];
 			$temp['storeName']		= $item['storeName'];
+			$temp['totalSales']		= round(collect($sale)->pluck('totalSales')->sum(), 2);
+			$temp['totalExtra']		= round(collect($sale)->pluck('totalExtra')->sum(), 2);
+			$temp['totalDischarge']	= round(collect($sale)->pluck('totalDischarge')->sum(), 2);
 			$temp['totalAmount']	= round(collect($sale)->pluck('totalAmount')->sum(), 2);
 			$temp['invoiceAmount']	= round(collect($sale)->pluck('invoiceAmount')->sum(), 2);
 			$temp['closingAmount']	= round($closingAmount, 2);
@@ -465,6 +472,9 @@ class DayService
 			$row[] = $store['posId'];
 			$row[] = $store['storeKey'];
 			$row[] = $store['storeName'];
+			$row[] = Number::currency($store['totalSales'], precision: 0);
+			$row[] = Number::currency($store['totalExtra'], precision: 0);
+			$row[] = Number::currency($store['totalDischarge'], precision: 0);
 			$row[] = Number::currency($store['totalAmount'], precision: 0);
 			$row[] = Number::currency($store['invoiceAmount'], precision: 0);
 			

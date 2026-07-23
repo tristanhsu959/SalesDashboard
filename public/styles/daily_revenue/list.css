@@ -89,6 +89,42 @@ form {
 	
 	.statistics-list {
 		padding: 0;
+		
+		/* 門市 */
+		.statistics-store {
+			table {
+				thead tr {
+					th {
+						&:nth-of-type(1) {
+							width: 100px;
+							min-width: 100px;
+							max-width: 100px;
+						}
+						&:nth-of-type(2) {
+							width: 100px;
+							min-width: 100px;
+							max-width: 100px;
+						}
+						&:nth-of-type(3) {
+							width: 100px;
+							min-width: 100px;
+							max-width: 100px;
+						}
+						&:nth-of-type(4) {
+							width: 200px;
+							min-width: 200px;
+							max-width: 200px;
+						}
+					}
+				}
+				
+				tbody tr {
+					td {
+						
+					}
+				}
+			}
+		}
 	}
 }
 
