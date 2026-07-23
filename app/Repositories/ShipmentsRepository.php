@@ -100,4 +100,57 @@ class ShipmentsRepository extends Repository
 		
 		return $result;
 	}
+	
+	/* 取訂貨訂單資料 By records 
+	 * @params: enums
+	 * @params: datetime
+	 * @params: datetime
+	 * @params: array
+	 * @return: array
+	 */
+	public function getOrderDataByStore($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $storeIds)
+	{
+		#to UTC Time
+		$stDate			= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
+		$endDate		= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
+		$brandId 		= $brand->value;
+		$authAreaIds 	= AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
+		
+		#轉成DB brandid, 其實可不判別OpCenter,結果應相同
+		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
+		
+		
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table(DB::raw('[Order] as a WITH(NOLOCK)'))
+			->join(DB::raw('OrderSub as b WITH(NOLOCK)'), 'b.OrderId', '=', 'a.Id')
+			->join(DB::raw('Store as s WITH(NOLOCK)'), 's.Id', '=', 'a.StoreId')
+			->join(DB::raw('Product as p WITH(NOLOCK)'), 'p.Id', '=', 'b.ProductId')
+			->selectRaw('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE) as expectedDate')
+			->addSelect('b.Quantity as qty', 'b.Money as amount')
+			->addSelect('p.Name as productName', 'p.OldNo as shortCode', 's.No as storeNo')
+			->whereExists(function ($query) use($allowOpCenterIds) {
+				$query->select(DB::raw(1))
+					->from('OperationCenter as oc')
+					->whereColumn('oc.Id', 'a.OperationCenterId')
+					->whereIn('oc.No', $allowOpCenterIds);
+			})
+			->whereExists(function ($query) use($dbBrandIds) {
+				$query->select(DB::raw(1))
+					->from('Brand as bd')
+					->whereColumn('bd.Id', 's.BrandId')
+					->whereIn('bd.Id',  $dbBrandIds);
+			})
+			->where('a.ExpectedDate', '>=', $stDate)
+			->where('a.ExpectedDate', '<', $endDate)
+			->when(! empty($storeIds), function($query) use($storeIds){
+				$query->whereIn('a.StoreId', $storeIds);
+			})
+			->where('b.Money', '>', 0)
+			->where('p.ErpNo', '!=', '')#->ddRawSql();
+			->get()
+			->toArray();
+		
+		return $result;
+	}
 }

@@ -25,10 +25,18 @@
 					</label>
 				</template>
 			</nav>
-			<nav>
-				<template x-for="(name, id) in options.calc" :key="id">
+			<nav x-show="showByOptions">
+				<template x-for="(name, id) in options.by" :key="id">
 					<label class="radio field-light-blue">
-						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id">
+						<input type="radio" name="searchBy" x-model="searchData.by" :value="id" :disabled="! showByOptions">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+			<nav x-show="showCalcOptions">
+				<template x-for="(name, id) in options.calc" :key="id">
+					<label class="radio field-purple">
+						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id" :disabled="! showCalcOptions">
 						<span x-text="name"></span>
 					</label>
 				</template>
@@ -47,7 +55,7 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showAreaOptions" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
@@ -57,27 +65,27 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權區域</output>
 		</fieldset>
 		
-		<div class="field middle-align">
+		<div x-show="showWhereOptions" class="field middle-align">
 			<nav class="wrap">
-				<template x-for="(name, id) in options.by" :key="id">
+				<template x-for="(name, id) in options.where" :key="id">
 					<label class="radio field-purple">
-						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
+						<input type="radio" name="searchWhere" x-model="searchData.where" :value="id" :disabled="! showWhereOptions">
 						<span x-text="name"></span>
 					</label>
 				</template>
 			</nav>
 		</div>
 		
-		<div x-show="searchData.by == 'keyword'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'keyword')">
-			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" x-ref="searchKeyword" @input="errors.delete('keyword')">
+		<div x-show="showProductName" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'keyword')">
+			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" @input="errors.delete('keyword')" :disabled="! showProductName">
 			<label>產品名稱</label>
 		</div>
 			
-		<div x-show="searchData.by == 'category'" class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
-			<select x-model="searchData.category" name="searchCategory"> <!--@change="searchData.shortCodes = []"-->
+		<div x-show="showCategory" class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
+			<select x-model="searchData.category" name="searchCategory" :disabled="! showCategory"> <!--@change="searchData.shortCodes = []"-->
 				<option value="">請選擇</option>
 				<template x-for="(name, catId) in options.category" :key="catId">
 					<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
@@ -89,18 +97,23 @@
 		</div>
 		
 		<template x-for="(products, catId) in options.products" :key="catId">
-			<fieldset x-show="searchData.category == catId && searchData.by == 'category'" class="light-blue-border fieldset product-list">
+			<fieldset x-show="showProduct(catId)" class="light-blue-border fieldset product-list">
 				<legend><i class="small red-text">asterisk</i><span class="light-blue-text">請勾選產品</span></legend>
 				<template x-for="(item, idx) in products" :key="idx">
 					<div class="row">
 						<label class="checkbox large s3 check-amber">
-							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode">
+							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode" :disabled="! showCategory">
 							<span x-text="`${item.shortCode} ${item.productName}`"></span>
 						</label>
 					</div>
 				</template>
 			</fieldset>
 		</template>
+		
+		<div x-show="showStoreName" class="field label border round field-light-blue">
+			<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName" :disabled="! showStoreName">
+			<label>找店名</label>
+		</div>
 		
 		<div class="space"></div>
 		<div>

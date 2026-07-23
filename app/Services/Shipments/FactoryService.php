@@ -34,8 +34,8 @@ class FactoryService
 	{
 		$this->_statistics = [
 			'type'		=> '',
-			'calc'		=> '',
 			'by'		=> '',
+			'calc'		=> '',
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
@@ -79,9 +79,9 @@ class FactoryService
 	 */
 	private function _generateStatistics($params)
 	{
-		$this->_statistics['modeType']		= $params->type;
-		$this->_statistics['modeCalc']		= $params->calc; 
-		$this->_statistics['modeBy']		= $params->by; 
+		$this->_statistics['type']			= $params->type;
+		$this->_statistics['by']			= $params->by; 
+		$this->_statistics['calc']			= $params->calc; 
 		$this->_statistics['brandId']		= $params->brand->value; 
 		$this->_statistics['brandCode']		= $params->brand->code(); 
 		$this->_statistics['startDate'] 	= $params->stDate; 
@@ -98,7 +98,7 @@ class FactoryService
 			$this->_statistics['hasResult'] 	= TRUE;
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			$name = [];
-			$name[] = ($params->type == 'store') ? '門店' : '工廠';
+			$name[] = '工廠';
 			$name[] = ($params->calc == 'day') ? 'BY日' : 'BY月';
 			
 			$this->_statistics['exportName'] = Arr::join($name, '_');
@@ -118,12 +118,14 @@ class FactoryService
 		{
 			$this->_getStoreList($params);
 			
-			$orderData = $this->_getDataFromDB($params);
+			$this->_getProductId($params);
+			
+			$this->_getDataFromDB($params);
 			
 			#未來若建在新系統, 直接mark即可
-			$extraData = $this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
+			$this->_getExtraDataFromDB($params); #追加目前在舊系統,要另外處理
 			
-			$this->_buildBaseData($params, array_filter($orderData), array_filter($extraData));
+			$this->_buildBaseData($params);
 		}
 		catch(Exception $e)
 		{
@@ -149,6 +151,36 @@ class FactoryService
 		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 		
 		$params->storeList = $storeList;
+	}
+	
+	/* 以short code取得product id
+	 * @params: array
+	 * @return: array
+	 */
+	private function _getProductId($params)
+	{
+		try
+		{
+			#取資料都不分營運中心,不然可能會取不到
+			$brand 		= $params->brand;
+			$opCenterIds= $params->allowOpCenterIds;
+			$areaIds 	= $params->allowAreaIds;
+			
+			if ($params->where == 'keyword')
+				$params->productIds = PurchaseManager::getProductIdByName($brand, $opCenterIds, $params->keyword);
+			else if ($params->where == 'category')
+				$params->productIds = PurchaseManager::getProductIdByShortCode($brand, $opCenterIds, $params->shortCodes);
+			else
+				$params->productIds = [];
+			
+			if (empty($params->productIds))
+				throw new Exception('查無此產品');
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception($e->getMessage());
+		}
 	}
 	
 	/* Get order data
@@ -182,7 +214,7 @@ class FactoryService
 			#已包含蘿蔔訂單
 			$orderData = $this->_repository->getOrderDataByProductId($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
 			
-			return $orderData;
+			$params->orderData = $orderData;
 		}
 		catch(Exception $e)
 		{
@@ -216,7 +248,7 @@ class FactoryService
 				return in_array($storeKey, $validStoreKeys);
 			})->toArray();
 			
-			return $extraData;
+			$params->extraData = $extraData;
 		}
 		catch(Exception $e)
 		{
@@ -231,10 +263,10 @@ class FactoryService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _buildBaseData($params, $orderData, $extraData = [])
+	private function _buildBaseData($params)
 	{
 		#整合追加資料
-		$baseData = collect($orderData)->merge($extraData);
+		$baseData = collect($params->orderData)->merge($params->extraData);
 		
 		$authStoreKeys = collect($params->storeList)->pluck('storeKey')->unique()->all();
 		

@@ -7,10 +7,10 @@
 		</article>
 		
 		<div x-show="response.hasResult" class="area-content scrollbar">
-			<h6 x-text="statistics.startDate"></h6>
+			<h6 x-text="statistics.startDate" class="small"></h6>
 			<!-- 區域 -->
 			<section class="statistics-area" :class="response.brandCode">
-				<table class="stripes">
+				<table>
 					<thead>
 						<tr>
 							<template x-for="area in statistics.areaDayoff.header" :key="area">

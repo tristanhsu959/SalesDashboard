@@ -47,7 +47,7 @@
 			<label>結束日期</label>
 		</div>
 		
-		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showAreaOptions" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
@@ -57,10 +57,10 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權區域</output>
 		</fieldset>
 		
-		<div x-show="searchData.by == 'store'" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
+		<div x-show="showStoreName" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'storeName')">
 			<input type="text" name="searchStoreName" maxlength="10" x-model="searchData.storeName" x-ref="searchStoreName" :disabled="searchData.by != 'store'" @input="errors.delete('storeName')">
 			<label>找店名</label>
 		</div>

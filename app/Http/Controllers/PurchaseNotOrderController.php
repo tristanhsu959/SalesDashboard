@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\ShipmentsService;
-use App\ViewModels\ShipmentsViewModel;
+use App\Services\PurchaseNotOrderService;
+use App\ViewModels\PurchaseNotOrderViewModel;
 use App\Enums\Brand;
 use App\Enums\FormAction;
 use App\Enums\Functions;
@@ -14,9 +14,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ShipmentsController extends Controller
+class PurchaseNotOrderController extends Controller
 {
-	public function __construct(protected ShipmentsService $_service, protected ShipmentsViewModel $_viewModel)
+	public function __construct(protected PurchaseNotOrderService $_service, protected PurchaseNotOrderViewModel $_viewModel)
 	{
 	}
 	
@@ -31,7 +31,7 @@ class ShipmentsController extends Controller
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+		return view('purchase_not_order.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -44,35 +44,41 @@ class ShipmentsController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType 		= $request->input('searchType');
-		$searchBy 			= $request->input('searchBy'); #門店/工廠
-		$searchCalc 		= $request->input('searchCalc');
+		$searchCalc			= $request->input('searchCalc');
 		$searchStDate 		= $request->input('searchStDate');
-		$searchEndDate 		= $request->input('searchEndDate');
+		#$searchEndDate 		= $request->input('searchEndDate');
 		$searchAreaIds 		= $request->array('searchAreaIds');
-		$searchWhere 		= $request->input('searchWhere');
+		$searchBy 			= $request->input('searchBy');
 		$searchKeyword		= $request->input('searchKeyword');
 		$searchCategory 	= $request->input('searchCategory');
 		$searchShortCodes 	= $request->array('searchShortCodes');
-		$searchStoreName 	= $request->input('searchStoreName');
  		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-					$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName); 
+		$this->_viewModel->keepSearchData($searchType, $searchCalc, $searchStDate, /* $searchEndDate, */ 
+					$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
 			'searchStDate' 	=> 'required|date_format:Y-m-d',
-			'searchEndDate'	=> 'required|date_format:Y-m-d',
+			#'searchEndDate'	=> 'required|date_format:Y-m-d',
         ]);
  
         if ($validator->fails()) 
 		{
 			$this->_viewModel->fail('查詢參數錯誤');
-			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+			return view('purchase_not_order.statistics')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-						$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName);
+		if ($searchType == 'product' && 
+			(($searchBy == 'keyword' && empty($searchKeyword))
+				OR ($searchBy == 'category' && empty($searchShortCodes))))
+		{
+			$this->_viewModel->fail('缺少查詢產品參數');
+			return view('purchase_not_order.statistics')->with('viewModel', $this->_viewModel);
+		}
+		
+		$response = $this->_service->getStatistics($brand, $searchType, $searchCalc, $searchStDate, /* $searchEndDate, */ 
+						$searchAreaIds, $searchBy, $searchKeyword, $searchCategory, $searchShortCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -81,7 +87,7 @@ class ShipmentsController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; 
 		
-		return view('shipments.statistics')->with('viewModel', $this->_viewModel); 
+		return view('purchase_not_order.statistics')->with('viewModel', $this->_viewModel); 
 	}
 	
 	/* Export
@@ -101,7 +107,7 @@ class ShipmentsController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('shipments.statistics')->with('viewModel', $this->_viewModel);
+			return view('purchase_not_order.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

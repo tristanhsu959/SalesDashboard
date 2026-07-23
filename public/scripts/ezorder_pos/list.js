@@ -16,6 +16,13 @@ document.addEventListener('alpine:init', () => {
 				Alpine.store('ezorderPos').showFilter = true;
 		},
 		
+		get showAreaOptions() {
+			return (Object.keys(this.options.areaList).length > 0);
+		},
+		get showStoreName() {
+			return (this.searchData.by == 'store');
+		},
+		
 		search() {
 			this.errors.clear();
 			

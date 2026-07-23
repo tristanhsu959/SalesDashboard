@@ -15,7 +15,7 @@ form {
 .statistics-list {
 	/* 門市 */
 	.statistics-store {
-		max-height: calc(100vh - 200px);
+		/*top nav,toolbar,sheet,padding*/
 		table {
 			thead tr {
 				th {

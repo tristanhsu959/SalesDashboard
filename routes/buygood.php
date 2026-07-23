@@ -10,6 +10,7 @@ use App\Http\Controllers\ShipmentsController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PurchaseSalesController;
 use App\Http\Controllers\EzOrderPosController;
+use App\Http\Controllers\PurchaseNotOrderController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -51,6 +52,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('shipments', [ShipmentsController::class, 'showSearch'])->name('shipments');
 		Route::post('shipments/search', [ShipmentsController::class, 'search'])->name('shipments.search');
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
+	});	
+	
+	/* 未訂貨查詢 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BG_PURCHASE_NOT_ORDER->value, ':')])->group(function(){
+		Route::get('purchase_not_order', [PurchaseNotOrderController::class, 'showSearch'])->name('purchase_not_order');
+		Route::post('purchase_not_order/search', [PurchaseNotOrderController::class, 'search'])->name('purchase_not_order.search');
+		Route::get('purchase_not_order/export/{token}', [PurchaseNotOrderController::class, 'export'])->name('purchase_not_order.export');
 	});	
 	
 	/* 本日營收 */

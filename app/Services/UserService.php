@@ -64,8 +64,9 @@ class UserService
 			$password = Hash::make($password);
 			
 			#3. Convert area permission
-			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
-			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
+			$areaPermission['opCenter'] = data_get($areaPermission, 'opCenter', []);
+			$areaPermission['sales'] 	= array_map('intval', data_get($areaPermission, 'sales', []));
+			$areaPermission['purchase'] = array_map('intval', data_get($areaPermission, 'purchase', []));
 			
 			#4. Create user
 			$this->_repository->insert($account, $password, $displayName, $department, $email, $description, $isActive, 
@@ -140,8 +141,9 @@ class UserService
 				$password = Hash::make($password);
 			
 			#3. Convert area permission
-			$areaPermission['sales'] 	= array_map('intval', $areaPermission['sales']);
-			$areaPermission['purchase'] = array_map('intval', $areaPermission['purchase']);
+			$areaPermission['opCenter'] = data_get($areaPermission, 'opCenter', []);
+			$areaPermission['sales'] 	= array_map('intval', data_get($areaPermission, 'sales', []));
+			$areaPermission['purchase'] = array_map('intval', data_get($areaPermission, 'purchase', []));
 			
 			#4. Update user
 			$this->_repository->update($id, $account, $password, $displayName, $department, $email, $description, $isActive, 

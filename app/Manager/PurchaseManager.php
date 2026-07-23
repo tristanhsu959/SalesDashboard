@@ -198,6 +198,26 @@ class PurchaseManager
 		return $ids;
 	}
 	
+	/* 取ShortCode對應的ProductId(查詢時)
+	 * @params: int
+	 * @params: boolean
+	 * @return: array
+	 */
+	public function getProductShortCodeById($brand, $opCenter, $productIds)
+	{
+		#只能用id取product情況下使用
+		$brandId = $brand->value;
+		
+		$result = $this->_repository->getProductShortCodeById($brandId, $opCenter, $productIds);
+		
+		#format to int
+		$mappings = collect($result)->mapWithKeys(function($item, $key){
+			return [$item['shortCode'] => $item['productName']];
+		})->sortKeys()->toArray();
+		
+		return $mappings;
+	}
+	
 	/* 取對應的Product&Short code mapping
 	 * @params: int
 	 * @params: boolean
@@ -250,6 +270,74 @@ class PurchaseManager
 		
 		return data_get($config, $code, 1);
 	}
+	
+	/* 取出貨產品設定, 有啟用的產品清單 - purchase product setting(後台設定)
+	 * @params: int
+	 * @return: string
+	 */
+	public function getEnableProductSettingsAndCategory($brand, $allowOpCenter)
+	{
+		#同總量邏輯
+		$enableProducts 	= $this->_repository->getEnableProductSettings($brand);
+		$enableShortCodes 	= collect($enableProducts)->pluck('shortCode')->values()->all();
+		
+		#再至訂貨取到對應的產品名(這裏會分營運中心)
+		#shortCode => productName
+		$productMapping = $this->getProductShortCodeMapping($brand, $allowOpCenter);
+		
+		#Build options
+		/*array:4 [
+			"shortCode" => "0001"
+			"productName" => "招牌餡"
+			"groupId" => 1
+			"groupName" => "餡類"
+		]
+		*/
+		
+		$brandId = $brand->value;
+		
+		#因設定沒分營運中心, 故要改以訂貨的為依據過濾
+		$list = collect($productMapping)->filter(function($item, $key) use($enableShortCodes){
+			return in_array($item['productNo'], $enableShortCodes);
+		})->map(function($item, $key) use($brandId) {
+			
+			$temp['shortCode'] 	= $item['productNo'];
+			$temp['productName']= $item['productName'];
+			
+			$category = $this->getGroupByShortCode($brandId, $temp['shortCode']);
+			
+			$temp['groupId']	= $category['groupId'];
+			$temp['groupName'] 	= $category['groupName'];
+			
+			return $temp;
+		})->values()->all();
+		
+		#要分成category & product對應
+		$category = collect($list)->groupBy('groupId')->map(function($items, $key){
+			$temp['catId'] 	= $items->pluck('groupId')->unique()->first();
+			$temp['catName']= $items->pluck('groupName')->unique()->first();
+			
+			return $temp;
+		})->mapWithKeys(function($item, $key){
+			return [$item['catId'] => $item['catName']];
+		})->toArray();
+		
+		#Build product
+		$products = collect($list)->groupBy('groupId')->map(function($items, $key){
+			return $items->map(function($item, $key){
+				unset($item['groupId']);
+				unset($item['groupName']);
+				
+				return $item;
+			});
+			
+			return $items;
+		})->toArray();
+		
+		return [$category, $products];
+	}
+	
+	
 	
 	/******************** Store ********************/
 	/* Get store data by brand

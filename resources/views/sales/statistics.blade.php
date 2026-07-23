@@ -20,7 +20,7 @@
 			<nav class="wrap">
 				<template x-for="(name, id) in options.type" :key="id">
 					<label class="radio field-red">
-						<input type="radio" name="searchType" x-model="searchData.type" :value="id" @change="switchConditions()">
+						<input type="radio" name="searchType" x-model="searchData.type" :value="id">
 						<span x-text="name"></span>
 					</label>
 				</template>
@@ -28,12 +28,12 @@
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.today">
+			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" @input="errors.delete('stDate')" :max="searchData.today">
 			<label>開始日期</label>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" x-ref="searchEndDate" @input="errors.delete('endDate')" :max="searchData.today">
+			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :max="searchData.today">
 			<label>結束日期</label>
 		</div>
 		
@@ -47,7 +47,7 @@
 				</label>
 				</template>
 			</nav>
-			<output class="red-text small">未選時取全部</output>
+			<output class="red-text small">未選時取全部授權區域</output>
 		</fieldset>
 		
 		<div class="field label border round field-light-blue">

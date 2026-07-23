@@ -3,7 +3,7 @@
 namespace App\ViewModels;
 
 use App\Facades\AppManager;
-use App\Services\ShipmentsService;
+use App\Services\PurchaseNotOrderService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -18,11 +18,11 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
-class ShipmentsViewModel extends Fluent
+class PurchaseNotOrderViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
-	public function __construct(protected ShipmentsService $_service)
+	public function __construct(protected PurchaseNotOrderService $_service)
 	{
 		$this->function		= NULL;
 		$this->action 		= FormAction::LIST; 
@@ -52,7 +52,24 @@ class ShipmentsViewModel extends Fluent
 	 */
 	private function _setOptions()
 	{
-		$this->_setSearchMode();
+		$fillingTitle = ($this->brand == Brand::BAFANG) ? '所有餡皮' : '炸雞腿．炸排骨';
+		$type = [
+			'filling'	=> $fillingTitle,
+			'product'	=> '自選產品',
+		];
+		$this->set('options.type', $type);
+		
+		$calc = [
+			'whereall'	=> '全部符合未訂', 
+			'whereany'	=> '任一符合未訂', 
+		];
+		$this->set('options.calc', $calc);
+		
+		$by = [
+			'keyword'	=> '關鍵字查詢',
+			'category'	=> '分類查詢', 
+		];
+		$this->set('options.by', $by);
 		
 		$areaList = $this->getPurchaseAreaOptions($this->brand);
 		$this->set('options.areaList', $areaList);
@@ -61,37 +78,6 @@ class ShipmentsViewModel extends Fluent
 		$this->set('options.category', $category);
 		$this->set('options.products', $products); 
 		
-	}
-	
-	/* 查詢選項
-	 * @params:  
-	 * @return: void
-	 */
-	private function _setSearchMode()
-	{
-		$type = [
-			'total'		=> '總量', 
-			'status'	=> '門店訂貨狀況',
-		];
-		$this->set('options.type', $type);
-		
-		$by = [
-			'store'		=> '依門店', #option of total
-			'factory'	=> '依工廠', #option of total
-		];
-		$this->set('options.by', $by);
-		
-		$calc = [
-			'day'	=> '以日計算', 
-			'month'	=> '以月計算',
-		];
-		$this->set('options.calc', $calc);
-
-		$where = [
-			'keyword'	=> '關鍵字查詢',
-			'category'	=> '分類查詢', 
-		];
-		$this->set('options.where', $where);
 	}
 	
 	/* Form submit action
@@ -104,8 +90,8 @@ class ShipmentsViewModel extends Fluent
 		
 		return match($formAction)
 		{
-			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.shipments.search')),
-			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.shipments.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.purchase_not_order.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.purchase_not_order.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -116,25 +102,23 @@ class ShipmentsViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'total', $searchBy = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
-						$searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
-						$searchCategory = '', $searchShortCodes = [], $searchStoreName = '')
+	public function keepSearchData($searchType = 'filling', $searchCalc = 'whereall', $searchStDate = NULL, /* $searchEndDate = NULL, */
+						$searchAreaIds = [], $searchBy = 'keyword', $searchKeyword = '', 
+						$searchCategory = '', $searchShortCodes = [])
     {
 		$today = Carbon::tomorrow()->format('Y-m-d');
 		$searchStDate	= $searchStDate ?? $today;
-		$searchEndDate 	= $searchEndDate ?? $today;
+		#$searchEndDate 	= $searchEndDate ?? $today;
 		
 		$this->set('search.type', $searchType);
-		$this->set('search.by', $searchBy);
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
-		$this->set('search.endDate', $searchEndDate);
+		#$this->set('search.endDate', $searchEndDate);
 		$this->set('search.areaIds', $searchAreaIds);
-		$this->set('search.where', $searchWhere);
+		$this->set('search.by', $searchBy);
 		$this->set('search.keyword', $searchKeyword);
 		$this->set('search.category', $searchCategory);
 		$this->set('search.shortCodes', $searchShortCodes);
-		$this->set('search.storeName', $searchStoreName);
 		$this->set('search.tomorrow', Carbon::tomorrow()->format('Y-m-d'));
 	}
 	
@@ -144,16 +128,12 @@ class ShipmentsViewModel extends Fluent
 	 */
 	public function getPartialView()
 	{
-		$type 	= $this->get('search.type', NULL);
-		$by		= ($type == 'status') ? 'detail' : $this->get('search.by', NULL);
+		$type = $this->get('search.type', NULL);
 		
-		$typeBy = "{$type}:{$by}";
-		
-		return match($typeBy)
+		return match($type)
 		{
-			'total:store'	=> 'shipments.store',
-			'total:factory'	=> 'shipments.factory',	 
-			'status:detail'	=> 'shipments.status',
+			'filling' => 'purchase_not_order.store',
+			'product' => 'purchase_not_order.store',
 		};
 	}
 	
@@ -172,7 +152,7 @@ class ShipmentsViewModel extends Fluent
 		
 		#filter tool
 		$type = data_get($this->statistics, 'type', NULL);
-		$response['hasFilter'] = ($type == 'store');
+		$response['hasFilter'] = ($type == 'filling' OR $type == 'product');
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;

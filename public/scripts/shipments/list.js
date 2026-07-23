@@ -10,6 +10,32 @@ document.addEventListener('alpine:init', () => {
 			
 		},
 		
+		get showByOptions() {
+			return this.searchData.type == 'total';
+		},
+		get showCalcOptions() {
+			return this.searchData.type == 'total';
+		},
+		get showAreaOptions() {
+			return (Object.keys(this.options.areaList).length > 0);
+		},
+		get showWhereOptions() {
+			return this.searchData.type == 'total';
+		},
+		get showProductName() {
+			return (this.searchData.type == 'total' && this.searchData.where == 'keyword');
+		},
+		get showCategory() {
+			return (this.searchData.type == 'total' && this.searchData.where == 'category');
+		},
+		get showProduct() {
+			return (catId) => (this.searchData.type == 'total' && this.searchData.where == 'category' 
+							&& this.searchData.category == catId);
+		},
+		get showStoreName() {
+			return (this.searchData.type == 'status');
+		},
+		
 		search() {
 			this.errors.clear();
 			
@@ -27,10 +53,10 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.by == 'keyword' && this.searchData.keyword == '')
+			if (this.searchData.type == 'total' && this.searchData.by == 'keyword' && this.searchData.keyword == '')
 				this.errors.add('keyword');
 			
-			if (this.searchData.by == 'category' && this.searchData.shortCodes.length == 0)
+			if (this.searchData.type == 'total' && this.searchData.by == 'category' && this.searchData.shortCodes.length == 0)
 			{
 				this.errors.add('shortCodes');
 				Alpine.store('toast').notify('請勾選產品');
@@ -39,14 +65,6 @@ document.addEventListener('alpine:init', () => {
 			if (this.errors.size == 0)
 			{
 				this.$store.app.isLoading = true;
-				
-				if (this.searchData.by == 'keyword')
-				{
-					this.searchData.category = '';
-					this.searchData.shortCodes = [];
-				}
-				else
-					this.searchData.keyword = '';
 				
 				setTimeout(() => {
 					ui('#searchPanel');
@@ -66,9 +84,11 @@ document.addEventListener('alpine:init', () => {
 			this.searchData.stDate = this.searchData.tomorrow;
 			this.searchData.endDate = this.searchData.tomorrow;
 			this.searchData.areaIds = [];
+			this.searchData.where = Object.keys(this.options.where)[0];
 			this.searchData.keyword = '';
 			this.searchData.category = '';
 			this.searchData.shortCodes = [];
+			this.searchData.storeName = '';
 			this.errors.clear();
 		},
     }));
@@ -96,6 +116,7 @@ document.addEventListener('alpine:init', () => {
 		activeProduct: '',
 		
 		init() { 
+			/* Set active tab */
 			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
@@ -114,6 +135,53 @@ document.addEventListener('alpine:init', () => {
 			);
 			
 			return result;
+		},
+	
+    }));
+	
+	/*呼叫function要多處理變數*/
+	Alpine.data('StatisticsStatus', (data) => ({
+		statistics: {...data},
+		
+		init() { 
+		},
+		
+		/* get filterStore() {
+			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
+			
+			const list = Object.values(this.statistics.storeList);
+			
+			const result = list.filter(store => 
+				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeName || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
+		}, */
+	
+    }));
+	
+	/* Hourly revenue */
+	Alpine.data('storeDetail', () => ({
+		detail: {
+			dateList: [],
+			storeKey: '',
+			storeName: '',
+			data: {},
+		},
+		
+		init() {
+		},
+		
+		openDetail(eventData) {
+			this.detail.dateList 	= eventData.dateList;
+			this.detail.storeKey 	= eventData.id;
+			this.detail.storeName 	= eventData.name;
+			this.detail.data 		= eventData.details;
+			
+			ui('#detailData');
 		},
 	
     }));

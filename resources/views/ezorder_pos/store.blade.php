@@ -7,8 +7,8 @@
 	
 	<div x-show="response.hasResult" class="statistics">
 		<!-- 門店 -->
-		<div class="statistics-list padding">
-			<section class="statistics-store scrollbar" :class="response.brandCode">
+		<div class="statistics-list">
+			<section class="statistics-store scrollbar no-tab" :class="response.brandCode">
 				<table class="stripes border">
 					<thead>
 						<tr>

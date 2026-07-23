@@ -89,6 +89,7 @@ table {
 /* Page table common */
 .page, .statistics-list {
 	padding: 1rem;
+	
 	/* 區域彙總 */
 	.statistics-area.grid-table {
 		
@@ -100,6 +101,7 @@ table {
 			color: red;
 		}
 	}
+	
 	/* 區域彙總 */
 	.statistics-area {
 		--table-bg: #ffffff; 			/* light-2 */
@@ -180,6 +182,10 @@ table {
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
 		margin: 0;
 		border: 1px solid var(--table-bg-dark);
+		
+		&.no-tab {
+			max-height: calc(100vh - 128px - 2rem - 2rem); 
+		}
 		
 		table {
 			table-layout: fixed

@@ -28,19 +28,25 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.ezorder_pos'),
 		],
 		[
-			'name' 		=> Functions::BF_SHIPMENTS->label(), #出貨查詢
+			'name' 		=> Functions::BF_SHIPMENTS->label(), #出貨總量查詢
 			'code'		=> Functions::BF_SHIPMENTS->value,
 			'style' 	=> ['icon' => 'local_shipping', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
 		],
 		[
-			'name' 		=> Functions::BF_PURCHASE_REPORT->label(), #出貨統計報表
+			'name' 		=> Functions::BF_PURCHASE_NOT_ORDER->label(), #未訂貨查詢
+			'code'		=> Functions::BF_PURCHASE_NOT_ORDER->value,
+			'style' 	=> ['icon' => 'orders', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_not_order'),
+		],
+		[
+			'name' 		=> Functions::BF_PURCHASE_REPORT->label(), #出貨統計報表(八方only)
 			'code'		=> Functions::BF_PURCHASE_REPORT->value,
 			'style' 	=> ['icon' => 'analytics', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_report'),
 		],
 		[
-			'name' 		=> Functions::BF_MONTHLY_FILLING->label(), #月初報表
+			'name' 		=> Functions::BF_MONTHLY_FILLING->label(), #月初報表(八方only)
 			'code'		=> Functions::BF_MONTHLY_FILLING->value,
 			'style' 	=> ['icon' => 'summarize', 'color' => 'orange-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.monthly_filling'),
@@ -85,10 +91,16 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.ezorder_pos'),
 		],
 		[
-			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨查詢
+			'name' 		=> Functions::BG_SHIPMENTS->label(), #出貨總量查詢
 			'code'		=> Functions::BG_SHIPMENTS->value,
 			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
+		],
+		[
+			'name' 		=> Functions::BG_PURCHASE_NOT_ORDER->label(), #未訂貨查詢
+			'code'		=> Functions::BG_PURCHASE_NOT_ORDER->value,
+			'style' 	=> ['icon' => 'orders', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase_not_order'),
 		],
 		/* [
 			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計
