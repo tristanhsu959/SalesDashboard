@@ -254,4 +254,36 @@ class AuthService
 			
 		return TRUE;
 	}
+	
+	/* 忘記密碼
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function forgetPassword($account)
+	{
+		try
+		{
+			$userInfo = $this->_repository->getUserByAccount($account);
+			
+			$mail = $userInfo['email'];
+			
+			if (empty($mail))
+			{
+				$msg = "忘記密碼連結發送失敗，此帳號 [{$account}] 尚未設定Mail";
+				
+				Log::channel('webSysLog')->error($msg, [ __class__, __function__, __line__]);
+				throw new Exception($msg);
+			}
+			
+			$msg = "忘記密碼連結已發送至帳號 {$account} 所屬信箱";
+			
+			Log::channel('webSysLog')->info($msg, [ __class__, __function__, __line__]);
+			
+			return ResponseLib::initialize()->success($msg);
+		}
+		catch(Exception $e)
+		{
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
+	}
 }

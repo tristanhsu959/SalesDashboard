@@ -21,6 +21,7 @@ Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
 Route::redirect('signin', '/'); 
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
+Route::post('forgetPassword', [AuthController::class, 'forgetPassword'])->name('forgetPassword.post');
 
 Route::middleware([AuthMiddleware::class])->group(function(){
 	/***** Home *****/
@@ -28,7 +29,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	/***** User profile *****/
 	Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
-
+	
 	/***** 產品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
 		Route::get('product', [ProductController::class, 'list'])->name('products');

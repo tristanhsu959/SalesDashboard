@@ -82,4 +82,36 @@ class AuthController extends Controller
 		return view('signin')->with('viewModel', $this->_viewModel);
 	}
 	
+	/* 忘記密碼
+	 * @params: request
+	 * @return: view
+	 */
+	public function forgetPassword(Request $request)
+	{
+		#此功能不存viewModel
+		$account = $request->input('account');
+		
+		$this->_viewModel->action = FormAction::SIGNIN;
+		
+		$validator = Validator::make($request->all(), [
+            'account' => 'required|max:20',
+		]);
+		
+		if ($validator->fails())
+		{
+			$this->_viewModel->fail('忘記密碼連結發送失敗：使用者帳號未輸入');
+			return view('signin')->with('viewModel', $this->_viewModel);
+		}
+		
+		$response = $this->_service->forgetPassword($account);
+	
+		#不管成功或失敗都是回到登入頁
+		if ($response->status === FALSE)
+			$this->_viewModel->fail($response->msg);
+		else
+			$this->_viewModel->success($response->msg);
+		
+		return view('signin')->with('viewModel', $this->_viewModel);
+	}
+	
 }
