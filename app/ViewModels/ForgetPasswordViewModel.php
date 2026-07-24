@@ -6,14 +6,14 @@ use App\Enums\FormAction;
 use App\ViewModels\Attributes\attrStatus;
 use Illuminate\Support\Fluent;
 
-class AuthViewModel extends Fluent
+class forgetPasswordViewModel extends Fluent
 {
 	use attrStatus;
 	
 	public function __construct()
 	{
-		#Default data
-		$this->action = FormAction::SIGNIN;
+		#給設定password form使用, 非login頁面的send link
+		$this->action = FormAction::UPDATE; #不影響
 		$this->keepFormData();
 		$this->success();
 	}
@@ -33,16 +33,6 @@ class AuthViewModel extends Fluent
 	 * @return: void
 	 */
 	public function responseData()
-    {
-		$this->set('formData.formAction', route('signin.post'));
-		return $this->only('formData');
-	}
-	
-	/* Output json
-	 * @params: string
-	 * @return: void
-	 */
-	public function changePasswordData()
     {
 		$formData['formAction']	= route('forgetPassword.send');
 		$formData['account']	= '';

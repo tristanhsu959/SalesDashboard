@@ -9,16 +9,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ChangePasswordAuthLink extends Mailable
+class ForgetPassword extends Mailable
 {
     use Queueable, SerializesModels;
-
+	
+	public $title;
+	public $link;
+	public $expiredMins;
+	
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($link, $expiredMins)
     {
-        //
+        $this->title = '[Dashboard] 忘記密碼設定通知';
+		$this->link = $link;
+		$this->expiredMins = $expiredMins;
     }
 
     /**
@@ -27,7 +33,7 @@ class ChangePasswordAuthLink extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Dashboard]忘記密碼通知',
+            subject: $this->title,
         );
     }
 
@@ -37,7 +43,7 @@ class ChangePasswordAuthLink extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.forget_password',
         );
     }
 

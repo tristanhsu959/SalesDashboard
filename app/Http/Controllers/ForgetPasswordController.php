@@ -3,38 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\AuthService;
-use App\ViewModels\AuthViewModel;
+use App\Services\ForgetPasswordService;
+use App\ViewModels\ForgetPasswordViewModel;
 use App\Libraries\ResponseLib;
 use App\Enums\FormAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
+class ForgetPasswordController extends Controller
 {
-	public function __construct(protected AuthService $_service, protected AuthViewModel $_viewModel)
+	public function __construct(protected ForgetPasswordService $_service, protected ForgetPasswordViewModel $_viewModel)
 	{
 	}
 	
-	/* Signin view
+	/* 忘記密碼 Called by login view
 	 * @params: request
 	 * @return: view
 	 */
-	public function showSignin()
+	public function sendLink(Request $request)
 	{
-		#自動登出,避免view載入錯誤
-		$this->_service->signout();
-		$this->_viewModel->action = FormAction::SIGNIN;
-		session()->put('botTimeValidate', now());
+		#此功能不存viewModel
+		$account = $request->input('account');
 		
-		return view('signin')->with('viewModel', $this->_viewModel);
+		$validator = Validator::make($request->all(), [
+            'account' => 'required|max:20',
+		]);
+		
+		if ($validator->fails())
+			return redirect()->route('signin')->with('msg', '忘記密碼連結發送失敗：使用者帳號未輸入');
+		
+		$response = $this->_service->sendLink($account);
+	
+		#不管成功或失敗都是回到登入頁
+		$msg = $response->msg;
+
+		return redirect()->route('signin')->with('msg', $msg);
+	}
+	
+	/* 
+	 * @params: request
+	 * @return: view
+	 */
+	public function showSetting($token)
+	{
+		$this->_service->getInfoByToken($token);
+		$this->_viewModel->keepFormData($token); #account only
+		
+		return view('forget_password_setting')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* 登入驗證
 	 * @params: request
 	 * @return: view
 	 */
-	public function signin(Request $request)
+	public function setting(Request $request)
 	{
 		$account 	= $request->input('account');
 		$password	= $request->input('password');
@@ -81,4 +103,7 @@ class AuthController extends Controller
 		
 		return view('signin')->with('viewModel', $this->_viewModel);
 	}
+	
+	
+	
 }
