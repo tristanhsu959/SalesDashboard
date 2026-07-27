@@ -46,10 +46,18 @@ class ForgetPasswordController extends Controller
 	 */
 	public function showSetting($token)
 	{
-		$this->_service->getInfoByToken($token);
-		$this->_viewModel->keepFormData($token); #account only
+		$this->_viewModel->initialize(FormAction::UPDATE);
+		$response = $this->_service->getInfoByToken($token);
 		
-		return view('forget_password_setting')->with('viewModel', $this->_viewModel);
+		if ($response->status === FALSE)
+			return redirect()->route('signin')->with('msg', $response->msg);
+		else
+		{
+			$data = $response->data;
+			$this->_viewModel->keepFormData($data['id'], $data['account'], $data['name']);
+			
+			return view('forget_password_setting')->with('viewModel', $this->_viewModel);
+		}
 	}
 	
 	/* 登入驗證
@@ -92,17 +100,6 @@ class ForgetPasswordController extends Controller
 			return redirect('home');
 	}
 	
-	/* Signout
-	 * @params: request
-	 * @return: view
-	 */
-	public function signout(Request $request)
-	{
-		$this->_viewModel->action = FormAction::SIGNIN;
-		$this->_service->signout();
-		
-		return view('signin')->with('viewModel', $this->_viewModel);
-	}
 	
 	
 	

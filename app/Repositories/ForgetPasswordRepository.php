@@ -75,9 +75,11 @@ class ForgetPasswordRepository extends Repository
 		{
 			$db = $this->connectSalesDashboard();
 			$result = $db->table('forget_password as f')
-						->select('f.userId', 'f.userName')
 						->join('user as u', 'u.userId', '=', 'f.userId')
-						->where('f.token', '=', $token);
+						->where('f.token', '=', $token)
+						->select('u.userId', 'u.userAccount', 'u.userDisplayName')
+						->addSelect('f.expiredAt')
+						->get()->first();
 			
 			return $result;
 		}

@@ -8,7 +8,7 @@ document.addEventListener('alpine:init', () => {
 		
         validate() {
 			this.errors.clear();
-			
+			console.log(22);
 			if (Helper.isEmpty(this.formData.account))
 				this.errors.add('account');
 			if (Helper.isEmpty(this.formData.password))
@@ -34,7 +34,7 @@ document.addEventListener('alpine:init', () => {
 		
 		validate() {
 			this.errors.clear();
-			
+			console.log(2);
 			if (Helper.isEmpty(this.formData.account))
 				this.errors.add('account');
 			

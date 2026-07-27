@@ -19,6 +19,7 @@ use Exception;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 
 class ForgetPasswordService
 {
@@ -121,7 +122,18 @@ class ForgetPasswordService
 	
 	public function getInfoByToken($token)
 	{
-		$info = $this->_repository->getInfoByToken($token);
-		dd($info);
+		$result = $this->_repository->getInfoByToken($token);
+		
+		$info['id']			= $result['userId'];
+		$info['account']	= $result['userAccount'];
+		$info['name']		= $result['userDisplayName'];
+		$info['expiredTime']= $result['expiredAt'];
+		
+		$expired = Carbon::parse($info['expiredTime']);
+		return ResponseLib::initialize($info)->success();
+		if (now()->greaterThan($expired))
+			return ResponseLib::initialize()->fail('此驗證連結已過期，請重新執行忘記密碼');
+		else
+			return ResponseLib::initialize($info)->success();
 	}
 }

@@ -13,8 +13,19 @@ class forgetPasswordViewModel extends Fluent
 	public function __construct()
 	{
 		#給設定password form使用, 非login頁面的send link
-		$this->action = FormAction::UPDATE; #不影響
-		$this->keepFormData();
+		$this->function	= NULL; #獨立頁面可不設定
+		$this->action 	= FormAction::UPDATE; #不影響
+		$this->success();
+	}
+	
+	/* initialize
+	 * @params: enum
+	 * @return: void
+	 */
+	public function initialize($action)
+	{
+		#初始化各參數及Form Options
+		$this->action	= $action;
 		$this->success();
 	}
 	
@@ -22,10 +33,12 @@ class forgetPasswordViewModel extends Fluent
 	 * @params: string
 	 * @return: void
 	 */
-	public function keepFormData($account = '', $password = '')
+	public function keepFormData($id = 0, $account = '', $name = '')
     {
+		#不存Password
+		$this->set('formData.id', $id);
 		$this->set('formData.account', $account);
-		$this->set('formData.password', $password);
+		$this->set('formData.name', $name);
 	}
 	
 	/* Output json

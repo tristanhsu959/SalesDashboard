@@ -47,7 +47,7 @@
 			</nav>
 			<nav>
 				<div class="max"></div>
-				<button class="right pink-text transparent" @click="ui('#forgetPwd')">忘記密碼</button>
+				<button type="button" class="right pink-text transparent" @click="ui('#forgetPwd')">忘記密碼</button>
 			</nav>
 		</div>
 	</form>
