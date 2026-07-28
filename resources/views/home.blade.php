@@ -18,8 +18,16 @@
 <section class="section-wrapper container">
 	<section class="container">
 		<h6 class="red-text">Dashboard</h6>
-		<pre class="red-border"><i class="right-padding">commit</i>版本更新日期：2026-07-12</pre>
+		<pre class="red-border"><i class="right-padding">commit</i>版本更新日期：2026-07-31</pre>
 		<pre class="red-border"><i class="right-padding">commit</i>因版本更新，查詢可能顯示空白，請按 <code class="grey white-text tiny-padding">Ctrl</code> + <code class="grey white-text tiny-padding">F5</code> 清除瀏覽器暫存</pre>
+	
+		@if(!$viewModel->hasSetPassword())
+		<pre class="red-border">您尚未設定系統密碼，請點擊 <i class="orange circle small">person</i> 進行密碼設定</pre>
+		@endif
+		
+		@if(!$viewModel->hasSetEmail())
+		<pre class="red-border red white-text">您尚未設定Mail信箱，請盡速設定完成，以避免無法使用忘記密碼功能</pre>
+		@endif
 	</section>
 	
 	<!--section class="container">
@@ -28,9 +36,7 @@
 		<pre class="red-border"><i class="right-padding">kid_star</i>門店營收：新增客單統計查詢</pre>
 		<pre class="red-border"><i class="right-padding">kid_star</i>門店進貨及銷售：新增功能(測試中)</pre>
 	</section-->
-	@if(!$viewModel->hasSetPassword())
-	<pre class="red-border">您尚未設定系統密碼，請點擊 <i class="orange circle small">person</i> 進行密碼設定</pre>
-	@endif
+	
 {{--
 	<div class="purchase dp-2">
 		<h6>台北 屯山</h6>
