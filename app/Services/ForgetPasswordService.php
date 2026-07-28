@@ -131,14 +131,6 @@ class ForgetPasswordService
 		
 		$expired = Carbon::parse($info['expiredTime']);
 		
-		
-		
-		
-		return ResponseLib::initialize($info)->success(); #testing
-		
-		
-		
-		
 		if (now()->greaterThan($expired))
 			return ResponseLib::initialize()->fail('此驗證連結已過期，請重新執行忘記密碼');
 		else
