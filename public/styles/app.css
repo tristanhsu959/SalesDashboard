@@ -100,7 +100,7 @@ body {
 		}
 	}
 		
-	main.signin {
+	main.signin, main.forget-password {
 		min-height: 100vh;
 		display: flex;
 		justify-content: center;

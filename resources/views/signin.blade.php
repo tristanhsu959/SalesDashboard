@@ -56,27 +56,4 @@
 		</div>
 	</form>
 </div>
-	
-<!--div x-data="changePassword(@js($viewModel->changePasswordData()))">
-	<form :action="formData.formAction" method="post" class="row" novalidate @submit.prevent="validate()" >
-		@csrf
-		<dialog id="forgetPwd" class="modal">
-			<h5>忘記密碼</h5>
-			<div class="red-text small">系統將發送變更連結至此帳號信箱，請點擊連結進入密碼重設頁面</div>
-			
-			<div class="field label border" :class="Helper.hasError(errors, 'account')">
-				<input x-model="formData.account" type="text" name="account" maxlength="20" @input="errors.delete('account')">
-				<label>輸入登入帳號</label>
-			</div>
-			<nav class="group split">
-				<button type="submit" class="light-blue left-round max">
-					<span>送出</span>
-				</button>
-				<button type="button" class="right-round btn-cancel" @click="reset">
-					<i>close</i>
-				</button>
-			</nav>
-		</dialog>
-	</form>
-</div-->
 @endsection
