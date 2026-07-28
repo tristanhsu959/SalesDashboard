@@ -66,41 +66,33 @@ class ForgetPasswordController extends Controller
 	 */
 	public function setting(Request $request)
 	{
-		$account 	= $request->input('account');
+		$userId 	= $request->input('id');
+		$account 	= $request->input('account'); #為了要暫存
+		$name 		= $request->input('name'); #為了要暫存
 		$password	= $request->input('password');
-		$captcha	= $request->input('captcha');
 		
-		$this->_viewModel->action = FormAction::SIGNIN;
-		$this->_viewModel->keepFormData($account); #account only
+		$this->_viewModel->initialize(FormAction::UPDATE);
+		$this->_viewModel->keepFormData($userId, $account, $name);
 		
 		$validator = Validator::make($request->all(), [
-            'account' => 'required|max:20',
+            'id' => 'required',
 			'password' => 'required|max:20',
         ]);
 		
-		$botSt = session()->get('botTimeValidate');
-		
-		if (! empty($captcha) OR $botSt->diffInSeconds(now()) < 1)
-			 abort(400, 'Bad Request');
-		
-        if ($validator->fails())
+		if ($validator->fails())
 		{
-			$this->_viewModel->fail('登入失敗，帳號或密碼輸入不完整');
-			return view('signin')->with('viewModel', $this->_viewModel);
+			$this->_viewModel->fail('設定失敗，無法識別帳號ID');
+			return view('forget_password_setting')->with('viewModel', $this->_viewModel);
 		}
 		
-		$response = $this->_service->signin($account, $password);
+		$response = $this->_service->updatePassword($userId, $password, $account); #account當備用輸入,故放最後
 		
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('signin')->with('viewModel', $this->_viewModel);
+			return view('forget_password_setting')->with('viewModel', $this->_viewModel);
 		}
 		else
-			return redirect('home');
+			return redirect()->route('signin')->with('msg', '使用者密碼變更完成，請重新登入');
 	}
-	
-	
-	
-	
 }

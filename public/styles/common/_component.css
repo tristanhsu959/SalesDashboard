@@ -39,6 +39,9 @@ button, a {
 	&.btn-red {
 		--primary: #f44336;
 	}
+	&.btn-light-blue {
+		--primary: #03a9f4;
+	}
 }
 
 /* search tool bar small button */

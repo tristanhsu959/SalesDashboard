@@ -5,17 +5,56 @@ document.addEventListener('alpine:init', () => {
 		formData: {...response.formData},
 		errors: new Set(),
 		isLoading: false,
+		isForgetPassword: false,
 		
-        validate() {
+		get showPassword(){
+			return ! this.isForgetPassword;
+		},
+		get showPasswordHint(){
+			return this.isForgetPassword;
+		},
+		get showSubmitButton(){
+			return ! this.isForgetPassword;
+		},
+		get showSendButton(){
+			return this.isForgetPassword;
+		},
+		
+		validate() {
+			if (this.isForgetPassword)
+				this.validateForgetPassword();
+			else
+				this.validateLogin();
+		},
+		
+        validateLogin() {
 			this.errors.clear();
-			console.log(22);
+			
 			if (Helper.isEmpty(this.formData.account))
 				this.errors.add('account');
 			if (Helper.isEmpty(this.formData.password))
 				this.errors.add('password');
 			
 			if (this.errors.size == 0)
+			{
+				this.$el.action = this.formData.formAction;
 				this.$el.submit();
+			}
+			else
+				return false;
+		},
+		
+		validateForgetPassword() {
+			this.errors.clear();
+			
+			if (Helper.isEmpty(this.formData.account))
+				this.errors.add('account');
+			
+			if (this.errors.size == 0)
+			{
+				this.$el.action = this.formData.forgetPasswordAction;
+				this.$el.submit();
+			}
 			else
 				return false;
 		},
@@ -25,29 +64,6 @@ document.addEventListener('alpine:init', () => {
 			this.formData.password = '';
 			this.errors.clear();
 			this.isLoading = false;
-		}
-    }));
-	
-	Alpine.data('changePassword', (formData) => ({
-		formData: {...formData},
-		errors: new Set(),
-		
-		validate() {
-			this.errors.clear();
-			console.log(2);
-			if (Helper.isEmpty(this.formData.account))
-				this.errors.add('account');
-			
-			if (this.errors.size == 0)
-				this.$el.submit();
-			else
-				return false;
-		},
-		
-		reset() {
-			this.formData.account = '';
-			this.errors.clear();
-			ui('#forgetPwd');
 		}
     }));
 });

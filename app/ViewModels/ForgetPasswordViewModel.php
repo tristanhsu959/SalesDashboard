@@ -47,9 +47,7 @@ class forgetPasswordViewModel extends Fluent
 	 */
 	public function responseData()
     {
-		$formData['formAction']	= route('forgetPassword.send');
-		$formData['account']	= '';
-		
-		return $formData;
+		$this->set('formData.formAction', route('forgetPassword.setting.post'));
+		return $this->only('formData');
 	}
 }

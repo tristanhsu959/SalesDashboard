@@ -89,4 +89,29 @@ class ForgetPasswordRepository extends Repository
 			return FALSE;
 		}
 	}
+	
+	/* Get user mail by account
+	 * @params: string
+	 * @return: array
+	 */
+	public function updatePasswordByUserId($userId, $password)
+	{
+		try
+		{
+			$data['userPassword']	= $password;
+			$data['updateAt'] 		= now()->format('Y-m-d H:i:s');
+			
+			$db = $this->connectSalesDashboard();
+			$db->table('user')
+				->where('userId', '=', $userId)
+				->update($data);
+			
+			return TRUE;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return FALSE;
+		}
+	}
 }

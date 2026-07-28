@@ -130,10 +130,47 @@ class ForgetPasswordService
 		$info['expiredTime']= $result['expiredAt'];
 		
 		$expired = Carbon::parse($info['expiredTime']);
-		return ResponseLib::initialize($info)->success();
+		
+		
+		
+		
+		return ResponseLib::initialize($info)->success(); #testing
+		
+		
+		
+		
 		if (now()->greaterThan($expired))
 			return ResponseLib::initialize()->fail('此驗證連結已過期，請重新執行忘記密碼');
 		else
 			return ResponseLib::initialize($info)->success();
+	}
+	
+	/* Update password by forget password
+	 * @params: string
+	 * @return: mixed
+	 */
+	public function updatePassword($userId, $password, $account = '')
+	{
+		try 
+		{
+			if (empty($userId) OR empty($password))
+				throw new Exception('新密碼變更失敗，無法識別使用者帳號，請重新執行');
+			
+            $password = Hash::make($password);
+			$result = $this->_repository->updatePasswordByUserId($userId, $password);
+			
+			if ($result === FALSE)
+				throw new Exception('新密碼變更失敗，請重新執行');
+			
+			$user = empty($account) ? $userId : $account;
+			
+			Log::channel('webSysLog')->info("使用者({$user})已執行密碼變更", [ __class__, __function__, __line__]);
+            return ResponseLib::initialize()->success();
+        } 
+		catch (Exception $e) 
+		{
+            Log::channel('webSysLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			return ResponseLib::initialize()->fail($e->getMessage());
+        }
 	}
 }
