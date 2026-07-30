@@ -29,6 +29,22 @@
 	}
 }
 
+/* nav.scroll a {
+  position: static !important; /* 讓 tooltip 跳出 a 標籤的限制 *
+}
+
+nav.scroll .tooltip {
+  margin-top: 40px; /* 手動修正彈出提示的向下位移距離，避免重疊 *
+} */
+
+/* nav.tabs.scroll::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera *
+}
+nav.tabs.scroll {
+	-ms-overflow-style: none;  /* IE and Edge *
+	scrollbar-width: none;  /* Firefox *
+} */
+
 /* Width control */
 .w20 {
 	width: calc((100% - 4rem) / 5);

@@ -9,7 +9,6 @@ document.addEventListener('alpine:init', () => {
 		},
 		validate() {
 			this.errors.clear();
-			const pwdPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 			
 			if (Helper.isEmpty(this.formData.password))
 				this.errors.add('password');
@@ -19,7 +18,7 @@ document.addEventListener('alpine:init', () => {
 			if (this.errors.size > 0)
 				return false;
 			
-			if (! pwdPattern.test(this.formData.password))
+			if (! Helper.isValidPassword(this.formData.password))
 			{
 				this.errors.add('password');
 				Alpine.store('toast').notify('密碼格式不符規則');

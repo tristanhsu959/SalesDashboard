@@ -167,6 +167,9 @@ class PurchaseManager
 	 */
 	public function getProductIdByName($brand, $opCenter, $name)
 	{
+		if (empty($name))
+			return [];
+		
 		$brandId = $brand->value;
 		
 		$result = $this->_repository->getProductIdByName($brandId, $opCenter, $name);
@@ -186,6 +189,9 @@ class PurchaseManager
 	 */
 	public function getProductIdByShortCode($brand, $opCenter, $shortCodes)
 	{
+		if (empty($shortCodes))
+			return [];
+		
 		$brandId = $brand->value;
 		
 		$result = $this->_repository->getProductIdByShortCode($brandId, $opCenter, $shortCodes);

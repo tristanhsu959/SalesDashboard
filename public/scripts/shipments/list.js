@@ -53,10 +53,10 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.type == 'total' && this.searchData.by == 'keyword' && this.searchData.keyword == '')
+			if (this.searchData.type == 'total' && this.searchData.where == 'keyword' && this.searchData.keyword == '')
 				this.errors.add('keyword');
 			
-			if (this.searchData.type == 'total' && this.searchData.by == 'category' && this.searchData.shortCodes.length == 0)
+			if (this.searchData.type == 'total' && this.searchData.where == 'category' && this.searchData.shortCodes.length == 0)
 			{
 				this.errors.add('shortCodes');
 				Alpine.store('toast').notify('請勾選產品');

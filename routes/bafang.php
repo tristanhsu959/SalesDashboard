@@ -13,6 +13,7 @@ use App\Http\Controllers\PurchaseSalesController;
 use App\Http\Controllers\PurchaseReportController;
 use App\Http\Controllers\EzOrderPosController;
 use App\Http\Controllers\PurchaseNotOrderController;
+use App\Http\Controllers\PurchaseProductInfoController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -55,6 +56,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('purchase_not_order', [PurchaseNotOrderController::class, 'showSearch'])->name('purchase_not_order');
 		Route::post('purchase_not_order/search', [PurchaseNotOrderController::class, 'search'])->name('purchase_not_order.search');
 		Route::get('purchase_not_order/export/{token}', [PurchaseNotOrderController::class, 'export'])->name('purchase_not_order.export');
+	});	
+	
+	/* 產品查詢 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE_PRODUCT_INFO->value, ':')])->group(function(){
+		Route::get('purchase_product_info', [PurchaseProductInfoController::class, 'showSearch'])->name('purchase_product_info');
+		Route::post('purchase_product_info/search', [PurchaseProductInfoController::class, 'search'])->name('purchase_product_info.search');
+		Route::get('purchase_product_info/export/{token}', [PurchaseProductInfoController::class, 'export'])->name('purchase_product_info.export');
 	});	
 	
 	/* 出貨報表 */
