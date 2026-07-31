@@ -9,8 +9,8 @@
 		<div x-show="info.hasResult" class="list-content">
 			<div class="tabs cyan-text">
 				<a data-ui="#tab-product" class="active">一般產品</a>
-				<a data-ui="#tab-preorder">預購產品</a>
-				<a data-ui="#tab-supplier">供應商產品</a>
+				<a data-ui="#tab-preorder" x-show="info.hasPreorder">預購產品</a>
+				<a data-ui="#tab-supplier" x-show="info.hasSupplier">供應商產品</a>
 			</div>
 				
 			<!-- Product list -->
@@ -48,7 +48,7 @@
 			</div>
 			
 			<!-- 預購產品 -->
-			<div class="page paddin" id="tab-preorder">
+			<div class="page paddin" id="tab-preorder" x-show="info.hasPreorder">
 				<section class="statistics-table scrollbar" :class="response.brandCode">
 					<table class="stripes">
 						<thead>
@@ -78,7 +78,7 @@
 			</div>
 			
 			<!-- 供應商產品 -->
-			<div class="page paddin" id="tab-supplier">
+			<div class="page paddin" id="tab-supplier" x-show="info.hasSupplier">
 				<section class="statistics-table scrollbar" :class="response.brandCode">
 					<table class="stripes">
 						<thead>

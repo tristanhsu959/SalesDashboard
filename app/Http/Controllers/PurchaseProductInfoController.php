@@ -44,7 +44,7 @@ class PurchaseProductInfoController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType 		= $request->input('searchType');
-		$searchProductTypes = $request->input('searchProductTypes');
+		$searchProductTypes = $request->array('searchProductTypes');
 		$searchFactoryIds 	= $request->array('searchFactoryIds'); #門店/工廠
 		$searchOffShelf 	= $request->boolean('searchOffShelf');
 		$searchShortCode 	= $request->input('searchShortCode');

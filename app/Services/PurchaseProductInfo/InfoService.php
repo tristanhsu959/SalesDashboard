@@ -79,6 +79,8 @@ class InfoService
 		$this->_statistics['product'] 		= $params->product;
 		$this->_statistics['preorder'] 		= $params->preorder;
 		$this->_statistics['supplier'] 		= $params->supplier;
+		$this->_statistics['hasPreorder']	= $params->hasPreorder;
+		$this->_statistics['hasSupplier'] 	= $params->hasSupplier;
 		$this->_statistics['hasResult'] 	= FALSE;
 		
 		#無值不cache
@@ -225,14 +227,13 @@ class InfoService
 		{
 			$brand 				= $params->brand;
 			$allowOpCenterIds 	= $params->allowOpCenterIds;
-			$productTypes 		= $params->productTypes;
 			#$factoryIds 		= $params->factoryIds;
 			$hasOffShelf		= $params->hasOffShelf;
-			#$productIds			= $params->productIds;
+			#$productIds		= $params->productIds;
 			
 			#預購無法判別工廠,會有問題
 			#預購應是從一般產品加入, 應要有關聯
-			if (in_array('preorder', $productTypes))
+			if ($params->hasPreorder)
 				$list = $this->_repository->getPreOrderProductList($brand, $allowOpCenterIds, $hasOffShelf);
 			else
 				$list = [];
@@ -289,12 +290,11 @@ class InfoService
 		{
 			$brand 				= $params->brand;
 			$allowOpCenterIds 	= $params->allowOpCenterIds;
-			$productTypes 		= $params->productTypes;
 			$factoryIds 		= $params->factoryIds;
 			$hasOffShelf		= $params->hasOffShelf;
 			#$productIds		= $params->productIds;
 			
-			if (in_array('supplier', $productTypes))
+			if ($params->hasSupplier)
 				$list = $this->_repository->getSupplierProductList($brand, $allowOpCenterIds, $factoryIds, $hasOffShelf);
 			else
 				$list = [];
@@ -417,8 +417,12 @@ class InfoService
 		{
 			#Build export data for sheets
 			$export['一般產品'] 	= $this->_buildExportProduct($sourceData['product']);
-			$export['預購產品'] 	= $this->_buildExportPreorderProduct($sourceData['preorder']);
-			$export['供應商產品']	= $this->_buildExportSupplierProduct($sourceData['supplier']);
+			
+			if ($sourceData['hasPreorder'])
+				$export['預購產品'] 	= $this->_buildExportPreorderProduct($sourceData['preorder']);
+			
+			if ($sourceData['hasSupplier'])
+				$export['供應商產品']	= $this->_buildExportSupplierProduct($sourceData['supplier']);
 			
 			#Write export to file
 			$brandName = Brand::tryFrom($sourceData['brandId'])->label();

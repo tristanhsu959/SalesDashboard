@@ -146,8 +146,13 @@ class PurchaseProductInfoService
 		$functions 	= $this->parsingFunction($brand);
 		$cacheKey	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchProductTypes, $searchFactoryIds, $searchOffShelf, $searchShortCode, $searchProductName]);
 		
+		#是否有查詢
+		$hasPreorder = in_array('preorder', $searchProductTypes);
+		$hasSupplier = in_array('supplier', $searchProductTypes);
+		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
-				->type($searchType)->productTypes($searchProductTypes)->factoryIds($searchFactoryIds)->hasOffShelf($searchOffShelf)
+				->type($searchType)->hasPreorder($hasPreorder)->hasSupplier($hasSupplier)
+				->factoryIds($searchFactoryIds)->hasOffShelf($searchOffShelf)
 				->shortCode($searchShortCode)->productName($searchProductName)
 				->cacheKey($cacheKey);
 	
