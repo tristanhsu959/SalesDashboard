@@ -256,13 +256,26 @@ class StoreManager
 	 */
 	public function filterFactoryStore($brand, $storeList)
 	{
+		#濾除沒POS的或廠區學區店-訂貨系統定義
+		return collect($storeList)->reject(function($item, $key) {
+			return empty($item['posId']) OR $item['posId'] == 'null';
+		})->toArray();
+	}
+	
+	/* 排除廠區學區店(因依情境不同手動呼叫,只針對沒有POS的)
+	 * 銷售才會用到
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterEzorderFactoryStore($brand, $storeList)
+	{
 		#ezorder定義的名單,有另調整過
 		$brandId = $brand->value;
 		$excepts = config("web.purchase.store.factoryStore.{$brandId}", []);
 		
 		#濾除沒POS的或廠區學區店
 		return collect($storeList)->reject(function($item, $key) use($excepts) {
-			return empty($item['posId']) OR $item['posId'] == 'null' OR in_array($item['storeKey'], $excepts);
+			return in_array($item['storeKey'], $excepts);
 		})->toArray();
 	}
 	

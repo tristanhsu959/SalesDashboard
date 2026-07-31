@@ -129,6 +129,7 @@ class StoreService
 		#已過濾廠區學區店(含八方點定義的,無ezorder excepts, 因訂貨無此店號不用濾)
 		$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
 		$storeList = PosManager::filterSpecialStore($brand, $storeList);
+		$storeList = StoreManager::filterEzorderFactoryStore($brand, $storeList);
 		$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 	}
 	
