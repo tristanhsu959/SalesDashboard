@@ -9,6 +9,7 @@ use App\Enums\Functions;
 use App\Enums\RoleGroup;
 use App\Enums\OpCenter;
 use App\Enums\Area;
+use App\Events\LoginAccess;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,8 @@ class AuthService
 			
 			#7. Save to session
 			AppManager::saveCurrentUser($userInfo);
+			
+			LoginAccess::dispatch($userInfo['userId'], $userInfo['userAccount']);
 			
 			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
 			

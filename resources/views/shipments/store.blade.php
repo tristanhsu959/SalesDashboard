@@ -6,16 +6,36 @@
 			</div>
 		</article>
 		
+		<!--template x-for="(item, shortCode) in Object.fromEntries(Object.entries(statistics.productList).slice(0, 3))" :key="shortCode">
+			<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
+				<span x-text="item.productName"></span>
+				<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
+			</a>
+		</template-->
+				
 		<div x-show="response.hasResult" class="store-content">
 			<div class="tabs cyan-text">
-				<template x-for="(item, shortCode) in statistics.productList" :key="shortCode">
-					<a @click="activeProduct = shortCode" :class="{ 'active': activeProduct === shortCode }">
-						<span x-text="item.productName"></span>
-						<div class="tooltip bottom" x-text="item.memo" x-show="item.memo.trim() != ''"></div>
+				<template x-for="(item, shortCode) in fixedTabs" :key="shortCode">
+					<a x-text="item.productName" @click="setActiveTab(shortCode, item.productName)" :class="activeTab(shortCode)"></a>
+				</template>
+				
+				<!-- 更多 -->
+				<template x-if="showMoreTabs">
+					<a @click.away="openTabMenu = false" @click.stop="openTabMenu = !openTabMenu" class="moreTab" :class="activeMoreTab()">
+						<span x-text="moreTabName">更多</span>
+						<i>arrow_drop_down</i>
+						<!-- 下拉選單容器 -->
+						<menu class="no-wrap" :class="{ 'active': openTabMenu }">
+							<template x-for="(item, shortCode) in moreTabs" :key="shortCode">
+							<li class="align-left full-width">
+								<a x-text="item.productName" @click="setActiveTab(shortCode, item.productName)"></a>
+							</li>
+							</template>
+						</menu>
 					</a>
 				</template>
 			</div>
-			
+
 			<!-- 門店 -->
 			<template x-for="(name, shortCode) in statistics.productList" :key="shortCode">
 			<div class="page paddin" :class="{ 'active': activeProduct === shortCode }">
