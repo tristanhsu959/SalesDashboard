@@ -3,7 +3,7 @@
 @use('App\Libraries\HelperLib')
 
 @push('styles')
-    <link href="{{ asset('styles/new_release_setting/list.css') }}" rel="stylesheet">
+    <link href="{{ HelperLib::versionAsset('styles/new_release_setting/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
