@@ -49,10 +49,10 @@
 					<i>close</i>
 				</button>
 			</nav>
-			<nav>
+			<!--nav>
 				<div class="max"></div>
 				<button type="button" class="right pink-text transparent" @click="isForgetPassword = !isForgetPassword">忘記密碼</button>
-			</nav>
+			</nav-->
 		</div>
 	</form>
 </div>
