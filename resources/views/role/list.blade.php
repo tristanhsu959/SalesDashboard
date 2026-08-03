@@ -4,7 +4,7 @@
 @use('App\Libraries\HelperLib')
 
 @push('styles')
-	<link href="{{ asset('styles/role/list.css') }}" rel="stylesheet">
+	<link href="{{ HelperLib::versionAsset('styles/role/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
