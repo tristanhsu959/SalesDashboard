@@ -72,6 +72,7 @@ class ShipmentsViewModel extends Fluent
 		$type = [
 			'total'		=> '總量', 
 			'status'	=> '門店訂貨狀況',
+			'employee'	=> '公關員購',
 		];
 		$this->set('options.type', $type);
 		
@@ -145,15 +146,16 @@ class ShipmentsViewModel extends Fluent
 	public function getPartialView()
 	{
 		$type 	= $this->get('search.type', NULL);
-		$by		= ($type == 'status') ? 'detail' : $this->get('search.by', NULL);
+		$by		= $this->get('search.by', NULL);
 		
-		$typeBy = "{$type}:{$by}";
+		$typeBy = empty($by) ? $type : "{$type}:{$by}";
 		
 		return match($typeBy)
 		{
 			'total:store'	=> 'shipments.store',
 			'total:factory'	=> 'shipments.factory',	 
-			'status:detail'	=> 'shipments.status',
+			'status'		=> 'shipments.status',
+			'employee'		=> 'shipments.employee',
 		};
 	}
 	
