@@ -40,6 +40,12 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_not_order'),
 		],
 		[
+			'name' 		=> Functions::BF_PURCHASE_PRODUCT_INFO->label(), #產品資訊
+			'code'		=> Functions::BF_PURCHASE_PRODUCT_INFO->value,
+			'style' 	=> ['icon' => 'pallet', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.purchase_product_info'),
+		],
+		[
 			'name' 		=> Functions::BF_PURCHASE_REPORT->label(), #出貨統計報表(八方only)
 			'code'		=> Functions::BF_PURCHASE_REPORT->value,
 			'style' 	=> ['icon' => 'analytics', 'color' => 'orange-text'],
@@ -101,6 +107,12 @@ return [
 			'code'		=> Functions::BG_PURCHASE_NOT_ORDER->value,
 			'style' 	=> ['icon' => 'orders', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase_not_order'),
+		],
+		[
+			'name' 		=> Functions::BG_PURCHASE_PRODUCT_INFO->label(), #產品資訊
+			'code'		=> Functions::BG_PURCHASE_PRODUCT_INFO->value,
+			'style' 	=> ['icon' => 'pallet', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.purchase_product_info'),
 		],
 		/* [
 			'name' 		=> Functions::BG_PURCHASE->label(), #進貨統計

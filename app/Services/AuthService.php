@@ -9,6 +9,7 @@ use App\Enums\Functions;
 use App\Enums\RoleGroup;
 use App\Enums\OpCenter;
 use App\Enums\Area;
+use App\Events\LoginAccess;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,8 @@ class AuthService
 			
 			#7. Save to session
 			AppManager::saveCurrentUser($userInfo);
+			
+			LoginAccess::dispatch($userInfo['userId'], $userInfo['userAccount']);
 			
 			Log::channel('webSysLog')->info("使用者[{$account}]登入成功", [ __class__, __function__, __line__]);
 			
@@ -253,5 +256,37 @@ class AuthService
 		Log::channel('webSysLog')->info("使用者[{$user}]登出系統", [ __class__, __function__, __line__]);
 			
 		return TRUE;
+	}
+	
+	/* 忘記密碼
+	 * @params: 
+	 * @return: boolean
+	 */
+	public function forgetPassword($account)
+	{
+		try
+		{
+			$userInfo = $this->_repository->getUserByAccount($account);
+			
+			$mail = $userInfo['email'];
+			
+			if (empty($mail))
+			{
+				$msg = "忘記密碼連結發送失敗，此帳號 [{$account}] 尚未設定Mail";
+				
+				Log::channel('webSysLog')->error($msg, [ __class__, __function__, __line__]);
+				throw new Exception($msg);
+			}
+			
+			$msg = "忘記密碼連結已發送至帳號 {$account} 所屬信箱";
+			
+			Log::channel('webSysLog')->info($msg, [ __class__, __function__, __line__]);
+			
+			return ResponseLib::initialize()->success($msg);
+		}
+		catch(Exception $e)
+		{
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
 	}
 }

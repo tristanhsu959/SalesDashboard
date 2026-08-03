@@ -53,10 +53,10 @@ document.addEventListener('alpine:init', () => {
 				}
 			}
 			
-			if (this.searchData.type == 'total' && this.searchData.by == 'keyword' && this.searchData.keyword == '')
+			if (this.searchData.type == 'total' && this.searchData.where == 'keyword' && this.searchData.keyword == '')
 				this.errors.add('keyword');
 			
-			if (this.searchData.type == 'total' && this.searchData.by == 'category' && this.searchData.shortCodes.length == 0)
+			if (this.searchData.type == 'total' && this.searchData.where == 'category' && this.searchData.shortCodes.length == 0)
 			{
 				this.errors.add('shortCodes');
 				Alpine.store('toast').notify('請勾選產品');
@@ -114,12 +114,42 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('statisticsStore', (data) => ({
 		statistics: {...data},
 		activeProduct: '',
+		activeProductName: '',
+		openTabMenu: false,
+		fixedTabsCouont: 4,
 		
-		init() { 
+		init() {
 			/* Set active tab */
 			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
+		},
+		
+		activeTab(shortCode) {
+			return (this.activeProduct == shortCode) ? 'active' : '';
+		},
+		setActiveTab(shortCode, productName){
+			this.activeProduct = shortCode;
+			this.activeProductName = productName;
+		},
+		activeMoreTab(){
+			const list = Object.keys(this.statistics.productList).slice(this.fixedTabsCouont);
+			
+			return list.includes(this.activeProduct) ? 'active' : '';
+		},
+		
+		get fixedTabs() {
+			//st,end
+			return Object.fromEntries(Object.entries(this.statistics.productList).slice(0, this.fixedTabsCouont));
+		},
+		get showMoreTabs() {
+			return Object.keys(this.statistics.productList).length > this.fixedTabsCouont;
+		},
+		get moreTabs() {
+			return Object.fromEntries(Object.entries(this.statistics.productList).slice(this.fixedTabsCouont));
+		},
+		get moreTabName(){
+			return (this.activeMoreTab() == 'active') ? this.activeProductName : '更多';
 		},
 		
 		get filterStore() {

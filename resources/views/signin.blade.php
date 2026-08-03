@@ -29,22 +29,30 @@
 				<label>Account</label>
 				<!--span class="domain">@8way.com.tw</span-->
 			</div>
-			<div class="field label border" :class="Helper.hasError(errors, 'password')">
+			<div x-show="showPassword" class="field label border" :class="Helper.hasError(errors, 'password')">
 				<input x-model="formData.password" type="password" name="password" maxlength="20" @input="errors.delete('password')">
 				<label>Password</label>
 			</div>
+			<p x-show="showPasswordHint" class="red-text">系統將發送設定連結至此帳號信箱，請點擊連結進入密碼重設頁面</p>
 			<div class="field label border captcha">
 				<input type="text" name="captcha" maxlength="10">
 				<label>Captcha</label>
 			</div>
 			<nav class="group split">
-				<button type="submit" class="btn-red left-round max">
+				<button x-show="showSubmitButton"  type="submit" class="btn-red left-round max">
 					<span>Sign In</span>
+				</button>
+				<button x-show="showSendButton"  type="submit" class="btn-light-blue left-round max">
+					<span>送出</span>
 				</button>
 				<button type="button" class="right-round square btn-cancel" @click="reset()">
 					<i>close</i>
 				</button>
 			</nav>
+			<!--nav>
+				<div class="max"></div>
+				<button type="button" class="right pink-text transparent" @click="isForgetPassword = !isForgetPassword">忘記密碼</button>
+			</nav-->
 		</div>
 	</form>
 </div>

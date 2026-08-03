@@ -35,6 +35,19 @@ class AuthViewModel extends Fluent
 	public function responseData()
     {
 		$this->set('formData.formAction', route('signin.post'));
+		$this->set('formData.forgetPasswordAction', route('forgetPassword.send'));
 		return $this->only('formData');
 	}
+	
+	/* Output json
+	 * @params: string
+	 * @return: void
+	 */
+	/* public function changePasswordData()
+    {
+		$formData['formAction']	= route('forgetPassword.send');
+		$formData['account']	= '';
+		
+		return $formData;
+	} */
 }

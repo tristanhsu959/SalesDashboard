@@ -27,4 +27,11 @@ class HomeViewModel extends Fluent
 		$currentUser = AppManager::getCurrentUser();
 		return $currentUser->hasSetPassword;
 	}
+	
+	public function hasSetEmail()
+	{
+		$currentUser = AppManager::getCurrentUser();
+		
+		return empty($currentUser->email) ? FALSE : TRUE;
+	}
 }

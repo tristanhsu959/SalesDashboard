@@ -39,6 +39,9 @@ button, a {
 	&.btn-red {
 		--primary: #f44336;
 	}
+	&.btn-light-blue {
+		--primary: #03a9f4;
+	}
 }
 
 /* search tool bar small button */
@@ -150,7 +153,7 @@ table {
 	}
 	
 	/* 門市 */
-	.statistics-store {
+	.statistics-store, .statistics-table {
 		&.bafang {
 			--table-bg: #4fc3f7; 			/* light-2 */
 			--table-bg-dark: #0288d1; 		/* dark-2 */

@@ -11,16 +11,28 @@ use App\Http\Controllers\NewReleaseSettingController;
 use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ForgetPasswordController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
 use App\Enums\Functions;
 
-/* Login */
+/* use App\Mail\ForgetPassword; */
+
+/* Route::get('/preview-mail', function () {
+    return new ForgetPassword('http://laravel.local/forgetPassword/preview'); 
+}); */
+
+/***** Login *****/
 Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
 Route::redirect('signin', '/'); 
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
+
+/***** Forget Password *****/
+Route::post('forgetPassword/send', [ForgetPasswordController::class, 'sendLink'])->name('forgetPassword.send');
+Route::get('forgetPassword/setting/{token}', [ForgetPasswordController::class, 'showSetting'])->name('forgetPassword.setting');
+Route::post('forgetPassword/setting', [ForgetPasswordController::class, 'setting'])->name('forgetPassword.setting.post');
 
 Route::middleware([AuthMiddleware::class])->group(function(){
 	/***** Home *****/
@@ -28,7 +40,7 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	/***** User profile *****/
 	Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
-
+	
 	/***** 產品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
 		Route::get('product', [ProductController::class, 'list'])->name('products');

@@ -45,7 +45,7 @@
 						<th>部門</th>
 						<th>EMail</th>
 						<th>狀態</th>
-						<th>更新時間</th>
+						<th>最後登入時間</th>
 						<th class="right-align">操作</th>
 					</tr>
 				</thead>
@@ -61,7 +61,7 @@
 							<i class="green-text" x-show="user.isActive">check_circle</i>
 							<i class="red-text" x-show="! user.isActive">x_circle</i>
 						</td>
-						<td class="min" x-text="user.updateAt"></td>
+						<td class="min" x-text="user.accessTime"></td>
 						<td class="right-align action">
 							<a :href="list.updateRoute.replace('_ID', user.userId)" class="btn-edit button circle small" :disabled="user.roleGroup == list.supervisorGroupId">
 								<i class="small">edit</i>
