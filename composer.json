@@ -9,9 +9,11 @@
         "php": "^8.2",
         "directorytree/ldaprecord": "^3.8",
         "laravel/framework": "^12.0",
+        "laravel/socialite": "^5.29",
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^1.1",
-        "openspout/openspout": "4.23"
+        "openspout/openspout": "4.23",
+        "socialiteproviders/manager": "^4.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
