@@ -2,7 +2,7 @@
 @use('App\Libraries\HelperLib')
 
 @push('styles')
-	<link href="{{ asset('styles/user/detail.css') }}" rel="stylesheet">
+	<link href="{{ HelperLib::versionAsset('styles/user/detail.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')

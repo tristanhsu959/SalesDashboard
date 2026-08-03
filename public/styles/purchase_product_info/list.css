@@ -40,6 +40,11 @@ form {
 					left: 0;
 					z-index: 6;
 				}
+				&:nth-of-type(8) {
+					width: 160px;
+					min-width: 160px;
+					max-width: 160px;
+				}
 				&:nth-of-type(10) {
 					width: 280px;
 					min-width: 280px;
