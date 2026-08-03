@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-    <link href="{{ asset('styles/home/main.css') }}" rel="stylesheet">
+    <link href="{{ HelperLib::versionAsset('styles/home/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
