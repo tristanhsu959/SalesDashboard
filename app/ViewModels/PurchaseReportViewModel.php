@@ -51,7 +51,9 @@ class PurchaseReportViewModel extends Fluent
 	private function _setOptions()
 	{
 		$type = [
-			'performance'	=> '營運概況', 
+			'performance'	=> '營運概況',
+			'employeePr'	=> '員購公關',
+			'extraOrder'	=> '追加',
 		];
 		$this->set('options.type', $type);
 		
@@ -108,6 +110,8 @@ class PurchaseReportViewModel extends Fluent
 		return match($type)
 		{
 			'performance'	=> 'purchase_report.performance',
+			'employeePr'	=> 'purchase_report.employee_pr',
+			'extraOrder'	=> 'purchase_report.extra_order',
 		};
 	}
 	

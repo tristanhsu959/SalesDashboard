@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Services\Shipments\FactoryService;
 use App\Services\Shipments\StoreService;
 use App\Services\Shipments\StatusService;
-use App\Services\Shipments\EmployeeService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Repositories\ShipmentsRepository;
@@ -126,8 +125,6 @@ class ShipmentsService
 					$service = app(FactoryService::class);
 				else if ($params->type == 'status')
 					$service = app(StatusService::class);
-				else if ($params->type == 'employee')
-					$service = app(EmployeeService::class);
 				else
 					throw new Exception('查詢訂貨總量時發生錯誤，無法識別查詢類型');
 				

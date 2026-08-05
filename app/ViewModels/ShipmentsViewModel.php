@@ -72,7 +72,6 @@ class ShipmentsViewModel extends Fluent
 		$type = [
 			'total'		=> '總量', 
 			'status'	=> '門店訂貨狀況',
-			'employee'	=> '公關員購',
 		];
 		$this->set('options.type', $type);
 		
@@ -155,7 +154,6 @@ class ShipmentsViewModel extends Fluent
 			'total:store'	=> 'shipments.store',
 			'total:factory'	=> 'shipments.factory',	 
 			'status'		=> 'shipments.status',
-			'employee'		=> 'shipments.employee',
 		};
 	}
 	

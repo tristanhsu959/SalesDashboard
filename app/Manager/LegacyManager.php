@@ -178,5 +178,124 @@ class LegacyManager
 		return $data;
 	}
 	
+	#======================= 員購/公關 =======================
+	
+	/* 員購訂單
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getEmployeeData($brand, $stDate, $endDate, $factoryNos)
+	{
+		#公關員購可套用同一邏輯
+		$brandId = $brand->value;
+		$accNos = config("web.purchase.store.employee.{$brandId}");
+		
+		#因為是獨立的DB
+		if ($brand == Brand::BAFANG)
+			$data = $this->getBafangDataByAccNo($stDate, $endDate, $accNos, $factoryNos);
+		else if ($brand == Brand::BUYGOOD)
+			$data = $this->getBuygoodDataByAccNo($stDate, $endDate, $accNos, $factoryNos);
+		else
+			$data = [];
+		
+		return $data;
+	}
+	
+	
+	/* 公關訂單
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getPRData($brand, $stDate, $endDate, $factoryNos)
+	{
+		#公關員購可套用同一邏輯
+		$brandId = $brand->value;
+		$accNos = config("web.purchase.store.pr.{$brandId}");
+			
+		if ($brand == Brand::BAFANG)
+			$data = $this->getBafangDataByAccNo($stDate, $endDate, $accNos, $factoryNos);
+		else if ($brand == Brand::BUYGOOD)
+			$data = $this->getBuygoodDataByAccNo($stDate, $endDate, $accNos, $factoryNos);
+		else
+			$data = [];
+		
+		return $data;
+	}
+	
+	/* 取追加(先全取再由各自功能過濾門店或其它條件)
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getBafangDataByAccNo($stDate, $endDate, $accNos, $factoryNos)
+	{
+		if (in_array('TW_TP', $factoryNos))
+			$tp = $this->_repository->getTpDataByAccNo($stDate, $endDate, $accNos['TW_TP']);
+		else
+			$tp = collect([]);
+		
+		if (in_array('TW_KH', $factoryNos))
+			$kh = $this->_repository->getKhDataByAccNo($stDate, $endDate, $accNos['TW_KH']);
+		else
+			$kh = collect([]);
+		
+		#storeNo維持原樣不影響
+		$tp = $tp->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::TP->value;
+			$item['factoryName'] 	= Factory::TP->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$kh = $kh->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::KH->value;
+			$item['factoryName'] 	= Factory::KH->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$result = $tp->merge($kh)->toArray();
+		
+		return $result;
+	}
+	
+	/* 取追加
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getBuygoodDataByAccNo($stDate, $endDate, $accNos)
+	{
+		if (in_array('TW_TS', $factoryNos))
+			$ts = $this->_repository->getTsDataByAccNo($stDate, $endDate, $accNos['TW_TS']);
+		else
+			$ts = collect([]);
+		
+		if (in_array('TW_RL', $factoryNos))
+			$rl = $this->_repository->getRlDataByAccNo($stDate, $endDate, $accNos['TW_RL']);
+		else
+			$rl = collect([]);
+		
+		#storeNo維持原樣不影響
+		$ts = $ts->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::TS->value;
+			$item['factoryName'] 	= Factory::TS->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$rl = $rl->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::RL->value;
+			$item['factoryName'] 	= Factory::RL->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$result = $ts->merge($rl)->toArray();
+		
+		return $result;
+	}
 	
 }

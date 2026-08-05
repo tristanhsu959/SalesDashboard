@@ -88,3 +88,49 @@ form {
 	}
 
 }
+
+/* 員購公關 statistics-store:才能套用共用style */
+.employee-pr-list {
+	.statistics-table { 
+		table {
+			thead tr th {
+				&:nth-of-type(3) {
+					width: 200px;
+					min-width: 200px;
+					max-width: 200px;
+					position: sticky;
+					left: 0;
+					z-index: 7; /* 提升一級,避免吃到default z-index=5 */
+				}
+				&:nth-of-type(10) {
+					width: 260px;
+					min-width: 260px;
+					max-width: 260px;
+				}
+				
+			}
+			
+			tbody tr {
+				td {
+					&:nth-of-type(3) {
+						position: sticky;
+						z-index: 6;
+						left: 0;
+					}
+					
+				}
+				
+				&.order-header.employee td {
+					background-color: #b3e5fc;
+					font-weight: bold;
+				}
+				
+				&.order-header.pr td {
+					background-color: #e1bee7;
+					font-weight: bold;
+				}
+			}
+			
+		}
+	}
+}

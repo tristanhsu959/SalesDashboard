@@ -121,6 +121,8 @@ class PurchaseManager
 			return [$brand->shortCode()];
 	} */
 	
+	
+	/******************** Factory ********************/
 	/* Factory No
 	 * @params: enum
 	 * @return: array
@@ -138,7 +140,6 @@ class PurchaseManager
 			return [];
 	}
 	
-	/******************** Factory ********************/
 	/* 取工廠清單
 	 * @params: int
 	 * @return: array

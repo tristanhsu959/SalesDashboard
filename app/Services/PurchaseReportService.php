@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\PurchaseReport\PerformanceService;
+use App\Services\PurchaseReport\EmployeePrService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Libraries\ResponseLib;
@@ -88,6 +89,8 @@ class PurchaseReportService
 				
 				if ($params->type == 'performance')
 					$service = app(PerformanceService::class);
+				else if ($params->type == 'employeePr')
+					$service = app(EmployeePrService::class);
 				else
 					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤');
 				
@@ -151,6 +154,8 @@ class PurchaseReportService
 		
 		if ($type == 'performance')
 			$service = app(PerformanceService::class);
+		else if ($type == 'employeePr')
+			$service = app(EmployeePrService::class);
 		else
 			return ResponseLib::initialize('檔案下載發生錯誤，請重新查詢')->fail();
 		

@@ -36,7 +36,7 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<fieldset x-show="Object.keys(options.opCenterList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showOpCenterList" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇營運中心</legend>
 			<nav class="wrap">
 				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
@@ -49,7 +49,7 @@
 			<output class="red-text small">未選時取全部授權營運中心</output>
 		</fieldset>
 		
-		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showAreaList" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">
