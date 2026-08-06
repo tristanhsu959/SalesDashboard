@@ -147,7 +147,7 @@ class ShipmentsViewModel extends Fluent
 		$type 	= $this->get('search.type', NULL);
 		$by		= $this->get('search.by', NULL);
 		
-		$typeBy = empty($by) ? $type : "{$type}:{$by}";
+		$typeBy = ($type == 'status') ? $type : "{$type}:{$by}";
 		
 		return match($typeBy)
 		{

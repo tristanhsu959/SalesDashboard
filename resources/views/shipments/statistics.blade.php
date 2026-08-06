@@ -28,7 +28,7 @@
 			<nav x-show="showByOptions">
 				<template x-for="(name, id) in options.by" :key="id">
 					<label class="radio field-light-blue">
-						<input type="radio" name="searchBy" x-model="searchData.by" :value="id" :disabled="! showByOptions">
+						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
 						<span x-text="name"></span>
 					</label>
 				</template>
@@ -36,7 +36,7 @@
 			<nav x-show="showCalcOptions">
 				<template x-for="(name, id) in options.calc" :key="id">
 					<label class="radio field-purple">
-						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id" :disabled="! showCalcOptions">
+						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id">
 						<span x-text="name"></span>
 					</label>
 				</template>
@@ -72,7 +72,7 @@
 			<nav class="wrap">
 				<template x-for="(name, id) in options.where" :key="id">
 					<label class="radio field-purple">
-						<input type="radio" name="searchWhere" x-model="searchData.where" :value="id" :disabled="! showWhereOptions">
+						<input type="radio" name="searchWhere" x-model="searchData.where" :value="id">
 						<span x-text="name"></span>
 					</label>
 				</template>
@@ -80,7 +80,7 @@
 		</div>
 		
 		<div x-show="showProductName" class="field label border round field-light-blue" :class="Helper.hasError(errors, 'keyword')">
-			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" @input="errors.delete('keyword')" :disabled="! showProductName">
+			<input type="text" name="searchKeyword" maxlength="30" x-model="searchData.keyword" @input="errors.delete('keyword')">
 			<label>產品名稱</label>
 		</div>
 			
@@ -102,7 +102,7 @@
 				<template x-for="(item, idx) in products" :key="idx">
 					<div class="row">
 						<label class="checkbox large s3 check-amber">
-							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode" :disabled="! showCategory">
+							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode">
 							<span x-text="`${item.shortCode} ${item.productName}`"></span>
 						</label>
 					</div>
@@ -111,7 +111,7 @@
 		</template>
 		
 		<div x-show="showStoreName" class="field label border round field-light-blue">
-			<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName" :disabled="! showStoreName">
+			<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName">
 			<label>找店名</label>
 		</div>
 		
