@@ -134,3 +134,54 @@ form {
 		}
 	}
 }
+
+/* 追加 statistics-store:才能套用共用style */
+.extra-order-list {
+	.statistics-table { 
+		table {
+			thead tr th {
+				&:nth-of-type(3) {
+					width: 200px;
+					min-width: 200px;
+					max-width: 200px;
+					position: sticky;
+					left: 0;
+					z-index: 7; /* 提升一級,避免吃到default z-index=5 */
+				}
+				&:nth-of-type(6) {
+					width: 200px;
+					min-width: 200px;
+					max-width: 200px;
+					position: sticky;
+					left: 200px;
+					z-index: 7; /* 提升一級,避免吃到default z-index=5 */
+				}
+			}
+			
+			tbody tr {
+				td {
+					&:nth-of-type(3) {
+						position: sticky;
+						z-index: 6;
+						left: 0;
+						background-color: var(--surface);
+					}
+					&:nth-of-type(6) {
+						position: sticky;
+						z-index: 6;
+						left: 200px;
+						background-color: var(--surface);
+					}
+					
+				}
+				
+				&.order-header td {
+					background-color: #fce4ec;
+					color: #e91e63;
+					font-weight: 500;
+				}
+			}
+			
+		}
+	}
+}

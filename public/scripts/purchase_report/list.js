@@ -15,7 +15,7 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		get showAreaList(){
-			return (Object.keys(this.options.areaList).length > 0 && this.searchData.type == 'performance');
+			return (Object.keys(this.options.areaList).length > 0 && (this.searchData.type == 'performance' || this.searchData.type == 'extraOrder'));
 		},
 		
 		search() {
@@ -74,7 +74,7 @@ document.addEventListener('alpine:init', () => {
     }));
 	
 	
-	/* 員購 */
+	/* 員購公關 */
 	Alpine.data('employeePrData', (statistics) => ({
 		employeeData: {...statistics.employee},
 		prData: {...statistics.pr},
@@ -84,6 +84,14 @@ document.addEventListener('alpine:init', () => {
 		
 		orderHead(dateString){
 			return (dateString.length == 10) ? 'order-header' : '';
+		},
+    }));
+	
+	/* 追加 */
+	Alpine.data('extraData', (statistics) => ({
+		extraOrder: {...statistics.extraOrder},
+		
+		init() {
 		},
     }));
 });

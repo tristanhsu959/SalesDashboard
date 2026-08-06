@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\PurchaseReport\PerformanceService;
 use App\Services\PurchaseReport\EmployeePrService;
+use App\Services\PurchaseReport\ExtraOrderService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Libraries\ResponseLib;
@@ -91,8 +92,10 @@ class PurchaseReportService
 					$service = app(PerformanceService::class);
 				else if ($params->type == 'employeePr')
 					$service = app(EmployeePrService::class);
+				else if ($params->type == 'extraOrder')
+					$service = app(ExtraOrderService::class);
 				else
-					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤');
+					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤，無法識別報表類型');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -156,6 +159,8 @@ class PurchaseReportService
 			$service = app(PerformanceService::class);
 		else if ($type == 'employeePr')
 			$service = app(EmployeePrService::class);
+		else if ($type == 'extraOrder')
+			$service = app(ExtraOrderService::class);
 		else
 			return ResponseLib::initialize('檔案下載發生錯誤，請重新查詢')->fail();
 		

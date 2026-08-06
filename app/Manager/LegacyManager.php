@@ -45,7 +45,7 @@ class LegacyManager
 		]
 		*/
 		
-		#*****排程會呼叫此Function*****
+		#***** 排程會呼叫此Function getExtraData *****
 		$bafang 	= $this->getExtraDataByBafang($stDate, $endDate, FALSE); #false for all
 		$buygood	= $this->getExtraDataByBuygood($stDate, $endDate, FALSE);
 		
@@ -298,4 +298,96 @@ class LegacyManager
 		return $result;
 	}
 	
+	
+	#======================= 追加(含單頭單身) =======================
+	/* 追加訂單
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getFullExtraData($brand, $stDate, $endDate, $factoryNos)
+	{
+		if ($brand == Brand::BAFANG)
+			$data = $this->getBafangFullExtraData($stDate, $endDate, $factoryNos);
+		else if ($brand == Brand::BUYGOOD)
+			$data = $this->getBuygoodFullExtraData($stDate, $endDate, $factoryNos);
+		else
+			$data = [];
+		
+		return $data;
+	}
+	
+	/* 取追加(先全取再由各自功能過濾門店或其它條件)
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getBafangFullExtraData($stDate, $endDate, $factoryNos)
+	{
+		if (in_array('TW_TP', $factoryNos))
+			$tp = $this->_repository->getTpFullExtraData($stDate, $endDate);
+		else
+			$tp = collect([]);
+		
+		if (in_array('TW_KH', $factoryNos))
+			$kh = $this->_repository->getKhFullExtraData($stDate, $endDate);
+		else
+			$kh = collect([]);
+		
+		#storeNo維持原樣不影響
+		$tp = $tp->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::TP->value;
+			$item['factoryName'] 	= Factory::TP->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$kh = $kh->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::KH->value;
+			$item['factoryName'] 	= Factory::KH->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$result = $tp->merge($kh)->toArray();
+		
+		return $result;
+	}
+	
+	/* 取追加
+	 * @params: datetime
+	 * @params: datetime
+	 * @return: array
+	 */
+	public function getBuygoodFullExtraData($stDate, $endDate, $factoryNos)
+	{
+		if (in_array('TW_TS', $factoryNos))
+			$ts = $this->_repository->getTsFullExtraData($stDate, $endDate);
+		else
+			$ts = collect([]);
+		
+		if (in_array('TW_RL', $factoryNos))
+			$rl = $this->_repository->getRlFullExtraData($stDate, $endDate);
+		else
+			$rl = collect([]);
+		
+		#storeNo維持原樣不影響
+		$ts = $ts->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::TS->value;
+			$item['factoryName'] 	= Factory::TS->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$rl = $rl->map(function($item, $key){
+			$item['factoryNo'] 		= Factory::RL->value;
+			$item['factoryName'] 	= Factory::RL->label();
+			$item['orderDate']		= Carbon::parse($item['orderDate'])->format('Y-m-d H:i:s');
+			return $item;
+		});
+		
+		$result = $ts->merge($rl)->toArray();
+		
+		return $result;
+	}
 }
