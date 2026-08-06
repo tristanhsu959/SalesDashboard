@@ -54,7 +54,7 @@
 							</tbody>
 						</template>
 						
-						<template x-if="extraOrder.data.length > 0">
+						<template x-if="extraOrder.data.length <= 0">
 							<tbody>						
 								<tr><td colspan="13" class="red-text">查無符合資料</td></tr>
 							</tbody>

@@ -121,13 +121,15 @@ form {
 				}
 				
 				&.order-header.employee td {
-					background-color: #b3e5fc;
-					font-weight: bold;
+					background-color: #e3f2fd;
+					color: #1e88e5;
+					font-weight: 500;
 				}
 				
 				&.order-header.pr td {
-					background-color: #e1bee7;
-					font-weight: bold;
+					background-color: #f3e5f5;
+					color: #8e24aa;
+					font-weight: 500;
 				}
 			}
 			
@@ -148,14 +150,6 @@ form {
 					left: 0;
 					z-index: 7; /* 提升一級,避免吃到default z-index=5 */
 				}
-				&:nth-of-type(6) {
-					width: 200px;
-					min-width: 200px;
-					max-width: 200px;
-					position: sticky;
-					left: 200px;
-					z-index: 7; /* 提升一級,避免吃到default z-index=5 */
-				}
 			}
 			
 			tbody tr {
@@ -166,18 +160,11 @@ form {
 						left: 0;
 						background-color: var(--surface);
 					}
-					&:nth-of-type(6) {
-						position: sticky;
-						z-index: 6;
-						left: 200px;
-						background-color: var(--surface);
-					}
-					
 				}
 				
 				&.order-header td {
 					background-color: #fce4ec;
-					color: #e91e63;
+					color: #d81b60;
 					font-weight: 500;
 				}
 			}
