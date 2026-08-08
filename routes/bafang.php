@@ -14,6 +14,7 @@ use App\Http\Controllers\PurchaseReportController;
 use App\Http\Controllers\EzOrderPosController;
 use App\Http\Controllers\PurchaseNotOrderController;
 use App\Http\Controllers\PurchaseProductInfoController;
+use App\Http\Controllers\PurchaseSupplierController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -49,6 +50,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('shipments', [ShipmentsController::class, 'showSearch'])->name('shipments');
 		Route::post('shipments/search', [ShipmentsController::class, 'search'])->name('shipments.search');
 		Route::get('shipments/export/{token}', [ShipmentsController::class, 'export'])->name('shipments.export');
+	});	
+	
+	/* 供應商出貨總量查詢 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_PURCHASE_SUPPLIER->value, ':')])->group(function(){
+		Route::get('supplier', [PurchaseSupplierController::class, 'showSearch'])->name('supplier');
+		Route::post('supplier/search', [PurchaseSupplierController::class, 'search'])->name('supplier.search');
+		Route::get('supplier/export/{token}', [PurchaseSupplierController::class, 'export'])->name('supplier.export');
 	});	
 	
 	/* 未訂貨查詢 */

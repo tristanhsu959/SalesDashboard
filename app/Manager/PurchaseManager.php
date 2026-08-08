@@ -345,7 +345,77 @@ class PurchaseManager
 	}
 	
 	
+	/******************** 供應商產品 ********************/
+	/* 供應商產品-不分品牌
+	 * @params: int
+	 * @return: string
+	 */
+	public function getSupplierProductWithCategory()
+	{
+		#沒有重複問題,可以直接取Id使用
+		#不分品牌, 由門店來過濾數據即可
+		$enableProducts = $this->_repository->getSupplierProductList();
+		
+		#整理成分類模式
+		$groups = collect($enableProducts)->groupBy('supplierId');
+		
+		#供應商category
+		$category = $groups->mapWithKeys(function($items, $key){
+			$name = $items->pluck('supplierName')->first();
+			return [$key => $name];
+		})->all();
+		
+		#Product Mapping
+		$productGroup = $groups->map(function($items, $key){
+			
+			return $items->mapWithKeys(function($item, $key){
+				$id 	= $item['productId'];
+				$name	= "{$item['shortCode']} {$item['productName']}";
+				
+				return [$id => $name];
+			})->all();
+		})->all();
+		
+		return [$category, $productGroup];
+	}
 	
+	/* 取Name對應的ProductId(查詢時)
+	 * @params: int
+	 * @params: boolean
+	 * @return: array
+	 */
+	public function getSupplierProductIdByName($name)
+	{
+		if (empty($name))
+			return [];
+		
+		$result = $this->_repository->getSupplierProductIdByName($name);
+		
+		#format to int
+		$ids = collect($result)->map(function($item, $key){
+			return (int)$item['productId'];
+		})->toArray();
+		
+		return $ids;
+	}
+	
+	/* 供應商產品-不分品牌
+	 * @params: int
+	 * @return: string
+	 */
+	public function getSupplierProductListByIds($ids)
+	{
+		#依Id取清單
+		$enableProducts = $this->_repository->getSupplierProductList();
+		
+		$productList = collect($enableProducts)->filter(function($item, $key) use($ids){
+			return in_array($item['productId'], $ids);
+		})->mapWithKeys(function($item, $key){
+			return [$item['productId'] => $item['productName']];
+		})->all();
+		
+		return $productList;
+	}
 	/******************** Store ********************/
 	/* Get store data by brand
 	 * @params: int

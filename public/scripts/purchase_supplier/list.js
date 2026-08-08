@@ -1,7 +1,7 @@
 /* JS */
 
 document.addEventListener('alpine:init', () => {
-	Alpine.data('searchShipments', (searchData) => ({
+	Alpine.data('searchSupplier', (searchData) => ({
 		searchData: {...searchData.search},
 		options: {...searchData.options},
 		errors: new Set(),
@@ -10,12 +10,6 @@ document.addEventListener('alpine:init', () => {
 			
 		},
 		
-		get showByOptions() {
-			return this.searchData.type == 'total';
-		},
-		get showCalcOptions() {
-			return this.searchData.type == 'total';
-		},
 		get showAreaOptions() {
 			return (Object.keys(this.options.areaList).length > 0);
 		},
@@ -31,9 +25,6 @@ document.addEventListener('alpine:init', () => {
 		get showProduct() {
 			return (catId) => (this.searchData.type == 'total' && this.searchData.where == 'category' 
 							&& this.searchData.category == catId);
-		},
-		get showStoreName() {
-			return (this.searchData.type == 'status');
 		},
 		
 		search() {
@@ -56,9 +47,9 @@ document.addEventListener('alpine:init', () => {
 			if (this.searchData.type == 'total' && this.searchData.where == 'keyword' && this.searchData.keyword == '')
 				this.errors.add('keyword');
 			
-			if (this.searchData.type == 'total' && this.searchData.where == 'category' && this.searchData.shortCodes.length == 0)
+			if (this.searchData.type == 'total' && this.searchData.where == 'category' && this.searchData.productIds.length == 0)
 			{
-				this.errors.add('shortCodes');
+				this.errors.add('productIds');
 				Alpine.store('toast').notify('請勾選產品');
 			}
 			
@@ -79,36 +70,16 @@ document.addEventListener('alpine:init', () => {
 		
 		resetSearch() {
 			this.searchData.type = Object.keys(this.options.type)[0];
-			this.searchData.calc = Object.keys(this.options.calc)[0];
-			this.searchData.by = Object.keys(this.options.by)[0];
 			this.searchData.stDate = this.searchData.tomorrow;
 			this.searchData.endDate = this.searchData.tomorrow;
 			this.searchData.areaIds = [];
 			this.searchData.where = Object.keys(this.options.where)[0];
 			this.searchData.keyword = '';
 			this.searchData.category = '';
-			this.searchData.shortCodes = [];
-			this.searchData.storeName = '';
+			this.searchData.productIds = [];
 			this.errors.clear();
 		},
     }));
-	
-	//Factory
-	Alpine.data('statisticsFactory', (data) => ({
-		statistics: {...data},
-		activeProduct: '',
-		
-		init() { 
-			const keys = Object.keys(this.statistics.productList);
-			if (keys.length > 0)
-				this.activeProduct = keys[0];
-		},
-    }));
-	
-	//Store cache
-	Alpine.store('shipmentStore', {
-		filter: '',
-	});
 	
 	/*呼叫function要多處理變數*/
 	Alpine.data('statisticsStore', (data) => ({
@@ -118,18 +89,18 @@ document.addEventListener('alpine:init', () => {
 		openTabMenu: false,
 		fixedTabsCount: 4,
 		
-		init() {
+		init() { 
 			/* Set active tab */
 			const keys = Object.keys(this.statistics.productList);
 			if (keys.length > 0)
 				this.activeProduct = keys[0];
 		},
 		
-		activeTab(shortCode) {
-			return (this.activeProduct == shortCode) ? 'active' : '';
+		activeTab(productId) {
+			return (this.activeProduct == productId) ? 'active' : '';
 		},
-		setActiveTab(shortCode, productName){
-			this.activeProduct = shortCode;
+		setActiveTab(productId, productName){
+			this.activeProduct = productId;
 			this.activeProductName = productName;
 		},
 		activeMoreTab(){
@@ -152,30 +123,6 @@ document.addEventListener('alpine:init', () => {
 			return (this.activeMoreTab() == 'active') ? this.activeProductName : '更多';
 		},
 		
-		get filterStore() {
-			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
-			
-			const list = Object.values(this.statistics.storeList);
-			
-			const result = list.filter(store => 
-				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
-				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
-				String(store.storeNo || '').toLowerCase().includes(searchKeyword) ||
-				String(store.storeName || '').toLowerCase().includes(searchKeyword)
-			);
-			
-			return result;
-		},
-	
-    }));
-	
-	/*呼叫function要多處理變數*/
-	Alpine.data('StatisticsStatus', (data) => ({
-		statistics: {...data},
-		
-		init() { 
-		},
-		
 		/* get filterStore() {
 			const searchKeyword = Alpine.store('shipmentStore').filter.toLowerCase();
 			
@@ -193,27 +140,6 @@ document.addEventListener('alpine:init', () => {
 	
     }));
 	
-	/* Hourly revenue */
-	Alpine.data('storeDetail', () => ({
-		detail: {
-			dateList: [],
-			storeKey: '',
-			storeName: '',
-			data: {},
-		},
-		
-		init() {
-		},
-		
-		openDetail(eventData) {
-			this.detail.dateList 	= eventData.dateList;
-			this.detail.storeKey 	= eventData.id;
-			this.detail.storeName 	= eventData.name;
-			this.detail.data 		= eventData.details;
-			
-			ui('#detailData');
-		},
 	
-    }));
 });
 

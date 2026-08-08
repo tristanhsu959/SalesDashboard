@@ -30,6 +30,7 @@ enum Functions : string
 	case BF_PURCHASE_SALES			= 'bafang:purchase_sales';
 	case BF_PURCHASE_NOT_ORDER		= 'bafang:purchases_not_order';
 	case BF_PURCHASE_PRODUCT_INFO	= 'bafang:purchase_product_info';
+	case BF_PURCHASE_SUPPLIER		= 'bafang:purchase_supplier';
 		
 	#Buygood	
 	case BG_NEW_RELEASE				= 'buygood:new_releases';
@@ -42,6 +43,7 @@ enum Functions : string
 	case BG_PURCHASE_SALES			= 'buygood:purchase_sales';
 	case BG_PURCHASE_NOT_ORDER		= 'buygood:purchases_not_order';
 	case BG_PURCHASE_PRODUCT_INFO	= 'buygood:purchase_product_info';
+	case BG_PURCHASE_SUPPLIER		= 'buygood:purchase_supplier';
 	
 	#FjVeggie	
 	case FJ_DAILY_REVENUE		= 'fjVeggie:daily_revenue';
@@ -76,6 +78,7 @@ enum Functions : string
 			self::BF_PURCHASE_SALES			=> '門店進貨及銷售(Beta)',
 			self::BF_PURCHASE_NOT_ORDER		=> '未訂貨查詢',
 			self::BF_PURCHASE_PRODUCT_INFO 	=> '訂貨產品資訊',
+			self::BF_PURCHASE_SUPPLIER 		=> '供應商出貨總量查詢',
 			
 			#御廚
 			self::BG_NEW_RELEASE 			=> '新品銷售',
@@ -88,6 +91,7 @@ enum Functions : string
 			self::BG_PURCHASE_SALES			=> '門店進貨及銷售(Beta)',
 			self::BG_PURCHASE_NOT_ORDER		=> '未訂貨查詢',
 			self::BG_PURCHASE_PRODUCT_INFO 	=> '訂貨產品資訊',
+			self::BG_PURCHASE_SUPPLIER 		=> '供應商出貨總量查詢',
 				
 			#芳珍	
 			self::FJ_DAILY_REVENUE			=> '門店營收',
