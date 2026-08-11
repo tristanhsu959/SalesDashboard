@@ -3,6 +3,7 @@
 namespace App\ViewModels;
 
 use App\Facades\AppManager;
+use App\Services\PurchaseSupplierService;
 use App\ViewModels\Attributes\attrStatus;
 use App\ViewModels\Attributes\attrActionBar;
 use App\ViewModels\Attributes\attrAllowAction;
@@ -17,16 +18,17 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Fluent;
 
-class PurchaseReportViewModel extends Fluent
+class PurchaseSupplierViewModel extends Fluent
 {
 	use attrStatus, attrActionBar, attrAllowAction, attrResponse;
 	
-	public function __construct()
+	public function __construct(protected PurchaseSupplierService $_service)
 	{
 		$this->function		= NULL;
 		$this->action 		= FormAction::LIST; 
 		$this->backRoute 	= '';
 		$this->success();
+		$this->statistics = [];
 	}
 	
 	/* initialize
@@ -51,17 +53,22 @@ class PurchaseReportViewModel extends Fluent
 	private function _setOptions()
 	{
 		$type = [
-			'performance'	=> '營運概況',
-			'employeePr'	=> '員購公關',
-			'extraOrder'	=> '追加',
+			'total'	=> '總量', 
 		];
 		$this->set('options.type', $type);
 		
-		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
-		$areaList 		= $this->getPurchaseAreaOptions($this->brand);
+		$where = [
+			'keyword'	=> '關鍵字查詢',
+			'category'	=> '分類查詢', 
+		];
+		$this->set('options.where', $where);
 		
-		$this->set('options.opCenterList', $opCenterList);
+		$areaList = $this->getPurchaseAreaOptions($this->brand);
 		$this->set('options.areaList', $areaList);
+		
+		list($category, $products) = $this->_service->getProductOptions($this->brand);
+		$this->set('options.category', $category);
+		$this->set('options.products', $products); 
 	}
 	
 	/* Form submit action
@@ -74,8 +81,8 @@ class PurchaseReportViewModel extends Fluent
 		
 		return match($formAction)
 		{
-			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.purchase_report.search')),
-			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.purchase_report.export'), ['token' => $this->statistics['exportToken']]),
+			FormAction::LIST	=> route(Str::replace('?', $brandCode, '?.supplier.search')),
+			FormAction::EXPORT	=> route(Str::replace('?', $brandCode, '?.supplier.export'), ['token' => $this->statistics['exportToken']]),
 		};
 	}
 	
@@ -83,20 +90,29 @@ class PurchaseReportViewModel extends Fluent
 	 * @params: string
 	 * @params: string
 	 * @params: string
+	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'performance', $searchStDate = NULL, $searchEndDate = NULL, $searchOpCenterIds = [], $searchAreaIds = [], $searchProductCodes = [])
+	public function keepSearchData($searchType = 'total', $searchStDate = NULL, $searchEndDate = NULL,
+						$searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
+						$searchCategory = '', $searchProductIds = [])
     {
-		$today = Carbon::now()->format('Y-m-d');
+		$today = now()->format('Y-m-d');
+		$tomorrow = Carbon::tomorrow()->format('Y-m-d');
+		
+		$searchStDate	= $searchStDate ?? $tomorrow;
+		$searchEndDate 	= $searchEndDate ?? $tomorrow;
 		
 		$this->set('search.type', $searchType);
-		$this->set('search.stDate', $searchStDate ?? $today);
-		$this->set('search.endDate', $searchEndDate ?? $today);
-		$this->set('search.opCenterIds', $searchOpCenterIds);
+		$this->set('search.stDate', $searchStDate);
+		$this->set('search.endDate', $searchEndDate);
 		$this->set('search.areaIds', $searchAreaIds);
-		$this->set('search.productCodes', $searchProductCodes);
-		$this->set('search.today', $today); 
-		$this->set('search.tomorrow', Carbon::tomorrow()->format('Y-m-d'));
+		$this->set('search.where', $searchWhere);
+		$this->set('search.keyword', $searchKeyword);
+		$this->set('search.category', $searchCategory);
+		$this->set('search.productIds', $searchProductIds);
+		$this->set('search.today', $today);
+		$this->set('search.tomorrow', $tomorrow);
 	}
 	
 	/* Partial view
@@ -105,13 +121,11 @@ class PurchaseReportViewModel extends Fluent
 	 */
 	public function getPartialView()
 	{
-		$type = $this->get('search.type', NULL);
+		$type 	= $this->get('search.type', NULL);
 		
 		return match($type)
 		{
-			'performance'	=> 'purchase_report.performance',
-			'employeePr'	=> 'purchase_report.employee_pr',
-			'extraOrder'	=> 'purchase_report.extra_order',
+			'total'	=> 'purchase_supplier.store',
 		};
 	}
 	
@@ -128,7 +142,9 @@ class PurchaseReportViewModel extends Fluent
 	{
 		$response = $this->responseBaseData();
 		
-		$data = data_get($this->statistics, 'report', []);
+		#filter tool
+		$type = data_get($this->statistics, 'type', NULL);
+		$response['hasFilter'] = ($type == 'store');
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
 		
 		return $response;

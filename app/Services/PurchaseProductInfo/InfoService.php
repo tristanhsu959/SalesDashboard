@@ -391,7 +391,7 @@ class InfoService
 		*/
 		
 		#取得的清單已可直接使用, 無須再特別處理
-		$header = ['產品名稱', 'ERP料號', '供應商代號', '供應商', '售價', '進貨價', '單位', 
+		$header = ['產品名稱', 'ERP料號', '簡碼', '供應商代號', '供應商', '售價', '進貨價', '單位', 
 						'營運中心', '出貨工廠', '上架狀態', '備註'];
 		
 		#整理格式即可
@@ -522,7 +522,7 @@ class InfoService
 		$export = [];
 		$export[] = $exportData['header'];
 		
-		['產品名稱', 'ERP料號', '供應商代號', '供應商', '售價', '進貨價', '單位', 
+		['產品名稱', 'ERP料號', '簡碼', '供應商代號', '供應商', '售價', '進貨價', '單位', 
 						'營運中心', '出貨工廠', '上架狀態', '備註'];
 		foreach($exportData['list'] as $data)
 		{
@@ -530,6 +530,7 @@ class InfoService
 			
 			$row[] = $data['productName'];
 			$row[] = $data['erpNo'];
+			$row[] = $data['shortCode'];
 			$row[] = $data['supplierNo'];
 			$row[] = $data['supplierName'];
 			$row[] = Number::currency(intval(data_get($data, 'price', 0)), precision: 0);

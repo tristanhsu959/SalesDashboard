@@ -93,6 +93,7 @@
 							<tr>
 								<td x-text="data.productName"></td>
 								<td x-text="data.erpNo"></td>
+								<td x-text="data.shortCode"></td>
 								<td x-text="data.supplierNo"></td>
 								<td x-text="data.supplierName"></td>
 								<td x-text="Helper.formatDollar(data.price)"></td>

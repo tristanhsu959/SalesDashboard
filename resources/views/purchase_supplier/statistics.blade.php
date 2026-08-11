@@ -2,16 +2,16 @@
 @use('App\Libraries\HelperLib')
 
 @push('styles')
-    <link href="{{ HelperLib::versionAsset('styles/shipments/list.css') }}" rel="stylesheet">
+    <link href="{{ HelperLib::versionAsset('styles/purchase_supplier/list.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ HelperLib::versionAsset('scripts/shipments/list.js') }}" defer></script>
+    <script src="{{ HelperLib::versionAsset('scripts/purchase_supplier/list.js') }}" defer></script>
 @endpush
 
 @section('content')
 <!-- Search panel -->
-<dialog x-data="searchShipments(@js($viewModel->searchFormData()))" id="searchPanel" class="right">
+<dialog x-data="searchSupplier(@js($viewModel->searchFormData()))" id="searchPanel" class="right">
 	<form :action="searchData.formAction" method="post" id="searchForm" novalidate @submit.prevent="search()">
 	@csrf
 		<h5>查詢</h5>
@@ -25,24 +25,7 @@
 					</label>
 				</template>
 			</nav>
-			<nav x-show="showByOptions">
-				<template x-for="(name, id) in options.by" :key="id">
-					<label class="radio field-light-blue">
-						<input type="radio" name="searchBy" x-model="searchData.by" :value="id">
-						<span x-text="name"></span>
-					</label>
-				</template>
-			</nav>
-			<nav x-show="showCalcOptions">
-				<template x-for="(name, id) in options.calc" :key="id">
-					<label class="radio field-purple">
-						<input type="radio" name="searchCalc" x-model="searchData.calc" :value="id">
-						<span x-text="name"></span>
-					</label>
-				</template>
-			</nav>
 		</div>
-		<div class="space"></div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
@@ -85,7 +68,7 @@
 		</div>
 			
 		<div x-show="showCategory" class="field label suffix round border field-light-blue" :class="Helper.hasError(errors, 'category')">
-			<select x-model="searchData.category" name="searchCategory" :disabled="! showCategory"> <!--@change="searchData.shortCodes = []"-->
+			<select x-model="searchData.category" name="searchCategory" :disabled="! showCategory">
 				<option value="">請選擇</option>
 				<template x-for="(name, catId) in options.category" :key="catId">
 					<option x-text="name" :value="catId" :selected="searchData.category == catId"></option>
@@ -93,27 +76,22 @@
 			</select>
 			<label>類別</label>
 			<i>arrow_drop_down</i>
-			<output x-text="`已選 ${searchData.shortCodes.length} 個項目`" class="red-text"></output>
+			<output x-text="`已選 ${searchData.productIds.length} 個項目`" class="red-text"></output>
 		</div>
 		
 		<template x-for="(products, catId) in options.products" :key="catId">
 			<fieldset x-show="showProduct(catId)" class="light-blue-border fieldset product-list">
 				<legend><i class="small red-text">asterisk</i><span class="light-blue-text">請勾選產品</span></legend>
-				<template x-for="(item, idx) in products" :key="idx">
+				<template x-for="(name, id) in products" :key="id">
 					<div class="row">
 						<label class="checkbox large s3 check-amber">
-							<input type="checkbox" :name="`searchShortCodes[]`" x-model="searchData.shortCodes" :value="item.shortCode">
-							<span x-text="`${item.shortCode} ${item.productName}`"></span>
+							<input type="checkbox" :name="`searchProductIds[]`" x-model="searchData.productIds" :value="id" :disabled="! showCategory">
+							<span x-text="name"></span>
 						</label>
 					</div>
 				</template>
 			</fieldset>
 		</template>
-		
-		<div x-show="showStoreName" class="field label border round field-light-blue">
-			<input type="text" name="searchStoreName" maxlength="30" x-model="searchData.storeName">
-			<label>找店名</label>
-		</div>
 		
 		<div class="space"></div>
 		<div>
@@ -157,7 +135,6 @@
 		<!-- Loading -->
 		<section class="container">
 			<pre><i>arrow_warm_up</i>點擊查詢按鈕執行查詢</pre>
-			<pre x-show="response.brandCode == 'bafang'" class="red-border">菜肉餡：Qty X 2.5<br/>新蔬食餡：Qty X 1.8</pre>
 		</section>
 	</template>
 	

@@ -21,6 +21,7 @@ class LocalLegacyRepository  extends Repository
 	 * @params: query builder
 	 * @params: datetime
 	 * @params: datetime
+	 * @params: array => productCodes = FALSE => 全取
 	 * @return: array
 	 */
 	public function getExtraData($brand, $factoryNos, $stDate, $endDate, $productCodes)

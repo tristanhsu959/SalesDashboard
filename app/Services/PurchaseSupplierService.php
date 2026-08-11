@@ -2,12 +2,10 @@
 
 namespace App\Services;
 
-use App\Services\Shipments\FactoryService;
-use App\Services\Shipments\StoreService;
-use App\Services\Shipments\StatusService;
+use App\Services\PurchaseSupplier\OrderService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
-use App\Repositories\ShipmentsRepository;
+use App\Repositories\PurchaseSupplierRepository;
 use App\Libraries\ResponseLib;
 use App\Libraries\HelperLib;
 use App\Enums\Brand;
@@ -28,27 +26,23 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 
 #當主Service
-class ShipmentsService
+class PurchaseSupplierService
 {
 	private $_statistics = [];
 	
-	public function __construct(protected ShipmentsRepository $_repository)
+	public function __construct(protected PurchaseSupplierRepository $_repository)
 	{
 		$this->_statistics = [
 			'type'			=> '', 
-			'by'			=> '', #store,factory
-			'calc'			=> '', #日,月
 			'where'			=> '', #keyword,category
 			'brandId'		=> '', #export
 			'brandCode'		=> '', 
 			'startDate'		=> '', #Y-m-d
             'endDate'   	=> '',
 			'productIds'	=> [],
-			'dateList'		=> [],
 			'productList'	=> [],
 			'storeList'		=> [],
-			'factoryList'	=> [],
-			'data'			=> [],
+			'store'			=> [],
 			'exportName'	=> '', #export
 			'exportToken'	=> '', #export
 		];
@@ -72,8 +66,8 @@ class ShipmentsService
 	{
 		return match ($brand) 
 		{
-			Brand::BAFANG	=> Functions::BF_SHIPMENTS, 
-			Brand::BUYGOOD	=> Functions::BG_SHIPMENTS,
+			Brand::BAFANG	=> Functions::BF_PURCHASE_SUPPLIER, 
+			Brand::BUYGOOD	=> Functions::BG_PURCHASE_SUPPLIER,
         };
 	}
 	
@@ -84,7 +78,7 @@ class ShipmentsService
 	public function getProductOptions($brand)
 	{
 		$allowOpCenter 	= PurchaseManager::getAllowOpCenters($brand);
-		$productOptions = PurchaseManager::getEnableProductSettingsAndCategory($brand, $allowOpCenter);
+		$productOptions = PurchaseManager::getSupplierProductWithCategory();
 		
 		#若有個別處理寫在這
 		return $productOptions;
@@ -98,35 +92,32 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
+	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, 
+									$searchWhere, $searchKeyword, $searchCategory, $searchProductIds)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-								$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName);
+			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, 
+											$searchWhere, $searchKeyword, $searchCategory, $searchProductIds);
+			
 			if (Cache::has($params->cacheKey))
 			{
-				Log::channel('appServiceLog')->info('Get shipments data from cache');
+				Log::channel('appServiceLog')->info('Get supplier order data from cache');
 				
 				$statistics = Cache::get($params->cacheKey); #cache data is response format
 				return ResponseLib::initialize($statistics)->success();
 			}
 			else
 			{
-				Log::channel('appServiceLog')->info('Get shipments data from db');
+				Log::channel('appServiceLog')->info('Get supplier order data from db');
 				
-				if ($params->type == 'total' && $params->by == 'store')
-					$service = app(StoreService::class);
-				else if ($params->type == 'total' && $params->by == 'factory')
-					$service = app(FactoryService::class);
-				else if ($params->type == 'status')
-					$service = app(StatusService::class);
+				if ($params->type == 'total')
+					$service = app(OrderService::class);
 				else
-					throw new Exception('查詢訂貨總量時發生錯誤，無法識別查詢類型');
+					throw new Exception('查詢供應商出貨總量時發生錯誤，無法識別查詢類型');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -149,8 +140,8 @@ class ShipmentsService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
+	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, 
+							$searchWhere, $searchKeyword, $searchCategory, $searchProductIds)
 	{
 		$params = new Fluent();
 		
@@ -161,21 +152,19 @@ class ShipmentsService
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;
 		$functions 		= $this->parsingFunction($brand);
 		
-		$cacheKeyItems = [$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate];
+		$cacheKeyItems = [$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate];
 		
 		if ($searchType == 'total' && $searchWhere == 'keyword')
 			$cacheKeyItems[] = [$searchWhere, $searchKeyword];
 		else if ($searchType == 'total' && $searchWhere == 'category')
-			$cacheKeyItems[] = [$searchWhere, $searchCategory, $searchShortCodes];
-		else if ($searchType == 'status')
-			$cacheKeyItems[] = $searchStoreName;
+			$cacheKeyItems[] = [$searchWhere, $searchCategory, $searchProductIds];
 		
 		$cacheKey = HelperLib::buildCacheKey($cacheKeyItems);
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
 				->stDate($searchStDate)->endDate($searchEndDate)
-				->type($searchType)->by($searchBy)->calc($searchCalc)->where($searchWhere)
-				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)->storeName($searchStoreName)
+				->type($searchType)->where($searchWhere)
+				->keyword($searchKeyword)->category($searchCategory)->productIds($searchProductIds)
 				->cacheKey($cacheKey);
 		
 		return $params;
@@ -195,18 +184,13 @@ class ShipmentsService
 			return ResponseLib::initialize()->fail('資料已過期，請重新查詢後下載');
 		
 		$currentUser = AppManager::getCurrentUser();
-		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export shipment data-?'));
+		Log::channel('appServiceLog')->info(Str::replaceArray('?', [$currentUser->getAvailableName(), $cacheKey], '[?]Export purchase supplier order data-?'));
 		
 		$sourceData = Cache::get($cacheKey);
 		$type 	= $sourceData['type'];
-		$by 	= $sourceData['by'];
 		
-		if ($type == 'total' && $by == 'store')
-			$service = app(StoreService::class);
-		else if ($type == 'total' && $by == 'factory')
-			$service = app(FactoryService::class);
-		else if ($type == 'status')
-			$service = app(StatusService::class);
+		if ($type == 'total')
+			$service = app(OrderService::class);
 		else
 			return ResponseLib::initialize()->fail('下載檔案發生錯誤，請重新查詢後下載');
 		

@@ -34,6 +34,12 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
 		],
 		[
+			'name' 		=> Functions::BF_PURCHASE_SUPPLIER->label(), #供應商出貨總量查詢
+			'code'		=> Functions::BF_PURCHASE_SUPPLIER->value,
+			'style' 	=> ['icon' => 'delivery_truck_speed', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.supplier'),
+		],
+		[
 			'name' 		=> Functions::BF_PURCHASE_NOT_ORDER->label(), #未訂貨查詢
 			'code'		=> Functions::BF_PURCHASE_NOT_ORDER->value,
 			'style' 	=> ['icon' => 'orders', 'color' => 'orange-text'],
@@ -101,6 +107,12 @@ return [
 			'code'		=> Functions::BG_SHIPMENTS->value,
 			'style' 	=> ['icon' => 'local_shipping', 'color' => 'cyan-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
+		],
+		[
+			'name' 		=> Functions::BG_PURCHASE_SUPPLIER->label(), #供應商出貨總量查詢
+			'code'		=> Functions::BG_PURCHASE_SUPPLIER->value,
+			'style' 	=> ['icon' => 'delivery_truck_speed', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.supplier'),
 		],
 		[
 			'name' 		=> Functions::BG_PURCHASE_NOT_ORDER->label(), #未訂貨查詢

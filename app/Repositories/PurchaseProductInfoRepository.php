@@ -156,7 +156,7 @@ class PurchaseProductInfoRepository extends Repository
 			->join(DB::raw('SupplierFactory as sf WITH(NOLOCK)'), 'sf.SupplierId', '=', 'sp.SupplierId')
 			->join(DB::raw('Factory as f WITH(NOLOCK)'), 'f.Id', '=', 'sf.FactoryId')
 			->join(DB::raw('Unit as u WITH(NOLOCK)'), 'u.Id', '=', 'sp.UnitId')
-			->select('sp.SupplierProductName as productName', 'sp.ErpNo as erpNo', 'sp.ProductNote as memo')
+			->select('sp.SupplierProductName as productName', 'sp.ErpNo as erpNo', 'sp.SupplierProductNo as shortCode', 'sp.ProductNote as memo')
 			->addSelect('sp.Price as price', 'sp.PurchasePrice as purchasePrice', 'sp.ShelfStatus as status')
 			->addSelect('s.No as supplierNo', 's.Name as supplierName')
 			->addSelect('f.No as factoryNo', 'f.Name as factoryName')

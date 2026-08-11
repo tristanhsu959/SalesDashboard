@@ -264,4 +264,44 @@ class PurchaseRepository extends Repository
 	}
 	
 	
+	/******************** 供應商產品 ********************/
+	/* 取供應商產品設定及代碼
+	 * @params: int
+	 * @return: array
+	 */
+	public function getSupplierProductList()
+	{
+		#供應商產品沒有工廠,故應不會重複
+		$db = $this->connectNewOrder();
+		$result = $db
+			->table('SupplierProduct as p')
+			->join('Supplier as s', 's.Id', '=', 'p.SupplierId')
+			->select('p.Id as productId', 'p.SupplierProductNo as shortCode', 'p.SupplierProductName as productName')
+			->addSelect('s.Id as supplierId', 's.Name as supplierName')
+			->where('p.ShelfStatus', '=', 1)
+			->get()
+			->toArray(); 
+		
+		return $result;
+	}
+	
+	/* 取Product id
+	 * @params: int
+	 * @params: string
+	 * @return: array
+	 */
+	public function getSupplierProductIdByName($name)
+	{
+		$db = $this->connectNewOrder();
+		
+		$result = $db
+			->table('SupplierProduct as p')
+			->select('p.Id as productId')
+			->where('p.SupplierProductName', 'like', "%{$name}%")
+			->where('p.ShelfStatus', '=', 1)
+			->get()
+			->toArray(); 
+			
+		return $result;
+	}
 }
