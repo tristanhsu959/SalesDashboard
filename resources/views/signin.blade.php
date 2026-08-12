@@ -7,6 +7,7 @@
 
 @section('content')
 
+@if (empty($oidcUrl))
 <div x-data="login(@js($viewModel->responseData()))" class="content-wrapper">
 	<form :action="formData.formAction" method="post" class="row" novalidate @submit.prevent="validate()" >
 		@csrf
@@ -16,7 +17,7 @@
 			<span class="copyright">Bafang<i>&copy;</i>2025</span>
 		</div>
 
-		<div class="divider"> </div>
+		<div class="divider"></div>
 
 		<div class="content-right">
 			<div class="header">
@@ -56,4 +57,14 @@
 		</div>
 	</form>
 </div>
+@else
+	<a href="{{$oidcUrl}}" class="button round pink right-margin">
+		<i>fingerprint</i>
+		<span>OIDC Auth</span>
+	</a>
+	<a href="{{ route('signin')}}" class="button round black">
+		<span>Back</span>
+		<i>arrow_forward</i>
+	</a>
+@endif
 @endsection
