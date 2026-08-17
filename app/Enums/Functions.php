@@ -9,7 +9,7 @@ enum Functions : string
 	case HOME						= 'home';
 	case USER						= 'user';
 	case ROLE 						= 'role'; #deprecated
-	case STORE_MAP 					= 'store_map'; #deprecated
+	case AREA_MANAGER				= 'area_manager'; #deprecated
 		
 	#Product	
 	case PRODUCT 					= 'product';
@@ -57,7 +57,7 @@ enum Functions : string
 			self::HOME						=> '首頁',
 			self::USER						=> '帳號管理',
 			self::ROLE 						=> '身份管理',
-			self::STORE_MAP 				=> '門店對應',
+			self::AREA_MANAGER 				=> '督導維護',
 				
 			#產品管理	
 			self::PRODUCT 					=> '產品料號設定',

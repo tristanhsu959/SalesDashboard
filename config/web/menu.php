@@ -161,6 +161,15 @@ return [
 		],
 	],
 	
+	MenuGroup::DATA->value => [
+		[
+			'name' 		=> Functions::AREA_MANAGER->label(), #督導管理,
+			'code'		=> Functions::AREA_MANAGER->value,
+			'style' 	=> ['icon' => 'location_away', 'color' => 'yellow-text'],
+			'url' 		=> 'area_manager', 
+		],
+	],
+	
 	MenuGroup::PRODUCT->value => [
 		[
 			'name' 		=> Functions::PRODUCT->label(), #產品基本資料,
