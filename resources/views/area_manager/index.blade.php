@@ -58,8 +58,8 @@
 			
 			<template x-if="response.exportAction">
 				<a :href="`javascript:window.location.href='${response.exportAction}'`" class="button circle extend red" type="button">
-					<i>download_2</i>
-					<span>下載</span>
+					<i>download</i>
+					<span>下載範本</span>
 				</a>
 			</template>
 			
