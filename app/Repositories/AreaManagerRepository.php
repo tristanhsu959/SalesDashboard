@@ -67,6 +67,20 @@ class AreaManagerRepository extends Repository
 		return $result;
 	}
 	
+	/* get area manager
+	 * @params: enum
+	 * @params: array
+	 * @return: array
+	 */
+	public function getAreaManagerMapping()
+	{
+		$db = $this->connectSalesDashboard();
+		
+		$result = $db->table('area_manager_mapping')->get();
+		
+		return $result;
+	}
+	
 	/* Update area manager
 	 * @params: enum
 	 * @params: array

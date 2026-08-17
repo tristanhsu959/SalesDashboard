@@ -45,8 +45,10 @@ class AreaManagerService
 		{
 			$brand	= Brand::tryFrom($brandId);
 			
-			$storeList 	= $this->_getStoreList($brand, $areaIds);
-			$result 	= $this->_saveTemplate($brand, $areaIds, $storeList);
+			$areaManagers 	= $this->_getAreaManagerMapping(); #因為是local直接全抓
+			$storeList 		= $this->_getStoreList($brand, $areaIds, $areaManagers);
+			
+			$result 		= $this->_saveTemplate($brand, $areaIds, $storeList);
 			
 			return ResponseLib::initialize($result)->success();
 		}
@@ -57,13 +59,33 @@ class AreaManagerService
 		}
 	}
 	
+	/* Get area manager current setting
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getAreaManagerMapping()
+	{
+		/*[
+			1000001 => "陳奕璇",....
+		]
+		*/
+		
+		$managers = $this->_repository->getAreaManagerMapping();
+		
+		$mappings = collect($managers)->mapWithKeys(function($item, $key){
+			return [$item['storeKey'] => $item['areaManager']];
+		})->all();
+		
+		return $mappings;
+	}
+	
 	/* Search data
 	 * @params: enum
 	 * @params: string
 	 * @params: date
 	 * @return: array
 	 */
-	private function _getStoreList($brand, $areaIds)
+	private function _getStoreList($brand, $areaIds, $areaManagers = [])
 	{
 		/* "brandNo" => "BF"
 		"areaId" => "24"
@@ -88,19 +110,20 @@ class AreaManagerService
 		#之後要再取area manager設定
 		#欄位先取, 視狀況再決定要顯示多少
 		#依區分組
-		$result = collect($storeList)->map(function($item, $key) {
+		$result = collect($storeList)->map(function($item, $key) use($areaManagers){
 			$area = AreaLib::toArea(intval($item['areaId']));
 			
 			$item['areaId']		= $area->value;
 			$item['areaName']	= $area->label();
 			$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
-			$item['areaManager']= '';
+			$item['areaManager']= data_get($areaManagers, $item['storeKey'], '');
 			
 			return $item;
 		})->sortBy('areaId')->groupBy('areaName')->toArray();
 		
 		return $result;
 	}
+	
 	
 	/* Generate statistics data
 	 * @params: object

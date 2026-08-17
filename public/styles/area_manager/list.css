@@ -3,7 +3,7 @@
 .store-list {
 	
 	.area-store {
-		--table-stripes: #e1bee7;
+		--table-stripes: #f3e5f5;
 		
 		table {
 			&.stripes tbody tr:nth-child(odd) {
