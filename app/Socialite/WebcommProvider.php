@@ -24,7 +24,11 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
         return ['base_url'];
     }
 	
-    #授權登入網址
+    /* 授權登入網址-Called by redirect
+	 * 
+	 * @param  string  $code
+	 * @return array
+	 */
     protected function getAuthUrl($state)
     {
 		$baseUrl = rtrim($this->config['base_url'], '/');
@@ -33,7 +37,11 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
         return $this->buildAuthUrlFromBase($authUrl, $state);
     }
 
-    #Token 交換網址
+    /* Token 交換網址-Called by callback(Socialite::driver('webcomm')->user())
+	 * 
+	 * @param  string  $code
+	 * @return array
+	 */
     protected function getTokenUrl()
     {
 		$baseUrl	= rtrim($this->config['base_url'], '/');
@@ -41,6 +49,23 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 		
         return $tokenUrl;
     }
+	
+	/**
+	 * 組合發送至 Token 交換網址的 Body 參數
+	 * 
+	 * @param  string  $code
+	 * @return array
+	 */
+	protected function getTokenFields($code)
+	{dd($code);
+		return [
+			'grant_type'    => 'authorization_code',
+			'code'          => $code, 
+			'client_id'     => $this->clientId,
+			'client_secret' => $this->clientSecret,
+			'redirect_uri'  => $this->redirectUrl,
+		];
+	}
 
     #取得使用者資料網址 (Userinfo)
     protected function getUserByToken($token)
@@ -51,7 +76,7 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
         $response = $this->getHttpClient()->get($userUrl, [
             'headers' => [
                 'Authorization' => "Bearer {$token}",
-                'Accept' => 'application/json',
+                'Accept' => 'application/x-www-form-urlencoded', #'application/json',
             ],
         ]);
 

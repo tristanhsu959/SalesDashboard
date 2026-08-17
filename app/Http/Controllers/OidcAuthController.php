@@ -32,6 +32,7 @@ class OidcAuthController extends Controller
 		try 
 		{
 			$oidcUser = Socialite::driver('webcomm')->user();
+			dd($oidcUser);
 			$email = $oidcUser->getEmail();
 			$name = $oidcUser->getName() ?? $oidcUser->getNickname();
 
@@ -39,7 +40,7 @@ class OidcAuthController extends Controller
 				return "偉康未回傳 Email 資訊";
 			
 			// 不使用 Model，直接使用 DB Facade
-			$user = DB::table('users')->where('email', $email)->first();
+			/* $user = DB::table('users')->where('email', $email)->first();
 
 			if (!$user) {
 				$userId = DB::table('users')->insertGetId([
@@ -50,7 +51,7 @@ class OidcAuthController extends Controller
 					'updated_at' => now(),
 				]);
 				$user = DB::table('users')->where('id', $userId)->first();
-			}
+			} */
 
 			// 使用 ID 執行 Session 登入
 			Auth::loginUsingId($user->id);
