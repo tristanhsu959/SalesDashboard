@@ -155,6 +155,18 @@ class StoreManager
 		return $storeList;
 	}
 	
+	/* 開閉店排除
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterActiveStoreByCloseDate($storeList)
+	{
+		#只排除有close date的店
+		return collect($storeList)->filter(function($item, $key) {
+				return empty($item['closeDate']);
+		})->all();
+	}
+	
 	/* Format store output
 	 * @params: array
 	 * @return: array
