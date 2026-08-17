@@ -114,9 +114,8 @@
 					<i>backspace</i>
 				</button>
 				
-				<button type="button" class="extend circle secondary small" @click="isUpdate = false" >
+				<button type="button" class="circle secondary large" @click="isUpdate = false" >
 					<i>arrow_forward</i>
-					<span>回列表</span>
 				</button>
 			</nav>
 		</form>
