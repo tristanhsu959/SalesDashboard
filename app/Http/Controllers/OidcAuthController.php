@@ -31,9 +31,10 @@ class OidcAuthController extends Controller
 	{
 		try 
 		{
+			dd(request()->all()); 
 			$oidcUser = Socialite::driver('webcomm')->stateless()->user();
 			dd($oidcUser);
-			 dd(request()->all()); 
+			 
 			$email = $oidcUser->getEmail();
 			$name = $oidcUser->getName() ?? $oidcUser->getNickname();
 

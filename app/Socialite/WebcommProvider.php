@@ -36,21 +36,8 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 	
         return $this->buildAuthUrlFromBase($authUrl, $state);
     }
-
-    /* Token 交換網址-Called by callback(Socialite::driver('webcomm')->user())
-	 * 
-	 * @param  string  $code
-	 * @return array
-	 */
-    protected function getTokenUrl()
-    {
-		$baseUrl	= rtrim($this->config['base_url'], '/');
-		$tokenUrl 	= "{$baseUrl}/protocol/openid-connect/token";
-		
-        return $tokenUrl;
-    }
 	
-	/**這裏應是callback ->user()時會來call
+	/**Called by callback
 	 * 組合發送至 Token 交換網址的 Body 參數
 	 * 
 	 * @param  string  $code
@@ -67,7 +54,21 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 		];
 	}
 
-    #取得使用者資料網址 (Userinfo)
+    /* Token 交換網址-Called by callback(Socialite::driver('webcomm')->user())
+	 * 
+	 * @param  string  $code
+	 * @return array
+	 */
+    protected function getTokenUrl()
+    {
+		$baseUrl	= rtrim($this->config['base_url'], '/');
+		$tokenUrl 	= "{$baseUrl}/protocol/openid-connect/token";
+		
+        return $tokenUrl;
+    }
+	
+	#Called by callback
+	#取得使用者資料網址 (Userinfo)
     protected function getUserByToken($token)
     {
 		$baseUrl = rtrim($this->config['base_url'], '/');
@@ -82,7 +83,8 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 
         return json_decode($response->getBody(), true);
     }
-
+	
+	#Called by callback
     #將偉康回傳的 JSON 欄位對應至 Socialite 的 User 物件
     protected function mapUserToObject(array $user)
     {
