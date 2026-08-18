@@ -13,7 +13,7 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 	
     #偉康 OIDC 標準要求的 Scopes
 	#protected $scopes = []; #不預設,因不知是什麼
-	protected $scopeSeparator = ' ';
+	protected $scopeSeparator = ' '; #要以空格分隔,預設是逗號
 	
     protected $scopes = [
 		"profile",
