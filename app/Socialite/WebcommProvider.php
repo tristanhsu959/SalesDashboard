@@ -50,7 +50,7 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
         return $tokenUrl;
     }
 	
-	/**
+	/**這裏應是callback ->user()時會來call
 	 * 組合發送至 Token 交換網址的 Body 參數
 	 * 
 	 * @param  string  $code
