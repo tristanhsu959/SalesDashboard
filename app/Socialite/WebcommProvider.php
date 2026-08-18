@@ -12,7 +12,22 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 	use ConfigTrait;
 	
     #偉康 OIDC 標準要求的 Scopes
-	protected $scopes = []; #不預設,因不知是什麼
+	protected $scopes = [
+	"web-origins",
+    "profile",
+    "edm_access",
+    "phone",
+    "roles",
+    "acr",
+    "address",
+    "basic",
+    "service_account",
+    "email",
+    "admin_portal_clientId",
+    "openid",
+    "offline_access",
+    "microprofile-jwt"
+	]; #不預設,因不知是什麼
 	
     /* protected $scopes = [
 		"profile",
