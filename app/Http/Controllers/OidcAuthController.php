@@ -20,7 +20,7 @@ class OidcAuthController extends Controller
 	 */
 	public function redirect()
 	{
-		return Socialite::driver('webcomm')->redirect();
+		return Socialite::driver('webcomm')->scopes(['openid'])->redirect();
 	}
 	
 	/* Webcomm oidc auth callback
