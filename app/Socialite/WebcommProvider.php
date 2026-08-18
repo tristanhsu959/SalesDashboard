@@ -57,7 +57,7 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 	 * @return array
 	 */
 	protected function getTokenFields($code)
-	{dd($code);
+	{
 		return [
 			'grant_type'    => 'authorization_code',
 			'code'          => $code, 
