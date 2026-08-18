@@ -67,14 +67,14 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
+	public function getStatistics($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
+			$params = $this->_initParams($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -117,7 +117,7 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
+	private function _initParams($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		$params = new Fluent();
 		
@@ -128,8 +128,12 @@ class PurchaseReportService
 		$functions 	= $this->parsingFunction($brand);
 		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);
 		
+		#只有營運狀況才有此選項
+		$searchBrand = ($searchType == 'performance') ? $searchBrand : NULL;
+		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
-				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->whereBrandId($searchBrand)
+				->stDate($searchStDate)->endDate($searchEndDate)
 				->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		

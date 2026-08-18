@@ -57,6 +57,12 @@ class PurchaseReportViewModel extends Fluent
 		];
 		$this->set('options.type', $type);
 		
+		$brand = [
+			Brand::BAFANG->value	=> Brand::BAFANG->label(),
+			Brand::LUOBO->value		=> Brand::LUOBO->label(),
+		];
+		$this->set('options.brand', $brand);
+		
 		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
 		$areaList 		= $this->getPurchaseAreaOptions($this->brand);
 		
@@ -85,11 +91,12 @@ class PurchaseReportViewModel extends Fluent
 	 * @params: string
 	 * @return: array
 	 */
-	public function keepSearchData($searchType = 'performance', $searchStDate = NULL, $searchEndDate = NULL, $searchOpCenterIds = [], $searchAreaIds = [], $searchProductCodes = [])
+	public function keepSearchData($searchType = 'performance', $searchBrand = Brand::BAFANG->value, $searchStDate = NULL, $searchEndDate = NULL, $searchOpCenterIds = [], $searchAreaIds = [], $searchProductCodes = [])
     {
 		$today = Carbon::now()->format('Y-m-d');
 		
 		$this->set('search.type', $searchType);
+		$this->set('search.brand', $searchBrand);
 		$this->set('search.stDate', $searchStDate ?? $today);
 		$this->set('search.endDate', $searchEndDate ?? $today);
 		$this->set('search.opCenterIds', $searchOpCenterIds);

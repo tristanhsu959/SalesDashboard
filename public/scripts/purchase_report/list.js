@@ -10,10 +10,12 @@ document.addEventListener('alpine:init', () => {
 			
 		},
 		
+		get showBrandList(){
+			return (this.searchData.type == 'performance');
+		},
 		get showOpCenterList(){
 			return Object.keys(this.options.opCenterList).length > 0;
 		},
-		
 		get showAreaList(){
 			return (Object.keys(this.options.areaList).length > 0 && (this.searchData.type == 'performance' || this.searchData.type == 'extraOrder'));
 		},

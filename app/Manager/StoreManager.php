@@ -90,6 +90,30 @@ class StoreManager
 		}
 	}
 	
+	/* 取門店及蘿蔔分開
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getLbStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
+	{
+		try
+		{
+			#取門店不含蘿蔔
+			list($storeList, $lbStoreList) = $this->_getStoreData($brand, $allowOpCenterIds, $allowAreaIds);
+			
+			$lbStoreList = $this->filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
+			$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
+			
+			return $lbStoreList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料失敗');
+		}
+	}
+	
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array

@@ -115,7 +115,7 @@ class PerformanceService
 			
 			#3.Get Purchase data
 			$orderData = $this->_getDataFromDB($params);
-			
+			dd($params->storeList);
 			#4.Get extra data
 			$extraData = $this->_getExtraDataFromDB($params);
 			
@@ -141,6 +141,8 @@ class PerformanceService
 			#營運概況取固定的product
 			$codeGroup	= config('web.purchase.report.performance');
 			
+			#八方/蘿蔔的項目似乎不同
+			dd($codeGroup);
 			#取出所有的short code
 			$codes = collect($codeGroup)->collapse()->pluck('code')->toArray();
 			
@@ -172,7 +174,13 @@ class PerformanceService
 		$allowOpCenterIds 	= $params->allowOpCenterIds;
 		$allowAreaIds 		= $params->allowAreaIds;
 		
-		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		if ($params->whereBrandId == Brand::BAFANG->value)
+			$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		else if ($params->whereBrandId == Brand::LUOBO->value)
+			$storeList = StoreManager::getLbStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		else
+			$storeList = [];
+		
 		#這裏不排除工廠學區店
 		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
 		
@@ -197,15 +205,18 @@ class PerformanceService
 	
 		try
 		{
+			#目前只有八方有此報表
+			#因八方及蘿蔔要分開,故brand改代入search brand
 			$brand 				= $params->brand;
+			$searchBrand		= Brand::tryfrom($params->whereBrandId);
 			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
 			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
 			$productIds 		= $params->productIds;
 			$allowOpCenterIds 	= $params->allowOpCenterIds;
 			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
-			
+			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds, $searchBrand);
+			dd($orderData);
 			return $orderData;
 		}
 		catch(Exception $e)
