@@ -20,6 +20,20 @@ class AuthController extends Controller
 	 * @params: request
 	 * @return: view
 	 */
+	public function oidcAuth()
+	{
+		#自動登出,避免view載入錯誤
+		$this->_service->signout();
+		$this->_viewModel->action = FormAction::SIGNIN;
+		session()->put('botTimeValidate', now());
+		
+		return view('signin')->with('viewModel', $this->_viewModel)->with('oidcUrl', route('oidc.redirect'));
+	}
+	
+	/* Signin view
+	 * @params: request
+	 * @return: view
+	 */
 	public function showSignin()
 	{
 		#自動登出,避免view載入錯誤
