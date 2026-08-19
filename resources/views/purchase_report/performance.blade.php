@@ -31,7 +31,7 @@
 								<template x-for="(row, rowKey) in rowData" :key="rowKey">
  									<td>
 										<template x-if="statistics.report.amountFields.includes(rowKey)">
-											<span x-text="Helper.formatDollar(row)" class="red-text"></span>
+											<span x-text="Helper.formatDollar(row)" class="pink-text"></span>
 										</template>
 										<template x-if="!statistics.report.amountFields.includes(rowKey)">
 											<span x-text="row"></span>

@@ -32,22 +32,28 @@ form {
 					left: 0;
 				}
 				&:nth-of-type(2) {
-					width: 150px;
-					min-width: 150px;
-					max-width: 150px;
+					width: 80px;
+					min-width: 80px;
+					max-width: 80px;
+					left: 0;
+				}
+				&:nth-of-type(3) {
+					width: 180px;
+					min-width: 180px;
+					max-width: 180px;
 					position: sticky;
 					left: 0;
 					z-index: 6;
 				}
-				&:nth-of-type(3) {
-					width: 150px;
-					min-width: 150px;
-					max-width: 150px;
+				&:nth-of-type(4) {
+					width: 120px;
+					min-width: 120px;
+					max-width: 120px;
 					position: sticky;
-					left: 150px;
+					left: 180px;
 					z-index: 6;
 				}
-				&:nth-of-type(4) {
+				&:nth-of-type(5) {
 					width: 100px;
 					min-width: 100px;
 					max-width: 100px;
@@ -63,8 +69,6 @@ form {
 						color: var(--table-fixed-color);
 					}
 					&:nth-of-type(2) {
-						position: sticky;
-						z-index: 5;
 						left: 0;
 						background-color: var(--table-fixed-bg);
 						color: var(--table-fixed-color);
@@ -72,11 +76,18 @@ form {
 					&:nth-of-type(3) {
 						position: sticky;
 						z-index: 5;
-						left: 150px;
+						left: 0;
 						background-color: var(--table-fixed-bg);
 						color: var(--table-fixed-color);
 					}
 					&:nth-of-type(4) {
+						position: sticky;
+						z-index: 5;
+						left: 180px;
+						background-color: var(--table-fixed-bg);
+						color: var(--table-fixed-color);
+					}
+					&:nth-of-type(5) {
 						left: 0;
 						background-color: var(--table-fixed-bg);
 						color: var(--table-fixed-color);

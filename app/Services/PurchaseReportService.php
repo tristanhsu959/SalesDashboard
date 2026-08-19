@@ -126,7 +126,7 @@ class PurchaseReportService
 		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchProductCodes]);
 		
 		#只有營運狀況才有此選項
 		$searchBrand = ($searchType == 'performance') ? $searchBrand : NULL;

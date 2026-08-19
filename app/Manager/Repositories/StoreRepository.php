@@ -38,7 +38,7 @@ class StoreRepository extends Repository
 			->join('BusinessType as bt', 'bt.Id', '=', 's.BusinessTypeId')
 			->join('Brand as b', 'b.Id', '=', 's.BrandId')
 			->join('Factory as f', 'f.id', '=', 'sc.FactoryId')
-			->select('b.No as brandNo', 'ar.Id as areaId', 'f.Name as factoryName')
+			->select('b.No as brandNo', 'ar.Id as areaId', 'f.Name as factoryName', 's.District as district')
 			->addSelect('s.Id as storeId', 's.No as storeNo', 's.Name as storeName', 's.PosId as posId', 'bt.Name as typeName')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.CloseDate) AS DATE) as closeDate')
 			->selectRaw('CAST(DATEADD(HOUR, 8, s.OpenDate) AS DATE) as openDate')

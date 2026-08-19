@@ -219,6 +219,8 @@ class StoreManager
 			$item['areaId']		= $area->value;
 			$item['areaName'] 	= $area->label();
 			
+			$item['district']	= Str::substr($item['district'], 0, 3);
+			
 			return $item;
 		})->unique('storeKey')->sortBy('areaId')->values()->all(); #芳珍會有重複的店
 		
@@ -255,7 +257,8 @@ class StoreManager
 		#因有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
 		#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
 		#有些No沒有TP/KH要注意
-		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		#$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		$storeKey = Str::of($storeNo)->replaceMatches('/^(TP|KH|TS|RL)/', '');
 		$storeKey = Str::take($storeKey, 7);
 		
 		return $storeKey;
