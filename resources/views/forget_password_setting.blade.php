@@ -49,8 +49,8 @@
 
 					<div class="content-right">
 						<div class="header">
-							<span class="title"><i>encrypted</i>密碼設定</span>
-							<h6 class="red-text">請設定密碼後，重新登入</h6>
+							<span class="title"><i class="fill">encrypted</i>密碼設定</span>
+							<h6 class="purple-text">設定密碼後，請重新登入</h6>
 						</div>
 						
 						<div>
@@ -58,15 +58,27 @@
 							<span x-text="`(${formData.account})`"></span>
 						</div>
 						
-						<div class="field label border field-light-green" :class="Helper.hasError(errors, 'password')">
-							<input x-model="formData.password" type="password" name="password" maxlength="20" @input="errors.delete('password')">
+						<div class="field label border field-light-green suffix" :class="Helper.hasError(errors, 'password')">
+							<input x-model="formData.password" :type="showPassword ? 'text':'password'" name="password" maxlength="20" @input="errors.delete('password')">
 							<label>新密碼</label>
 							<span class="red-text small-text">英文+數字六個字元以上</span>
+							<i class="btn-icon">
+								<button type="button" class="large square" @click="showPassword = !showPassword">
+									<i x-show="!showPassword">visibility</i>
+									<i x-show="showPassword">visibility_off</i>
+								</button>
+							</i>
 						</div>
-						<div class="field label border field-light-green" :class="Helper.hasError(errors, 'confirmPassword')">
-							<input x-model="formData.confirmPassword" type="password" name="confirmPassword" maxlength="20" @input="errors.delete('confirmPassword')">
+						<div class="field label border field-light-green suffix" :class="Helper.hasError(errors, 'confirmPassword')">
+							<input x-model="formData.confirmPassword" :type="showConfirmPassword ? 'text':'password'" name="confirmPassword" maxlength="20" @input="errors.delete('confirmPassword')">
 							<label>確認密碼</label>
 							<span class="red-text small-text">再輸入一次新密碼</span>
+							<i class="btn-icon">
+								<button type="button" class="large square" @click="showConfirmPassword = !showConfirmPassword">
+									<i x-show="!showConfirmPassword">visibility</i>
+									<i x-show="showConfirmPassword">visibility_off</i>
+								</button>
+							</i>
 						</div>
 						
 						<nav class="group split">

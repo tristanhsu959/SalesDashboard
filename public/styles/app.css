@@ -195,4 +195,24 @@ body {
 			bottom: -3rem;
 		}
 	}
+	
+	main.forget-password {
+		.content-right .header .title {
+			color: #4caf50;
+		}
+		.field > i.btn-icon {
+			pointer-events: auto;
+			border-radius: 1rem;
+			
+			button {
+				background-color: transparent;
+				color: #000;
+				
+				&:hover {
+					background-color: #4caf50;
+					color: #fafafa;
+				}
+			}
+		}
+	}
 }
