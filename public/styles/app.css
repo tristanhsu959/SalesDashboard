@@ -187,5 +187,12 @@ body {
 				margin-block-start: 2rem !important;
 			}
 		}
+		
+		/* OIDC button */
+		.btn-oidc {
+			position: absolute;
+			right: -3rem;
+			bottom: -3rem;
+		}
 	}
 }

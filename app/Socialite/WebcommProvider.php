@@ -16,9 +16,9 @@ class WebcommProvider extends AbstractProvider implements ProviderInterface
 	protected $scopeSeparator = ' '; #要以空格分隔,預設是逗號
 	
     protected $scopes = [
-		"profile",
-		"email",
-		"openid",
+		'profile',
+		'email',
+		'openid',
 	];
 	
 	public static function additionalConfigKeys()

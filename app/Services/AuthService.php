@@ -18,6 +18,8 @@ use Exception;
 use LdapRecord\Connection;
 use LdapRecord\Query\Filter\Parser;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
+use GuzzleHttp\Exception\ClientException;
 
 class AuthService
 {
@@ -288,5 +290,108 @@ class AuthService
 		{
 			return ResponseLib::initialize()->fail($e->getMessage());
 		}
+	}
+	
+	/* OIDC Auth
+	 * @params: object
+	 * @return: boolean
+	 */
+	public function oethAuth()
+	{
+		try
+		{
+			#1. Get user from oeth
+			$oethUser = Socialite::driver('webcomm')->stateless()->user();
+			
+			#2. Clear old auth session : CurrentUserTrait
+			AppManager::removeCurrentUser();
+			
+			#3. Get user data
+			$account = $oethUser->getEmail(); #先用email測試
+			$userInfo = $this->_authAccountRegister($account);
+			
+			#4.Auth account
+			if ($userInfo === FALSE)
+				throw new Exception('此帳號尚未在系統註冊');
+			
+			#5.rebuild data
+			$userInfo = $this->_rebuildInfo($userInfo);
+			
+			#6.Validate user status
+			if (boolval($userInfo['isActive']) === FALSE)
+				throw new Exception('登入失敗，此帳號已停用');
+			
+			#7. Save to session
+			AppManager::saveCurrentUser($userInfo);
+			
+			LoginAccess::dispatch($userInfo['userId'], $userInfo['userAccount']);
+			
+			Log::channel('webSysLog')->info("使用者[{$account}]登入成功(OETH)", [ __class__, __function__, __line__]);
+			
+			return ResponseLib::initialize()->success();
+		}
+		catch (ClientException $e) 
+		{
+            $response		= $e->getResponse();
+            $responseBody 	= $response->getBody()->getContents();
+            
+            #解析偉康的 JSON 錯誤訊息 (例如 {"error":"invalid_request", ...})
+            $errorData 	= json_decode($responseBody, TRUE);
+			
+            $type 	= $errorData['error'] ?? 'unknown';
+            $desc 	= $errorData['error_description'] ?? 'N/A';
+			$msg	= "OETH認證失敗 [{$type}] {$desc}";
+			
+			return ResponseLib::initialize()->fail($msg);
+        } 
+		catch(Exception $e)
+		{
+			return ResponseLib::initialize()->fail($e->getMessage());
+		}
+		
+		/* 
+		Laravel\Socialite\Two\User {
+		  +id: "be9b238c-e259-491e-a489-17ca62ec5f75"
+		  +nickname: "user10@demo.oeth.one"
+		  +name: "10"
+		  +email: "user10@demo.oeth.one"
+		  +avatar: null
+		  +user: array:6 [▼
+			"sub" => "be9b238c-e259-491e-a489-17ca62ec5f75"
+			"email_verified" => false
+			"name" => "10"
+			"preferred_username" => "user10@demo.oeth.one"
+			"family_name" => "10"
+			"email" => "user10@demo.oeth.one"
+		  ]
+		  +attributes: array:4 [▼
+			"id" => "be9b238c-e259-491e-a489-17ca62ec5f75"
+			"nickname" => "user10@demo.oeth.one"
+			"name" => "10"
+			"email" => "user10@demo.oeth.one"
+		  ]
+		  +token: "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJKZ0s1d29PQ010Y0gyXzRkQ1VHaVM3UUVYMGNZd0habEpnSlB0TFNOczFVIn0.eyJleHAiOjE3ODcxOTE2MTcsImlhdCI6MTc4NzE4OTgxNywi ▶"
+		  +refreshToken: "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJkZDMwYmVjMS1kNmEwLTRhOGUtYmU3ZC1iNzc5ODJhMmJkNWIifQ.eyJleHAiOjE3ODcxOTE2MTcsImlhdCI6MTc4NzE4OTgxNywianRpIjoiZ ▶"
+		  +expiresIn: 1800
+		  +approvedScopes: array:4 [▼
+			0 => "email"
+			1 => "admin_portal_clientId"
+			2 => "profile"
+			3 => "openid"
+		  ]
+		} 
+		*/
+		
+		/* Methods
+		$token = $oidcUser->token;
+		$refreshToken = $oidcUser->refreshToken;
+		$expiresIn = $oidcUser->expiresIn;
+			
+		$id = $oidcUser->getId();
+		$nickName = $oidcUser->getNickname();
+		$name = $oidcUser->getName();
+		$email = $oidcUser->getEmail();
+		$avatar = $oidcUser->getAvatar(); 
+		*/
 	}
 }

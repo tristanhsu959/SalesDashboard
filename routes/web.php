@@ -12,7 +12,7 @@ use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ForgetPasswordController;
-use App\Http\Controllers\OidcAuthController;
+use App\Http\Controllers\OethAuthController;
 use App\Http\Controllers\AreaManagerController;
 
 use App\Http\Middleware\AuthMiddleware;
@@ -25,19 +25,16 @@ use App\Enums\Functions;
     return new ForgetPassword('http://laravel.local/forgetPassword/preview'); 
 }); */
 
-/***** OIDC *****/
-Route::get('oidc/auth/redirect', [OidcAuthController::class, 'redirect'])->name('oidc.redirect');
-Route::get('oidc/auth/callback', [OidcAuthController::class, 'callback']);
-/***** OIDC End *****/
+/***** Oeth fido *****/
+Route::get('oeth/auth/redirect', [OethAuthController::class, 'redirect'])->name('oeth.redirect');
+Route::get('oeth/auth/callback', [OethAuthController::class, 'callback']);
+/***** Oeth fido End *****/
 
 /***** Login *****/
 Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
 Route::redirect('signin', '/'); 
 Route::post('signin', [AuthController::class, 'signin'])->name('signin.post');
 Route::get('signout', [AuthController::class, 'signout'])->name('signout');
-
-#OIDC demo route
-Route::get('oidc', [AuthController::class, 'oidcAuth']);
 
 /***** Forget Password *****/
 Route::post('forgetPassword/send', [ForgetPasswordController::class, 'sendLink'])->name('forgetPassword.send');

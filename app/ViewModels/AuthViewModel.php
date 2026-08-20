@@ -36,6 +36,8 @@ class AuthViewModel extends Fluent
     {
 		$this->set('formData.formAction', route('signin.post'));
 		$this->set('formData.forgetPasswordAction', route('forgetPassword.send'));
+		$this->set('formData.oethRedirect', route('oeth.redirect'));
+		
 		return $this->only('formData');
 	}
 	

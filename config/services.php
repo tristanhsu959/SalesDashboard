@@ -36,10 +36,10 @@ return [
     ],
 	
 	'webcomm' => [
-		'client_id'     => env('OIDC_CLIENT_ID'),
-		'client_secret' => env('OIDC_CLIENT_SECRET'),
-		'redirect'      => env('OIDC_REDIRECT_URI', 'https://report-stag.8way.com.tw:8443/oidc/auth/callback'),
-		'base_url'      => env('OIDC_BASE_URL', 'https://demo.oeth-uat.webcomm.com.tw/auth/realms/demo'),
+		'client_id'     => env('OETH_CLIENT_ID'),
+		'client_secret' => env('OETH_CLIENT_SECRET'),
+		'redirect'      => env('OETH_REDIRECT_URI', 'https://report-stag.8way.com.tw:8443/oeth/auth/callback'),
+		'base_url'      => env('OETH_BASE_URL', 'https://demo.oeth-uat.webcomm.com.tw/auth/realms/demo'),
 		'verify_jwt'    => TRUE, 
 	],
 	

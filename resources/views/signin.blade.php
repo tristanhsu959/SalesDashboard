@@ -7,13 +7,12 @@
 
 @section('content')
 
-@if (empty($oidcUrl))
 <div x-data="login(@js($viewModel->responseData()))" class="content-wrapper">
 	<form :action="formData.formAction" method="post" class="row" novalidate @submit.prevent="validate()" >
 		@csrf
 		
 		<div class="content-left">
-			<img src="{{ asset('images/logo.svg') }}" />
+			<img src="{{ asset('images/logo.svg') }}"  @dblclick="showForgetPasswordButton = !showForgetPasswordButton"/>
 			<span class="copyright">Bafang<i>&copy;</i>2025</span>
 		</div>
 
@@ -21,7 +20,7 @@
 
 		<div class="content-right">
 			<div class="header">
-				<img src="{{ asset('images/microsoft_logo.png') }}" />
+				<img src="{{ asset('images/microsoft_logo.png') }}" @dblclick="showOidcButton = !showOidcButton" />
 				<span class="title">Sign In</span>
 				<h6>登入至DASHBOARD</h6>
 			</div>
@@ -34,7 +33,7 @@
 				<input x-model="formData.password" type="password" name="password" maxlength="20" @input="errors.delete('password')">
 				<label>Password</label>
 			</div>
-			<p x-show="showPasswordHint" class="red-text">系統將發送設定連結至此帳號信箱，請點擊連結進入密碼重設頁面</p>
+			<p x-show="showPasswordHint" class="red-text">送出後系統將發送密碼設定連結至此帳號信箱，請由該連結進入密碼重設頁面</p>
 			<div class="field label border captcha">
 				<input type="text" name="captcha" maxlength="10">
 				<label>Captcha</label>
@@ -50,21 +49,21 @@
 					<i>close</i>
 				</button>
 			</nav>
-			<!--nav>
+			<nav x-show="showForgetPasswordButton">
 				<div class="max"></div>
-				<button type="button" class="right pink-text transparent" @click="isForgetPassword = !isForgetPassword">忘記密碼</button>
-			</nav-->
+				<button type="button" class="right pink-text transparent" @click="isForgetPassword = !isForgetPassword">
+					<i x-show="isForgetPassword">password_2</i>
+					<i x-show="!isForgetPassword">password_2_off</i>
+					<span>忘記密碼</span>
+				</button>
+			</nav>
 		</div>
 	</form>
-</div>
-@else
-	<a href="{{$oidcUrl}}" class="button round pink right-margin">
+	
+	<a x-show="showOidcButton" :href="formData.oethRedirect" class="button extend circle pink btn-oidc">
 		<i>fingerprint</i>
-		<span>OIDC Auth</span>
+		<span>OETH Auth</span>
 	</a>
-	<a href="{{ route('signin')}}" class="button round black">
-		<span>Back</span>
-		<i>arrow_forward</i>
-	</a>
-@endif
+</div>
+
 @endsection

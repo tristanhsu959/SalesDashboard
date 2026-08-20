@@ -6,6 +6,8 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		isLoading: false,
 		isForgetPassword: false,
+		showForgetPasswordButton: false,
+		showOidcButton: false,
 		
 		get showPassword(){
 			return ! this.isForgetPassword;
