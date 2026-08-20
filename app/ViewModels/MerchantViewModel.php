@@ -124,6 +124,9 @@ class MerchantViewModel extends Fluent
 		#顯示列表判別用
 		$response['dayoffCount']= data_get($this->statistics, 'dayoffCount', 0);
 		
+		$type = data_get($this->statistics, 'type', FALSE);
+		$response['hasFilter'] 	= ($type == 'info');
+		
 		return $response;
 	}
 }

@@ -92,6 +92,9 @@ class InfoService
 		{
 			#1. Get data from DB
 			$this->_getDataFromDB($params);
+			
+			#2. Get area manager fromm local
+			$this->_getAreaManager($params);
 
 		}
 		catch(Exception $e)
@@ -139,6 +142,21 @@ class InfoService
 		}
 	}
 	
+	/* Get area manager current setting
+	 * @params: 
+	 * @return: array
+	 */
+	private function _getAreaManager($params)
+	{
+		$managers = $this->_repository->getAreaManagerList();
+		
+		$mappings = collect($managers)->mapWithKeys(function($item, $key){
+			return [$item['storeKey'] => $item['areaManager']];
+		})->all();
+		
+		$params->areaManagerList = $mappings;
+	}
+	
 	/* ========================== 統計 ========================== */
 	/* ========================================================== */
 	/* 
@@ -171,6 +189,7 @@ class InfoService
 	{
 		try
 		{
+			$areaManagerList = $params->areaManagerList;
 			$storeList = $params->storeList;
 			
 			#先處理storeKey, 才能進行合併
@@ -182,16 +201,18 @@ class InfoService
 			$mergeStoreList = StoreManager::mergeLbStoreByBrandNo($params->brand, $storeList);
 			
 			#處理Data
-			$store = collect($mergeStoreList)->map(function($item, $key){
+			$store = collect($mergeStoreList)->map(function($item, $key) use($areaManagerList){
 				$item['posId'] 		= (empty($item['posId']) OR $item['posId'] == 'null') ? '' : $item['posId'];
-				$item['salesName']	= (empty($item['salesName']) OR $item['salesName'] == 'null') ? '' : $item['salesName'];
 				
 				$area = AreaLib::toArea(intval($item['areaId']));
 				$item['areaId']		= $area->value;
 				$item['areaName']	= $area->label();
 				
+				$areaManager = data_get($areaManagerList, $item['storeKey'], '');
+				$item['areaManager']= $areaManager;
+				
 				return $item;
-			})->sortBy('areaId')->map(function($item, $key) {
+			})->sortBy('areaId')->map(function($item, $key)  {
 				#依顯示順序
 				$temp['areaName'] 	= $item['areaName'];
 				#$temp['storeNo']	= $item['storeNo'];
@@ -204,7 +225,7 @@ class InfoService
 				$temp['factoryName']= $item['factoryName'];
 				$temp['warehouse']	= $item['warehouse'];
 				$temp['carNo']		= $item['carNo'];
-				$temp['salesName']	= $item['salesName'];
+				$temp['areaManager']= $item['areaManager'];
 				
 				return $temp;
 			})->values()->all(); 
