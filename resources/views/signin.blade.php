@@ -66,8 +66,9 @@
 		</div>
 	</form>
 	
-	<a x-show="showOidcButton" :href="formData.oethRedirect" class="button extend circle pink btn-oidc">
-		<i>fingerprint</i>
+	<a x-show="showOidcButton" :href="formData.oethRedirect" class="button extend circle light-blue10 btn-oidc">
+		<!--i>fingerprint</i-->
+		<img class="responsive" src="{{ asset('images/oeth.png') }}">
 		<span>OETH Auth</span>
 	</a>
 </div>
