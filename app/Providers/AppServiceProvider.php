@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\View;
 use PDO;
 use App\ViewModels\MenuViewModel;
 use Illuminate\Support\Facades\Blade;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use App\Socialite\WebcommProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,6 +61,11 @@ class AppServiceProvider extends ServiceProvider
 		Event::listen(StatementPrepared::class, function ($event) {
 			$event->statement->setFetchMode(PDO::FETCH_ASSOC);
 		});
+		
+		#Webcomm oidc
+		Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
+            $event->extendSocialite('webcomm', WebcommProvider::class);
+        });
 		
 		#View share not work, because session is not available
 		#Deprecated

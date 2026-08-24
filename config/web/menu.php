@@ -34,6 +34,12 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.shipments'),
 		],
 		[
+			'name' 		=> Functions::BF_PURCHASE_SUPPLIER->label(), #供應商出貨總量查詢
+			'code'		=> Functions::BF_PURCHASE_SUPPLIER->value,
+			'style' 	=> ['icon' => 'delivery_truck_speed', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.supplier'),
+		],
+		[
 			'name' 		=> Functions::BF_PURCHASE_NOT_ORDER->label(), #未訂貨查詢
 			'code'		=> Functions::BF_PURCHASE_NOT_ORDER->value,
 			'style' 	=> ['icon' => 'orders', 'color' => 'orange-text'],
@@ -103,6 +109,12 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.shipments'),
 		],
 		[
+			'name' 		=> Functions::BG_PURCHASE_SUPPLIER->label(), #供應商出貨總量查詢
+			'code'		=> Functions::BG_PURCHASE_SUPPLIER->value,
+			'style' 	=> ['icon' => 'delivery_truck_speed', 'color' => 'cyan-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BUYGOOD->code()], '?.supplier'),
+		],
+		[
 			'name' 		=> Functions::BG_PURCHASE_NOT_ORDER->label(), #未訂貨查詢
 			'code'		=> Functions::BG_PURCHASE_NOT_ORDER->value,
 			'style' 	=> ['icon' => 'orders', 'color' => 'cyan-text'],
@@ -146,6 +158,15 @@ return [
 			'code'		=> Functions::FJ_DAILY_REVENUE->value,
 			'style' 	=> ['icon' => 'paid', 'color' => 'light-green-text'],
 			'url' 		=> Str::replaceArray('?', [Brand::FJVEGGIE->code()], '?.daily_revenue'),
+		],
+	],
+	
+	MenuGroup::DATA->value => [
+		[
+			'name' 		=> Functions::AREA_MANAGER->label(), #督導管理,
+			'code'		=> Functions::AREA_MANAGER->value,
+			'style' 	=> ['icon' => 'location_away', 'color' => 'yellow-text'],
+			'url' 		=> 'area_manager', 
 		],
 	],
 	

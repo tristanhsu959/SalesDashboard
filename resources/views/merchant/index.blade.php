@@ -66,6 +66,18 @@
 					<span>下載</span>
 				</a>
 			</template>
+			
+			<template x-if="response.hasResult && response.hasFilter">
+				<nav class="no-space filter">
+					<div class="field label border prefix field-filter-dark small">
+						<i>filter_alt</i>
+						<input type="text" x-model="$store.merchantInfo.filter">
+						<label>篩選</label>
+						<span class="tooltip right">區域|Pos店號|門店代號|門店名稱|統一編號|督導</span>
+					</div>
+					<button class="right-round" @click="$store.merchantInfo.filter = ''"><i>backspace</i></button>
+				</nav>
+			</template>
 		</nav>
 	</header>
 	

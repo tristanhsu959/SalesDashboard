@@ -37,10 +37,31 @@ document.addEventListener('alpine:init', () => {
 		},
     }));
 	
+	Alpine.store('merchantInfo', {
+		filter: '',
+	});
+	
 	Alpine.data('storeInfo', (data) => ({
 		statistics: {...data},
 		
 		init() { 
+		},
+		
+		get filterStore() {
+			const searchKeyword = Alpine.store('merchantInfo').filter.toLowerCase();
+			
+			const list = this.statistics?.info?.store || [];
+			
+			const result = list.filter(store => 
+				String(store.areaName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.posId || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeKey || '').toLowerCase().includes(searchKeyword) ||
+				String(store.storeName || '').toLowerCase().includes(searchKeyword) ||
+				String(store.vatNumber || '').toLowerCase().includes(searchKeyword) ||
+				String(store.areaManager || '').toLowerCase().includes(searchKeyword)
+			);
+			
+			return result;
 		},
     }));
 	

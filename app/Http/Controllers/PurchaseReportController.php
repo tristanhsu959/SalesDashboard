@@ -44,6 +44,7 @@ class PurchaseReportController extends Controller
 		$function 	= $this->_service->parsingFunction($brand);
 		
 		$searchType			= $request->input('searchType');
+		$searchBrand		= $request->input('searchBrand');
 		$searchStDate		= $request->input('searchStDate');
 		$searchEndDate		= $request->input('searchEndDate');
 		$searchOpCenterIds	= $request->array('searchOpCenterIds');
@@ -51,7 +52,7 @@ class PurchaseReportController extends Controller
 		$searchProductCodes	= $request->array('searchProductCodes'); #目前尚未用到
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes); 
+		$this->_viewModel->keepSearchData($searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes); 
 		
 		#validate input
 		$validator = Validator::make($request->all(), [
@@ -59,7 +60,7 @@ class PurchaseReportController extends Controller
 			'searchEndDate'	=> 'required',
         ]);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);

@@ -10,6 +10,16 @@ document.addEventListener('alpine:init', () => {
 			
 		},
 		
+		get showBrandList(){
+			return (this.searchData.type == 'performance');
+		},
+		get showOpCenterList(){
+			return Object.keys(this.options.opCenterList).length > 0;
+		},
+		get showAreaList(){
+			return (Object.keys(this.options.areaList).length > 0 && (this.searchData.type == 'performance' || this.searchData.type == 'extraOrder'));
+		},
+		
 		search() {
 			this.errors.clear();
 			
@@ -62,6 +72,28 @@ document.addEventListener('alpine:init', () => {
 				this.activeSheet = keys[0];
 			
 			this.$nextTick(() => ui(`#page-${this.activeSheet}`));
+		},
+    }));
+	
+	
+	/* 員購公關 */
+	Alpine.data('employeePrData', (statistics) => ({
+		employeeData: {...statistics.employee},
+		prData: {...statistics.pr},
+		
+		init() {
+		},
+		
+		orderHead(dateString){
+			return (dateString.length == 10) ? 'order-header' : '';
+		},
+    }));
+	
+	/* 追加 */
+	Alpine.data('extraData', (statistics) => ({
+		extraOrder: {...statistics.extraOrder},
+		
+		init() {
 		},
     }));
 });

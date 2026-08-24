@@ -19,7 +19,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<template x-for="(store, idx) in statistics.info.store" :key="idx">
+						<template x-for="(store, idx) in filterStore" :key="idx">
 						<tr>
 							<template x-for="(row, rowIdx) in store" :key="rowIdx">
 								<td x-text="row"></td>

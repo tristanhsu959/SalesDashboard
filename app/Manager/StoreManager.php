@@ -90,6 +90,30 @@ class StoreManager
 		}
 	}
 	
+	/* 取門店及蘿蔔分開
+	 * @params: int
+	 * @params: array
+	 * @return: array
+	 */
+	public function getLbStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate = NULL, $endDate = NULL)
+	{
+		try
+		{
+			#取門店不含蘿蔔
+			list($storeList, $lbStoreList) = $this->_getStoreData($brand, $allowOpCenterIds, $allowAreaIds);
+			
+			$lbStoreList = $this->filterActiveStoreByDate($lbStoreList, $stDate, $endDate);
+			$lbStoreList = $this->_formatStoreOutput($brand, $lbStoreList);
+			
+			return $lbStoreList;
+		}
+		catch(Exception $e)
+		{
+			Log::channel('appServiceLog')->error($e->getMessage(), [ __class__, __function__, __line__]);
+			throw new Exception('讀取門店資料失敗');
+		}
+	}
+	
 	/* Get store data by brand
 	 * @params: int
 	 * @params: array
@@ -155,6 +179,18 @@ class StoreManager
 		return $storeList;
 	}
 	
+	/* 開閉店排除
+	 * @params: array
+	 * @return: array
+	 */
+	public function filterActiveStoreByCloseDate($storeList)
+	{
+		#只排除有close date的店
+		return collect($storeList)->filter(function($item, $key) {
+				return empty($item['closeDate']);
+		})->all();
+	}
+	
 	/* Format store output
 	 * @params: array
 	 * @return: array
@@ -182,6 +218,8 @@ class StoreManager
 			$item['storeId']	= intval($item['storeId']);
 			$item['areaId']		= $area->value;
 			$item['areaName'] 	= $area->label();
+			
+			$item['district']	= Str::substr($item['district'], 0, 3);
 			
 			return $item;
 		})->unique('storeKey')->sortBy('areaId')->values()->all(); #芳珍會有重複的店
@@ -219,7 +257,8 @@ class StoreManager
 		#因有包含蘿蔔, 故要用No來當Key => 只有八方, 御廚不適用, 最後一碼 1=>八方, 2=>蘿蔔
 		#台北:10碼, 高雄:9碼(八方/蘿蔔已合併)=>全處理成7碼與舊系統同,才好mapping
 		#有些No沒有TP/KH要注意
-		$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		#$storeKey = Str::of($storeNo)->replaceStart('TP', '')->replaceStart('KH', '')->replaceStart('TS', '')->replaceStart('RL', '');
+		$storeKey = Str::of($storeNo)->replaceMatches('/^(TP|KH|TS|RL)/', '');
 		$storeKey = Str::take($storeKey, 7);
 		
 		return $storeKey;

@@ -81,6 +81,7 @@ class PerformanceService
 		$this->_statistics['type']			= $params->type;
 		$this->_statistics['brandId']		= $params->brand->value;
 		$this->_statistics['brandCode']		= $params->brand->code();
+		$this->_statistics['searchBrandId']	= $params->whereBrandId;
 		$this->_statistics['startDate'] 	= $params->stDate;
 		$this->_statistics['endDate']		= $params->endDate;
 		$this->_statistics['areaIds']		= $params->areaIds;
@@ -92,7 +93,7 @@ class PerformanceService
 		if (! empty(Arr::flatten($this->_statistics['report'])))
 		{
 			$this->_statistics['hasResult']		= TRUE;
-			$this->_statistics['exportName']	= '營運概況';
+			$this->_statistics['exportName']	= "營運概況";
 			$this->_statistics['exportToken'] 	= bin2hex($params->cacheKey); #hex2bin
 			Cache::put($params->cacheKey, $this->_statistics, now()->addMinutes(15));
 		}
@@ -139,10 +140,23 @@ class PerformanceService
 		try
 		{
 			#營運概況取固定的product
-			$codeGroup	= config('web.purchase.report.performance');
+			$productConfigs		= config('web.purchase.report.performance');
+			#有粗細麵自動加入南區的short code
+			$noodleShortCodes 	= config('web.purchase.product_type.noodles.queryShortCodes'); 
+			
+			#八方/蘿蔔的項目似乎不同
+			$codeGroup = data_get($productConfigs, $params->whereBrandId, []);
 			
 			#取出所有的short code
-			$codes = collect($codeGroup)->collapse()->pluck('code')->toArray();
+			$codes = collect($codeGroup)->collapse()->pluck('code')->map(function($item, $key) use($noodleShortCodes){
+				
+				$includes = data_get($noodleShortCodes, $item, NULL);
+				
+				if (empty($includes))
+					return $item;
+				else
+					return $includes;
+			})->flatten()->toArray();
 			
 			$ids = PurchaseManager::getProductIdByShortCode($params->brand, $params->allowOpCenterIds, $codes);
 			
@@ -172,9 +186,21 @@ class PerformanceService
 		$allowOpCenterIds 	= $params->allowOpCenterIds;
 		$allowAreaIds 		= $params->allowAreaIds;
 		
-		$storeList = StoreManager::getStoreListWithLb($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		if ($params->whereBrandId == Brand::BAFANG->value)
+			$storeList = StoreManager::getStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		else if ($params->whereBrandId == Brand::LUOBO->value)
+			$storeList = StoreManager::getLbStoreList($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate);
+		else
+			$storeList = [];
+		
 		#這裏不排除工廠學區店
 		#$params->storeList = StoreManager::filterFactoryStore($brand, $storeList);
+		
+		$storeList = collect($storeList)->map(function($item, $key){
+			#報表另產生舊store no格式欄位
+			$item['oldStoreNo'] = Str::of($item['storeNo'])->replaceMatches('/^(TP|KH|TS|RL)/', '')->toString();
+			return $item;
+		})->toArray();
 		
 		$params->storeList = $storeList;
 	}
@@ -197,14 +223,17 @@ class PerformanceService
 	
 		try
 		{
+			#目前只有八方有此報表
+			#因八方及蘿蔔要分開,故brand改代入search brand
 			$brand 				= $params->brand;
+			$searchBrand		= Brand::tryfrom($params->whereBrandId);
 			$stDate				= Carbon::parse($params->stDate)->format('Y-m-d H:i:s');
 			$endDate 			= Carbon::parse($params->endDate)->addDay()->format('Y-m-d H:i:s');
 			$productIds 		= $params->productIds;
 			$allowOpCenterIds 	= $params->allowOpCenterIds;
 			$allowAreaIds 		= $params->allowAreaIds;
 			
-			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds);
+			$orderData = $this->_repository->getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds, $searchBrand);
 			
 			return $orderData;
 		}
@@ -244,11 +273,14 @@ class PerformanceService
 			$extraData = LocalLegacyManager::getExtraDataByProduct($brand, $allowOpCenterIds, $stDate, $endDate, $productCodes);
 			
 			#因無areaId, 故只能從門店過濾
+			#20260818:一樣用storeKey過濾Area權限不影響
 			$validStoreKeys = collect($params->storeList)->pluck('storeKey')->values()->all();
 			
-			$extraData = collect($extraData)->filter(function($item, $key) use($validStoreKeys) {
-				$storeKey = Str::take($item['storeNo'], 7);
-				return in_array($storeKey, $validStoreKeys);
+			$extraData = collect($extraData)->map(function($item, $key){
+				$item['storeKey'] = Str::take($item['storeNo'], 7);
+				return $item;
+			})->filter(function($item, $key) use($validStoreKeys) {
+				return in_array($item['storeKey'], $validStoreKeys);
 			})->toArray();
 			
 			return $extraData;
@@ -274,34 +306,22 @@ class PerformanceService
 			"shortCode" => "0001"
 		]
 		*/
+		$convert = config('web.purchase.product_type.noodles.convert');
+		
 		#整合追加資料,Group Data但先不計算
 		$orderData = collect($orderData)->merge($extraData);
 		
-		$baseData = collect($orderData)->map(function($item, $key) {
+		$baseData = collect($orderData)->map(function($item, $key) use($convert) {
 			$item['storeKey'] 	= StoreManager::buildStoreKey($item['storeNo']);
 			$item['qty'] 		= round(intval($item['qty']) * PurchaseManager::getPackagingScale($item['shortCode']), 2);
 			
+			$convertShortCode	= data_get($convert, $item['shortCode'], NULL);
+			#有值才轉換, 只是為了避免重複
+			if (! empty($convertShortCode))
+				$item['shortCode'] = $convertShortCode;
+			
 			return $item;
 		})->groupBy('storeKey')->toArray();
-		
-		#用門店取資料,因門店已是active list
-		/* $baseData = collect($params->storeList)->map(function($item, $key) use($orderData){
-			
-			$order = data_get($orderData, $item['storeKey'], NULL);
-			
-			$temp['expectedDate']	= data_get($order, 'expectedDate', NULL);
-			$temp['storeNo'] 		= $item['storeNo'];
-			$temp['storeKey'] 		= $item['storeKey'];
-			$temp['storeName'] 		= $item['storeName'];
-			$temp['areaId'] 		= $item['areaId'];
-			$temp['areaName'] 		= $item['areaName'];
-			$temp['openDate'] 		= $item['openDate'];
-			$temp['shortCode'] 		= data_get($order, 'shortCode', NULL);
-			$temp['qty'] 			= data_get($order, 'qty', 0);
-			$temp['amount']			= data_get($order, 'amount', 0);
-			
-			return $temp;
-		})->filter()->all(); */
 		
 		$params->baseData = $baseData;
 	}
@@ -340,9 +360,8 @@ class PerformanceService
 	 */
 	private function _buildHeader($params)
 	{
-		$productGroup = $params->productGroup;
-		
-		$groupList = collect($productGroup)->map(function($group, $key){
+		$groupList = collect($params->productGroup)->map(function($group, $key){
+			
 			return collect($group)->mapWithKeys(function($item, $key){
 				return [$item['code'] => $item['name']];
 			})->toArray();
@@ -350,15 +369,22 @@ class PerformanceService
 		})->toArray();
 		
 		#Build header
-		$header = collect(['序號', '店名', '客戶編號', '開店日期'])
+		$header = collect(['序號', '行政區', '店名', '門店代碼', '開店日期'])
 			->merge(array_values($groupList['filling']))
 			->merge(['餡料總和', '餡料平均', '餡料銷售金額'])
 			->merge(array_values($groupList['wrapper']))
 			->merge(['皮總和', '皮銷售金額', '餡皮比率'])
-			->merge(array_values($groupList['drink']))
-			->merge(['總和', '銷售總額', '營業天數'])
-			->all();
-			
+			->when($params->whereBrandId == Brand::BAFANG->value, function($collection, $value) use($groupList){
+				$collection = $collection->merge(array_values(data_get($groupList, 'drink', [])))
+							->merge(['飲品總和', '飲品銷售金額', '銷售總額', '銷售日均額', '營業天數']);
+				return $collection;
+			})
+			->when($params->whereBrandId == Brand::LUOBO->value, function($collection, $value) use($groupList){
+				$collection = $collection->merge(array_values(data_get($groupList, 'noodle', [])))
+							->merge(['麵球總和', '麵球銷售金額', '銷售總額', '銷售日均額', '營業天數']);
+				return $collection;
+			})->all();
+		
 		$params->set('report.header', $header);
 	}
 	
@@ -371,12 +397,15 @@ class PerformanceService
 		#依區->門店->產品
 		$baseData = $params->baseData;
 		
-		#改用門店來取, 排多比較不會亂
+		#改用門店來取, 排序比較不會亂
 		$result = collect($params->storeList)->map(function($item, $key) use($baseData){
 			
 			$data = data_get($baseData, $item['storeKey'], []);
 			
+			$temp['district'] 	= $item['district'];
 			$temp['storeKey'] 	= $item['storeKey'];
+			$temp['storeNo'] 	= $item['storeNo'];
+			$temp['oldStoreNo'] = $item['oldStoreNo'];
 			$temp['storeName'] 	= $item['storeName'];
 			$temp['areaId'] 	= $item['areaId'];
 			$temp['areaName'] 	= $item['areaName'];
@@ -418,6 +447,7 @@ class PerformanceService
 		if (empty($params->orders))
 			return [];
 		
+		$searchBrandId = $params->whereBrandId;
 		$orders = collect($params->orders)->groupBy('areaId');
 		
 		#須依據header順序
@@ -429,16 +459,17 @@ class PerformanceService
 			
 			foreach($areaGroup as $storeData)
 			{
-				$configMap	= $this->_getConfigProductMap(); #product mapping settings
 				$opendays 	= data_get($storeData, 'openDays'); #營業天數
 				
 				#Build product => qty,amount mapping : 確保每個product都要對應值
-				$total = $this->_getProductOutput($storeData);
+				$total = $this->_getProductOutput($searchBrandId, $storeData);
 				
 				$row = [];
 				$row['sn']	= $sn;
+				$row['district'] 	= data_get($storeData, 'district');
 				$row['storeName'] 	= data_get($storeData, 'storeName');
-				$row['storeKey'] 	= data_get($storeData, 'storeKey');
+				#$row['storeKey'] 	= data_get($storeData, 'storeKey');
+				$row['oldStoreNo'] 	= data_get($storeData, 'oldStoreNo');
 				$row['openDate']	= data_get($storeData, 'openDate');
 				
 				#各餡量
@@ -467,17 +498,43 @@ class PerformanceService
 				$row['wrapperAmount'] 	= $wrapperAmount; #皮銷售金額
 				$row['wrapperRatio'] 	= empty($fillingQty) ? 0 : round($wrapperQty / $fillingQty, 2); #餡皮比率 (皮/餡)
 				
-				$drinkQty 		= collect($total['drink'])->pluck('qty')->sum();
-				$drinkAmount 	= collect($total['drink'])->pluck('amount')->sum();
-				
-				#各飲料量
-				foreach($total['drink'] as $code => $value) 
+				if ($searchBrandId == Brand::BAFANG->value)
 				{
-					$row[$code] = $value['qty'];
+					$drinkQty 		= collect($total['drink'])->pluck('qty')->sum();
+					$drinkAmount 	= collect($total['drink'])->pluck('amount')->sum();
+				
+					#各飲料量
+					foreach($total['drink'] as $code => $value) 
+					{
+						$row[$code] = $value['qty'];
+					}
+					
+					$row['drinkQty'] 	= $drinkQty; #飲料總和
+					$row['drinkAmount'] = $drinkAmount; #飲料總額
+					
+					#銷售總額
+					$row['totalAmount'] = $fillingAmount + $wrapperAmount + $drinkAmount; 
 				}
 				
-				$row['drinkQty'] 	= $drinkQty; #飲料總和
-				$row['totalAmount'] = $fillingAmount + $wrapperAmount + $drinkAmount; #銷售總額
+				if ($searchBrandId == Brand::LUOBO->value)
+				{
+					$noodleQty 		= collect($total['noodle'])->pluck('qty')->sum();
+					$noodleAmount 	= collect($total['noodle'])->pluck('amount')->sum();
+				
+					#各飲料量
+					foreach($total['noodle'] as $code => $value) 
+					{
+						$row[$code] = $value['qty'];
+					}
+					
+					$row['noodleQty'] 	= $noodleQty; #麵球總和
+					$row['noodleAmount']= $noodleAmount; #麵球銷售金額
+					
+					#銷售總額
+					$row['totalAmount'] = $fillingAmount + $wrapperAmount + $noodleAmount; 
+				}
+				
+				$row['avgAmount'] 	= empty($opendays) ? 0 : round($row['totalAmount'] / $opendays, 2);; #日均額
 				$row['openDays'] 	= $opendays; #營業天數
 				$sn++;
 				
@@ -486,7 +543,7 @@ class PerformanceService
 		}
 		
 		$params->set('report.sheets', array_keys($areaData));
-		$params->set('report.amountFields', ['fillingAmount', 'wrapperAmount', 'totalAmount']);
+		$params->set('report.amountFields', ['fillingAmount', 'wrapperAmount', 'drinkAmount', 'noodleAmount', 'totalAmount']);
 		$params->set('report.data', $areaData);
 	}
 	
@@ -494,9 +551,9 @@ class PerformanceService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getProductOutput($storeData)
+	private function _getProductOutput($searchBrandId, $storeData)
 	{
-		$configMap = $this->_getConfigProductMap($storeData);
+		$configMap = $this->_getConfigProductMap($searchBrandId);
 		$result = [];
 		
 		foreach($configMap as $group => $items)
@@ -521,9 +578,9 @@ class PerformanceService
 	 * @params: array
 	 * @return: array
 	 */
-	private function _getConfigProductMap()
+	private function _getConfigProductMap($searchBrandId)
 	{
-		$config = config('web.purchase.report.performance');
+		$config = config("web.purchase.report.performance.{$searchBrandId}");
 		
 		$map = collect($config)->map(function($groups, $key){
 			return collect($groups)->mapWithKeys(function($item, $key){
@@ -546,7 +603,7 @@ class PerformanceService
 			$export = $this->_buildExportData($sourceData['report']);
 			
 			#Write export to file
-			$brandName = Brand::tryFrom($sourceData['brandId'])->label();
+			$brandName = Brand::tryFrom($sourceData['searchBrandId'])->label();
 			$fileName = Str::replaceArray('?', [$brandName, $sourceData['exportName'], $sourceData['startDate'], $sourceData['endDate']], '?_?_?_?.xlsx');
 			$filePath = Storage::disk('export')->path($fileName);
 			

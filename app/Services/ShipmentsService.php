@@ -177,7 +177,7 @@ class ShipmentsService
 				->type($searchType)->by($searchBy)->calc($searchCalc)->where($searchWhere)
 				->keyword($searchKeyword)->category($searchCategory)->shortCodes($searchShortCodes)->storeName($searchStoreName)
 				->cacheKey($cacheKey);
-	
+		
 		return $params;
 	}
 	

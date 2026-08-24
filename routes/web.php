@@ -12,6 +12,8 @@ use App\Http\Controllers\SalesProductController;
 use App\Http\Controllers\PurchaseProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ForgetPasswordController;
+use App\Http\Controllers\OethAuthController;
+use App\Http\Controllers\AreaManagerController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -22,6 +24,11 @@ use App\Enums\Functions;
 /* Route::get('/preview-mail', function () {
     return new ForgetPassword('http://laravel.local/forgetPassword/preview'); 
 }); */
+
+/***** Oeth fido *****/
+Route::get('oeth/auth/redirect', [OethAuthController::class, 'redirect'])->name('oeth.redirect');
+Route::get('oeth/auth/callback', [OethAuthController::class, 'callback']);
+/***** Oeth fido End *****/
 
 /***** Login *****/
 Route::get('/', [AuthController::class, 'showSignin'])->name('signin');
@@ -40,6 +47,16 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 	
 	/***** User profile *****/
 	Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update.post');
+	
+	
+	/***** 督導維護 *****/
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::AREA_MANAGER->value, ':')])->group(function(){
+		Route::get('area_manager', [AreaManagerController::class, 'showSearch'])->name('area_manager');
+		Route::post('area_manager/search', [AreaManagerController::class, 'search'])->name('area_manager.search');
+		Route::get('area_manager/export/{token}', [AreaManagerController::class, 'export'])->name('area_manager.export');
+		Route::post('area_manager/update', [AreaManagerController::class, 'update'])->name('area_manager.update');
+	});
+	
 	
 	/***** 產品設定 *****/
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::PRODUCT->value, ':')])->group(function(){
@@ -100,11 +117,6 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::get('user/update/{id}', [UserController::class, 'showUpdate'])->name('user.update');
 		Route::post('user/update', [UserController::class, 'update'])->name('user.update.post');
 		Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
-	});
-	
-	/***** 門店對應表 *****/
-	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::STORE_MAP->value, ':')])->group(function(){
-		Route::get('store_map', [StoreMapController::class, 'list'])->name('store_map');
 	});
 	
 	/***** 身份管理 *****

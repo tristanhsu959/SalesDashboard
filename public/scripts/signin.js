@@ -6,19 +6,7 @@ document.addEventListener('alpine:init', () => {
 		errors: new Set(),
 		isLoading: false,
 		isForgetPassword: false,
-		
-		get showPassword(){
-			return ! this.isForgetPassword;
-		},
-		get showPasswordHint(){
-			return this.isForgetPassword;
-		},
-		get showSubmitButton(){
-			return ! this.isForgetPassword;
-		},
-		get showSendButton(){
-			return this.isForgetPassword;
-		},
+		showOidcButton: false,
 		
 		validate() {
 			if (this.isForgetPassword)

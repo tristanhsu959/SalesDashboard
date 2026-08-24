@@ -29,14 +29,15 @@ class PurchaseReportRepository extends Repository
 	 * @params: array
 	 * @return: array
 	 */
-	public function getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds)
+	public function getOrderDataByPerformance($brand, $allowOpCenterIds, $allowAreaIds, $stDate, $endDate, $productIds, $searchBrand)
 	{
 		#to UTC Time
 		$stDate	= (new Carbon($stDate))->utc()->format('Y-m-d H:i:s');
 		$endDate= (new Carbon($endDate))->utc()->format('Y-m-d H:i:s');
 		
+		#區域不用分蘿蔔
 		$authAreaIds = AreaLib::toPurchaseAreaId($brand, $allowAreaIds);
-		$dbBrandIds = $this->getDbBrandIdWithLb($brand, $allowOpCenterIds);
+		$dbBrandIds = $this->getDbBrandId($searchBrand, $allowOpCenterIds);
 		
 		$db = $this->connectNewOrder();
 		$result = $db
@@ -75,6 +76,7 @@ class PurchaseReportRepository extends Repository
 			->whereIn('s.AreaId', $authAreaIds)
 			->whereIn('b.ProductId', $productIds)
 			->groupBy(DB::RAW('CAST(DATEADD(HOUR, 8, a.ExpectedDate) AS DATE)'), 's.Id', 's.No', 'p.OldNo')
+			#->ddRawSql();
 			->get()
 			->toArray();
 		

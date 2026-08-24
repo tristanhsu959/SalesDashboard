@@ -25,6 +25,17 @@
 			<i>arrow_drop_down</i>
 		</div>
 		
+		<div x-show="showBrandList" class="field middle-align">
+			<nav>
+				<template x-for="(name, id) in options.brand" :key="id">
+					<label class="radio field-red">
+						<input type="radio" name="searchBrand" x-model="searchData.brand" :value="id" :disabled="!showBrandList">
+						<span x-text="name"></span>
+					</label>
+				</template>
+			</nav>
+		</div>
+		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
 			<input type="date" name="searchStDate" maxlength="7" x-model="searchData.stDate" x-ref="searchStDate" @input="errors.delete('stDate')" :max="searchData.tomorrow">
 			<label>開始日期</label>
@@ -36,7 +47,7 @@
 			<output class="red-text">查詢日期為到貨日期</output>
 		</div>
 		
-		<fieldset x-show="Object.keys(options.opCenterList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showOpCenterList" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇營運中心</legend>
 			<nav class="wrap">
 				<template x-for="(opName, opId) in options.opCenterList" :key="opId">
@@ -49,7 +60,7 @@
 			<output class="red-text small">未選時取全部授權營運中心</output>
 		</fieldset>
 		
-		<fieldset x-show="Object.keys(options.areaList).length > 0" class="field light-blue-border light-blue-text">
+		<fieldset x-show="showAreaList" class="field light-blue-border light-blue-text">
 			<legend class="small">選擇區域</legend>
 			<nav class="wrap">
 				<template x-for="(areaName, areaId) in options.areaList" :key="areaId">

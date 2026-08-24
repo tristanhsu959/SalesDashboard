@@ -4,6 +4,8 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('setPassword', (response) => ({
 		formData: {...response.formData},
 		errors: new Set(),
+		showPassword: false,
+		showConfirmPassword: false,
 		
 		init(){
 		},

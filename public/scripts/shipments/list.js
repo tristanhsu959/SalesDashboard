@@ -116,7 +116,7 @@ document.addEventListener('alpine:init', () => {
 		activeProduct: '',
 		activeProductName: '',
 		openTabMenu: false,
-		fixedTabsCouont: 4,
+		fixedTabsCount: 4,
 		
 		init() {
 			/* Set active tab */
@@ -133,20 +133,20 @@ document.addEventListener('alpine:init', () => {
 			this.activeProductName = productName;
 		},
 		activeMoreTab(){
-			const list = Object.keys(this.statistics.productList).slice(this.fixedTabsCouont);
+			const list = Object.keys(this.statistics.productList).slice(this.fixedTabsCount);
 			
 			return list.includes(this.activeProduct) ? 'active' : '';
 		},
 		
 		get fixedTabs() {
 			//st,end
-			return Object.fromEntries(Object.entries(this.statistics.productList).slice(0, this.fixedTabsCouont));
+			return Object.fromEntries(Object.entries(this.statistics.productList).slice(0, this.fixedTabsCount));
 		},
 		get showMoreTabs() {
-			return Object.keys(this.statistics.productList).length > this.fixedTabsCouont;
+			return Object.keys(this.statistics.productList).length > this.fixedTabsCount;
 		},
 		get moreTabs() {
-			return Object.fromEntries(Object.entries(this.statistics.productList).slice(this.fixedTabsCouont));
+			return Object.fromEntries(Object.entries(this.statistics.productList).slice(this.fixedTabsCount));
 		},
 		get moreTabName(){
 			return (this.activeMoreTab() == 'active') ? this.activeProductName : '更多';

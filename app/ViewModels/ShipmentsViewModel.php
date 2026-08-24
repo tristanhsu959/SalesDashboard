@@ -120,7 +120,7 @@ class ShipmentsViewModel extends Fluent
 						$searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
 						$searchCategory = '', $searchShortCodes = [], $searchStoreName = '')
     {
-		$today = Carbon::tomorrow()->format('Y-m-d');
+		$today = now()->format('Y-m-d');
 		$searchStDate	= $searchStDate ?? $today;
 		$searchEndDate 	= $searchEndDate ?? $today;
 		
@@ -145,15 +145,15 @@ class ShipmentsViewModel extends Fluent
 	public function getPartialView()
 	{
 		$type 	= $this->get('search.type', NULL);
-		$by		= ($type == 'status') ? 'detail' : $this->get('search.by', NULL);
+		$by		= $this->get('search.by', NULL);
 		
-		$typeBy = "{$type}:{$by}";
+		$typeBy = ($type == 'status') ? $type : "{$type}:{$by}";
 		
 		return match($typeBy)
 		{
 			'total:store'	=> 'shipments.store',
 			'total:factory'	=> 'shipments.factory',	 
-			'status:detail'	=> 'shipments.status',
+			'status'		=> 'shipments.status',
 		};
 	}
 	

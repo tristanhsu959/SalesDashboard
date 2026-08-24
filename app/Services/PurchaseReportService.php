@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Services\PurchaseReport\PerformanceService;
+use App\Services\PurchaseReport\EmployeePrService;
+use App\Services\PurchaseReport\ExtraOrderService;
 use App\Facades\AppManager;
 use App\Facades\PurchaseManager;
 use App\Libraries\ResponseLib;
@@ -65,14 +67,14 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	public function getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
+	public function getStatistics($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		try
 		{
 			if (AppManager::hasAreaPermission() === FALSE)
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
-			$params = $this->_initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
+			$params = $this->_initParams($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes);
 			
 			if (Cache::has($params->cacheKey))
 			{
@@ -88,8 +90,12 @@ class PurchaseReportService
 				
 				if ($params->type == 'performance')
 					$service = app(PerformanceService::class);
+				else if ($params->type == 'employeePr')
+					$service = app(EmployeePrService::class);
+				else if ($params->type == 'extraOrder')
+					$service = app(ExtraOrderService::class);
 				else
-					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤');
+					return ResponseLib::initialize($this->_statistics)->fail('執行訂貨統計時發生錯誤，無法識別報表類型');
 				
 				#執行統計
 				$this->_statistics = $service->analysis($params);
@@ -111,7 +117,7 @@ class PurchaseReportService
 	 * @params: string
 	 * @return: array
 	 */
-	private function _initParams($brand, $searchType, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
+	private function _initParams($brand, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchOpCenterIds, $searchAreaIds, $searchProductCodes)
 	{
 		$params = new Fluent();
 		
@@ -120,10 +126,14 @@ class PurchaseReportService
 		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$functions 	= $this->parsingFunction($brand);
-		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchStDate, $searchEndDate, $searchProductCodes]);
+		$cacheKey 	= HelperLib::buildCacheKey([$functions->value, $allowOpCenterIds, $allowAreaIds, $searchType, $searchBrand, $searchStDate, $searchEndDate, $searchProductCodes]);
+		
+		#只有營運狀況才有此選項
+		$searchBrand = ($searchType == 'performance') ? $searchBrand : NULL;
 		
 		$params->brand($brand)->allowOpCenterIds($allowOpCenterIds)->allowAreaIds($allowAreaIds)
-				->type($searchType)->stDate($searchStDate)->endDate($searchEndDate)
+				->type($searchType)->whereBrandId($searchBrand)
+				->stDate($searchStDate)->endDate($searchEndDate)
 				->productCodes($searchProductCodes)
 				->cacheKey($cacheKey);
 		
@@ -151,6 +161,10 @@ class PurchaseReportService
 		
 		if ($type == 'performance')
 			$service = app(PerformanceService::class);
+		else if ($type == 'employeePr')
+			$service = app(EmployeePrService::class);
+		else if ($type == 'extraOrder')
+			$service = app(ExtraOrderService::class);
 		else
 			return ResponseLib::initialize('檔案下載發生錯誤，請重新查詢')->fail();
 		

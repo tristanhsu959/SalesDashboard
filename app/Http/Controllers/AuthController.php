@@ -81,4 +81,5 @@ class AuthController extends Controller
 		
 		return view('signin')->with('viewModel', $this->_viewModel);
 	}
+	
 }
