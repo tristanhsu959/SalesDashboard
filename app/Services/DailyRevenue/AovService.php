@@ -23,6 +23,7 @@ use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
 
 #partial Service
 class AovService
@@ -306,6 +307,10 @@ class AovService
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
+			$centerStyle = (new StyleBuilder())
+				->setCellAlignment(CellAlignment::CENTER)
+				->build();
+	
 			$index = 0;
 			foreach($export as $sheetName => $sheetData)
 			{
@@ -314,7 +319,7 @@ class AovService
 				
 				foreach($sheetData as $data)
 				{
-					$row =  Row::fromValues($data);
+					$row =  Row::fromValues($data, $centerStyle);
 					$writer->addRow($row);
 				}
 				$index++;
