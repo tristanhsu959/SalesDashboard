@@ -24,6 +24,8 @@ use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style; 
+use OpenSpout\Common\Entity\Style\CellAlignment;
 
 #partial Service
 class ProductService
@@ -383,12 +385,14 @@ class ProductService
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
+			$centerStyle = (new Style())->setCellAlignment(CellAlignment::CENTER);
+			
 			$sheet = $writer->getCurrentSheet();
 			$sheet->setName('未訂貨門市');
 				
 			foreach($export as $data)
 			{
-				$row =  Row::fromValues($data);
+				$row =  Row::fromValues($data, $centerStyle);
 				$writer->addRow($row);
 			}
 			
