@@ -18,6 +18,10 @@ class AuthController extends Controller
 	
 	public function showSignin()
 	{
+		 $date = date("YmdH");
+
+    $signature = base64_encode(hash_hmac('sha1', "bafang:$date", 'yKfuHq8vX4CnLAV51qyXdfp4989oYDHo', true));
+	dd($signature);
 		 // 1. 還原 C# 匿名物件的欄位順序與名稱 (大小寫必須與 C# 變數名一致)
         // 🚨 注意：C# 程式碼中是 _account.Id, password, _account.CreatedAt
         
