@@ -22,6 +22,12 @@ return [
 			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sales'),
 		],
 		[
+			'name' 		=> Functions::BF_SALE_EVENTS->label(), #銷售活動統計(目前只有八方有)
+			'code'		=> Functions::BF_SALE_EVENTS->value,
+			'style' 	=> ['icon' => 'event', 'color' => 'orange-text'],
+			'url' 		=> Str::replaceArray('?', [Brand::BAFANG->code()], '?.sale_events'),
+		],
+		[
 			'name' 		=> Functions::BF_EZORDER_POS->label(), #八方點
 			'code'		=> Functions::BF_EZORDER_POS->value,
 			'style' 	=> ['icon' => 'qr_code_scanner', 'color' => 'orange-text'],

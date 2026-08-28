@@ -21,6 +21,7 @@ enum Functions : string
 	#Bafang		
 	case BF_NEW_RELEASE				= 'bafang:new_releases';
 	case BF_SALES					= 'bafang:sales';
+	case BF_SALE_EVENTS				= 'bafang:sale_events'; #bafang only
 	case BF_EZORDER_POS				= 'bafang:ezorder_pos';
 	case BF_DAILY_REVENUE			= 'bafang:daily_revenue';
 	case BF_SHIPMENTS				= 'bafang:shipments';
@@ -69,6 +70,7 @@ enum Functions : string
 			#八方	
 			self::BF_NEW_RELEASE			=> '新品銷售',
 			self::BF_SALES 					=> '銷售查詢',
+			self::BF_SALE_EVENTS			=> '銷售活動統計',
 			self::BF_EZORDER_POS			=> '八方點統計',
 			self::BF_SHIPMENTS 				=> '出貨總量查詢',
 			self::BF_PURCHASE_REPORT 		=> '出貨統計報表',
