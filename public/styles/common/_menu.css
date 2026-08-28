@@ -62,6 +62,10 @@ nav.menu {
 					}
 				}
 			}
+			
+			&:last-child {
+				margin-block-end: 1rem;
+			}
 		}
 	}
 }
