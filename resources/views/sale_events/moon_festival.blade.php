@@ -12,6 +12,7 @@
 							<th x-text="dateHeader" colspan="3"></th>
 						</template>
 						<th rowspan="2">總計</th>
+						<th rowspan="2">兌換數</th>
 					</tr>
 					<tr>
 						<template x-for="rangeHeader in dayRange" :key="rangeHeader">
@@ -36,6 +37,7 @@
 						</template>
 						
 						<td x-text="row.totalQty" class="red-text"></td>
+						<td x-text="row.totalUsed" class="red-text"></td>
 					</tr>
 					</template>
 				</tbody>

@@ -371,6 +371,7 @@ class MoonFestivalService
 			})->toArray();
 			
 			$item['totalQty'] = collect($item['products'])->collapse()->values()->sum();
+			$item['totalUsed'] = $item['totalQty'] / 10; #兌換數
 			
 			unset($item['areaId']);
 			
@@ -443,6 +444,7 @@ class MoonFestivalService
 			$writer->getOptions()->mergeCells(1, 1, 1, 2, 0); 
 			$writer->getOptions()->mergeCells(2, 1, 2, 2, 0); 
 			$writer->getOptions()->mergeCells(3, 1, 3, 2, 0);
+			$writer->getOptions()->mergeCells($cols-1, 1, $cols-1, 2, 0);
 			$writer->getOptions()->mergeCells($cols, 1, $cols, 2, 0);
 			
 			$dateColSt = 4;
@@ -482,7 +484,7 @@ class MoonFestivalService
 			$header = array_merge($header, [$date, '', '']);
 		}
 		
-		$header = array_merge($header, ['總計']);
+		$header = array_merge($header, ['總計', '兌換數']);
 		$export[] = $header;
 		
 		#header row2
@@ -526,6 +528,7 @@ class MoonFestivalService
 			}
 			
 			$row[] = $data['totalQty'];
+			$row[] = $data['totalUsed'];
 			
 			$export[] = $row;
 		}
