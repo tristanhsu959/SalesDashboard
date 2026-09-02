@@ -343,9 +343,9 @@ class MoonFestivalService
 			]
 		]
 		*/
-		$params->set('store.data', []);
+		$params->set('store', []);
 		
-		$baseData 	= $params->baseData;
+		$baseData = $params->baseData;
 		
 		#會有無設定區域權限的狀況, 須判別
 		if (empty($baseData))

@@ -28,12 +28,12 @@
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'stDate')">
-			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" @input="errors.delete('stDate')" :max="searchData.eventEndDate"><!--:min="searchData.eventStDate" -->
+			<input type="date" name="searchStDate" maxlength="10" x-model="searchData.stDate" @input="errors.delete('stDate')" :min="searchData.eventStDate" :max="searchData.eventEndDate">
 			<label>開始日期</label>
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :max="searchData.eventEndDate">
+			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :min="searchData.eventStDate" :max="searchData.eventEndDate">
 			<label>結束日期</label>
 		</div>
 		
@@ -62,7 +62,6 @@
 <div x-data="{response:@js($viewModel->responseData())}" class="content-wrapper">
 	<header class="page-nav">
 		<nav>
-			<!--button type="button" class="btn-show-search button circle" data-ui="#searchPanel"><i>search</i></button-->
 			<button type="button" class="btn-show-search button circle extend" data-ui="#searchPanel">
 				<i>search</i>
 				<span>查詢</span>

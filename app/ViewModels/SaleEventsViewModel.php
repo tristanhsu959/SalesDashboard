@@ -113,7 +113,7 @@ class SaleEventsViewModel extends Fluent
 		$response = $this->responseBaseData();
 		
 		$response['hasResult'] = data_get($this->statistics, 'hasResult', FALSE);
-		$response['hasFilter'] = TRUE; 
+		$response['hasFilter'] = !empty($response['hasResult']); 
 		
 		return $response;
 	}
