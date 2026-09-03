@@ -15,6 +15,7 @@ use App\Http\Controllers\EzOrderPosController;
 use App\Http\Controllers\PurchaseNotOrderController;
 use App\Http\Controllers\PurchaseProductInfoController;
 use App\Http\Controllers\PurchaseSupplierController;
+use App\Http\Controllers\SaleEventsController;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AccessPermissionMiddleware;
@@ -37,6 +38,13 @@ Route::middleware([AuthMiddleware::class])->group(function(){
 		Route::post('sales/search', [SalesController::class, 'search'])->name('sales.search');
 		Route::get('sales/export/{token}', [SalesController::class, 'export'])->name('sales.export');
 	});	
+	
+	/* 銷售活動統計 */
+	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_SALE_EVENTS->value, ':')])->group(function(){
+		Route::get('sale_events', [SaleEventsController::class, 'showSearch'])->name('sale_events');
+		Route::post('sale_events/search', [SaleEventsController::class, 'search'])->name('sale_events.search');
+		Route::get('sale_events/export/{token}', [SaleEventsController::class, 'export'])->name('sale_events.export');
+	});
 	
 	/* 八方點 */
 	Route::middleware([AccessPermissionMiddleware::class . Str::start(Functions::BF_EZORDER_POS->value, ':')])->group(function(){

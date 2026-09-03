@@ -24,6 +24,8 @@ use Exception;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style; 
+use OpenSpout\Common\Entity\Style\CellAlignment;
 
 #partial Service
 class StoreService
@@ -430,9 +432,11 @@ class StoreService
 			$sheet = $writer->getCurrentSheet();
 			$sheet->setName("{$typeName}-{$byName}");
 			
+			$centerStyle = (new Style())->setCellAlignment(CellAlignment::CENTER);
+			
 			foreach($export as $data)
 			{
-				$row =  Row::fromValues($data);
+				$row =  Row::fromValues($data, $centerStyle);
 				$writer->addRow($row);
 			}
 			

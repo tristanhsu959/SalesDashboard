@@ -23,6 +23,8 @@ use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style; 
+use OpenSpout\Common\Entity\Style\CellAlignment;
 
 #partial Service
 class InfoService
@@ -432,6 +434,8 @@ class InfoService
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
+			$centerStyle = (new Style())->setCellAlignment(CellAlignment::CENTER);
+			
 			$index = 0;
 			foreach($export as $sheetName => $sheetData)
 			{
@@ -440,7 +444,7 @@ class InfoService
 				
 				foreach($sheetData as $data)
 				{
-					$row =  Row::fromValues($data);
+					$row =  Row::fromValues($data, $centerStyle);
 					$writer->addRow($row);
 				}
 				$index++;

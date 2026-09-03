@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\SalesService;
-use App\ViewModels\SalesViewModel;
+use App\Services\SaleEventsService;
+use App\ViewModels\SaleEventsViewModel;
 use App\Enums\Functions;
 use App\Enums\FormAction;
 use App\Enums\Brand;
@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
-/*銷售統計*/
-class SalesController extends Controller
+/*銷售活動統計*/
+class SaleEventsController extends Controller
 {
-	public function __construct(protected SalesService $_service, protected SalesViewModel $_viewModel)
+	public function __construct(protected SaleEventsService $_service, protected SaleEventsViewModel $_viewModel)
 	{
 	}
 	
@@ -32,7 +32,7 @@ class SalesController extends Controller
 		if (empty($brand) OR empty($function))
 			$this->_viewModel->fail('無法識別ID');
 		
-		return view('sales.statistics')->with('viewModel', $this->_viewModel);
+		return view('sale_events.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Search
@@ -48,14 +48,11 @@ class SalesController extends Controller
 		$searchStDate		= $request->input('searchStDate');
 		$searchEndDate		= $request->input('searchEndDate');
 		$searchAreaIds		= $request->array('searchAreaIds');
-		$searchStoreName	= $request->input('searchStoreName', NULL);
-		$searchCategory		= $request->input('searchCategory');
-		$searchProductIds	= $request->array('searchProductIds');
 		
 		$this->_viewModel->initialize($brand, $function);
-		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName, $searchCategory, $searchProductIds);
+		$this->_viewModel->keepSearchData($searchType, $searchStDate, $searchEndDate, $searchAreaIds);
 		
-		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds, $searchStoreName, $searchCategory, $searchProductIds);
+		$response = $this->_service->getStatistics($brand, $searchType, $searchStDate, $searchEndDate, $searchAreaIds);
 		
 		if ($response->status === FALSE)
 			$this->_viewModel->fail($response->msg);
@@ -64,7 +61,7 @@ class SalesController extends Controller
 		
 		$this->_viewModel->statistics = $response->data; #失敗也要有預設值
 		
-		return view('sales.statistics')->with('viewModel', $this->_viewModel);
+		return view('sale_events.statistics')->with('viewModel', $this->_viewModel);
 	}
 	
 	/* Export
@@ -84,7 +81,7 @@ class SalesController extends Controller
 		if ($response->status === FALSE)
 		{
 			$this->_viewModel->fail($response->msg);
-			return view('sales.statistics')->with('viewModel', $this->_viewModel);
+			return view('sale_events.statistics')->with('viewModel', $this->_viewModel);
 		}
 		else
 		{

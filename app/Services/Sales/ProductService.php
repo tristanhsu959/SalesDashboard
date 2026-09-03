@@ -26,7 +26,8 @@ use Exception;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
-
+use OpenSpout\Common\Entity\Style\Style; 
+use OpenSpout\Common\Entity\Style\CellAlignment;
 
 #Partial service
 class ProductService
@@ -668,6 +669,8 @@ class ProductService
 			$writer = new Writer();
 			$writer->openToFile($filePath);
 			
+			$centerStyle = (new Style())->setCellAlignment(CellAlignment::CENTER);
+			
 			foreach($export as $sheetName => $sheetData)
 			{
 				$sheet = ($sheetName == '區域彙總-數量') ? $writer->getCurrentSheet() : $writer->addNewSheetAndMakeItCurrent();
@@ -675,7 +678,7 @@ class ProductService
 				
 				foreach($sheetData as $data)
 				{
-					$row =  Row::fromValues($data);
+					$row =  Row::fromValues($data, $centerStyle);
 					$writer->addRow($row);
 				}
 			}
