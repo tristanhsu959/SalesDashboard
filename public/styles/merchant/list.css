@@ -30,7 +30,7 @@ form, section.statistics-store {
 		
 		position: relatvie;
 		width: auto;
-		max-height: calc(100vh - 128px - 2rem - 2rem); 
+		max-height: calc(100vh - 128px - 2rem - 2rem - 2rem); 
 		overflow: auto;
 		/* scrollbar-width: thin; */
 		scrollbar-color: var(--table-bg-dark) var(--table-bg); /*thumb - track*/
@@ -69,7 +69,7 @@ form, section.statistics-store {
 							width: 200px;
 						}
 						&:nth-of-type(5) {
-							width: 280px;
+							width: 300px;
 						}
 					}
 				}

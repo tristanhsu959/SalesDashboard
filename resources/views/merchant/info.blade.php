@@ -8,9 +8,11 @@
 			
 		<div x-show="response.hasResult" class="store-content">
 			<!-- 門店 -->
+			<button class="chip round purple-text no-border" x-text="`共 ${statistics.info.store.length} 家門店`"></button>
+				
 			<section class="statistics-store scrollbar" :class="response.brandCode">
 				<table class="stripes">
-					<caption class="left-align" x-text="`共${statistics.info.store.length}家門店`"></caption>
+					<!--caption class="left-align" x-text="`共${statistics.info.store.length}家門店`"></caption-->
 					<thead>
 						<tr>
 							<template x-for="(name, idx) in statistics.info.header" :key="idx">
