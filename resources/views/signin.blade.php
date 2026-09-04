@@ -16,8 +16,8 @@
 			<span class="copyright">Bafang<i>&copy;</i>2025</span>
 		</div>
 
-		<div class="divider"></div>
-
+		<!--div class="divider vertical"></div-->
+		
 		<div class="content-right">
 			<div x-show="!isForgetPassword" class="header">
 				<img src="{{ asset('images/microsoft_logo.png') }}" @dblclick="showOidcButton = !showOidcButton" />

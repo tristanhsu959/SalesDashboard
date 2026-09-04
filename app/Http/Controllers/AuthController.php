@@ -79,7 +79,8 @@ class AuthController extends Controller
 		$this->_viewModel->action = FormAction::SIGNIN;
 		$this->_service->signout();
 		
-		return view('signin')->with('viewModel', $this->_viewModel);
+		return redirect('signin');
+		#return view('signin')->with('viewModel', $this->_viewModel);
 	}
 	
 }
