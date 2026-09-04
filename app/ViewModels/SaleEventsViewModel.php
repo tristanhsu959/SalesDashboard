@@ -91,8 +91,8 @@ class SaleEventsViewModel extends Fluent
 		$today = now()->format('Y-m-d');
 		
 		$this->set('search.type', $searchType); 
-		$this->set('search.stDate', $searchStDate ?? $eventStDate); 
-		$this->set('search.endDate', $searchEndDate ?? $eventStDate);
+		$this->set('search.stDate', $searchStDate ?? $today); 
+		$this->set('search.endDate', $searchEndDate ?? $today);
 		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.today', $today);
 		$this->set('search.eventStDate', $eventStDate);
