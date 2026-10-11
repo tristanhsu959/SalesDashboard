@@ -31,7 +31,7 @@ Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(
 Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 #舊系統追加 To Local
-Schedule::command('legacy:extra-order-to-local')->everyFourHours()->withoutOverlapping(); #->between('10:00', '22:00');
+Schedule::command('legacy:extra-order-to-local')->dailyAt('01:00')->withoutOverlapping(); #->between('10:00', '22:00');
 
 /* #Update data for current day
 #橙汁排骨

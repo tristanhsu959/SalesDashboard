@@ -40,10 +40,10 @@ trait attrAllowAction
 		$currentUser 	= AppManager::getCurrentUser();
 		$opCenters 		= $currentUser->getOpCenterPermissionMap();
 		
-		if ($this->brand != Brand::BAFANG) #八方才有
+		if ($this->brand != Brand::BAFANG) #八方才有,御廚不需要
 			return [];
 		
-		#只有單個, 就無需顯示
+		#只有單個, 就無需顯示/全區或中彰投權限會設定全部營運中心,故判別count即可
 		if (count($opCenters) <= 1)
 			return [];
 		

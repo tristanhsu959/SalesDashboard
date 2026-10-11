@@ -44,6 +44,8 @@ class LegacyExtraOrderToLocal extends Command
 			
 			$orderData = $this->_fetchOrder($stDate, $endDate);
 			
+			$this->_removeLocalData($stDate);
+			
 			$this->_updateToLocal($orderData);
 			
 			Log::channel('commandLog')->info(Str::replaceArray('?', [count($orderData), now()], "Fetch buygood data completed:? ----- ?"), [ __class__, __function__, __line__]);
@@ -60,10 +62,10 @@ class LegacyExtraOrderToLocal extends Command
 		#2026-02有5萬多筆,應是春節期間從舊系統建的資料
 		$this->info("Build params start ----- " . now());
 		
-		if (empty($argStDate) OR empty($argEndDate))
+		if (empty($argStDate) && empty($argEndDate))
 		{
-			$stDate = now()->subHours(5)->format('Y-m-d H:i:s');
-			$endDate= now()->format('Y-m-d H:i:s');
+			$stDate = Carbon::yesterday()->format('Y-m-d 00:00:00');
+			$endDate= Carbon::today()->format('Y-m-d 00:00:00');
 		}
 		else
 		{
@@ -110,6 +112,23 @@ class LegacyExtraOrderToLocal extends Command
 		$this->info(Str::replaceArray('?', [now()], "Fetch extra data completed -----?"));
 			
 		return $result;
+	}
+	
+	private function _removeLocalData($stDate)
+	{
+		#先刪除以免萬一
+		if (empty($stDate))
+			return TRUE;
+		
+		$stDate = Carbon::parse($stDate)->format('Y-m-d');
+		
+		$query = DB::connection('SalesDashboard');
+		
+		$query->table('legacy_extra_order')
+				->where('expectedDate', '=', $stDate)
+				->delete();
+		
+		return TRUE;
 	}
 	
 	private function _updateToLocal($orderData)

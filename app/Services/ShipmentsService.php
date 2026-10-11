@@ -99,7 +99,8 @@ class ShipmentsService
 	 * @return: array
 	 */
 	public function getStatistics($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
+							$searchOpCenterIds, $searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, 
+							$searchShortCodes, $searchStoreName)
 	{
 		try
 		{
@@ -107,7 +108,9 @@ class ShipmentsService
 				return ResponseLib::initialize($this->_statistics)->fail('此使用者無區域瀏覽權限');
 			
 			$params = $this->_initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-								$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName);
+								$searchOpCenterIds, $searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, 
+								$searchShortCodes, $searchStoreName);
+			
 			if (Cache::has($params->cacheKey))
 			{
 				Log::channel('appServiceLog')->info('Get shipments data from cache');
@@ -150,12 +153,13 @@ class ShipmentsService
 	 * @return: array
 	 */
 	private function _initParams($brand, $searchType, $searchBy, $searchCalc, $searchStDate, $searchEndDate, 
-							$searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, $searchShortCodes, $searchStoreName)
+							$searchOpCenterIds, $searchAreaIds, $searchWhere, $searchKeyword, $searchCategory, 
+							$searchShortCodes, $searchStoreName)
 	{
 		$params = new Fluent();
 		
 		#這裏是call appmanager不是current user
-		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand); #只有取門店需要,無需代參數
+		$allowOpCenterIds	= PurchaseManager::getAllowOpCenters($brand, $searchOpCenterIds); #只有取門店需要,無需代參數
 		$allowAreaIds		= PurchaseManager::getAllowAreas($searchAreaIds); #整併查詢參數
 		
 		$searchEndDate 	= empty($searchEndDate) ? now()->format('Y-m-d') : $searchEndDate;

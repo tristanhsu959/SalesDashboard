@@ -16,6 +16,9 @@ document.addEventListener('alpine:init', () => {
 		get showCalcOptions() {
 			return this.searchData.type == 'total';
 		},
+		get showOpCenterList() {
+			return (Object.keys(this.options.opCenterList).length > 0);
+		},
 		get showAreaOptions() {
 			return (Object.keys(this.options.areaList).length > 0);
 		},

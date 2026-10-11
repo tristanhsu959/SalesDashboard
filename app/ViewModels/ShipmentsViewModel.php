@@ -54,6 +54,9 @@ class ShipmentsViewModel extends Fluent
 	{
 		$this->_setSearchMode();
 		
+		$opCenterList 	= $this->getPurchaseOpCenterOptions($this->brand);
+		$this->set('options.opCenterList', $opCenterList);
+		
 		$areaList = $this->getPurchaseAreaOptions($this->brand);
 		$this->set('options.areaList', $areaList);
 		
@@ -117,7 +120,7 @@ class ShipmentsViewModel extends Fluent
 	 * @return: array
 	 */
 	public function keepSearchData($searchType = 'total', $searchBy = 'store', $searchCalc = 'day', $searchStDate = NULL, $searchEndDate = NULL,
-						$searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
+						$searchOpCenterIds = [], $searchAreaIds = [], $searchWhere = 'keyword', $searchKeyword = '', 
 						$searchCategory = '', $searchShortCodes = [], $searchStoreName = '')
     {
 		$today = now()->format('Y-m-d');
@@ -129,6 +132,7 @@ class ShipmentsViewModel extends Fluent
 		$this->set('search.calc', $searchCalc);
 		$this->set('search.stDate', $searchStDate);
 		$this->set('search.endDate', $searchEndDate);
+		$this->set('search.opCenterIds', $searchOpCenterIds);
 		$this->set('search.areaIds', $searchAreaIds);
 		$this->set('search.where', $searchWhere);
 		$this->set('search.keyword', $searchKeyword);
