@@ -33,7 +33,7 @@
 		</div>
 		
 		<div class="field label border round field-light-blue" :class="Helper.hasError(errors, 'endDate')">
-			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :min="searchData.eventStDate" :max="searchData.eventEndDate">
+			<input type="date" name="searchEndDate" maxlength="10" x-model="searchData.endDate" @input="errors.delete('endDate')" :min="searchData.eventStDate">
 			<label>結束日期</label>
 		</div>
 		

@@ -370,7 +370,9 @@ class MoonFestivalService
 				
 			})->toArray();
 			
-			$item['totalQty'] = collect($item['products'])->collapse()->values()->sum();
+			#直接攤平,同erpNo會被蓋掉
+			#$item['totalQty'] = collect($item['products'])->collapse()->values()->sum();
+			$item['totalQty'] = collect($item['products'])->values()->flatten()->sum();
 			$item['totalUsed'] = $item['totalQty'] / 10; #兌換數
 			
 			unset($item['areaId']);
