@@ -23,7 +23,7 @@
 						<select x-model="$store.productSetting.filterCat[brandId]" id="filterCat">
 							<option value="">全部</option>
 							<template x-for="(catName, catId) in response.options.categories[brandId]" :key="catId">
-								<option x-text="catName" :value="catName"></option>
+								<option x-text="catName" :value="catName" :selected="catName === $store.productSetting.filterCat[brandId]"></option>
 							</template>
 						</select>
 						<label>篩選分類</label>
