@@ -3,10 +3,11 @@
 document.addEventListener('alpine:init', () => {
 	Alpine.store('productSetting', {
 		tabIndex: Alpine.$persist(0),
-		filterCat: {
-			1: '',
-			2: '',
-		},
+		filterCat: Alpine.$persist({
+			'1': '',
+			'2': '',
+		}),
+		
 	});
 	
 	Alpine.data('productList', (response) => ({
@@ -16,11 +17,13 @@ document.addEventListener('alpine:init', () => {
 		activeTab: 0,
 		
 		init() {
+			
 			this.activeTab = Alpine.store('productSetting').tabIndex;
 			
 			if (! this.activeTab)
 				this.activeTab = 1;
 		},
+		
 		confirmDelete(url) {
 			Alpine.store('dialog').show('確定要刪除此產品?', true, () => this.deleteProduct(url));
 		},
