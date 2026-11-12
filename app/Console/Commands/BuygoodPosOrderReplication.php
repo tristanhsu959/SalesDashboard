@@ -84,10 +84,22 @@ class BuygoodPosOrderReplication extends Command
 		if (! empty($stDate) && ! empty($endDate))
 		{
 			$stDate		= Carbon::parse($stDate)->format('Y-m-d 00:00:00');
-			$endDate 	= Carbon::parse($endDate)->format('Y-m-d 23:59:59');
+			$endDate 	= Carbon::parse($endDate)->addDay()->format('Y-m-d 00:00:00');
 		}
 		else
 		{
+			if ($stDate) #取指定的開始日期
+			{
+				$stDate 	= Carbon::parse($stDate)->format('Y-m-d 00:00:00');
+				$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d 00:00:00');
+			}
+			else
+			{
+				$stDate		= now()->subMinutes(30)->format('Y-m-d H:i:s');
+				$endDate 	= now()->format('Y-m-d H:i:s');
+			}
+			
+			/*
 			$result = DB::connection('BGPosErp')->selectOne("SELECT TOP 1 saleDate
 					FROM zs_sd_order WITH (INDEX(idx_zs_sd_order_saleDate))
 					ORDER BY saleDate DESC");
@@ -100,6 +112,7 @@ class BuygoodPosOrderReplication extends Command
 				$stDate = now()->subMinutes(30)->format('Y-m-d 00:00:00');
 			
 			$endDate = Carbon::parse($stDate)->addDay()->subMinutes(30)->format('Y-m-d H:i:s');
+			*/
 		}
 		
 		return [$stDate, $endDate];
