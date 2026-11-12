@@ -25,10 +25,10 @@ Schedule::command('bafang:pos-sale00')->everyTenMinutes()->withoutOverlapping(5)
 Schedule::command('buygood:pos-sale00')->everyTenMinutes()->withoutOverlapping(5);
 
 #Bafang zs_sd_order(銷售統計)
-Schedule::command('bafang:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
+Schedule::command('bafang:pos-order-replication')->everyFifteenMinutes()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 #Buygood zs_sd_order(銷售統計)
-Schedule::command('buygood:pos-order-replication')->hourly()->withoutOverlapping(10); #->between('10:00', '22:00');
+Schedule::command('buygood:pos-order-replication')->everyFifteenMinutes()->withoutOverlapping(10); #->between('10:00', '22:00');
 
 #舊系統追加 To Local
 Schedule::command('legacy:extra-order-to-local')->dailyAt('01:00')->withoutOverlapping(); #->between('10:00', '22:00');

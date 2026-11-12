@@ -59,7 +59,7 @@ class BafangPosOrderReplication extends Command
 					AND a.SALE_ID = b.SALE_ID
 				WHERE
 					b.STATUS = '2'
-					AND b.SALE_DATE BETWEEN ? AND ?
+					AND b.SALE_DATE >= ? AND b.SALE_DATE < ?
 					AND NOT EXISTS (
 						SELECT 1
 						FROM zs_sd_order s
@@ -84,13 +84,26 @@ class BafangPosOrderReplication extends Command
 		if (! empty($stDate) && ! empty($endDate))
 		{
 			$stDate		= Carbon::parse($stDate)->format('Y-m-d 00:00:00');
-			$endDate 	= Carbon::parse($endDate)->format('Y-m-d 23:59:59');
+			$endDate 	= Carbon::parse($endDate)->addDay()->format('Y-m-d 00:00:00');
 		}
 		else
 		{
+			if ($stDate) #取指定的開始日期
+			{
+				$stDate 	= Carbon::parse($stDate)->format('Y-m-d 00:00:00');
+				$endDate 	= Carbon::parse($stDate)->addDay()->format('Y-m-d 00:00:00');
+			}
+			else
+			{
+				$stDate		= now()->subMinutes(30)->format('Y-m-d H:i:s');
+				$endDate 	= now()->format('Y-m-d H:i:s');
+			}
+			
+			#2026-11-12: 0557台中學士, saleDate快了近1小時
+			/* 	
 			$result = DB::connection('BFPosErp')->selectOne("SELECT TOP 1 saleDate
 					FROM zs_sd_order WITH (INDEX(idx_zs_sd_order_saleDate))
-					ORDER BY saleDate DESC");
+					ORDER BY saleDate DESC"); 
 			
 			if ($result) #取最後更新時間
 				$stDate = Carbon::parse($result['saleDate'])->subMinutes(30)->format('Y-m-d H:i:s');
@@ -100,6 +113,7 @@ class BafangPosOrderReplication extends Command
 				$stDate = now()->subMinutes(30)->format('Y-m-d 00:00:00');
 			
 			$endDate = Carbon::parse($stDate)->addDay()->subMinutes(30)->format('Y-m-d H:i:s');
+			*/
 		}
 		
 		return [$stDate, $endDate];
